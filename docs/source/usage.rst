@@ -6,4 +6,4 @@ Usage
 Installation
 ------------
 
-To use <package_name>, first install it using...:
+To use autora_gui, first install it using...:
