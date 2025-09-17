@@ -101,7 +101,7 @@ _NOTE: The following steps require ``pip install -r requirements/dev.txt``._
 * Run tox ``tox``. This will run all of linting, security, test, docs and package building within tox virtual environments.
 * To run an individual step, use ``tox -e {step}`` for example, ``tox -e test``, ``tox -e build-docs``, etc.
 
-Typically, the CI tests run in github actions will use tox to run as above. See also [ci.yml](git@github.com:ssec-jhu/autoRA-gui.git/blob/main/.github/workflows/ci.yml).
+Typically, the CI tests run in github actions will use tox to run as above. See also [ci.yml](https://github.com/ssec-jhu/autoRA-gui/blob/main/.github/workflows/ci.yml).
 
 ## Outside of tox:
 
