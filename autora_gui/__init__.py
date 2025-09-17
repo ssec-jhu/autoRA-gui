@@ -1,4 +1,4 @@
-__project__ = "autora_gui"  # Replace autora_gui with actual name (it's just a template).
+__project__ = "autora_gui"
 
 try:
     from ._version import __version__
