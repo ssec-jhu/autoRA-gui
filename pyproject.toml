@@ -1,5 +1,5 @@
 [project]
-name = "package_name"  # Replace package_name with actual name (it's just a template).
+name = "autora_gui"
 dynamic = ["version"]
 authors = [
     {name = "Scientifc Software Engineering Center at JHU", email = "ssec@jhu.edu"},
@@ -33,9 +33,9 @@ docs = [
 ]
 
 [project.urls]
-homepage = "https://github.com/ssec-jhu/base-template"
-documentation = "https://github.com/ssec-jhu/base-template"
-repository = "https://github.com/ssec-jhu/base-template"
+homepage = "https://github.com/ssec-jhu/autoRA-gui"
+documentation = "https://github.com/ssec-jhu/autoRA-gui"
+repository = "https://github.com/ssec-jhu/autoRA-gui"
 
 [build-system]
 requires = ["setuptools>=61.2", "setuptools_scm[toml]>=8.0"]
@@ -47,11 +47,11 @@ include-package-data = true
 exclude-package-data = {"*" = ["tests/*"]}
 
 [tool.setuptools.packages.find]
-include = ["package_name*"]
+include = ["autora_gui*"]
 exclude = ["*.tests*"]
 
 [tool.setuptools_scm]
-write_to = "package_name/_version.py"  # Replace package_name with actual name (it's just a template).
+write_to = "autora_gui/_version.py"
 
 [tool.bandit]
 exclude_dirs = ["tests"]
