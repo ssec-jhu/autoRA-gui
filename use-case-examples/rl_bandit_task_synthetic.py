@@ -195,7 +195,7 @@ for c in range(1, CYCLES + 1):
     mse_rnn_linear = np.mean((x - prediction_rnn_linear) ** 2)
     mse_rnn_poly = np.mean((x - prediction_rnn_poly) ** 2)
 
-    # Break if
+    # Break if mse is lower then threshold
     if mse_rnn_linear < MSE_THRESHOLD or mse_rnn_poly < MSE_THRESHOLD:
         break
 
