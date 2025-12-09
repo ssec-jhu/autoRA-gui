@@ -12,7 +12,6 @@ Non-Standard Workflow Components:
     - Break the loop if one theorist reaches a threshold MSE
 """
 
-import time
 import random
 from dataclasses import dataclass, field
 from typing import Optional, List
@@ -65,6 +64,7 @@ variables = VariableCollection(
 
 # *** State *** #
 # Here, we use a non-standard State to be able to use a multiple models
+# !!! This is not standard !!! #
 @dataclass(frozen=True)
 class RnnState(State):
     variables: Optional[VariableCollection] = field(
@@ -76,11 +76,11 @@ class RnnState(State):
     experiment_data: Optional[pd.DataFrame] = field(
         default=None, metadata={"delta": "extend", "converter": pd.DataFrame}
     )
-    models_rnn_linear: List[BaseEstimator] = field(
+    models_rnn_linear: List[BaseEstimator] = field(  # <-- this field is not standard
         default_factory=list,
         metadata={"delta": "extend"},
     )
-    models_rnn_poly: List[BaseEstimator] = field(
+    models_rnn_poly: List[BaseEstimator] = field(  # <-- this field is not standard
         default_factory=list,
         metadata={"delta": "extend"},
     )
@@ -97,7 +97,6 @@ def pool_on_state(num_samples, n_trials=TRIALS_PER_PARTICIPANTS):
     """
     This is creates `num_samples` randomized reward trajectories of length `n_trials`
     """
-
     sigma = np.random.uniform(SIGMA_RANGE[0], SIGMA_RANGE[1])
     _trajectory_array = bandit_random_pool(
         num_rewards=2,
@@ -114,11 +113,11 @@ def pool_on_state(num_samples, n_trials=TRIALS_PER_PARTICIPANTS):
 # * Model Disagreement Sampler * #
 @on_state()
 def model_disagreement_on_state(
-        conditions, models_a, models_b, num_samples):
+        conditions, models_rnn_linear, models_rnn_poly, num_samples): # <-- signature has to match state fields
     x = conditions['reward-trajectory']
     conditions = model_disagreement_sample(
         conditions=x,
-        models=[models_a[-1], models_b[-1]],
+        models=[models_rnn_linear[-1], models_rnn_poly[-1]],
         num_samples=num_samples,
         auto_transform=False
     )
@@ -152,14 +151,14 @@ theorist_rnn_poly = RNNSindy(2, epochs=EPOCHS, polynomial_degree=2)
 def theorist_linear_on_state(experiment_data):
     x = experiment_data[['reward-trajectory']]
     y = experiment_data[['choice-trajectory']]
-    return Delta(models_rnn_linear=[theorist_a.fit(x, y)])
+    return Delta(models_rnn_linear=[theorist_a.fit(x, y)]) # <-- signature has to match state field
 
 
 @on_state()
 def theorist_poly_on_state(experiment_data):
     x = np.stack(experiment_data['reward-trajectory'].tolist())
     y = np.stack(experiment_data['choice-trajectory'].tolist())
-    return Delta(models_rnn_poly=[theorist_b.fit(x, y)])
+    return Delta(models_rnn_poly=[theorist_b.fit(x, y)]) # <-- signature has to match state field
 
 
 # ** Workflow ** #
