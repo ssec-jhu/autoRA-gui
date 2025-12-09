@@ -1,5 +1,7 @@
 ## Use Case Examples
 
-Examples of AutoRA workflows to base the gui on.
+Examples of AutoRA workflows to base the GUI on.
 
-Goal: Exploring non-default examples
+*Cleaned up and commented for easier use.*
+
+**Goal**: Explore **non-default**, interesting, and edge-case workflows beyond the canonical AutoRA loop.
