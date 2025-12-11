@@ -5,9 +5,9 @@ Main Plotly Dash application for drag-and-drop workflow builder.
 import dash
 from dash import dcc, html, Input, Output, State, clientside_callback, no_update
 import json
-from typing import Dict, List, Any
+from typing import Dict, List
 
-from components import get_component_definitions, create_component
+from .components import get_component_definitions, create_component
 
 # Initialize Dash app
 app = dash.Dash(__name__)
@@ -51,6 +51,8 @@ def create_canvas():
 
         # Control panel
         html.Div([
+            html.Button('Load Workflow', id='load-button', className='run-button'),
+            html.Button('Save Workflow', id='save-button', className='run-button'),
             html.Button('Run Workflow', id='run-button', className='run-button'),
             html.Button('Clear Canvas', id='clear-button', className='clear-button'),
             html.Button('Debug Store', id='debug-button', className='run-button', 
