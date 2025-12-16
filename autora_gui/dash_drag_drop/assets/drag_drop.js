@@ -475,4 +475,3 @@ window.loadWorkflowIntoCanvas = function(workflow) {
     }
 };
 
-//
