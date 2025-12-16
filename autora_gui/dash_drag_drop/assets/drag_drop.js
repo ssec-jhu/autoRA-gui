@@ -1,13 +1,16 @@
-// Simple drag and drop functionality for Dash workflow builder
+// Global state management
+window.componentData = window.componentData || {};
+window.componentConnections = window.componentConnections || [];
+window.isConnecting = false;
+window.connectionStart = null;
+
 let draggedComponent = null;
-let componentData = {};
-let componentConnections = [];
-let isConnecting = false;
-let connectionStart = null;
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function () {
     setupDragAndDrop();
+    // Delay SVG creation to ensure canvas is ready
+    setTimeout(createConnectionSVG, 100);
 });
 
 function setupDragAndDrop() {
@@ -35,20 +38,31 @@ function setupDragAndDrop() {
     document.addEventListener('drop', function (e) {
         if (e.target.closest('.canvas-container') && draggedComponent) {
             e.preventDefault();
-
-            const canvasRect = e.target.closest('.canvas-container').getBoundingClientRect();
-            const x = e.clientX - canvasRect.left;
-            const y = e.clientY - canvasRect.top;
+            
+            const canvas = e.target.closest('.canvas-container').querySelector('.canvas');
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
 
             createCanvasComponent(draggedComponent, x, y);
             draggedComponent = null;
         }
     });
+
+    // Global click handler for connection points
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('input-point') || e.target.classList.contains('output-point')) {
+            e.stopPropagation();
+            const componentId = e.target.getAttribute('data-component-id');
+            const pointType = e.target.getAttribute('data-point-type');
+            handleConnectionPoint(componentId, pointType);
+        }
+    });
 }
 
-function createCanvasComponent(componentInfo, x, y) {
-    const componentId = 'component_' + Date.now();
-
+function createCanvasComponent(componentInfo, x, y, existingId = null) {
+    const componentId = existingId || 'component_' + Date.now();
+    
     // Create component element
     const component = document.createElement('div');
     component.className = 'canvas-component';
@@ -60,13 +74,13 @@ function createCanvasComponent(componentInfo, x, y) {
         <div class="component-header">
             <span>${componentInfo.title}</span>
             <div class="component-controls">
-                <button class="control-btn delete-btn" onclick="deleteComponent('${componentId}')">❌</button>
+                <button class="control-btn delete-btn">❌</button>
             </div>
         </div>
         <div class="component-content">${componentInfo.description}</div>
         <div class="connection-points">
-            <div class="input-point" onclick="startConnection('${componentId}', 'input')" title="Click to connect input">📥 Input</div>
-            <div class="output-point" onclick="startConnection('${componentId}', 'output')" title="Click to connect output">📤 Output</div>
+            <div class="input-point" data-component-id="${componentId}" data-point-type="input">📥 Input</div>
+            <div class="output-point" data-component-id="${componentId}" data-point-type="output">📤 Output</div>
         </div>
     `;
 
@@ -75,7 +89,6 @@ function createCanvasComponent(componentInfo, x, y) {
     canvas.appendChild(component);
 
     // Store component data
-    window.componentData = window.componentData || {};
     window.componentData[componentId] = {
         type: componentInfo.type,
         title: componentInfo.title,
@@ -84,11 +97,72 @@ function createCanvasComponent(componentInfo, x, y) {
         config: {}
     };
 
-    // Make component draggable within canvas
-    setupComponentDrag(component);
+    console.log('Component created:', componentId, window.componentData[componentId]);
 
-    // Update Dash store
-    updateDashStore();
+    // Setup event handlers
+    setupComponentEventHandlers(component);
+    
+    return component;
+}
+
+function setupComponentEventHandlers(component) {
+    // Delete button handler
+    const deleteBtn = component.querySelector('.delete-btn');
+    deleteBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        deleteComponent(component.id);
+    });
+
+    // Setup drag functionality
+    setupComponentDrag(component);
+}
+
+function handleConnectionPoint(componentId, pointType) {
+    console.log('Connection point clicked:', componentId, pointType, 'isConnecting:', window.isConnecting);
+    
+    if (!window.isConnecting) {
+        // Start connection
+        window.isConnecting = true;
+        window.connectionStart = {
+            componentId: componentId,
+            pointType: pointType
+        };
+        document.body.style.cursor = 'crosshair';
+        showConnectionMode();
+        showInstruction(`Click on an ${pointType === 'output' ? 'input' : 'output'} point to complete the connection`);
+    } else {
+        // Complete connection
+        const start = window.connectionStart;
+        
+        if (start.componentId !== componentId) {
+            if ((start.pointType === 'output' && pointType === 'input') ||
+                (start.pointType === 'input' && pointType === 'output')) {
+                
+                // Create the connection
+                let fromId, toId;
+                if (start.pointType === 'output') {
+                    fromId = start.componentId;
+                    toId = componentId;
+                } else {
+                    fromId = componentId;
+                    toId = start.componentId;
+                }
+                
+                createConnection(fromId, toId);
+                showInstruction('Connection created!');
+                setTimeout(hideInstruction, 1000);
+            } else {
+                showInstruction('Cannot connect same type of points!');
+                setTimeout(hideInstruction, 2000);
+            }
+        }
+        
+        // Reset connection state
+        window.isConnecting = false;
+        window.connectionStart = null;
+        document.body.style.cursor = 'default';
+        hideConnectionMode();
+    }
 }
 
 function setupComponentDrag(component) {
@@ -96,7 +170,13 @@ function setupComponentDrag(component) {
     let startX, startY, initialX, initialY;
 
     component.addEventListener('mousedown', function (e) {
-        if (e.target.classList.contains('control-btn')) return;
+        if (
+            e.target.classList.contains('control-btn') ||
+            e.target.classList.contains('input-point') ||
+            e.target.classList.contains('output-point')
+        ) {
+            return;
+        }
 
         isDragging = true;
         startX = e.clientX;
@@ -105,7 +185,7 @@ function setupComponentDrag(component) {
         initialY = parseInt(component.style.top);
 
         component.style.cursor = 'grabbing';
-        e.preventDefault();
+        component.style.zIndex = '1000';
     });
 
     document.addEventListener('mousemove', function (e) {
@@ -132,7 +212,7 @@ function setupComponentDrag(component) {
         if (isDragging) {
             isDragging = false;
             component.style.cursor = 'move';
-            updateDashStore();
+            component.style.zIndex = '';
         }
     });
 }
@@ -141,144 +221,170 @@ function deleteComponent(componentId) {
     const component = document.getElementById(componentId);
     if (component) {
         component.remove();
-
-        // Remove from data
-        if (window.componentData) {
-            delete window.componentData[componentId];
-        }
-
-        updateDashStore();
-    }
-}
-
-function clearCanvas() {
-    document.querySelectorAll('.canvas-component').forEach(comp => comp.remove());
-    const svg = document.querySelector('.connection-svg');
-    if (svg) svg.remove();
-
-    window.componentData = {};
-    window.componentConnections = [];
-    updateDashStore();
-}
-
-// Connection Functions
-function startConnection(componentId, pointType) {
-    if (!isConnecting) {
-        isConnecting = true;
-        connectionStart = { componentId, pointType };
-
-        // Visual feedback
-        document.body.style.cursor = 'crosshair';
-        showConnectionMode();
-
-        // Show instruction
-        showInstruction(`Now click on an ${pointType === 'output' ? 'input' : 'output'} point to complete the connection`);
-    } else {
-        // Complete connection
-        completeConnection(componentId, pointType);
-    }
-}
-
-function completeConnection(endComponentId, endPointType) {
-    if (connectionStart && connectionStart.componentId !== endComponentId) {
-        // Only allow output -> input connections
-        if (connectionStart.pointType === 'output' && endPointType === 'input') {
-            const connection = {
-                from: connectionStart.componentId,
-                to: endComponentId,
-                id: 'conn_' + Date.now()
-            };
-
-            window.componentConnections = window.componentConnections || [];
-            window.componentConnections.push(connection);
-
-            drawConnection(connection);
-            updateDashStore();
-            showInstruction('Connection created! Click output → input to create more connections.');
-        } else if (connectionStart.pointType === 'input' && endPointType === 'output') {
-            showInstruction('Please connect from output to input (📤 → 📥)');
-        } else {
-            showInstruction('Cannot connect to the same type of point');
-        }
     }
 
-    // Reset connection state
-    isConnecting = false;
-    connectionStart = null;
-    document.body.style.cursor = 'default';
-    hideConnectionMode();
+    // Remove from stored data
+    delete window.componentData[componentId];
+
+    // Remove related connections
+    window.componentConnections = window.componentConnections.filter(
+        conn => conn.from !== componentId && conn.to !== componentId
+    );
+
+    redrawConnections();
+}
+
+function createConnection(fromId, toId) {
+    // Check if connection already exists
+    const exists = window.componentConnections.some(conn => 
+        conn.from === fromId && conn.to === toId
+    );
+    
+    if (exists) {
+        console.log('Connection already exists');
+        showInstruction('Connection already exists!');
+        setTimeout(hideInstruction, 2000);
+        return;
+    }
+    
+    const connectionId = 'conn_' + Date.now();
+    const connection = {
+        from: fromId,
+        to: toId,
+        id: connectionId
+    };
+    
+    window.componentConnections.push(connection);
+    
+    console.log('Connection created:', connection);
+    console.log('All connections:', window.componentConnections);
+    
+    // Ensure SVG exists before drawing
+    if (!document.querySelector('.connection-svg')) {
+        createConnectionSVG();
+    }
+    
+    // Use setTimeout to ensure DOM is ready
+    setTimeout(() => drawConnection(connection), 50);
+}
+
+function createConnectionSVG() {
+    const canvas = document.querySelector('.canvas');
+    if (!canvas) {
+        console.error('Canvas not found');
+        return;
+    }
+    
+    // Remove existing SVG if any
+    const existingSvg = canvas.querySelector('.connection-svg');
+    if (existingSvg) {
+        existingSvg.remove();
+    }
+    
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList.add('connection-svg');
+    svg.style.position = 'absolute';
+    svg.style.top = '0';
+    svg.style.left = '0';
+    svg.style.width = '100%';
+    svg.style.height = '100%';
+    svg.style.pointerEvents = 'none';
+    svg.style.zIndex = '1';
+    
+    // Add arrow marker definition
+    svg.innerHTML = `
+        <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                    refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#007bff" />
+            </marker>
+        </defs>
+    `;
+    
+    canvas.appendChild(svg);
+    console.log('SVG created');
 }
 
 function drawConnection(connection) {
-    const fromComponent = document.getElementById(connection.from);
-    const toComponent = document.getElementById(connection.to);
-
-    if (!fromComponent || !toComponent) return;
-
-    const canvas = document.querySelector('.canvas');
-    let svg = canvas.querySelector('.connection-svg');
-
-    if (!svg) {
-        svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.classList.add('connection-svg');
-        svg.innerHTML = `
-            <defs>
-                <marker id="arrowhead" markerWidth="10" markerHeight="7" 
-                        refX="9" refY="3.5" orient="auto">
-                    <polygon points="0 0, 10 3.5, 0 7" fill="#007bff" />
-                </marker>
-            </defs>
-        `;
-        canvas.appendChild(svg);
+    const fromElement = document.getElementById(connection.from);
+    const toElement = document.getElementById(connection.to);
+    
+    if (!fromElement || !toElement) {
+        console.error('Cannot find elements for connection:', connection);
+        return;
     }
-
-    const fromRect = fromComponent.getBoundingClientRect();
-    const toRect = toComponent.getBoundingClientRect();
+    
+    const svg = document.querySelector('.connection-svg');
+    if (!svg) {
+        console.error('SVG container not found');
+        createConnectionSVG();
+        setTimeout(() => drawConnection(connection), 50);
+        return;
+    }
+    
+    const canvas = document.querySelector('.canvas');
     const canvasRect = canvas.getBoundingClientRect();
-
-    const x1 = fromRect.right - canvasRect.left;
-    const y1 = fromRect.top + fromRect.height / 2 - canvasRect.top;
-    const x2 = toRect.left - canvasRect.left;
-    const y2 = toRect.top + toRect.height / 2 - canvasRect.top;
-
+    const canvasScrollLeft = canvas.scrollLeft;
+    const canvasScrollTop = canvas.scrollTop;
+    
+    const fromRect = fromElement.getBoundingClientRect();
+    const toRect = toElement.getBoundingClientRect();
+    
+    // Calculate positions relative to canvas, accounting for scroll
+    const fromX = fromRect.right - canvasRect.left + canvasScrollLeft;
+    const fromY = fromRect.top + fromRect.height / 2 - canvasRect.top + canvasScrollTop;
+    const toX = toRect.left - canvasRect.left + canvasScrollLeft;
+    const toY = toRect.top + toRect.height / 2 - canvasRect.top + canvasScrollTop;
+    
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const curve = `M ${x1} ${y1} C ${x1 + 50} ${y1}, ${x2 - 50} ${y2}, ${x2} ${y2}`;
-    path.setAttribute('d', curve);
-    path.classList.add('connection-line');
-    path.dataset.connectionId = connection.id;
-
-    // Add click handler for connection deletion
-    path.addEventListener('click', function (e) {
+    
+    // Create a curved path
+    const midX = (fromX + toX) / 2;
+    const d = `M ${fromX} ${fromY} C ${midX} ${fromY}, ${midX} ${toY}, ${toX} ${toY}`;
+    
+    path.setAttribute('d', d);
+    path.setAttribute('class', 'connection-line');
+    path.setAttribute('id', connection.id);
+    path.setAttribute('stroke', '#007bff');
+    path.setAttribute('stroke-width', '2');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('marker-end', 'url(#arrowhead)');
+    path.style.pointerEvents = 'stroke';
+    path.style.cursor = 'pointer';
+    
+    path.onclick = function(e) {
         e.stopPropagation();
-        deleteConnection(connection.id);
-    });
-
+        if (confirm('Delete this connection?')) {
+            deleteConnection(connection.id);
+        }
+    };
+    
     svg.appendChild(path);
+    console.log('Path drawn:', d);
 }
 
 function deleteConnection(connectionId) {
-    if (window.componentConnections) {
-        window.componentConnections = window.componentConnections.filter(
-            conn => conn.id !== connectionId
-        );
-        redrawConnections();
-        updateDashStore();
-    }
+    window.componentConnections = window.componentConnections.filter(
+        conn => conn.id !== connectionId
+    );
+    redrawConnections();
 }
 
 function redrawConnections() {
     const svg = document.querySelector('.connection-svg');
-    if (svg) {
-        // Remove existing paths
-        svg.querySelectorAll('.connection-line').forEach(path => path.remove());
-
-        // Redraw all connections
-        if (window.componentConnections) {
-            window.componentConnections.forEach(connection => {
-                drawConnection(connection);
-            });
-        }
+    if (!svg) {
+        createConnectionSVG();
+        setTimeout(redrawConnections, 50);
+        return;
     }
+    
+    // Remove existing paths
+    svg.querySelectorAll('.connection-line').forEach(path => path.remove());
+
+    // Redraw all connections
+    window.componentConnections.forEach(connection => {
+        drawConnection(connection);
+    });
 }
 
 function showConnectionMode() {
@@ -293,7 +399,7 @@ function hideConnectionMode() {
     });
 }
 
-function showInstruction(message) {
+function showInstruction(text) {
     let instructionDiv = document.getElementById('connection-instruction');
     if (!instructionDiv) {
         instructionDiv = document.createElement('div');
@@ -307,51 +413,66 @@ function showInstruction(message) {
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
-            z-index: 1000;
-            font-weight: 500;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 10000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         `;
         document.body.appendChild(instructionDiv);
     }
-    instructionDiv.textContent = message;
+    instructionDiv.textContent = text;
     instructionDiv.style.display = 'block';
-
-    // Auto-hide after 3 seconds
-    setTimeout(() => {
-        if (instructionDiv && instructionDiv.style.display === 'block') {
-            instructionDiv.style.display = 'none';
-        }
-    }, 3000);
 }
 
-function updateDashStore() {
-    // Update Dash Store components with current state
-    const storeData = {
-        components: window.componentData || {},
-        connections: window.componentConnections || [],
-        timestamp: Date.now()
-    };
-
-    console.log('Updating store with:', storeData); // Debug log
-
-    // Trigger Dash callback by updating hidden div
-    const storeDiv = document.getElementById('canvas-store-trigger');
-    if (storeDiv) {
-        storeDiv.textContent = JSON.stringify(storeData);
-        // Try multiple event types to ensure callback triggers
-        storeDiv.dispatchEvent(new Event('change', { bubbles: true }));
-        storeDiv.dispatchEvent(new Event('input', { bubbles: true }));
-    } else {
-        console.error('canvas-store-trigger element not found');
+function hideInstruction() {
+    const instructionDiv = document.getElementById('connection-instruction');
+    if (instructionDiv) {
+        instructionDiv.style.display = 'none';
     }
 }
 
-// Export functions for Dash callbacks
-window.dashDragDrop = {
-    clearCanvas: clearCanvas,
-    updateDashStore: updateDashStore,
-    getCanvasState: () => ({
-        components: window.componentData || {},
-        connections: window.componentConnections || []
-    })
+function clearCanvas() {
+    const canvas = document.querySelector('.canvas');
+    if (!canvas) return;
+    
+    // Remove all components
+    canvas.querySelectorAll('.canvas-component').forEach(comp => comp.remove());
+    
+    // Clear global state
+    window.componentData = {};
+    window.componentConnections = [];
+    
+    // Clear connection lines
+    redrawConnections();
+}
+
+// Load workflow into canvas
+window.loadWorkflowIntoCanvas = function(workflow) {
+    console.log('Loading workflow:', workflow);
+    
+    // Clear existing components
+    clearCanvas();
+
+    const components = workflow.components || {};
+
+    // Restore components
+    for (const compId in components) {
+        const comp = components[compId];
+        createCanvasComponent(
+            { 
+                title: comp.title, 
+                description: comp.description || "", 
+                type: comp.type 
+            },
+            comp.x,
+            comp.y,
+            compId
+        );
+    }
+
+    // Restore connections
+    if (workflow.connections) {
+        window.componentConnections = workflow.connections.slice();
+        setTimeout(redrawConnections, 100);
+    }
 };
+
+//

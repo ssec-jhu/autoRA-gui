@@ -142,6 +142,10 @@
 
 /* Control Panel */
 .control-panel {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;   /* spacing between buttons */
     position: absolute;
     top: 20px;
     right: 20px;

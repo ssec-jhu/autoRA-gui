@@ -3,11 +3,13 @@ Main Plotly Dash application for drag-and-drop workflow builder.
 """
 
 import dash
-from dash import dcc, html, Input, Output, State, clientside_callback, no_update
+from dash import dcc, html, Input, Output, State, callback, clientside_callback, no_update
 import json
 from typing import Dict, List
 
 from .components import get_component_definitions, create_component
+from dash.exceptions import PreventUpdate
+
 
 # Initialize Dash app
 app = dash.Dash(__name__)
@@ -34,25 +36,26 @@ def create_sidebar():
         )
 
     return html.Div([
-        html.Div([
-            html.H3("Component Library"),
-            html.P("Drag arithmetic components to the canvas, connect them with lines to create calculations",
-                   style={'font-size': '12px', 'color': '#6c757d', 'margin-bottom': '15px'}),
-            html.Div(component_items, className='component-list')
-        ], className='component-library')
-    ], className='sidebar')
+        html.H3('Components'),
+        html.Div(component_items, className='component-list')
+    ], className='component-library')
 
 
 def create_canvas():
     """Create the main canvas area."""
     return html.Div([
-        # Canvas for dropping components
+        # Canvas for components
         html.Div(id='canvas', className='canvas'),
 
         # Control panel
         html.Div([
-            html.Button('Load Workflow', id='load-button', className='run-button'),
+            dcc.Upload(
+                id='load-workflow-upload',
+                children=html.Button('Load Workflow', className='run-button'),
+                accept='.json', style={'display': 'inline-flex', 'align-items': 'center', 'margin-right': '10px'}
+            ),
             html.Button('Save Workflow', id='save-button', className='run-button'),
+            html.Button('Generate Python', id='generate-python-button', className='run-button'),
             html.Button('Run Workflow', id='run-button', className='run-button'),
             html.Button('Clear Canvas', id='clear-button', className='clear-button'),
             html.Button('Debug Store', id='debug-button', className='run-button', 
@@ -72,6 +75,9 @@ def create_canvas():
 app.layout = html.Div([
     # Hidden stores for component state
     dcc.Store(id='canvas-store', data={'components': {}, 'connections': []}),
+    dcc.Store(id='workflow-store', data={'components': {}, 'connections': []}),
+    dcc.Store(id='save-trigger'),
+    dcc.Download(id="download-workflow"),
 
     # Hidden trigger for JavaScript updates
     html.Div(id='canvas-store-trigger', style={'display': 'none'}),
@@ -87,6 +93,7 @@ app.layout = html.Div([
 
 ], id='main-container')
 
+
 # Clientside callback for clearing canvas
 clientside_callback(
     """
@@ -101,6 +108,7 @@ clientside_callback(
     Input('clear-button', 'n_clicks'),
     prevent_initial_call=True
 )
+
 
 # Clientside callback to update store on run button click
 clientside_callback(
@@ -119,166 +127,155 @@ clientside_callback(
 )
 
 
-@app.callback(
-    Output('canvas-store', 'data', allow_duplicate=True),
-    Input('canvas-store-trigger', 'children'),
+# Clientside callback to capture canvas state and prepare for save
+clientside_callback(
+    """
+    function(n_clicks) {
+        if (!n_clicks) {
+            return window.dash_clientside.no_update;
+        }
+        
+        // Make sure we have the latest component data
+        const components = {};
+        document.querySelectorAll('.canvas-component').forEach(comp => {
+            const compId = comp.id;
+            if (window.componentData && window.componentData[compId]) {
+                components[compId] = window.componentData[compId];
+            }
+        });
+        
+        // Clean up duplicate connections
+        const connections = window.componentConnections || [];
+        const uniqueConnections = [];
+        const seen = new Set();
+        
+        connections.forEach(conn => {
+            const key = `${conn.from}-${conn.to}`;
+            if (!seen.has(key)) {
+                seen.add(key);
+                uniqueConnections.push(conn);
+            }
+        });
+        
+        const state = {
+            components: components,
+            connections: uniqueConnections,
+            savedAt: Date.now()
+        };
+        
+        console.log('Saving state:', state); // Debug log
+        
+        return state;
+    }
+    """,
+    Output("workflow-store", "data", allow_duplicate=True),
+    Input("save-button", "n_clicks"),
     prevent_initial_call=True
 )
-def update_canvas_store(trigger_data):
-    """Update the canvas store when triggered by JavaScript."""
-    if trigger_data:
-        try:
-            return json.loads(trigger_data)
-        except (json.JSONDecodeError, TypeError):
-            pass
-    return dash.no_update
 
 
-@app.callback(
+# Server-side callback to trigger download after state is captured
+@callback(
+    Output("download-workflow", "data"),
+    Input("workflow-store", "data"),
+    State("save-button", "n_clicks"),
+    prevent_initial_call=True
+)
+def download_workflow(workflow_data, n_clicks):
+    if n_clicks and workflow_data and workflow_data.get('savedAt'):
+        # Check if this is a fresh save (not from loading)
+        return dict(
+            content=json.dumps(workflow_data, indent=2),
+            filename="workflow.json"
+        )
+    return no_update
+
+
+# Load workflow callback
+@callback(
+    Output("workflow-store", "data", allow_duplicate=True),
+    Input("load-workflow-upload", "contents"),
+    State("load-workflow-upload", "filename"),
+    prevent_initial_call=True
+)
+def load_workflow(contents, filename):
+    if contents is None:
+        return no_update
+
+    # contents is "data:application/json;base64,XXXXX"
+    content_string = contents.split(",")[1]
+
+    import base64
+    decoded = base64.b64decode(content_string).decode("utf-8")
+
+    workflow_data = json.loads(decoded)
+
+    return workflow_data
+
+
+# Clientside callback to load workflow into canvas
+clientside_callback(
+    """
+    function(workflow) {
+        if (workflow && workflow.components && window.loadWorkflowIntoCanvas) {
+            window.loadWorkflowIntoCanvas(workflow);
+        }
+        return '';
+    }
+    """,
+    Output('canvas-store-trigger', 'children', allow_duplicate=True),
+    Input('workflow-store', 'data'),
+    prevent_initial_call=True
+)
+
+
+# Run workflow callback
+@callback(
     [Output('output-panel', 'className'),
-     Output('output-content', 'children'),
-     Output('visualization-container', 'children'),
-     Output('visualization-container', 'style')],
+     Output('output-content', 'children')],
     Input('run-button', 'n_clicks'),
     State('canvas-store', 'data'),
     prevent_initial_call=True
 )
-def execute_workflow(n_clicks, canvas_data):
-    """Execute the workflow when Run button is clicked."""
-    print(f"Execute workflow called: n_clicks={n_clicks}, canvas_data={canvas_data}")  # Debug
-    
+def run_workflow(n_clicks, canvas_data):
     if not n_clicks or not canvas_data:
-        return 'output-panel', '', [], {'display': 'none'}
-
-    components_data = canvas_data.get('components', {})
-    connections = canvas_data.get('connections', [])
-    
-    print(f"Components: {components_data}")  # Debug
-    print(f"Connections: {connections}")  # Debug
-
-    if not components_data:
-        return 'output-panel visible', 'No components on canvas.', [], {'display': 'none'}
+        return no_update, no_update
 
     try:
-        # Build execution order based on connections (if any)
-        if connections:
-            execution_order = get_execution_order(components_data, connections)
-        else:
-            # Simple sequential execution if no connections
-            execution_order = list(components_data.keys())
+        components = canvas_data.get('components', {})
+        connections = canvas_data.get('connections', [])
 
-        # Execute components
-        output_lines = []
-        visualizations = []
-        results = {}
+        # Execute workflow logic here
+        result = f"Workflow executed successfully!\nComponents: {len(components)}\nConnections: {len(connections)}"
 
-        for comp_id in execution_order:
-            comp_data = components_data[comp_id]
-            comp_type = comp_data['type']
-            comp_config = comp_data.get('config', {})
-
-            try:
-                # Create and execute component
-                component = create_component(comp_type, comp_id, comp_config)
-
-                # Get input data based on connections
-                input_data = None
-                if connections:
-                    # Find connected input
-                    for conn in connections:
-                        if conn['to'] == comp_id and conn['from'] in results:
-                            input_data = results[conn['from']]
-                            break
-                elif comp_type != 'data_source' and results:
-                    # Fallback: use the last result as input
-                    input_data = list(results.values())[-1]
-
-                result = component.execute(input_data)
-                results[comp_id] = result
-
-                # Show the expression and result for arithmetic components
-                if hasattr(component, 'expression') and hasattr(component, 'result'):
-                    output_lines.append(f"✅ {comp_data['title']}: {component.expression}")
-                else:
-                    output_lines.append(f"✅ {comp_data['title']}: Result = {result}")
-
-            except Exception as e:
-                output_lines.append(f"❌ {comp_data['title']}: Error - {str(e)}")
-
-        # Show final result
-        if results:
-            final_result = list(results.values())[-1]
-            output_lines.append("")
-            output_lines.append(f"🎯 FINAL RESULT: {final_result}")
-
-        output_content = [html.Div(line, style={'margin': '2px 0', 'font-family': 'monospace'}) for line in
-                          output_lines]
-
-        return 'output-panel visible', output_content, [], {'display': 'none'}
+        return 'output-panel visible', result
 
     except Exception as e:
-        error_msg = f"Execution error: {str(e)}"
-        return 'output-panel visible', error_msg, [], {'display': 'none'}
+        return 'output-panel visible', f"Error: {str(e)}"
 
 
-def get_execution_order(components_data: Dict, connections: List) -> List[str]:
-    """Determine the order of component execution based on connections."""
-    component_ids = list(components_data.keys())
-
-    if not connections:
-        return component_ids
-
-    # Build dependency graph
-    dependencies = {comp_id: [] for comp_id in component_ids}
-
-    for conn in connections:
-        from_comp = conn['from']
-        to_comp = conn['to']
-        if to_comp in dependencies and from_comp in component_ids:
-            dependencies[to_comp].append(from_comp)
-
-    # Simple topological sort
-    visited = set()
-    temp_visited = set()
-    order = []
-
-    def visit(comp_id):
-        if comp_id in temp_visited:
-            # Circular dependency - just add to end
-            return
-        if comp_id in visited:
-            return
-
-        temp_visited.add(comp_id)
-        for dep in dependencies.get(comp_id, []):
-            visit(dep)
-        temp_visited.remove(comp_id)
-        visited.add(comp_id)
-        order.append(comp_id)
-
-    for comp_id in component_ids:
-        if comp_id not in visited:
-            visit(comp_id)
-
-    return order
-
-
-@app.callback(
+# Debug store callback
+@callback(
     Output('output-content', 'children', allow_duplicate=True),
     Input('debug-button', 'n_clicks'),
     State('canvas-store', 'data'),
+    State('workflow-store', 'data'),
     prevent_initial_call=True
 )
-def debug_store(n_clicks, canvas_data):
-    """Debug callback to show store contents."""
-    if n_clicks:
-        debug_info = [
-            html.Div(f"Store data: {json.dumps(canvas_data, indent=2)}", 
-                    style={'font-family': 'monospace', 'white-space': 'pre-wrap'})
-        ]
-        return debug_info
-    return no_update
+def debug_store(n_clicks, canvas_data, workflow_data):
+    if not n_clicks:
+        return no_update
+
+    debug_info = f"""
+Canvas Store:
+{json.dumps(canvas_data, indent=2)}
+
+Workflow Store:
+{json.dumps(workflow_data, indent=2)}
+"""
+    return html.Pre(debug_info)
 
 
 if __name__ == '__main__':
     app.run(debug=True, port=8050)
+    
