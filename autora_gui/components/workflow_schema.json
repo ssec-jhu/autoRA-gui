@@ -1,0 +1,339 @@
+{
+  "$defs": {
+    "CanvasLocation": {
+      "properties": {
+        "x": {
+          "title": "X",
+          "type": "integer"
+        },
+        "y": {
+          "title": "Y",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "title": "CanvasLocation",
+      "type": "object"
+    },
+    "Component": {
+      "properties": {
+        "uuid": {
+          "format": "uuid",
+          "title": "Uuid",
+          "type": "string"
+        },
+        "protocol_uuid": {
+          "format": "uuid",
+          "title": "Protocol Uuid",
+          "type": "string"
+        },
+        "parameter_setting": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ParameterSetting"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Parameter Setting"
+        },
+        "canvas_location": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CanvasLocation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "uuid",
+        "protocol_uuid",
+        "parameter_setting",
+        "canvas_location"
+      ],
+      "title": "Component",
+      "type": "object"
+    },
+    "Datatype": {
+      "enum": [
+        "real",
+        "integer",
+        "boolean",
+        "string",
+        "categorical"
+      ],
+      "title": "Datatype",
+      "type": "string"
+    },
+    "Link": {
+      "properties": {
+        "source": {
+          "format": "uuid",
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "format": "uuid",
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "target"
+      ],
+      "title": "Link",
+      "type": "object"
+    },
+    "ParameterSetting": {
+      "properties": {
+        "uuid": {
+          "format": "uuid",
+          "title": "Uuid",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uuid",
+        "value"
+      ],
+      "title": "ParameterSetting",
+      "type": "object"
+    },
+    "PrimitiveVariableType": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "datatype": {
+          "$ref": "#/$defs/Datatype"
+        },
+        "minOccurs": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 1,
+          "title": "Minoccurs"
+        },
+        "maxOccurs": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "$ref": "#/$defs/Unlimited"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 1,
+          "title": "Maxoccurs"
+        },
+        "validValues": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validvalues"
+        },
+        "default": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "datatype"
+      ],
+      "title": "PrimitiveVariableType",
+      "type": "object"
+    },
+    "TupleVariableType": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "variables": {
+          "items": {
+            "$ref": "#/$defs/VariableType"
+          },
+          "title": "Variables",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "variables"
+      ],
+      "title": "TupleVariableType",
+      "type": "object"
+    },
+    "Unlimited": {
+      "enum": [
+        "unlimited"
+      ],
+      "title": "Unlimited",
+      "type": "string"
+    },
+    "VariableType": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        }
+      },
+      "required": [
+        "name",
+        "description"
+      ],
+      "title": "VariableType",
+      "type": "object"
+    },
+    "Workflow": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "independentVariables": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrimitiveVariableType"
+            },
+            {
+              "$ref": "#/$defs/TupleVariableType"
+            }
+          ],
+          "title": "Independentvariables"
+        },
+        "dependentVariables": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrimitiveVariableType"
+            },
+            {
+              "$ref": "#/$defs/TupleVariableType"
+            }
+          ],
+          "title": "Dependentvariables"
+        },
+        "components": {
+          "items": {
+            "$ref": "#/$defs/Component"
+          },
+          "title": "Components",
+          "type": "array"
+        },
+        "links": {
+          "items": {
+            "$ref": "#/$defs/Link"
+          },
+          "title": "Links",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "independentVariables",
+        "dependentVariables",
+        "components",
+        "links"
+      ],
+      "title": "Workflow",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "workflow": {
+      "$ref": "#/$defs/Workflow"
+    }
+  },
+  "required": [
+    "workflow"
+  ],
+  "title": "root",
+  "type": "object"
+}
