@@ -74,13 +74,13 @@ class Protocol(AutoraBaseModel):
     Presents basic model for components and links.
     """
 
-    protocol_type: ComponentType
+    protocolType: ComponentType
     name: str
     description: str | None = None
     githubCommit: str
     parameters: list[VariableTypes] | None
-    input_data_type: list[VariableTypes] | None  # could be a bunch of allowed datatypes
-    output_data_type: list[VariableTypes] | None  # could be a bunch of allowed datatypes
+    inputDataType: list[VariableTypes] | None  # could be a bunch of allowed datatypes
+    outputDataType: list[VariableTypes] | None  # could be a bunch of allowed datatypes
 
 
 # Workflow classes from here
@@ -103,8 +103,8 @@ class Filter(Link):
     Includes the loop counter parameter and alternative target.
     """
 
-    max_counter: int = 1
-    alt_target: uuid.UUID | None
+    maxCounter: int = 1
+    altTarget: uuid.UUID | None
 
 
 class ParameterSetting(AutoraBaseModel):
@@ -132,9 +132,9 @@ class Component(AutoraBaseModel):
     Includes node parameters and canvas location.
     """
 
-    protocol_uuid: uuid.UUID  # uuid of the Protocol
-    parameter_setting: list[ParameterSetting] | None
-    canvas_location: CanvasLocation | None
+    protocolUuid: uuid.UUID  # uuid of the Protocol
+    parameterSetting: list[ParameterSetting] | None
+    canvasLocation: CanvasLocation | None
 
 
 class Workflow(BaseModel):
@@ -164,5 +164,5 @@ class Root(BaseModel):
 if __name__ == "__main__":
     main_model_schema = Root.model_json_schema()  # (1)!
     schema_path = "autora_gui/components/workflow_schema.json"
-    with Path(schema_path).open("w") as f:
-        f.write(json.dumps(main_model_schema, indent=2))  # (2)!
+    with Path(schema_path).open("w", encoding="utf-8") as f:
+        f.write(json.dumps(main_model_schema, indent=2, ensure_ascii=False))  # (2)!

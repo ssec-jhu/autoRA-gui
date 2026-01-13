@@ -1,1 +1,281 @@
-"{\"uuid\":\"c9c8d872-eff9-11f0-b206-eefea9c7fa3b\",\"protocolType\":\"theorist\",\"name\":\"DARTS Regressor\",\"description\":\"DARTS finds a composition of functions and coefficients to minimize a loss function suitable for the dependent variable.\",\"githubCommit\":\"...\",\"parameters\":[{\"name\":\"batch_size\",\"description\":\"...\",\"datatype\":\"integer\",\"minOccurs\":1,\"maxOccurs\":1,\"validValues\":null,\"default\":64},{\"name\":\"darts_type\",\"description\":\"...\",\"datatype\":\"categorical\",\"minOccurs\":1,\"maxOccurs\":1,\"validValues\":[\"original\",\"fair\"],\"default\":\"original\"},{\"name\":\"primitives\",\"description\":\"...\",\"datatype\":\"categorical\",\"minOccurs\":1,\"maxOccurs\":21,\"validValues\":[\"none\",\"add\",\"subtract\",\"mult\",\"linear\",\"relu\",\"exp\",\"logistic\",\"sin\",\"cos\",\"tanh\",\"linear_relu\",\"linear_exp\",\"linear_logistic\",\"linear_sin\",\"linear_cos\",\"linear_tanh\",\"reciprocal\",\"ln\",\"softplus\",\"softminus\"],\"default\":\"none\"}],\"inputDataType\":[{\"name\":\"X\",\"description\":\"...\",\"datatype\":\"real\",\"minOccurs\":1,\"maxOccurs\":1,\"validValues\":null,\"default\":null}],\"outputDataType\":[{\"name\":\"y\",\"description\":\"...\",\"datatype\":\"real\",\"minOccurs\":1,\"maxOccurs\":1,\"validValues\":null,\"default\":null}]}"
+{
+  "$defs": {
+    "ComponentType": {
+      "description": "Component type model for the workflow.",
+      "enum": [
+        "theorist",
+        "experimentalist",
+        "experiment_runner"
+      ],
+      "title": "ComponentType",
+      "type": "string"
+    },
+    "Datatype": {
+      "description": "Datatype model for the workflow.",
+      "enum": [
+        "real",
+        "integer",
+        "boolean",
+        "string",
+        "categorical"
+      ],
+      "title": "Datatype",
+      "type": "string"
+    },
+    "PrimitiveVariableType": {
+      "description": "Primitive variable type model for the workflow.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "datatype": {
+          "$ref": "#/$defs/Datatype"
+        },
+        "minOccurs": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 1,
+          "title": "Minoccurs"
+        },
+        "maxOccurs": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "$ref": "#/$defs/Unlimited"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 1,
+          "title": "Maxoccurs"
+        },
+        "validValues": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validvalues"
+        },
+        "default": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "datatype"
+      ],
+      "title": "PrimitiveVariableType",
+      "type": "object"
+    },
+    "TupleVariableType": {
+      "description": "A model for tuple variables in the workflow.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "variables": {
+          "items": {
+            "$ref": "#/$defs/VariableType"
+          },
+          "title": "Variables",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "variables"
+      ],
+      "title": "TupleVariableType",
+      "type": "object"
+    },
+    "Unlimited": {
+      "description": "Unlimited model for the workflow.",
+      "enum": [
+        "unlimited"
+      ],
+      "title": "Unlimited",
+      "type": "string"
+    },
+    "VariableType": {
+      "description": "Variable type model for the workflow.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        }
+      },
+      "required": [
+        "name",
+        "description"
+      ],
+      "title": "VariableType",
+      "type": "object"
+    }
+  },
+  "description": "A protocol model for the workflow.\n\nPresents basic model for components and links.",
+  "properties": {
+    "uuid": {
+      "format": "uuid",
+      "title": "Uuid",
+      "type": "string"
+    },
+    "protocolType": {
+      "$ref": "#/$defs/ComponentType"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Description"
+    },
+    "githubCommit": {
+      "title": "Githubcommit",
+      "type": "string"
+    },
+    "parameters": {
+      "anyOf": [
+        {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PrimitiveVariableType"
+              },
+              {
+                "$ref": "#/$defs/TupleVariableType"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Parameters"
+    },
+    "inputDataType": {
+      "anyOf": [
+        {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PrimitiveVariableType"
+              },
+              {
+                "$ref": "#/$defs/TupleVariableType"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Inputdatatype"
+    },
+    "outputDataType": {
+      "anyOf": [
+        {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PrimitiveVariableType"
+              },
+              {
+                "$ref": "#/$defs/TupleVariableType"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Outputdatatype"
+    }
+  },
+  "required": [
+    "uuid",
+    "protocolType",
+    "name",
+    "githubCommit",
+    "parameters",
+    "inputDataType",
+    "outputDataType"
+  ],
+  "title": "Protocol",
+  "type": "object"
+}

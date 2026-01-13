@@ -60,7 +60,7 @@ darts_theorist = dm.Protocol(
     protocolType=dm.ComponentType.THEORIST,
     uuid=uuid.uuid1(),
     name="DARTS Regressor",
-    githubCommit="...",
+    githubCommit="",
     description="Finds a composition of functions and coefficients to minimize a loss function.",
     parameters=parameters,
     inputDataType=[
@@ -81,10 +81,11 @@ darts_theorist = dm.Protocol(
 
 # test code to generate, read and save schema
 if __name__ == "__main__":
-    json_dump = darts_theorist.model_dump_json()
-    theorist_dict = json.loads(json_dump)
-    darts_theorist = dm.Protocol(**theorist_dict)
+    # json_dump = darts_theorist.model_dump_json()
+    # theorist_dict = json.loads(json_dump)
+    # darts_theorist = dm.Protocol(**theorist_dict)
 
     darts_model_path = "autora_gui/components/theorist_darts.json"
-    with Path(darts_model_path).open("w") as f:
-        json.dump(darts_theorist.model_dump(), f)
+    darts_theorist_schema = darts_theorist.model_json_schema()
+    with Path(darts_model_path).open("w", encoding="utf-8") as f:
+        f.write(json.dumps(darts_theorist_schema, indent=2, ensure_ascii=False))
