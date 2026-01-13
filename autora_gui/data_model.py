@@ -1,4 +1,4 @@
-"""Workflow schema or Autora gui."""
+"""Workflow schema for Autora gui."""
 
 import json
 import uuid
@@ -12,7 +12,7 @@ from pydantic import BaseModel
 #################################
 
 
-class AutoRABaseModel(BaseModel):
+class AutoraBaseModel(BaseModel):
     """Autora base model for the workflow."""
 
     uuid: uuid.UUID
@@ -53,9 +53,9 @@ class PrimitiveVariableType(VariableType):
     """Primitive variable type model for the workflow."""
 
     datatype: Datatype
-    min_occurs: int | None = 1
-    max_occurs: int | Unlimited | None = 1
-    valid_values: list[str] | None = None
+    minOccurs: int | None = 1
+    maxOccurs: int | Unlimited | None = 1
+    validValues: list[str] | None = None
     default: Any | None = None
 
 
@@ -68,7 +68,7 @@ class TupleVariableType(VariableType):
 VariableTypes = PrimitiveVariableType | TupleVariableType
 
 
-class Protocol(AutoRABaseModel):
+class Protocol(AutoraBaseModel):
     """A protocol model for the workflow.
 
     Presents basic model for components and links.
@@ -77,7 +77,7 @@ class Protocol(AutoRABaseModel):
     protocol_type: ComponentType
     name: str
     description: str | None = None
-    github_commit: str
+    githubCommit: str
     parameters: list[VariableTypes] | None
     input_data_type: list[VariableTypes] | None  # could be a bunch of allowed datatypes
     output_data_type: list[VariableTypes] | None  # could be a bunch of allowed datatypes
@@ -90,7 +90,7 @@ class Protocol(AutoRABaseModel):
 class Link(BaseModel):
     """A link (connection) model for Autora gui.
 
-    Includes output and input nodes being connected y the given link.
+    Includes output and input nodes being connected by the given link.
     """
 
     source: uuid.UUID  # uuid of the Experiment
@@ -107,7 +107,7 @@ class Filter(Link):
     alt_target: uuid.UUID | None
 
 
-class ParameterSetting(AutoRABaseModel):
+class ParameterSetting(AutoraBaseModel):
     """A class for parameter setting.
 
     Includes the description.
@@ -119,14 +119,14 @@ class ParameterSetting(AutoRABaseModel):
 class CanvasLocation(BaseModel):
     """A class for node's canvas location.
 
-    Includes x and y oordinates.
+    Includes x and y coordinates.
     """
 
     x: int
     y: int
 
 
-class Component(AutoRABaseModel):
+class Component(AutoraBaseModel):
     """A component model for Autora gui.
 
     Includes node parameters and canvas location.
@@ -145,8 +145,8 @@ class Workflow(BaseModel):
 
     name: str
     description: str | None = None
-    independent_variables: VariableTypes
-    dependent_variables: VariableTypes
+    independentVariables: VariableTypes
+    dependentVariables: VariableTypes
     components: list[Component]
     links: list[Link]
 
