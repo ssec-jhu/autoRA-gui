@@ -28,8 +28,8 @@ class Datatype(str, Enum):
     CATEGORICAL = "categorical"
 
 
-class ComponentType(str, Enum):
-    """Component type model for the workflow."""
+class ProtocolType(str, Enum):
+    """Protocol type model for the workflow."""
 
     THEORIST = "theorist"
     EXPERIMENTALIST = "experimentalist"
@@ -68,7 +68,7 @@ class Protocol(AutoraBaseModel):
     Presents basic model for components and links.
     """
 
-    protocolType: ComponentType
+    protocolType: ProtocolType
     name: str
     description: str | None = None
     githubCommit: str

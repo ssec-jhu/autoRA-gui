@@ -1,15 +1,5 @@
 {
   "$defs": {
-    "ComponentType": {
-      "description": "Component type model for the workflow.",
-      "enum": [
-        "theorist",
-        "experimentalist",
-        "experiment_runner"
-      ],
-      "title": "ComponentType",
-      "type": "string"
-    },
     "Datatype": {
       "description": "Datatype model for the workflow.",
       "enum": [
@@ -101,6 +91,16 @@
       "title": "PrimitiveVariableType",
       "type": "object"
     },
+    "ProtocolType": {
+      "description": "Protocol type model for the workflow.",
+      "enum": [
+        "theorist",
+        "experimentalist",
+        "experiment_runner"
+      ],
+      "title": "ProtocolType",
+      "type": "string"
+    },
     "TupleVariableType": {
       "description": "A model for tuple variables in the workflow.",
       "properties": {
@@ -170,7 +170,7 @@
       "type": "string"
     },
     "protocolType": {
-      "$ref": "#/$defs/ComponentType"
+      "$ref": "#/$defs/ProtocolType"
     },
     "name": {
       "title": "Name",
