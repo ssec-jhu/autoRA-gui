@@ -36,12 +36,6 @@ class ComponentType(str, Enum):
     EXPERIMENT_RUNNER = "experiment_runner"
 
 
-class Unlimited(str, Enum):
-    """Unlimited model for the workflow."""
-
-    UNLIMITED = "unlimited"
-
-
 class VariableType(BaseModel):
     """Variable type model for the workflow."""
 
@@ -163,17 +157,12 @@ class Root(BaseModel):
 # Create and save schemas
 ####################################
 if __name__ == "__main__":
-    root_model_schema = Root.model_json_schema()
-    schema_path = "autora_gui/components/root_schema.json"
-    with Path(schema_path).open("w", encoding="utf-8") as f:
-        f.write(json.dumps(root_model_schema, indent=2, ensure_ascii=False))
-
     workflow_model_schema = Root.model_json_schema()
-    schema_path = "autora_gui/components/workflow_schema.json"
+    schema_path = "autora_gui/JSON/schemas/workflow_model.json"
     with Path(schema_path).open("w", encoding="utf-8") as f:
         f.write(json.dumps(workflow_model_schema, indent=2, ensure_ascii=False))
 
     protocol_model_schema = Root.model_json_schema()
-    schema_path = "autora_gui/components/protocol_schema.json"
+    schema_path = "autora_gui/JSON/schemas/protocol_model.json"
     with Path(schema_path).open("w", encoding="utf-8") as f:
         f.write(json.dumps(protocol_model_schema, indent=2, ensure_ascii=False))
