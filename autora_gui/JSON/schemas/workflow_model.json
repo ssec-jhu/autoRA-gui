@@ -257,83 +257,70 @@
       ],
       "title": "VariableType",
       "type": "object"
-    },
-    "Workflow": {
-      "description": "A workflow model for Autora gui.\n\nIncludes all possible elements like nodes and links.",
-      "properties": {
-        "name": {
-          "title": "Name",
-          "type": "string"
-        },
-        "description": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Description"
-        },
-        "independentVariables": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/PrimitiveVariableType"
-            },
-            {
-              "$ref": "#/$defs/TupleVariableType"
-            }
-          ],
-          "title": "Independentvariables"
-        },
-        "dependentVariables": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/PrimitiveVariableType"
-            },
-            {
-              "$ref": "#/$defs/TupleVariableType"
-            }
-          ],
-          "title": "Dependentvariables"
-        },
-        "components": {
-          "items": {
-            "$ref": "#/$defs/Component"
-          },
-          "title": "Components",
-          "type": "array"
-        },
-        "links": {
-          "items": {
-            "$ref": "#/$defs/Link"
-          },
-          "title": "Links",
-          "type": "array"
-        }
-      },
-      "required": [
-        "name",
-        "independentVariables",
-        "dependentVariables",
-        "components",
-        "links"
-      ],
-      "title": "Workflow",
-      "type": "object"
     }
   },
-  "description": "A root model for Autora gui.\n\nBasic class including workflow.",
+  "description": "A workflow model for Autora gui.\n\nIncludes all possible elements like nodes and links.",
   "properties": {
-    "workflow": {
-      "$ref": "#/$defs/Workflow"
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Description"
+    },
+    "independentVariables": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PrimitiveVariableType"
+        },
+        {
+          "$ref": "#/$defs/TupleVariableType"
+        }
+      ],
+      "title": "Independentvariables"
+    },
+    "dependentVariables": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PrimitiveVariableType"
+        },
+        {
+          "$ref": "#/$defs/TupleVariableType"
+        }
+      ],
+      "title": "Dependentvariables"
+    },
+    "components": {
+      "items": {
+        "$ref": "#/$defs/Component"
+      },
+      "title": "Components",
+      "type": "array"
+    },
+    "links": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Links",
+      "type": "array"
     }
   },
   "required": [
-    "workflow"
+    "name",
+    "independentVariables",
+    "dependentVariables",
+    "components",
+    "links"
   ],
-  "title": "Root",
+  "title": "Workflow",
   "type": "object"
 }

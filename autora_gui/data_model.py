@@ -145,24 +145,15 @@ class Workflow(BaseModel):
     links: list[Link]
 
 
-class Root(BaseModel):
-    """A root model for Autora gui.
-
-    Basic class including workflow.
-    """
-
-    workflow: Workflow
-
-
 # Create and save schemas
 ####################################
 if __name__ == "__main__":
-    workflow_model_schema = Root.model_json_schema()
+    workflow_model_schema = Workflow.model_json_schema()
     schema_path = "autora_gui/JSON/schemas/workflow_model.json"
     with Path(schema_path).open("w", encoding="utf-8") as f:
         f.write(json.dumps(workflow_model_schema, indent=2, ensure_ascii=False))
 
-    protocol_model_schema = Root.model_json_schema()
+    protocol_model_schema = Protocol.model_json_schema()
     schema_path = "autora_gui/JSON/schemas/protocol_model.json"
     with Path(schema_path).open("w", encoding="utf-8") as f:
         f.write(json.dumps(protocol_model_schema, indent=2, ensure_ascii=False))
