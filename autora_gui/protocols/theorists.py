@@ -85,7 +85,7 @@ if __name__ == "__main__":
     # theorist_dict = json.loads(json_dump)
     # darts_theorist = dm.Protocol(**theorist_dict)
 
-    darts_model_path = "autora_gui/components/theorist_darts.json"
+    darts_model_path = "autora_gui/components/theorists/theorist_darts.json"
     darts_theorist_schema = darts_theorist.model_json_schema()
     with Path(darts_model_path).open("w", encoding="utf-8") as f:
         f.write(json.dumps(darts_theorist_schema, indent=2, ensure_ascii=False))

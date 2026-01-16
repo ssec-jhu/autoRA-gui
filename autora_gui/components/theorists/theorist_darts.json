@@ -61,13 +61,10 @@
               "type": "integer"
             },
             {
-              "$ref": "#/$defs/Unlimited"
-            },
-            {
               "type": "null"
             }
           ],
-          "default": 1,
+          "default": -1,
           "title": "Maxoccurs"
         },
         "validValues": {
@@ -137,14 +134,6 @@
       ],
       "title": "TupleVariableType",
       "type": "object"
-    },
-    "Unlimited": {
-      "description": "Unlimited model for the workflow.",
-      "enum": [
-        "unlimited"
-      ],
-      "title": "Unlimited",
-      "type": "string"
     },
     "VariableType": {
       "description": "Variable type model for the workflow.",

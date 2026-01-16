@@ -54,7 +54,7 @@ class PrimitiveVariableType(VariableType):
 
     datatype: Datatype
     minOccurs: int | None = 1
-    maxOccurs: int | Unlimited | None = 1
+    maxOccurs: int | None = -1
     validValues: list[str] | None = None
     default: Any | None = None
 
@@ -160,9 +160,20 @@ class Root(BaseModel):
     workflow: Workflow
 
 
-# test code to read schema
+# Create and save schemas
+####################################
 if __name__ == "__main__":
-    main_model_schema = Root.model_json_schema()  # (1)!
+    root_model_schema = Root.model_json_schema()
+    schema_path = "autora_gui/components/root_schema.json"
+    with Path(schema_path).open("w", encoding="utf-8") as f:
+        f.write(json.dumps(root_model_schema, indent=2, ensure_ascii=False))
+
+    workflow_model_schema = Root.model_json_schema()
     schema_path = "autora_gui/components/workflow_schema.json"
     with Path(schema_path).open("w", encoding="utf-8") as f:
-        f.write(json.dumps(main_model_schema, indent=2, ensure_ascii=False))  # (2)!
+        f.write(json.dumps(workflow_model_schema, indent=2, ensure_ascii=False))
+
+    protocol_model_schema = Root.model_json_schema()
+    schema_path = "autora_gui/components/protocol_schema.json"
+    with Path(schema_path).open("w", encoding="utf-8") as f:
+        f.write(json.dumps(protocol_model_schema, indent=2, ensure_ascii=False))
