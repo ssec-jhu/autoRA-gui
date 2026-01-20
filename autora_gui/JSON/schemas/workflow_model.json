@@ -1,0 +1,326 @@
+{
+  "$defs": {
+    "CanvasLocation": {
+      "description": "A class for node's canvas location.\n\nIncludes x and y coordinates.",
+      "properties": {
+        "x": {
+          "title": "X",
+          "type": "integer"
+        },
+        "y": {
+          "title": "Y",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "title": "CanvasLocation",
+      "type": "object"
+    },
+    "Component": {
+      "description": "A component model for Autora gui.\n\nIncludes node parameters and canvas location.",
+      "properties": {
+        "uuid": {
+          "format": "uuid",
+          "title": "Uuid",
+          "type": "string"
+        },
+        "protocolUuid": {
+          "format": "uuid",
+          "title": "Protocoluuid",
+          "type": "string"
+        },
+        "parameterSetting": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ParameterSetting"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Parametersetting"
+        },
+        "canvasLocation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CanvasLocation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "uuid",
+        "protocolUuid",
+        "parameterSetting",
+        "canvasLocation"
+      ],
+      "title": "Component",
+      "type": "object"
+    },
+    "Datatype": {
+      "description": "Datatype model for the workflow.",
+      "enum": [
+        "real",
+        "integer",
+        "boolean",
+        "string",
+        "categorical"
+      ],
+      "title": "Datatype",
+      "type": "string"
+    },
+    "Link": {
+      "description": "A link (connection) model for Autora gui.\n\nIncludes output and input nodes being connected by the given link.",
+      "properties": {
+        "source": {
+          "format": "uuid",
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "format": "uuid",
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "target"
+      ],
+      "title": "Link",
+      "type": "object"
+    },
+    "ParameterSetting": {
+      "description": "A class for parameter setting.\n\nIncludes the description.",
+      "properties": {
+        "uuid": {
+          "format": "uuid",
+          "title": "Uuid",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uuid",
+        "value"
+      ],
+      "title": "ParameterSetting",
+      "type": "object"
+    },
+    "PrimitiveVariableType": {
+      "description": "Primitive variable type model for the workflow.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "datatype": {
+          "$ref": "#/$defs/Datatype"
+        },
+        "minOccurs": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 1,
+          "title": "Minoccurs"
+        },
+        "maxOccurs": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": -1,
+          "title": "Maxoccurs"
+        },
+        "validValues": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validvalues"
+        },
+        "default": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "datatype"
+      ],
+      "title": "PrimitiveVariableType",
+      "type": "object"
+    },
+    "TupleVariableType": {
+      "description": "A model for tuple variables in the workflow.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "variables": {
+          "items": {
+            "$ref": "#/$defs/VariableType"
+          },
+          "title": "Variables",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "variables"
+      ],
+      "title": "TupleVariableType",
+      "type": "object"
+    },
+    "VariableType": {
+      "description": "Variable type model for the workflow.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        }
+      },
+      "required": [
+        "name",
+        "description"
+      ],
+      "title": "VariableType",
+      "type": "object"
+    }
+  },
+  "description": "A workflow model for Autora gui.\n\nIncludes all possible elements like nodes and links.",
+  "properties": {
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Description"
+    },
+    "independentVariables": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PrimitiveVariableType"
+        },
+        {
+          "$ref": "#/$defs/TupleVariableType"
+        }
+      ],
+      "title": "Independentvariables"
+    },
+    "dependentVariables": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PrimitiveVariableType"
+        },
+        {
+          "$ref": "#/$defs/TupleVariableType"
+        }
+      ],
+      "title": "Dependentvariables"
+    },
+    "components": {
+      "items": {
+        "$ref": "#/$defs/Component"
+      },
+      "title": "Components",
+      "type": "array"
+    },
+    "links": {
+      "items": {
+        "$ref": "#/$defs/Link"
+      },
+      "title": "Links",
+      "type": "array"
+    }
+  },
+  "required": [
+    "name",
+    "independentVariables",
+    "dependentVariables",
+    "components",
+    "links"
+  ],
+  "title": "Workflow",
+  "type": "object"
+}

@@ -1,0 +1,270 @@
+{
+  "$defs": {
+    "Datatype": {
+      "description": "Datatype model for the workflow.",
+      "enum": [
+        "real",
+        "integer",
+        "boolean",
+        "string",
+        "categorical"
+      ],
+      "title": "Datatype",
+      "type": "string"
+    },
+    "PrimitiveVariableType": {
+      "description": "Primitive variable type model for the workflow.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "datatype": {
+          "$ref": "#/$defs/Datatype"
+        },
+        "minOccurs": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 1,
+          "title": "Minoccurs"
+        },
+        "maxOccurs": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": -1,
+          "title": "Maxoccurs"
+        },
+        "validValues": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validvalues"
+        },
+        "default": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "datatype"
+      ],
+      "title": "PrimitiveVariableType",
+      "type": "object"
+    },
+    "ProtocolType": {
+      "description": "Protocol type model for the workflow.",
+      "enum": [
+        "theorist",
+        "experimentalist",
+        "experiment_runner"
+      ],
+      "title": "ProtocolType",
+      "type": "string"
+    },
+    "TupleVariableType": {
+      "description": "A model for tuple variables in the workflow.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "variables": {
+          "items": {
+            "$ref": "#/$defs/VariableType"
+          },
+          "title": "Variables",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "variables"
+      ],
+      "title": "TupleVariableType",
+      "type": "object"
+    },
+    "VariableType": {
+      "description": "Variable type model for the workflow.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        }
+      },
+      "required": [
+        "name",
+        "description"
+      ],
+      "title": "VariableType",
+      "type": "object"
+    }
+  },
+  "description": "A protocol model for the workflow.\n\nPresents basic model for components and links.",
+  "properties": {
+    "uuid": {
+      "format": "uuid",
+      "title": "Uuid",
+      "type": "string"
+    },
+    "protocolType": {
+      "$ref": "#/$defs/ProtocolType"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Description"
+    },
+    "githubCommit": {
+      "title": "Githubcommit",
+      "type": "string"
+    },
+    "parameters": {
+      "anyOf": [
+        {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PrimitiveVariableType"
+              },
+              {
+                "$ref": "#/$defs/TupleVariableType"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Parameters"
+    },
+    "inputDataType": {
+      "anyOf": [
+        {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PrimitiveVariableType"
+              },
+              {
+                "$ref": "#/$defs/TupleVariableType"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Inputdatatype"
+    },
+    "outputDataType": {
+      "anyOf": [
+        {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PrimitiveVariableType"
+              },
+              {
+                "$ref": "#/$defs/TupleVariableType"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Outputdatatype"
+    }
+  },
+  "required": [
+    "uuid",
+    "protocolType",
+    "name",
+    "githubCommit",
+    "parameters",
+    "inputDataType",
+    "outputDataType"
+  ],
+  "title": "Protocol",
+  "type": "object"
+}
