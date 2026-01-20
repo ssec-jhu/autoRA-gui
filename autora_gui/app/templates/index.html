@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoRA Workflow Builder</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <h1>AutoRA Workflow Builder</h1>
+            <div class="toolbar">
+                <button id="btn-save" class="btn btn-primary">
+                    <span class="icon">💾</span> Save Workflow
+                </button>
+                <button id="btn-load" class="btn btn-secondary">
+                    <span class="icon">📂</span> Load
+                </button>
+                <button id="btn-clear" class="btn btn-danger">
+                    <span class="icon">🗑️</span> Clear
+                </button>
+                <button id="btn-export" class="btn btn-secondary">
+                    <span class="icon">📤</span> Export JSON
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Panel - Component Palette -->
+            <aside class="panel panel-left">
+                <div class="panel-header">
+                    <h2>Components</h2>
+                    <input type="text" id="component-search" placeholder="Search components..." class="search-input">
+                </div>
+                <div class="panel-content">
+                    <!-- Theorists Section -->
+                    <div class="component-section" data-section="theorists">
+                        <div class="section-header" onclick="toggleSection('theorists')">
+                            <span class="section-icon">🧠</span>
+                            <span class="section-title">Theorists</span>
+                            <span class="section-toggle">▼</span>
+                        </div>
+                        <div class="section-content" id="theorists-list">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Experimentalists Section -->
+                    <div class="component-section" data-section="experimentalists">
+                        <div class="section-header" onclick="toggleSection('experimentalists')">
+                            <span class="section-icon">🔬</span>
+                            <span class="section-title">Experimentalists</span>
+                            <span class="section-toggle">▼</span>
+                        </div>
+                        <div class="section-content" id="experimentalists-list">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Experiment Runners Section -->
+                    <div class="component-section" data-section="experiment_runners">
+                        <div class="section-header" onclick="toggleSection('experiment_runners')">
+                            <span class="section-icon">⚡</span>
+                            <span class="section-title">Experiment Runners</span>
+                            <span class="section-toggle">▼</span>
+                        </div>
+                        <div class="section-content" id="experiment_runners-list">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Middle Panel - Canvas -->
+            <main class="panel panel-center">
+                <div class="canvas-container">
+                    <svg id="connections-svg" class="connections-layer"></svg>
+                    <div id="workflow-canvas" class="workflow-canvas">
+                        <div class="canvas-hint" id="canvas-hint">
+                            <p>Drag components here to build your workflow</p>
+                            <p class="hint-secondary">Connect nodes by dragging from output to input ports</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Zoom Controls -->
+                <div class="zoom-controls">
+                    <button id="zoom-in" class="zoom-btn">+</button>
+                    <span id="zoom-level">100%</span>
+                    <button id="zoom-out" class="zoom-btn">-</button>
+                    <button id="zoom-reset" class="zoom-btn">⟲</button>
+                </div>
+            </main>
+
+            <!-- Right Panel - Properties -->
+            <aside class="panel panel-right">
+                <div class="panel-header">
+                    <h2>Properties</h2>
+                </div>
+                <div class="panel-content" id="properties-panel">
+                    <div class="no-selection">
+                        <p>Select a node to view and edit its properties</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Status Bar -->
+        <footer class="status-bar">
+            <span id="status-message">Ready</span>
+            <span id="node-count">Nodes: 0</span>
+            <span id="connection-count">Connections: 0</span>
+        </footer>
+    </div>
+
+    <!-- Node Template (hidden) -->
+    <template id="node-template">
+        <div class="workflow-node" data-node-id="">
+            <div class="node-header">
+                <span class="node-icon"></span>
+                <span class="node-title"></span>
+                <button class="node-delete" title="Delete node">×</button>
+            </div>
+            <div class="node-body">
+                <div class="node-port port-input" data-port="input" title="Input">
+                    <span class="port-dot"></span>
+                </div>
+                <div class="node-content">
+                    <span class="node-type"></span>
+                </div>
+                <div class="node-port port-output" data-port="output" title="Output">
+                    <span class="port-dot"></span>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

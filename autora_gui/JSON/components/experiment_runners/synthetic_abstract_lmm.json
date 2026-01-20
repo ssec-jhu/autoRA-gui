@@ -1,0 +1,49 @@
+{
+  "uuid": "5df0ab3a-f561-11f0-9476-eefea9c7fa3b",
+  "protocolType": "experiment_runner",
+  "name": "Linear Mixed Model",
+  "description": "A synthetic experiment that runs a linear mixed model.",
+  "githubCommit": "",
+  "parameters": [
+    {
+      "name": "formula",
+      "description": "Formula used in the experiment runner.",
+      "datatype": "string",
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "validValues": null,
+      "default": 64
+    },
+    {
+      "name": "fixed_effects",
+      "description": "Type of DARTS algorithm to use.",
+      "datatype": "dict",
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "inputDataType": [
+    {
+      "name": "X",
+      "description": "Input features.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "y",
+      "description": "Predicted target.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "validValues": null,
+      "default": null
+    }
+  ]
+}

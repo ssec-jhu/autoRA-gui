@@ -26,6 +26,8 @@ class Datatype(str, Enum):
     BOOLEAN = "boolean"
     STRING = "string"
     CATEGORICAL = "categorical"
+    DICT = "dict"
+    LIST = "list"
 
 
 class ProtocolType(str, Enum):

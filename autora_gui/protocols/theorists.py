@@ -57,7 +57,7 @@ parameters = [
 
 
 darts_theorist = dm.Protocol(
-    protocolType=dm.ComponentType.THEORIST,
+    protocolType=dm.ProtocolType.THEORIST,
     uuid=uuid.uuid1(),
     name="DARTS Regressor",
     githubCommit="",
@@ -81,11 +81,7 @@ darts_theorist = dm.Protocol(
 
 # test code to generate, read and save schema
 if __name__ == "__main__":
-    # json_dump = darts_theorist.model_dump_json()
-    # theorist_dict = json.loads(json_dump)
-    # darts_theorist = dm.Protocol(**theorist_dict)
-
+    # Save the actual protocol instance data (not just schema)
     darts_model_path = "autora_gui/JSON/components/theorists/theorist_darts.json"
-    darts_theorist_schema = darts_theorist.model_json_schema()
     with Path(darts_model_path).open("w", encoding="utf-8") as f:
-        f.write(json.dumps(darts_theorist_schema, indent=2, ensure_ascii=False))
+        f.write(darts_theorist.model_dump_json(indent=2))
