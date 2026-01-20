@@ -57,7 +57,7 @@ parameters = [
 
 
 darts_theorist = dm.Protocol(
-    protocolType=dm.ComponentType.THEORIST,
+    protocolType=dm.ProtocolType.THEORIST,
     uuid=uuid.uuid1(),
     name="DARTS Regressor",
     githubCommit="",
