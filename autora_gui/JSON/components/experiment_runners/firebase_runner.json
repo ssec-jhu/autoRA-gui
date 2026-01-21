@@ -1,0 +1,58 @@
+{
+  "uuid": "firebase-runner-001",
+  "protocolType": "experiment_runner",
+  "name": "Firebase Runner",
+  "description": "Experiment runner for hosting web-based experiments on Firebase and collecting participant responses via Firestore.",
+  "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/8c004a8995908aa6963662ad23d20d6fe3113735/src/autora/experiment_runner/firebase_prolific/__init__.py#L175",
+  "parameters": [
+    {
+      "name": "firebase_credentials",
+      "description": "Firebase service account credentials dictionary.",
+      "datatype": "string",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "time_out",
+      "description": "Timeout duration in seconds for resetting unfinished conditions.",
+      "datatype": "integer",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 300
+    },
+    {
+      "name": "sleep_time",
+      "description": "Interval in seconds between Firebase database status checks.",
+      "datatype": "integer",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 30
+    }
+  ],
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "Experimental conditions to present to participants.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "observations",
+      "description": "Participant responses collected from the experiment.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "validValues": null,
+      "default": null
+    }
+  ]
+}
