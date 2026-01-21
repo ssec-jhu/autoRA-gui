@@ -1,0 +1,58 @@
+{
+  "uuid": "ed76272e-f62b-11f0-ac81-eefea9c7fa3b",
+  "protocolType": "theorist",
+  "name": "BMS Regressor",
+  "description": "Bayesian Machine Scientist that finds an optimal function to explain a dataset, given a set of variables and a pre-defined number of parameters.",
+  "githubCommit": "",
+  "parameters": [
+    {
+      "name": "prior_par",
+      "description": "A dictionary of the prior probabilities of different functions based on wikipedia data scraping.",
+      "datatype": "dict",
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "validValues": null,
+      "default": "PRIORS"
+    },
+    {
+      "name": "ts",
+      "description": "Contains a list of the temperatures that the parallel machine scientist works at.",
+      "datatype": "list",
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "validValues": null,
+      "default": "TEMPERATURES"
+    },
+    {
+      "name": "epochs",
+      "description": "Number of training epochs.",
+      "datatype": "integer",
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "validValues": null,
+      "default": 1500
+    }
+  ],
+  "inputDataType": [
+    {
+      "name": "X",
+      "description": "Input features.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "y",
+      "description": "Predicted target.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "validValues": null,
+      "default": null
+    }
+  ]
+}
