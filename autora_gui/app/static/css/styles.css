@@ -93,12 +93,12 @@ body {
 }
 
 .btn-primary {
-    background: var(--accent-primary);
+    background: var(--accent-success);
     color: white;
 }
 
 .btn-primary:hover {
-    background: #5558e3;
+    background: #1db954;
 }
 
 .btn-secondary {
@@ -224,6 +224,12 @@ body {
     font-size: 0.9rem;
 }
 
+.section-count {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-right: 4px;
+}
+
 .section-toggle {
     color: var(--text-muted);
     font-size: 0.75rem;
@@ -263,16 +269,37 @@ body {
     cursor: grabbing;
 }
 
-.component-item.theorist {
+.component-item.theorists {
     border-left: 3px solid var(--node-theorist);
 }
 
-.component-item.experimentalist {
+.component-item.experimentalists {
     border-left: 3px solid var(--node-experimentalist);
 }
 
-.component-item.experiment_runner {
+.component-item.experiment-runners {
     border-left: 3px solid var(--node-experiment-runner);
+}
+
+/* Additional dynamic component types */
+.component-item.data-processors {
+    border-left: 3px solid #3b82f6;
+}
+
+.component-item.models {
+    border-left: 3px solid #ec4899;
+}
+
+.component-item.optimizers {
+    border-left: 3px solid #14b8a6;
+}
+
+.component-item.samplers {
+    border-left: 3px solid #f97316;
+}
+
+.component-item.analyzers {
+    border-left: 3px solid #a855f7;
 }
 
 .component-item .item-icon {
@@ -375,20 +402,42 @@ body {
 }
 
 .workflow-node.selected {
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+    border-color: var(--accent-danger) !important;
+    border-width: 3px !important;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.4), 0 8px 20px var(--shadow-color);
 }
 
-.workflow-node.theorist .node-header {
+.workflow-node.theorists .node-header {
     background: var(--node-theorist);
 }
 
-.workflow-node.experimentalist .node-header {
+.workflow-node.experimentalists .node-header {
     background: var(--node-experimentalist);
 }
 
-.workflow-node.experiment_runner .node-header {
+.workflow-node.experiment-runners .node-header {
     background: var(--node-experiment-runner);
+}
+
+/* Additional dynamic node types */
+.workflow-node.data-processors .node-header {
+    background: #3b82f6;
+}
+
+.workflow-node.models .node-header {
+    background: #ec4899;
+}
+
+.workflow-node.optimizers .node-header {
+    background: #14b8a6;
+}
+
+.workflow-node.samplers .node-header {
+    background: #f97316;
+}
+
+.workflow-node.analyzers .node-header {
+    background: #a855f7;
 }
 
 .node-header {
@@ -552,6 +601,15 @@ body {
     stroke-dasharray: 4, 4;
     opacity: 0.6;
     pointer-events: none;
+}
+
+/* Selection Rectangle (Marquee) */
+.selection-rect {
+    position: absolute;
+    border: 2px dashed var(--accent-primary);
+    background: rgba(99, 102, 241, 0.1);
+    pointer-events: none;
+    z-index: 1000;
 }
 
 /* Zoom Controls */

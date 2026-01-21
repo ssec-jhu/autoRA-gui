@@ -10,8 +10,10 @@ const state = {
     components: {},          // Available components from API
     nodes: new Map(),        // Nodes on canvas: Map<nodeId, nodeData>
     connections: [],         // Connections between nodes
-    selectedNode: null,      // Currently selected node
-    selectedConnection: null, // Currently selected connection
+    selectedNode: null,      // Currently selected node (for properties panel)
+    selectedNodes: new Set(), // Multiple selected nodes for group operations
+    selectedConnection: null, // Currently selected connection (for properties panel)
+    selectedConnections: new Set(), // Multiple selected connections for group operations
     draggedComponent: null,  // Component being dragged from palette
     connecting: null,        // Connection in progress
     zoom: 1,                 // Canvas zoom level
@@ -34,18 +36,26 @@ function getNodeTypeIcon(type) {
     const icons = {
         theorists: '🧠',
         experimentalists: '🔬',
-        experiment_runners: '⚡'
+        experiment_runners: '⚡',
+        data_processors: '📊',
+        models: '🤖',
+        optimizers: '🎯',
+        samplers: '🎲',
+        analyzers: '📈'
     };
     return icons[type] || '📦';
 }
 
 function getNodeTypeClass(type) {
-    const classes = {
-        theorists: 'theorist',
-        experimentalists: 'experimentalist',
-        experiment_runners: 'experiment_runner'
-    };
-    return classes[type] || '';
+    // Convert type to a valid CSS class name
+    return type.replace(/_/g, '-').toLowerCase();
+}
+
+function formatTypeName(type) {
+    // Convert snake_case to Title Case with spaces
+    return type
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, char => char.toUpperCase());
 }
 
 function formatNodeName(name) {
@@ -76,60 +86,11 @@ async function loadComponents() {
         updateStatus('Components loaded successfully');
     } catch (error) {
         console.error('Failed to load components:', error);
-        updateStatus('Failed to load components');
-        // Load mock data for demo
-        loadMockComponents();
+        updateStatus('Failed to load components - check if server is running');
+        // Set empty components - API should be the source of truth
+        state.components = {};
+        renderComponentPalette();
     }
-}
-
-function loadMockComponents() {
-    // Mock data for when API is not available
-    state.components = {
-        theorists: [
-            {
-                _file: 'theorist_darts.json',
-                _type: 'theorists',
-                title: 'Protocol',
-                properties: {
-                    name: { title: 'Name', default: 'DARTS Regressor' },
-                    description: { title: 'Description', default: 'Finds a composition of functions' }
-                },
-                $defs: {
-                    PrimitiveVariableType: {
-                        properties: {
-                            name: { title: 'Name', type: 'string' },
-                            description: { title: 'Description', type: 'string' },
-                            datatype: { $ref: '#/$defs/Datatype' },
-                            default: { title: 'Default' }
-                        }
-                    }
-                }
-            }
-        ],
-        experimentalists: [
-            {
-                _file: 'bandit_random.json',
-                _type: 'experimentalists',
-                title: 'Protocol',
-                properties: {
-                    name: { title: 'Name', default: 'Bandit Random Experimentalist' },
-                    description: { title: 'Description', default: 'Returns sampled pool of conditions' }
-                }
-            }
-        ],
-        experiment_runners: [
-            {
-                _file: 'synthetic_abstract_lmm.json',
-                _type: 'experiment_runners',
-                title: 'Protocol',
-                properties: {
-                    name: { title: 'Name', default: 'Linear Mixed Model' },
-                    description: { title: 'Description', default: 'A synthetic experiment runner' }
-                }
-            }
-        ]
-    };
-    renderComponentPalette();
 }
 
 // ============================================================================
@@ -137,12 +98,41 @@ function loadMockComponents() {
 // ============================================================================
 
 function renderComponentPalette() {
-    for (const [type, components] of Object.entries(state.components)) {
-        const listElement = document.getElementById(`${type}-list`);
-        if (!listElement) continue;
-
-        listElement.innerHTML = '';
-
+    const container = document.getElementById('components-container');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    // Sort types alphabetically for consistent ordering
+    const sortedTypes = Object.keys(state.components).sort();
+    
+    for (const type of sortedTypes) {
+        const components = state.components[type];
+        if (!components || components.length === 0) continue;
+        
+        // Create section element
+        const section = document.createElement('div');
+        section.className = 'component-section';
+        section.dataset.section = type;
+        
+        // Create section header
+        const header = document.createElement('div');
+        header.className = 'section-header';
+        header.onclick = () => toggleSection(type);
+        header.innerHTML = `
+            <span class="section-icon">${getNodeTypeIcon(type)}</span>
+            <span class="section-title">${formatTypeName(type)}</span>
+            <span class="section-count">(${components.length})</span>
+            <span class="section-toggle">▶</span>
+        `;
+        section.appendChild(header);
+        
+        // Create section content (collapsed by default)
+        const content = document.createElement('div');
+        content.className = 'section-content collapsed';
+        content.id = `${type}-list`;
+        
+        // Add components to section
         components.forEach((component, index) => {
             const item = document.createElement('div');
             item.className = `component-item ${getNodeTypeClass(type)}`;
@@ -152,11 +142,13 @@ function renderComponentPalette() {
 
             // Use filename without .json extension as the display name
             const name = component._file?.replace('.json', '') || 
+                        component.name ||
                         component.properties?.name?.default || 
                         'Unknown Component';
             
-            const description = component.properties?.description?.default || 
-                               component.description || '';
+            const description = component.description ||
+                               component.properties?.description?.default || 
+                               '';
 
             item.innerHTML = `
                 <span class="item-icon">${getNodeTypeIcon(type)}</span>
@@ -171,8 +163,11 @@ function renderComponentPalette() {
             item.addEventListener('dragstart', handleDragStart);
             item.addEventListener('dragend', handleDragEnd);
 
-            listElement.appendChild(item);
+            content.appendChild(item);
         });
+        
+        section.appendChild(content);
+        container.appendChild(section);
     }
 }
 
@@ -368,6 +363,7 @@ function deleteNode(nodeId) {
 let isDraggingNode = false;
 let dragOffset = { x: 0, y: 0 };
 let draggedNodeId = null;
+let dragStartPositions = new Map(); // Store initial positions of all selected nodes
 
 function handleNodeMouseDown(e) {
     if (e.target.closest('.node-port') || e.target.closest('.node-delete')) return;
@@ -375,8 +371,22 @@ function handleNodeMouseDown(e) {
     const node = e.target.closest('.workflow-node');
     if (!node) return;
     
+    const nodeId = node.dataset.nodeId;
+    
+    // If this node is not in the selection, select only this node (unless Shift is held)
+    if (!state.selectedNodes.has(nodeId) && !e.shiftKey) {
+        state.selectedNodes.clear();
+        document.querySelectorAll('.workflow-node.selected').forEach(n => {
+            n.classList.remove('selected');
+        });
+    }
+    
+    // Add this node to selection
+    state.selectedNodes.add(nodeId);
+    node.classList.add('selected');
+    
     isDraggingNode = true;
-    draggedNodeId = node.dataset.nodeId;
+    draggedNodeId = nodeId;
     
     const rect = node.getBoundingClientRect();
     dragOffset = {
@@ -384,7 +394,27 @@ function handleNodeMouseDown(e) {
         y: e.clientY - rect.top
     };
     
-    node.style.zIndex = '100';
+    // Store initial positions of all selected nodes for group dragging
+    dragStartPositions.clear();
+    state.selectedNodes.forEach(id => {
+        const nodeData = state.nodes.get(id);
+        if (nodeData) {
+            dragStartPositions.set(id, { x: nodeData.x, y: nodeData.y });
+        }
+    });
+    
+    // Also store the initial position of the dragged node for delta calculation
+    const draggedNodeData = state.nodes.get(nodeId);
+    dragStartPositions.set('_dragStart', { 
+        x: draggedNodeData ? draggedNodeData.x : 0, 
+        y: draggedNodeData ? draggedNodeData.y : 0 
+    });
+    
+    // Raise all selected nodes
+    state.selectedNodes.forEach(id => {
+        const n = document.querySelector(`[data-node-id="${id}"]`);
+        if (n) n.style.zIndex = '100';
+    });
     
     document.addEventListener('mousemove', handleNodeDrag);
     document.addEventListener('mouseup', handleNodeDragEnd);
@@ -396,36 +426,51 @@ function handleNodeDrag(e) {
     const canvas = document.getElementById('workflow-canvas');
     const canvasRect = canvas.getBoundingClientRect();
     
-    const x = (e.clientX - canvasRect.left - dragOffset.x) / state.zoom;
-    const y = (e.clientY - canvasRect.top - dragOffset.y) / state.zoom;
+    // Calculate new position of the dragged node
+    const newX = (e.clientX - canvasRect.left - dragOffset.x) / state.zoom;
+    const newY = (e.clientY - canvasRect.top - dragOffset.y) / state.zoom;
     
-    const node = document.querySelector(`[data-node-id="${draggedNodeId}"]`);
-    if (node) {
-        node.style.left = `${Math.max(0, x)}px`;
-        node.style.top = `${Math.max(0, y)}px`;
+    // Calculate delta from the drag start position
+    const dragStart = dragStartPositions.get('_dragStart');
+    const deltaX = newX - dragStart.x;
+    const deltaY = newY - dragStart.y;
+    
+    // Move all selected nodes by the delta
+    state.selectedNodes.forEach(nodeId => {
+        const startPos = dragStartPositions.get(nodeId);
+        if (!startPos) return;
         
-        // Update state
-        const nodeData = state.nodes.get(draggedNodeId);
-        if (nodeData) {
-            nodeData.x = Math.max(0, x);
-            nodeData.y = Math.max(0, y);
+        const node = document.querySelector(`[data-node-id="${nodeId}"]`);
+        if (node) {
+            const x = Math.max(0, startPos.x + deltaX);
+            const y = Math.max(0, startPos.y + deltaY);
+            
+            node.style.left = `${x}px`;
+            node.style.top = `${y}px`;
+            
+            // Update state
+            const nodeData = state.nodes.get(nodeId);
+            if (nodeData) {
+                nodeData.x = x;
+                nodeData.y = y;
+            }
         }
-        
-        // Update connections
-        updateConnectionLines();
-    }
+    });
+    
+    // Update connections
+    updateConnectionLines();
 }
 
 function handleNodeDragEnd(e) {
-    if (draggedNodeId) {
-        const node = document.querySelector(`[data-node-id="${draggedNodeId}"]`);
-        if (node) {
-            node.style.zIndex = '10';
-        }
-    }
+    // Reset z-index for all selected nodes
+    state.selectedNodes.forEach(id => {
+        const node = document.querySelector(`[data-node-id="${id}"]`);
+        if (node) node.style.zIndex = '10';
+    });
     
     isDraggingNode = false;
     draggedNodeId = null;
+    dragStartPositions.clear();
     
     document.removeEventListener('mousemove', handleNodeDrag);
     document.removeEventListener('mouseup', handleNodeDragEnd);
@@ -441,16 +486,20 @@ function handleNodeClick(e) {
     const node = e.target.closest('.workflow-node');
     if (!node) return;
     
-    selectNode(node.dataset.nodeId);
+    selectNode(node.dataset.nodeId, e.shiftKey);
 }
 
-function selectNode(nodeId) {
-    // Deselect previous
-    document.querySelectorAll('.workflow-node.selected').forEach(n => {
-        n.classList.remove('selected');
-    });
+function selectNode(nodeId, addToSelection = false) {
+    if (!addToSelection) {
+        // Deselect previous
+        document.querySelectorAll('.workflow-node.selected').forEach(n => {
+            n.classList.remove('selected');
+        });
+        state.selectedNodes.clear();
+    }
     
     state.selectedNode = nodeId;
+    state.selectedNodes.add(nodeId);
     
     const node = document.querySelector(`[data-node-id="${nodeId}"]`);
     if (node) {
@@ -461,19 +510,227 @@ function selectNode(nodeId) {
     renderPropertiesPanel(nodeData);
 }
 
+function selectAllNodes() {
+    // Select all nodes
+    document.querySelectorAll('.workflow-node').forEach(n => {
+        n.classList.add('selected');
+    });
+    state.selectedNodes.clear();
+    state.nodes.forEach((nodeData, nodeId) => {
+        state.selectedNodes.add(nodeId);
+    });
+    
+    // Select all connections
+    document.querySelectorAll('.connection-line').forEach(c => {
+        c.classList.add('selected');
+    });
+    state.selectedConnections.clear();
+    state.connections.forEach(conn => {
+        state.selectedConnections.add(conn.id);
+    });
+    
+    // Set the first node as the "main" selected node for properties panel
+    const firstNodeId = state.nodes.keys().next().value;
+    if (firstNodeId) {
+        state.selectedNode = firstNodeId;
+    }
+    
+    updateStatus(`Selected all: ${state.selectedNodes.size} nodes, ${state.selectedConnections.size} connections.`);
+}
+
 function handleCanvasClick(e) {
     if (e.target.id === 'workflow-canvas' || e.target.classList.contains('canvas-hint')) {
-        // Clicked on canvas background - deselect nodes and connections
+        // Only deselect if not just finished a rectangle selection
+        if (!justFinishedSelecting) {
+            // Clicked on canvas background - deselect nodes and connections
+            document.querySelectorAll('.workflow-node.selected').forEach(n => {
+                n.classList.remove('selected');
+            });
+            document.querySelectorAll('.connection-line.selected').forEach(c => {
+                c.classList.remove('selected');
+            });
+            state.selectedNode = null;
+            state.selectedNodes.clear();
+            state.selectedConnection = null;
+            state.selectedConnections.clear();
+            renderPropertiesPanel(null);
+            updateStatus('Ready');
+        }
+        justFinishedSelecting = false;
+    }
+}
+
+// ============================================================================
+// Rectangle Selection (Marquee)
+// ============================================================================
+
+let isSelecting = false;
+let justFinishedSelecting = false;
+let selectionStart = { x: 0, y: 0 };
+let selectionRect = null;
+
+function handleCanvasMouseDown(e) {
+    // Only start selection if clicking directly on canvas (not on a node)
+    if (e.target.id !== 'workflow-canvas' && !e.target.classList.contains('canvas-hint')) return;
+    
+    const canvas = document.getElementById('workflow-canvas');
+    const canvasRect = canvas.getBoundingClientRect();
+    
+    isSelecting = true;
+    selectionStart = {
+        x: (e.clientX - canvasRect.left) / state.zoom,
+        y: (e.clientY - canvasRect.top) / state.zoom
+    };
+    
+    // Create selection rectangle element
+    selectionRect = document.createElement('div');
+    selectionRect.className = 'selection-rect';
+    selectionRect.style.left = `${selectionStart.x}px`;
+    selectionRect.style.top = `${selectionStart.y}px`;
+    selectionRect.style.width = '0px';
+    selectionRect.style.height = '0px';
+    canvas.appendChild(selectionRect);
+    
+    // If not holding Shift, clear previous selection
+    if (!e.shiftKey) {
         document.querySelectorAll('.workflow-node.selected').forEach(n => {
             n.classList.remove('selected');
         });
-        document.querySelectorAll('.connection-line.selected').forEach(c => {
-            c.classList.remove('selected');
-        });
-        state.selectedNode = null;
-        state.selectedConnection = null;
-        renderPropertiesPanel(null);
-        updateStatus('Ready');
+        state.selectedNodes.clear();
+    }
+    
+    document.addEventListener('mousemove', handleSelectionDrag);
+    document.addEventListener('mouseup', handleSelectionEnd);
+}
+
+function handleSelectionDrag(e) {
+    if (!isSelecting || !selectionRect) return;
+    
+    const canvas = document.getElementById('workflow-canvas');
+    const canvasRect = canvas.getBoundingClientRect();
+    
+    const currentX = (e.clientX - canvasRect.left) / state.zoom;
+    const currentY = (e.clientY - canvasRect.top) / state.zoom;
+    
+    // Calculate rectangle dimensions (handle dragging in any direction)
+    const left = Math.min(selectionStart.x, currentX);
+    const top = Math.min(selectionStart.y, currentY);
+    const width = Math.abs(currentX - selectionStart.x);
+    const height = Math.abs(currentY - selectionStart.y);
+    
+    selectionRect.style.left = `${left}px`;
+    selectionRect.style.top = `${top}px`;
+    selectionRect.style.width = `${width}px`;
+    selectionRect.style.height = `${height}px`;
+    
+    // Highlight nodes that intersect with the selection rectangle
+    const selectBounds = {
+        left: left,
+        top: top,
+        right: left + width,
+        bottom: top + height
+    };
+    
+    document.querySelectorAll('.workflow-node').forEach(node => {
+        const nodeId = node.dataset.nodeId;
+        const nodeData = state.nodes.get(nodeId);
+        if (!nodeData) return;
+        
+        const nodeBounds = {
+            left: nodeData.x,
+            top: nodeData.y,
+            right: nodeData.x + node.offsetWidth,
+            bottom: nodeData.y + node.offsetHeight
+        };
+        
+        // Check if rectangles intersect
+        const intersects = !(selectBounds.right < nodeBounds.left || 
+                            selectBounds.left > nodeBounds.right || 
+                            selectBounds.bottom < nodeBounds.top || 
+                            selectBounds.top > nodeBounds.bottom);
+        
+        if (intersects) {
+            node.classList.add('selected');
+            state.selectedNodes.add(nodeId);
+        } else if (!e.shiftKey) {
+            // Only remove selection if not holding Shift
+            node.classList.remove('selected');
+            state.selectedNodes.delete(nodeId);
+        }
+    });
+    
+    // Also check connections for intersection
+    const svg = document.getElementById('connections-svg');
+    const svgRect = svg.getBoundingClientRect();
+    
+    document.querySelectorAll('.connection-line').forEach(path => {
+        const connectionId = path.dataset.connectionId;
+        const connection = state.connections.find(c => c.id === connectionId);
+        if (!connection) return;
+        
+        // Get the bounding box of the path
+        const pathBBox = path.getBBox();
+        
+        // Convert to canvas coordinates (accounting for zoom)
+        const pathBounds = {
+            left: pathBBox.x,
+            top: pathBBox.y,
+            right: pathBBox.x + pathBBox.width,
+            bottom: pathBBox.y + pathBBox.height
+        };
+        
+        // Check if rectangles intersect
+        const intersects = !(selectBounds.right < pathBounds.left || 
+                            selectBounds.left > pathBounds.right || 
+                            selectBounds.bottom < pathBounds.top || 
+                            selectBounds.top > pathBounds.bottom);
+        
+        if (intersects) {
+            path.classList.add('selected');
+            state.selectedConnections.add(connectionId);
+        } else if (!e.shiftKey) {
+            path.classList.remove('selected');
+            state.selectedConnections.delete(connectionId);
+        }
+    });
+}
+
+function handleSelectionEnd(e) {
+    const hadSelection = selectionRect !== null;
+    
+    if (selectionRect) {
+        selectionRect.remove();
+        selectionRect = null;
+    }
+    
+    isSelecting = false;
+    
+    // Set flag to prevent click event from clearing selection
+    if (hadSelection && (state.selectedNodes.size > 0 || state.selectedConnections.size > 0)) {
+        justFinishedSelecting = true;
+    }
+    
+    document.removeEventListener('mousemove', handleSelectionDrag);
+    document.removeEventListener('mouseup', handleSelectionEnd);
+    
+    const nodeCount = state.selectedNodes.size;
+    const connCount = state.selectedConnections.size;
+    
+    if (nodeCount > 0 || connCount > 0) {
+        // Set the first selected node as the "main" selected node for properties panel
+        if (nodeCount > 0) {
+            const firstNodeId = state.selectedNodes.values().next().value;
+            state.selectedNode = firstNodeId;
+            const nodeData = state.nodes.get(firstNodeId);
+            renderPropertiesPanel(nodeData);
+        }
+        
+        let msg = 'Selected ';
+        if (nodeCount > 0) msg += `${nodeCount} node(s)`;
+        if (nodeCount > 0 && connCount > 0) msg += ' and ';
+        if (connCount > 0) msg += `${connCount} connection(s)`;
+        msg += '. Drag nodes to move, Delete to remove.';
+        updateStatus(msg);
     }
 }
 
@@ -1102,46 +1359,220 @@ function applyZoom() {
 
 async function saveWorkflow() {
     const workflowData = {
-        name: 'My Workflow',
+        name: 'workflow',
         nodes: Array.from(state.nodes.values()).map(node => ({
             id: node.id,
             type: node.type,
             x: node.x,
             y: node.y,
             componentFile: node.componentData._file,
+            componentType: node.componentData._type,
             parameters: node.parameters
         })),
         connections: state.connections.map(c => ({
             id: c.id,
             source: c.source,
-            target: c.target
+            target: c.target,
+            controlPoints: c.controlPoints || null
         }))
     };
     
+    // Try to use the modern File System Access API for native save dialog
+    if ('showSaveFilePicker' in window) {
+        try {
+            const handle = await window.showSaveFilePicker({
+                suggestedName: 'my_workflow.json',
+                types: [{
+                    description: 'JSON Workflow Files',
+                    accept: { 'application/json': ['.json'] }
+                }]
+            });
+            
+            const writable = await handle.createWritable();
+            workflowData.name = handle.name.replace('.json', '');
+            await writable.write(JSON.stringify(workflowData, null, 2));
+            await writable.close();
+            
+            updateStatus(`Workflow saved as: ${handle.name}`);
+            
+            // Also save a copy to server's JSON/workflows folder
+            const filename = handle.name.endsWith('.json') ? handle.name : `${handle.name}.json`;
+            try {
+                await fetch(`/api/workflow/save/${encodeURIComponent(filename)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(workflowData)
+                });
+            } catch (e) {
+                // Server save is optional, don't show error
+                console.log('Could not save to server folder:', e);
+            }
+            
+            return;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                updateStatus('Save cancelled');
+                return;
+            }
+            console.error('File System API failed:', error);
+            // Fall through to legacy method
+        }
+    }
+    
+    // Fallback for browsers without File System Access API
+    const defaultName = 'my_workflow';
+    const filename = prompt('Enter workflow name:', defaultName);
+    
+    if (!filename) {
+        updateStatus('Save cancelled');
+        return;
+    }
+    
+    const finalFilename = filename.endsWith('.json') ? filename : `${filename}.json`;
+    workflowData.name = filename.replace('.json', '');
+    
     try {
-        const response = await fetch('/api/workflow', {
+        const response = await fetch(`/api/workflow/save/${encodeURIComponent(finalFilename)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(workflowData)
         });
         const result = await response.json();
-        updateStatus(`Workflow saved (ID: ${result.workflow_id})`);
+        if (result.success) {
+            updateStatus(`Workflow saved as: ${result.filename}`);
+        } else {
+            throw new Error('Save failed');
+        }
     } catch (error) {
         console.error('Save failed:', error);
-        // Fallback: download as file
-        downloadWorkflow(workflowData);
+        updateStatus('Failed to save workflow');
+        downloadWorkflow(workflowData, finalFilename);
     }
 }
 
-function downloadWorkflow(workflowData) {
+function downloadWorkflow(workflowData, filename = 'workflow.json') {
     const blob = new Blob([JSON.stringify(workflowData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'workflow.json';
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
     updateStatus('Workflow downloaded');
+}
+
+async function loadWorkflow() {
+    // Try to use the modern File System Access API for native open dialog
+    if ('showOpenFilePicker' in window) {
+        try {
+            const [handle] = await window.showOpenFilePicker({
+                types: [{
+                    description: 'JSON Workflow Files',
+                    accept: { 'application/json': ['.json'] }
+                }],
+                multiple: false
+            });
+            
+            const file = await handle.getFile();
+            const content = await file.text();
+            const workflowData = JSON.parse(content);
+            
+            applyWorkflowData(workflowData);
+            updateStatus(`Workflow loaded: ${handle.name}`);
+            return;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                updateStatus('Load cancelled');
+                return;
+            }
+            console.error('File System API failed:', error);
+            // Fall through to legacy method
+        }
+    }
+    
+    // Fallback for browsers without File System Access API
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,application/json';
+    
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        try {
+            const content = await file.text();
+            const workflowData = JSON.parse(content);
+            applyWorkflowData(workflowData);
+            updateStatus(`Workflow loaded: ${file.name}`);
+        } catch (error) {
+            console.error('Failed to load workflow:', error);
+            updateStatus('Failed to load workflow: Invalid JSON');
+        }
+    };
+    
+    input.click();
+}
+
+function applyWorkflowData(workflowData) {
+    // Clear existing canvas first
+    document.querySelectorAll('.workflow-node').forEach(n => n.remove());
+    const svg = document.getElementById('connections-svg');
+    svg.querySelectorAll('.connection-line, .waypoint-handle, .control-line').forEach(el => el.remove());
+    state.nodes.clear();
+    state.connections = [];
+    state.selectedNode = null;
+    state.selectedConnection = null;
+    
+    // Show canvas hint if no nodes
+    const hint = document.getElementById('canvas-hint');
+    
+    // Load nodes
+    if (workflowData.nodes && workflowData.nodes.length > 0) {
+        hint.classList.add('hidden');
+        
+        workflowData.nodes.forEach(nodeData => {
+            // Find the component data from loaded components
+            const componentType = nodeData.componentType || nodeData.type;
+            const components = state.components[componentType] || [];
+            const componentData = components.find(c => c._file === nodeData.componentFile);
+            
+            if (componentData) {
+                const node = {
+                    id: nodeData.id,
+                    type: componentType,
+                    x: nodeData.x,
+                    y: nodeData.y,
+                    componentData: componentData,
+                    parameters: nodeData.parameters || {}
+                };
+                
+                state.nodes.set(node.id, node);
+                renderNode(node);
+            } else {
+                console.warn(`Component not found: ${nodeData.componentFile} in ${componentType}`);
+            }
+        });
+    } else {
+        hint.classList.remove('hidden');
+    }
+    
+    // Load connections
+    if (workflowData.connections) {
+        workflowData.connections.forEach(connData => {
+            const connection = {
+                id: connData.id || generateUUID(),
+                source: connData.source,
+                target: connData.target,
+                controlPoints: connData.controlPoints || null
+            };
+            
+            state.connections.push(connection);
+            renderConnectionLine(connection);
+        });
+    }
+    
+    updateCounts();
+    renderPropertiesPanel(null);
 }
 
 function clearCanvas() {
@@ -1210,12 +1641,11 @@ function init() {
     canvas.addEventListener('dragleave', handleCanvasDragLeave);
     canvas.addEventListener('drop', handleCanvasDrop);
     canvas.addEventListener('click', handleCanvasClick);
+    canvas.addEventListener('mousedown', handleCanvasMouseDown);
     
     // Toolbar events
     document.getElementById('btn-save').addEventListener('click', saveWorkflow);
-    document.getElementById('btn-load').addEventListener('click', () => {
-        updateStatus('Load workflow: Use File > Open to load a workflow JSON');
-    });
+    document.getElementById('btn-load').addEventListener('click', loadWorkflow);
     document.getElementById('btn-clear').addEventListener('click', clearCanvas);
     document.getElementById('btn-export').addEventListener('click', exportJSON);
     
@@ -1224,22 +1654,58 @@ function init() {
     document.getElementById('zoom-out').addEventListener('click', handleZoomOut);
     document.getElementById('zoom-reset').addEventListener('click', handleZoomReset);
     
+    // Mouse wheel zoom on canvas
+    const canvasContainer = document.querySelector('.canvas-container');
+    canvasContainer.addEventListener('wheel', (e) => {
+        // Only zoom if Ctrl/Cmd is held, or if it's a pinch gesture (ctrlKey is true for pinch on trackpad)
+        if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                // Scroll up = zoom in
+                state.zoom = Math.min(state.zoom + 0.05, 2);
+            } else {
+                // Scroll down = zoom out
+                state.zoom = Math.max(state.zoom - 0.05, 0.5);
+            }
+            applyZoom();
+        }
+    }, { passive: false });
+    
     // Search
     document.getElementById('component-search').addEventListener('input', handleSearch);
     
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
-        if ((e.key === 'Delete' || e.key === 'Backspace') && state.selectedNode) {
+        // Don't handle shortcuts if user is typing in an input field
+        const activeElement = document.activeElement;
+        const isTyping = activeElement && (
+            activeElement.tagName === 'INPUT' || 
+            activeElement.tagName === 'TEXTAREA' || 
+            activeElement.isContentEditable
+        );
+        
+        // Ctrl+A or Cmd+A to select all nodes
+        if ((e.ctrlKey || e.metaKey) && e.key === 'a' && !isTyping) {
             e.preventDefault();
-            deleteNode(state.selectedNode);
+            selectAllNodes();
         }
-        if ((e.key === 'Delete' || e.key === 'Backspace') && state.selectedConnection) {
+        
+        if ((e.key === 'Delete' || e.key === 'Backspace') && !isTyping && (state.selectedNodes.size > 0 || state.selectedConnections.size > 0)) {
             e.preventDefault();
-            deleteConnection(state.selectedConnection);
+            // Delete all selected connections first
+            const connsToDelete = [...state.selectedConnections];
+            connsToDelete.forEach(connId => deleteConnection(connId));
+            state.selectedConnections.clear();
+            // Delete all selected nodes
+            const nodesToDelete = [...state.selectedNodes];
+            nodesToDelete.forEach(nodeId => deleteNode(nodeId));
+            state.selectedNodes.clear();
         }
         if (e.key === 'Escape') {
             state.selectedNode = null;
+            state.selectedNodes.clear();
             state.selectedConnection = null;
+            state.selectedConnections.clear();
             document.querySelectorAll('.workflow-node.selected').forEach(n => {
                 n.classList.remove('selected');
             });

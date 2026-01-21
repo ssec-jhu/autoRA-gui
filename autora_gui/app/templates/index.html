@@ -16,7 +16,7 @@
                     <span class="icon">💾</span> Save Workflow
                 </button>
                 <button id="btn-load" class="btn btn-secondary">
-                    <span class="icon">📂</span> Load
+                    <span class="icon">📂</span> Load Workflow
                 </button>
                 <button id="btn-clear" class="btn btn-danger">
                     <span class="icon">🗑️</span> Clear
@@ -35,42 +35,8 @@
                     <h2>Components</h2>
                     <input type="text" id="component-search" placeholder="Search components..." class="search-input">
                 </div>
-                <div class="panel-content">
-                    <!-- Theorists Section -->
-                    <div class="component-section" data-section="theorists">
-                        <div class="section-header" onclick="toggleSection('theorists')">
-                            <span class="section-icon">🧠</span>
-                            <span class="section-title">Theorists</span>
-                            <span class="section-toggle">▼</span>
-                        </div>
-                        <div class="section-content" id="theorists-list">
-                            <!-- Populated by JavaScript -->
-                        </div>
-                    </div>
-
-                    <!-- Experimentalists Section -->
-                    <div class="component-section" data-section="experimentalists">
-                        <div class="section-header" onclick="toggleSection('experimentalists')">
-                            <span class="section-icon">🔬</span>
-                            <span class="section-title">Experimentalists</span>
-                            <span class="section-toggle">▼</span>
-                        </div>
-                        <div class="section-content" id="experimentalists-list">
-                            <!-- Populated by JavaScript -->
-                        </div>
-                    </div>
-
-                    <!-- Experiment Runners Section -->
-                    <div class="component-section" data-section="experiment_runners">
-                        <div class="section-header" onclick="toggleSection('experiment_runners')">
-                            <span class="section-icon">⚡</span>
-                            <span class="section-title">Experiment Runners</span>
-                            <span class="section-toggle">▼</span>
-                        </div>
-                        <div class="section-content" id="experiment_runners-list">
-                            <!-- Populated by JavaScript -->
-                        </div>
-                    </div>
+                <div class="panel-content" id="components-container">
+                    <!-- Component sections populated dynamically by JavaScript -->
                 </div>
             </aside>
 
