@@ -1,0 +1,112 @@
+{
+  "uuid": "bsr-regressor-001",
+  "protocolType": "theorist",
+  "name": "BSR Regressor",
+  "description": "Bayesian Symbolic Regression that discovers mathematical expressions using MCMC sampling to build up equations from basic functions.",
+  "githubCommit": "https://github.com/AutoResearch/autora-theorist-bsr/blob/cdbf04f2fb3712924826ba283152fc459ee21f6e/src/autora/theorist/bsr/regressor.py#L18",
+  "parameters": [
+    {
+      "name": "tree_num",
+      "description": "Number of symbolic regression trees for model fitting.",
+      "datatype": "integer",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 3
+    },
+    {
+      "name": "itr_num",
+      "description": "Total iteration steps during model fitting.",
+      "datatype": "integer",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 5000
+    },
+    {
+      "name": "alpha1",
+      "description": "Prior hyperparameter for tree structure.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 0.4
+    },
+    {
+      "name": "alpha2",
+      "description": "Prior hyperparameter for tree structure.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 0.4
+    },
+    {
+      "name": "beta",
+      "description": "Prior hyperparameter for tree depth penalty.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": -1.0
+    },
+    {
+      "name": "show_log",
+      "description": "Whether to display logging information during fitting.",
+      "datatype": "boolean",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": false
+    },
+    {
+      "name": "val",
+      "description": "Validation steps per iteration.",
+      "datatype": "integer",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 100
+    },
+    {
+      "name": "last_idx",
+      "description": "Index of model to use; -1 selects the final iteration.",
+      "datatype": "integer",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": -1
+    },
+    {
+      "name": "prior_name",
+      "description": "Prior distribution specification for the model.",
+      "datatype": "categorical",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": ["Uniform"],
+      "default": "Uniform"
+    }
+  ],
+  "inputDataType": [
+    {
+      "name": "X",
+      "description": "Input features as a 2D array.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "y",
+      "description": "Predicted target values.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "validValues": null,
+      "default": null
+    }
+  ]
+}

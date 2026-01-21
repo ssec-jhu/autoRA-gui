@@ -1,0 +1,85 @@
+{
+  "uuid": "novelty-sample-001",
+  "protocolType": "experimentalist",
+  "name": "Novelty Sample",
+  "description": "Selects experimental conditions that are most dissimilar (novel) compared to a reference pool of existing conditions using distance metrics.",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L36",
+  "parameters": [
+    {
+      "name": "conditions",
+      "description": "Pool of candidate experimental conditions to evaluate for dissimilarity.",
+      "datatype": "object",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "reference_conditions",
+      "description": "Reference pool of existing experimental conditions to compare against.",
+      "datatype": "object",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "num_samples",
+      "description": "Number of novel samples to select. If unspecified, all samples are returned ordered by novelty.",
+      "datatype": "integer",
+      "minOccurs": 0,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "metric",
+      "description": "Distance metric for measuring dissimilarity between conditions.",
+      "datatype": "categorical",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": ["euclidean", "manhattan", "chebyshev", "minkowski", "cosine", "correlation"],
+      "default": "euclidean"
+    },
+    {
+      "name": "integration",
+      "description": "Method for integrating pairwise distances into overall dissimilarity scores.",
+      "datatype": "categorical",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": ["min", "mean", "max"],
+      "default": "min"
+    }
+  ],
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "DataFrame or array of candidate experimental conditions.",
+      "datatype": "object",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "reference_conditions",
+      "description": "DataFrame or array of reference experimental conditions.",
+      "datatype": "object",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "conditions",
+      "description": "DataFrame of selected novel experimental conditions.",
+      "datatype": "object",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": null
+    }
+  ]
+}
