@@ -490,6 +490,9 @@ function handleNodeClick(e) {
 }
 
 function selectNode(nodeId, addToSelection = false) {
+    // Always deselect any selected connection and hide control points
+    deselectConnection();
+    
     if (!addToSelection) {
         // Deselect previous
         document.querySelectorAll('.workflow-node.selected').forEach(n => {
@@ -551,7 +554,7 @@ function handleCanvasClick(e) {
             });
             state.selectedNode = null;
             state.selectedNodes.clear();
-            state.selectedConnection = null;
+            deselectConnection();  // Hide control points
             state.selectedConnections.clear();
             renderPropertiesPanel(null);
             updateStatus('Ready');
@@ -1102,19 +1105,15 @@ function updateConnectionLines() {
 }
 
 function selectConnection(connectionId) {
-    // If clicking on the already selected connection, deselect it (toggle off)
-    if (state.selectedConnection === connectionId) {
-        deselectConnection();
-        renderPropertiesPanel(null);
-        updateStatus('Connection deselected');
-        return;
-    }
-    
     // Deselect all nodes
     document.querySelectorAll('.workflow-node.selected').forEach(n => {
         n.classList.remove('selected');
     });
     state.selectedNode = null;
+    state.selectedNodes.clear();
+    
+    // Remove all existing control point handles first
+    deselectConnection();
     
     // Remove all waypoint handles first
     document.querySelectorAll('.waypoint-handle').forEach(h => h.remove());
