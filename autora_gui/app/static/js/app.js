@@ -1102,6 +1102,14 @@ function updateConnectionLines() {
 }
 
 function selectConnection(connectionId) {
+    // If clicking on the already selected connection, deselect it (toggle off)
+    if (state.selectedConnection === connectionId) {
+        deselectConnection();
+        renderPropertiesPanel(null);
+        updateStatus('Connection deselected');
+        return;
+    }
+    
     // Deselect all nodes
     document.querySelectorAll('.workflow-node.selected').forEach(n => {
         n.classList.remove('selected');
@@ -1143,6 +1151,8 @@ function deselectConnection() {
     // Remove control point handles and lines
     if (previousSelected) {
         document.querySelectorAll(`[data-cp-connection="${previousSelected}"]`).forEach(el => el.remove());
+        document.querySelectorAll('.waypoint-handle').forEach(h => h.remove());
+        document.querySelectorAll('.control-line').forEach(l => l.remove());
     }
 }
 
