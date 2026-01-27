@@ -1,0 +1,58 @@
+{
+  "name": "workflow",
+  "nodes": [
+    {
+      "id": "009d9622-c072-40ae-a6fc-332635734a72",
+      "type": "experimentalists",
+      "x": 155,
+      "y": 148,
+      "componentFile": "bandit_random.json",
+      "parameters": {
+        "name": "Bandit Random Experimentalist",
+        "num_rewards": "required"
+      }
+    },
+    {
+      "id": "7c564eaa-4f54-4691-b82d-025d6fe43b3f",
+      "type": "theorists",
+      "x": 616,
+      "y": 93,
+      "componentFile": "darts_regressor.json",
+      "parameters": {
+        "name": "DARTS Regressor",
+        "batch_size": 64
+      }
+    },
+    {
+      "id": "9d551b2f-4827-44cf-aad4-79e84d817c9b",
+      "type": "experiment_runners",
+      "x": 510,
+      "y": 355,
+      "componentFile": "synthetic_expected_value.json",
+      "parameters": {
+        "name": "Expected Value Theory (Synthetic)",
+        "choice_temperature": 0.1
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "041372c3-a26a-4dbd-a96f-87a0e13b28c2",
+      "source": "009d9622-c072-40ae-a6fc-332635734a72",
+      "target": "7c564eaa-4f54-4691-b82d-025d6fe43b3f",
+      "controlPoints": null
+    },
+    {
+      "id": "23077e29-fdcd-4f05-848f-9e266a095256",
+      "source": "7c564eaa-4f54-4691-b82d-025d6fe43b3f",
+      "target": "9d551b2f-4827-44cf-aad4-79e84d817c9b",
+      "controlPoints": null
+    },
+    {
+      "id": "0a51b971-f9c7-4d0b-a659-6ed9e33db26a",
+      "source": "9d551b2f-4827-44cf-aad4-79e84d817c9b",
+      "target": "009d9622-c072-40ae-a6fc-332635734a72",
+      "controlPoints": null
+    }
+  ]
+}
