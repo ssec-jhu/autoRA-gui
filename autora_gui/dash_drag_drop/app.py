@@ -459,7 +459,7 @@ def create_app():
         prevent_initial_call=True,
     )
     def handle_save(save_click, elements, node_data):
-        if not save_click:
+        if not save_click or not ctx.triggered_id:
             return dash.no_update
 
         nodes, conns = [], []
@@ -489,10 +489,11 @@ def create_app():
             "connections": conns
         }
 
-        return dcc.send_string(
-            json.dumps(workflow_data, indent=2),
-            filename="workflow.json"
-        )
+        return {
+            "content": json.dumps(workflow_data, indent=2),
+            "filename": "workflow.json",
+            "type": "application/json",
+        }
 
     return app
 
