@@ -124,7 +124,7 @@ def create_layout():
                             "label": "data(label)",
                             "text-valign": "center",
                             "text-halign": "center",
-                            "font-size": 9,
+                            "font-size": 12,
                             "text-wrap": "wrap",
                             "text-max-width": 180,
                             "color": "#fff",
