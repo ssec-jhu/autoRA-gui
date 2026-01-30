@@ -1,0 +1,73 @@
+{
+  "name": "New Workflow",
+  "description": "",
+  "nodes": [
+    {
+      "uuid": "a4edfb50-6a54-4515-878e-a0ab8014cd37",
+      "componentUuid": "grid-pool-001",
+      "componentFile": "experimentalists/grid_pool.json",
+      "protocolType": "experimentalist",
+      "x": -207.63250000000002,
+      "y": -395.4275,
+      "parameters": {}
+    },
+    {
+      "uuid": "9178b5d8-ba01-4473-b567-7b075e1f7cae",
+      "componentUuid": "bsr-regressor-001",
+      "componentFile": "theorists/bsr_regressor.json",
+      "protocolType": "theorist",
+      "x": 51.17130108991819,
+      "y": -169.09810626702995,
+      "parameters": {
+        "tree_num": 3,
+        "itr_num": 5000,
+        "alpha1": 0.4,
+        "alpha2": 0.4,
+        "beta": -1.0,
+        "show_log": false,
+        "val": 100,
+        "last_idx": -1,
+        "prior_name": "Uniform"
+      }
+    },
+    {
+      "uuid": "973807f3-e442-4871-9fbd-1ec2b4a8c12b",
+      "componentUuid": "synthetic-exp-learning-001",
+      "componentFile": "experiment_runners/synthetic_exp_learning.json",
+      "protocolType": "experiment_runner",
+      "x": -265.8225,
+      "y": 54.22250000000001,
+      "parameters": {
+        "resolution": 100,
+        "minimum_trial": 1,
+        "minimum_initial_value": 0.0,
+        "maximum_initial_value": 0.5,
+        "lr": 0.03,
+        "p_asymptotic": 1.0
+      }
+    }
+  ],
+  "connections": [
+    {
+      "uuid": "990a8224-b255-4b20-9aeb-40c7e2f230e0",
+      "source": "a4edfb50-6a54-4515-878e-a0ab8014cd37",
+      "target": "9178b5d8-ba01-4473-b567-7b075e1f7cae",
+      "sourcePort": "right",
+      "targetPort": "top"
+    },
+    {
+      "uuid": "83421fbd-8f47-47ad-88db-8c691329ffb6",
+      "source": "9178b5d8-ba01-4473-b567-7b075e1f7cae",
+      "target": "973807f3-e442-4871-9fbd-1ec2b4a8c12b",
+      "sourcePort": "bottom",
+      "targetPort": "right"
+    },
+    {
+      "uuid": "63c3d4be-19ef-4010-bf9d-474255f77e4d",
+      "source": "973807f3-e442-4871-9fbd-1ec2b4a8c12b",
+      "target": "a4edfb50-6a54-4515-878e-a0ab8014cd37",
+      "sourcePort": "left",
+      "targetPort": "left"
+    }
+  ]
+}
