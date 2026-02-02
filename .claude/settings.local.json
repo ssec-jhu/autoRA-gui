@@ -3,7 +3,10 @@
     "allow": [
       "Bash(tree:*)",
       "Bash(du:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:autoresearch.github.io)",
+      "WebSearch"
     ]
   }
 }
