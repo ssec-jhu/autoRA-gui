@@ -1,6 +1,5 @@
 """Data models for theorists modules."""
 
-import json
 import uuid
 from pathlib import Path
 
@@ -79,9 +78,8 @@ darts_theorist = dm.Protocol(
     ],
 )
 
-# test code to generate, read and save schema
+# test code to generate and save instance data
 if __name__ == "__main__":
-    # Save the actual protocol instance data (not just schema)
     darts_model_path = "autora_gui/JSON/components/theorists/theorist_darts.json"
     with Path(darts_model_path).open("w", encoding="utf-8") as f:
         f.write(darts_theorist.model_dump_json(indent=2))
