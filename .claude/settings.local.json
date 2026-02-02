@@ -6,7 +6,9 @@
       "Bash(wc:*)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:autoresearch.github.io)",
-      "WebSearch"
+      "WebSearch",
+      "WebFetch(domain:dash.plotly.com)",
+      "WebFetch(domain:pypi.org)"
     ]
   }
 }
