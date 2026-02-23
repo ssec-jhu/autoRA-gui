@@ -1,0 +1,84 @@
+{
+  "name": "workflow",
+  "nodes": [
+    {
+      "id": "f70d72a5-e4c3-48f4-88a7-48e27dc97046",
+      "type": "experimentalists",
+      "x": 720,
+      "y": 85,
+      "componentFile": "falsification_sample.json",
+      "componentType": "experimentalists",
+      "parameters": {
+        "conditions": null,
+        "model": null,
+        "reference_conditions": null,
+        "reference_observations": null,
+        "metadata": null,
+        "num_samples": null,
+        "training_epochs": 1000,
+        "training_lr": 0.001,
+        "plot": false,
+        "_name": "Falsification Sample",
+        "_description": "Selects experimental conditions most likely to falsify the current model by identifying regions where the model predictions may deviate from ground truth."
+      }
+    },
+    {
+      "id": "89987c6e-5e01-41c9-a423-844c03d655d9",
+      "type": "theorists",
+      "x": 1046,
+      "y": 305,
+      "componentFile": "bms_regressor.json",
+      "componentType": "theorists",
+      "parameters": {
+        "epochs": 1600,
+        "prior_name": "Guimera2020",
+        "_name": "BMS Regressor",
+        "_description": "Bayesian Machine Scientist that discovers symbolic equations using MCMC sampling with informed priors over mathematical expressions."
+      }
+    },
+    {
+      "id": "d05446aa-a3e0-4f00-8e67-59ca593d3c2a",
+      "type": "experiment_runners",
+      "x": 729,
+      "y": 533,
+      "componentFile": "expected_value_theory.json",
+      "componentType": "experiment_runners",
+      "parameters": {
+        "name": "Expected Value Theory",
+        "choice_temperature": 0.1,
+        "value_lambda": 0.5,
+        "resolution": 10,
+        "minimum_value": -1,
+        "maximum_value": 1,
+        "_name": "Expected Value Theory",
+        "_description": "Synthetic experiment runner implementing Expected Value Theory for decision-making under risk, modeling choices between probabilistic options."
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "02a197a4-199e-4cbc-8817-548b6e6471f5",
+      "source": "f70d72a5-e4c3-48f4-88a7-48e27dc97046",
+      "target": "89987c6e-5e01-41c9-a423-844c03d655d9",
+      "sourceBorder": "border-right",
+      "targetBorder": "border-top",
+      "controlPoints": null
+    },
+    {
+      "id": "15ab5960-dc49-44ef-b935-a42fb80bb4ed",
+      "source": "89987c6e-5e01-41c9-a423-844c03d655d9",
+      "target": "d05446aa-a3e0-4f00-8e67-59ca593d3c2a",
+      "sourceBorder": "border-bottom",
+      "targetBorder": "border-right",
+      "controlPoints": null
+    },
+    {
+      "id": "e2a19b67-01b1-489b-90e9-002fc9185008",
+      "source": "d05446aa-a3e0-4f00-8e67-59ca593d3c2a",
+      "target": "f70d72a5-e4c3-48f4-88a7-48e27dc97046",
+      "sourceBorder": "border-left",
+      "targetBorder": "border-left",
+      "controlPoints": null
+    }
+  ]
+}

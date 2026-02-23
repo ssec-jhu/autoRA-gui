@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow Editor</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Left Panel: Component Palette -->
+        <aside class="panel panel-left">
+            <div class="panel-header">
+                <h2>Components</h2>
+                <input type="text" id="component-search" placeholder="Search components..." class="search-input">
+            </div>
+            <div class="panel-content" id="component-palette">
+                <!-- Components loaded dynamically -->
+            </div>
+        </aside>
+
+        <!-- Center Panel: Canvas -->
+        <main class="panel panel-center">
+            <div class="toolbar">
+                <div class="toolbar-group">
+                    <button id="btn-save" title="Save workflow (Ctrl+S)">Save</button>
+                    <button id="btn-load" title="Load workflow">Load</button>
+                    <input type="file" id="file-input" accept=".json" hidden>
+                    <button id="btn-clear" title="Clear canvas">Clear</button>
+                </div>
+                <div class="toolbar-group">
+                    <button id="btn-zoom-out" title="Zoom out">-</button>
+                    <span id="zoom-level">100%</span>
+                    <button id="btn-zoom-in" title="Zoom in">+</button>
+                </div>
+                <div class="toolbar-group">
+                    <span id="node-count">Nodes: 0</span>
+                    <span id="connection-count">Connections: 0</span>
+                </div>
+            </div>
+            <div class="canvas-container">
+                <svg id="connections-svg"></svg>
+                <div id="workflow-canvas">
+                    <div id="canvas-hint" class="canvas-hint">
+                        Drag components here to build your workflow
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Panel: Properties -->
+        <aside class="panel panel-right">
+            <div class="panel-header">
+                <h2>Properties</h2>
+            </div>
+            <div class="panel-content" id="properties-panel">
+                <div class="no-selection">Select a node to edit properties</div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Node Template -->
+    <template id="node-template">
+        <div class="workflow-node" data-node-id="">
+            <div class="node-header">
+                <span class="node-icon"></span>
+                <span class="node-title"></span>
+                <button class="node-delete" title="Delete node">&times;</button>
+            </div>
+            <div class="node-body">
+                <div class="node-content">
+                    <span class="node-type"></span>
+                </div>
+            </div>
+            <!-- Invisible border zones for connection dragging -->
+            <div class="connection-border border-top"></div>
+            <div class="connection-border border-right"></div>
+            <div class="connection-border border-bottom"></div>
+            <div class="connection-border border-left"></div>
+        </div>
+    </template>
+
+    <!-- Status Bar -->
+    <div id="status-bar" class="status-bar">Ready</div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
