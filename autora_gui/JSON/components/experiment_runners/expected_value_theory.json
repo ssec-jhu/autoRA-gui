@@ -1,0 +1,85 @@
+{
+  "uuid": "expected-value-theory-001",
+  "protocolType": "experiment_runner",
+  "name": "Expected Value Theory",
+  "description": "Synthetic experiment runner implementing Expected Value Theory for decision-making under risk, modeling choices between probabilistic options.",
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/economics/expected_value_theory.py#L12",
+  "parameters": [
+    {
+      "name": "name",
+      "description": "Identifier name for the experiment.",
+      "datatype": "string",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": "Expected Value Theory"
+    },
+    {
+      "name": "choice_temperature",
+      "description": "Softmax temperature parameter controlling choice stochasticity (lower = more deterministic).",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 0.1
+    },
+    {
+      "name": "value_lambda",
+      "description": "Scaling factor applied to option values.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 0.5
+    },
+    {
+      "name": "resolution",
+      "description": "Number of discrete points in the allowed values range.",
+      "datatype": "integer",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 10
+    },
+    {
+      "name": "minimum_value",
+      "description": "Lower bound for option values.",
+      "datatype": "integer",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": -1
+    },
+    {
+      "name": "maximum_value",
+      "description": "Upper bound for option values.",
+      "datatype": "integer",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 1
+    }
+  ],
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "DataFrame with values and probabilities for options A and B.",
+      "datatype": "object",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "observations",
+      "description": "DataFrame with probability of choosing option A as dependent variable.",
+      "datatype": "object",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": null
+    }
+  ]
+}

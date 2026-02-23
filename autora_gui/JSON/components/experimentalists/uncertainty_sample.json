@@ -1,0 +1,76 @@
+{
+  "uuid": "uncertainty-sample-001",
+  "protocolType": "experimentalist",
+  "name": "Uncertainty Sample",
+  "description": "Selects experimental conditions where the model exhibits the highest uncertainty in its predictions, enabling active learning strategies.",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-uncertainty/blob/main/src/autora/experimentalist/uncertainty/__init__.py#L32",
+  "parameters": [
+    {
+      "name": "conditions",
+      "description": "Pool of candidate experimental conditions to evaluate for model uncertainty.",
+      "datatype": "object",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "model",
+      "description": "Scikit-learn compatible model with a predict_proba method for uncertainty estimation.",
+      "datatype": "object",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "num_samples",
+      "description": "Number of high-uncertainty samples to select.",
+      "datatype": "integer",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 10
+    },
+    {
+      "name": "measure",
+      "description": "Uncertainty evaluation method: least_confident (1 - max probability), margin (difference between top two probabilities), or entropy (Shannon entropy).",
+      "datatype": "categorical",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": ["least_confident", "margin", "entropy"],
+      "default": "least_confident"
+    }
+  ],
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "DataFrame or array of candidate experimental conditions.",
+      "datatype": "object",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "model",
+      "description": "Fitted model with predict_proba method.",
+      "datatype": "object",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "conditions",
+      "description": "DataFrame of selected high-uncertainty experimental conditions.",
+      "datatype": "object",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": null
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "uuid": "synthetic-exp-learning-001",
+  "protocolType": "experiment_runner",
+  "name": "Exponential Learning (Synthetic)",
+  "description": "Synthetic experiment runner implementing exponential learning curves based on Heathcote, Brown, & Mewhort (2000) and Thurstone (1919).",
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychology/exp_learning.py#L10",
+  "parameters": [
+    {
+      "name": "resolution",
+      "description": "Number of allowed values for stimulus.",
+      "datatype": "integer",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 100
+    },
+    {
+      "name": "minimum_trial",
+      "description": "Lower bound for trial number.",
+      "datatype": "integer",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 1
+    },
+    {
+      "name": "minimum_initial_value",
+      "description": "Lower bound for initial performance value.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 0.0
+    },
+    {
+      "name": "maximum_initial_value",
+      "description": "Upper bound for initial performance value.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 0.5
+    },
+    {
+      "name": "lr",
+      "description": "Learning rate parameter.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 0.03
+    },
+    {
+      "name": "p_asymptotic",
+      "description": "Asymptotic performance level.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 1.0
+    }
+  ],
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "Experimental conditions specifying trial parameters.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "observations",
+      "description": "Simulated learning performance over trials.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "validValues": null,
+      "default": null
+    }
+  ]
+}
