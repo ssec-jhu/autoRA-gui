@@ -167,3 +167,7 @@ cython_debug/
 
 # File system
 .DS_Store
+
+# Claude files
+.claude
+SKILL.md
