@@ -1,13 +1,13 @@
-"""
-Workflow Editor - FastAPI Backend
+"""Workflow Editor - FastAPI Backend
 Serves the frontend and provides API endpoints for components.
 """
 
 import json
 from pathlib import Path
+
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, FileResponse
 
 app = FastAPI(title="Workflow Editor")
 
@@ -19,9 +19,10 @@ STATIC_DIR = BASE_DIR / "static"
 # Possible locations for JSON components (checked in order)
 # js_app is at autora_gui/js_app/, so paths are relative to that
 POSSIBLE_COMPONENT_DIRS = [
-    BASE_DIR.parent.parent / "JSON" / "components",       # Root level: JSON/components/
-    BASE_DIR.parent / "JSON" / "components",              # autora_gui/JSON/components/
+    BASE_DIR.parent.parent / "JSON" / "components",  # Root level: JSON/components/
+    BASE_DIR.parent / "JSON" / "components",  # autora_gui/JSON/components/
 ]
+
 
 def get_components_dir() -> Path | None:
     """Find the first existing components directory."""
@@ -29,6 +30,7 @@ def get_components_dir() -> Path | None:
         if path.exists():
             return path
     return None
+
 
 # Mount static files
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -45,8 +47,7 @@ async def index():
 
 @app.get("/api/components")
 async def get_components():
-    """
-    Get all available components organized by type.
+    """Get all available components organized by type.
     Automatically scans JSON/components directory for node definitions.
     Returns: {type: [component, ...], ...}
     """
@@ -56,15 +57,17 @@ async def get_components():
     if not components_dir:
         # Return sample data if no components directory found
         return {
-            "theorists": [
-                {"name": "Sample Theorist", "description": "A sample theorist component", "parameters": []}
-            ],
+            "theorists": [{"name": "Sample Theorist", "description": "A sample theorist component", "parameters": []}],
             "experimentalists": [
-                {"name": "Sample Experimentalist", "description": "A sample experimentalist component", "parameters": []}
+                {
+                    "name": "Sample Experimentalist",
+                    "description": "A sample experimentalist component",
+                    "parameters": [],
+                }
             ],
             "experiment_runners": [
                 {"name": "Sample Runner", "description": "A sample experiment runner component", "parameters": []}
-            ]
+            ],
         }
 
     # Scan all subdirectories for JSON files
@@ -81,7 +84,7 @@ async def get_components():
                         data["file"] = json_file.name
                         data["_type"] = type_name
                         components[type_name].append(data)
-                except (json.JSONDecodeError, IOError) as e:
+                except (OSError, json.JSONDecodeError) as e:
                     print(f"Error loading {json_file}: {e}")
 
     return components
@@ -130,14 +133,12 @@ async def list_workflows():
 
     workflows = []
     for json_file in workflows_dir.glob("*.json"):
-        workflows.append({
-            "name": json_file.stem,
-            "filename": json_file.name
-        })
+        workflows.append({"name": json_file.stem, "filename": json_file.name})
 
     return workflows
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
