@@ -32,6 +32,11 @@ def get_components_dir() -> Path | None:
     return None
 
 
+def get_workflows_dir() -> Path:
+    """Get the workflows directory path."""
+    return BASE_DIR.parent / "JSON" / "workflows"
+
+
 # Mount static files
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
@@ -112,8 +117,7 @@ async def get_component(type_name: str, filename: str):
 @app.post("/api/workflow/save/{filename}")
 async def save_workflow(filename: str, workflow: dict):
     """Save a workflow to a JSON file."""
-    # Save workflows alongside components in autora_gui/JSON/workflows
-    workflows_dir = BASE_DIR.parent / "JSON" / "workflows"
+    workflows_dir = get_workflows_dir()
     workflows_dir.mkdir(parents=True, exist_ok=True)
 
     file_path = workflows_dir / f"{filename}.json"
@@ -126,7 +130,7 @@ async def save_workflow(filename: str, workflow: dict):
 @app.get("/api/workflows")
 async def list_workflows():
     """List all saved workflows."""
-    workflows_dir = BASE_DIR.parent / "JSON" / "workflows"
+    workflows_dir = get_workflows_dir()
 
     if not workflows_dir.exists():
         return []
