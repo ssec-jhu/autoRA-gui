@@ -1,6 +1,7 @@
 """Component browser tree widget for the left panel."""
 
-import pickle
+import dataclasses
+import json
 
 from PySide6.QtCore import QByteArray, QMimeData, Qt
 from PySide6.QtGui import QColor, QDrag, QIcon, QPainter, QPixmap
@@ -51,7 +52,7 @@ class DraggableTreeWidget(QTreeWidget):
         for item in items:
             component = item.data(0, Qt.UserRole)
             if isinstance(component, ComponentDefinition):
-                data = pickle.dumps(component)
+                data = json.dumps(dataclasses.asdict(component)).encode("utf-8")
                 mime_data.setData("application/x-component", QByteArray(data))
                 break  # Only handle first item
 

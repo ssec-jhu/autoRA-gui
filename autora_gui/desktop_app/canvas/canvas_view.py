@@ -1,9 +1,12 @@
 """Canvas view with pan and zoom support."""
 
+import json
+
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QDragEnterEvent, QDropEvent, QMouseEvent, QPainter, QWheelEvent
 from PySide6.QtWidgets import QGraphicsView, QWidget
 
+from ..models.node import ComponentDefinition, ParameterDef, PortDef
 from .canvas_scene import CanvasScene
 
 
@@ -116,10 +119,19 @@ class CanvasView(QGraphicsView):
             scene_pos = self.mapToScene(event.position().toPoint())
 
             # Get component data from mime data
-            import pickle
-
             data = event.mimeData().data("application/x-component")
-            component = pickle.loads(bytes(data))
+            component_dict = json.loads(bytes(data).decode("utf-8"))
+            component = ComponentDefinition(
+                uuid=component_dict["uuid"],
+                protocol_type=component_dict["protocol_type"],
+                name=component_dict["name"],
+                description=component_dict["description"],
+                github_commit=component_dict["github_commit"],
+                parameters=[ParameterDef(**p) for p in component_dict["parameters"]],
+                input_ports=[PortDef(**p) for p in component_dict["input_ports"]],
+                output_ports=[PortDef(**p) for p in component_dict["output_ports"]],
+                file_path=component_dict.get("file_path", ""),
+            )
 
             # Emit signal for main window to handle
             self.component_dropped.emit(component, scene_pos.x(), scene_pos.y())
