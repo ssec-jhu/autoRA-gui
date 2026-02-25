@@ -170,7 +170,7 @@ cython_debug/
 
 # Claude AI
 .claude
-CLAUDE.md
+SKILL.md
 
 # JS tests
 node_modules
