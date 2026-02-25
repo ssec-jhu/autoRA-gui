@@ -7,7 +7,7 @@ from pathlib import Path
 
 import dash
 import dash_cytoscape as cyto
-from dash import Dash, Input, Output, State, dcc, html, ctx
+from dash import Dash, Input, Output, State, ctx, dcc, html
 
 # Load extra cytoscape layouts
 cyto.load_extra_layouts()
@@ -84,131 +84,203 @@ def create_layout():
         )
         palette_sections.append(section)
 
-    return html.Div([
-        html.Div([
-            html.H1("AutoRA Workflow Builder"),
-            html.P("Drag components from the left panel to build your workflow"),
-        ], className="app-header"),
-        html.Div([
-            # Left panel
-            html.Div([
-                html.H3("Components", className="panel-header"),
-                html.Div(palette_sections, className="palette-container"),
-            ], className="left-panel", id="left-panel"),
-            # Canvas panel
-            html.Div([
-                html.Div([
-                    html.H3("Workflow Canvas", className="panel-header"),
-                    html.Div([
-                        html.Button("Clear", id="clear-canvas-btn", className="toolbar-btn"),
-                        html.Button("Save", id="save-workflow-btn", className="toolbar-btn"),
-                        dcc.Upload(
-                            id="upload-workflow",
-                            children=html.Button("Load", className="toolbar-btn"),
-                            accept=".json",
-                        ),
-                    ], className="canvas-toolbar"),
-                ], className="canvas-header"),
-                cyto.Cytoscape(
-                    id="workflow-canvas",
-                    elements=[],
-                    layout={"name": "preset", "fit": False},
-                    style={"width": "100%", "height": "calc(100% - 80px)"},
-                    zoom=1,
-                    minZoom=0.5,
-                    maxZoom=2,
-                    autoRefreshLayout=False,
-                    stylesheet=[
-                        # Main node style - two-part design with name on top, divider, type on bottom
-                        {"selector": "node", "style": {
-                            "label": "data(label)",
-                            "text-valign": "center",
-                            "text-halign": "center",
-                            "font-size": 12,
-                            "text-wrap": "wrap",
-                            "text-max-width": 180,
-                            "color": "#fff",
-                            "line-height": 1.3,
-                            # Node appearance
-                            "background-color": "data(color)",
-                            "width": 200,
-                            "height": 80,
-                            "shape": "round-rectangle",
-                            "border-width": 2,
-                            "border-color": "#333",
-                        }},
-                        # Node hover effect
-                        {"selector": "node:hover", "style": {
-                            "border-color": "#888",
-                        }},
-                        # Selected node
-                        {"selector": "node:selected", "style": {
-                            "border-width": 3,
-                            "border-color": "#e91e63",
-                        }},
-                        # Connection source highlight
-                        {"selector": ".connection-source", "style": {
-                            "border-width": 3,
-                            "border-color": "#FF9800",
-                        }},
-                        # Edge style - quadratic bezier curve (concave)
-                        {"selector": "edge", "style": {
-                            "curve-style": "unbundled-bezier",
-                            "control-point-distances": [-40],
-                            "control-point-weights": [0.5],
-                            "target-arrow-shape": "triangle",
-                            "target-arrow-color": "#888",
-                            "line-color": "#888",
-                            "width": 2,
-                            "source-endpoint": "outside-to-node",
-                            "target-endpoint": "outside-to-node",
-                        }},
-                        # Edge hover
-                        {"selector": "edge:hover", "style": {
-                            "line-color": "#aaa",
-                            "target-arrow-color": "#aaa",
-                        }},
-                        # Selected edge
-                        {"selector": "edge:selected", "style": {
-                            "line-color": "#e91e63",
-                            "target-arrow-color": "#e91e63",
-                            "width": 3,
-                        }},
-                    ],
-                    boxSelectionEnabled=True,
-                    userZoomingEnabled=True,
-                    userPanningEnabled=True,
-                ),
-                dcc.Store(id="node-data-store", data={}),
-                dcc.Store(id="drop-event-store", data=None),
-                dcc.Store(id="edge-event-store", data=None),
-                dcc.Interval(id="js-poll-interval", interval=200, n_intervals=0),
-                dcc.Download(id="download-workflow"),
-            ], className="canvas-panel", id="canvas-panel"),
-            # Right panel
-            html.Div([
-                html.H3("Node Properties", className="panel-header"),
-                html.Div([
-                    html.Div([
-                        html.P("Select a node to view and edit its parameters.", className="no-selection-message"),
-                    ], id="parameter-editor", className="parameter-editor"),
-                    html.Div([
-                        html.Button("Delete Node", id="delete-node-btn", className="delete-node-btn", disabled=True),
-                    ], className="delete-button-container"),
-                ], className="parameter-editor-container"),
-                html.Div([
-                    html.H4("Instructions", className="instructions-header"),
-                    html.Ul([
-                        html.Li("Drag components from left to canvas"),
-                        html.Li("Click a node to start connection"),
-                        html.Li("Click another node to connect"),
-                        html.Li("Press Escape to cancel connection"),
-                        html.Li("Press Delete to remove selected"),
-                    ], className="instructions-list"),
-                ], className="instructions-panel"),
-            ], className="right-panel", id="right-panel"),
-        ], className="main-content"),
-    ], className="app-container")
+    return html.Div(
+        [
+            html.Div(
+                [
+                    html.H1("AutoRA Workflow Builder"),
+                    html.P("Drag components from the left panel to build your workflow"),
+                ],
+                className="app-header",
+            ),
+            html.Div(
+                [
+                    # Left panel
+                    html.Div(
+                        [
+                            html.H3("Components", className="panel-header"),
+                            html.Div(palette_sections, className="palette-container"),
+                        ],
+                        className="left-panel",
+                        id="left-panel",
+                    ),
+                    # Canvas panel
+                    html.Div(
+                        [
+                            html.Div(
+                                [
+                                    html.H3("Workflow Canvas", className="panel-header"),
+                                    html.Div(
+                                        [
+                                            html.Button("Clear", id="clear-canvas-btn", className="toolbar-btn"),
+                                            html.Button("Save", id="save-workflow-btn", className="toolbar-btn"),
+                                            dcc.Upload(
+                                                id="upload-workflow",
+                                                children=html.Button("Load", className="toolbar-btn"),
+                                                accept=".json",
+                                            ),
+                                        ],
+                                        className="canvas-toolbar",
+                                    ),
+                                ],
+                                className="canvas-header",
+                            ),
+                            cyto.Cytoscape(
+                                id="workflow-canvas",
+                                elements=[],
+                                layout={"name": "preset", "fit": False},
+                                style={"width": "100%", "height": "calc(100% - 80px)"},
+                                zoom=1,
+                                minZoom=0.5,
+                                maxZoom=2,
+                                autoRefreshLayout=False,
+                                stylesheet=[
+                                    # Main node style - two-part design with name on top, divider, type on bottom
+                                    {
+                                        "selector": "node",
+                                        "style": {
+                                            "label": "data(label)",
+                                            "text-valign": "center",
+                                            "text-halign": "center",
+                                            "font-size": 12,
+                                            "text-wrap": "wrap",
+                                            "text-max-width": 180,
+                                            "color": "#fff",
+                                            "line-height": 1.3,
+                                            # Node appearance
+                                            "background-color": "data(color)",
+                                            "width": 200,
+                                            "height": 80,
+                                            "shape": "round-rectangle",
+                                            "border-width": 2,
+                                            "border-color": "#333",
+                                        },
+                                    },
+                                    # Node hover effect
+                                    {
+                                        "selector": "node:hover",
+                                        "style": {
+                                            "border-color": "#888",
+                                        },
+                                    },
+                                    # Selected node
+                                    {
+                                        "selector": "node:selected",
+                                        "style": {
+                                            "border-width": 3,
+                                            "border-color": "#e91e63",
+                                        },
+                                    },
+                                    # Connection source highlight
+                                    {
+                                        "selector": ".connection-source",
+                                        "style": {
+                                            "border-width": 3,
+                                            "border-color": "#FF9800",
+                                        },
+                                    },
+                                    # Edge style - quadratic bezier curve (concave)
+                                    {
+                                        "selector": "edge",
+                                        "style": {
+                                            "curve-style": "unbundled-bezier",
+                                            "control-point-distances": [-40],
+                                            "control-point-weights": [0.5],
+                                            "target-arrow-shape": "triangle",
+                                            "target-arrow-color": "#888",
+                                            "line-color": "#888",
+                                            "width": 2,
+                                            "source-endpoint": "outside-to-node",
+                                            "target-endpoint": "outside-to-node",
+                                        },
+                                    },
+                                    # Edge hover
+                                    {
+                                        "selector": "edge:hover",
+                                        "style": {
+                                            "line-color": "#aaa",
+                                            "target-arrow-color": "#aaa",
+                                        },
+                                    },
+                                    # Selected edge
+                                    {
+                                        "selector": "edge:selected",
+                                        "style": {
+                                            "line-color": "#e91e63",
+                                            "target-arrow-color": "#e91e63",
+                                            "width": 3,
+                                        },
+                                    },
+                                ],
+                                boxSelectionEnabled=True,
+                                userZoomingEnabled=True,
+                                userPanningEnabled=True,
+                            ),
+                            dcc.Store(id="node-data-store", data={}),
+                            dcc.Store(id="drop-event-store", data=None),
+                            dcc.Store(id="edge-event-store", data=None),
+                            dcc.Interval(id="js-poll-interval", interval=200, n_intervals=0),
+                            dcc.Download(id="download-workflow"),
+                        ],
+                        className="canvas-panel",
+                        id="canvas-panel",
+                    ),
+                    # Right panel
+                    html.Div(
+                        [
+                            html.H3("Node Properties", className="panel-header"),
+                            html.Div(
+                                [
+                                    html.Div(
+                                        [
+                                            html.P(
+                                                "Select a node to view and edit its parameters.",
+                                                className="no-selection-message",
+                                            ),
+                                        ],
+                                        id="parameter-editor",
+                                        className="parameter-editor",
+                                    ),
+                                    html.Div(
+                                        [
+                                            html.Button(
+                                                "Delete Node",
+                                                id="delete-node-btn",
+                                                className="delete-node-btn",
+                                                disabled=True,
+                                            ),
+                                        ],
+                                        className="delete-button-container",
+                                    ),
+                                ],
+                                className="parameter-editor-container",
+                            ),
+                            html.Div(
+                                [
+                                    html.H4("Instructions", className="instructions-header"),
+                                    html.Ul(
+                                        [
+                                            html.Li("Drag components from left to canvas"),
+                                            html.Li("Click a node to start connection"),
+                                            html.Li("Click another node to connect"),
+                                            html.Li("Press Escape to cancel connection"),
+                                            html.Li("Press Delete to remove selected"),
+                                        ],
+                                        className="instructions-list",
+                                    ),
+                                ],
+                                className="instructions-panel",
+                            ),
+                        ],
+                        className="right-panel",
+                        id="right-panel",
+                    ),
+                ],
+                className="main-content",
+            ),
+        ],
+        className="app-container",
+    )
 
 
 def create_app():
@@ -309,12 +381,15 @@ def create_app():
 
             new_node = create_node_element(node_id, label, color, x, y, comp_type)
             new_elements = elements + [new_node]
-            new_node_data = {**node_data, node_id: {
-                "componentType": drop_event.get("componentType", ""),
-                "componentFile": drop_event.get("componentFile", ""),
-                "name": label,
-                "parameters": {"name": label},
-            }}
+            new_node_data = {
+                **node_data,
+                node_id: {
+                    "componentType": drop_event.get("componentType", ""),
+                    "componentFile": drop_event.get("componentFile", ""),
+                    "name": label,
+                    "parameters": {"name": label},
+                },
+            }
             return new_elements, new_node_data
 
         if triggered == "edge-event-store" and edge_event:
@@ -322,8 +397,7 @@ def create_app():
             if src and tgt:
                 # Check if edge already exists
                 edge_exists = any(
-                    e.get("data", {}).get("source") == src and e.get("data", {}).get("target") == tgt
-                    for e in elements
+                    e.get("data", {}).get("source") == src and e.get("data", {}).get("target") == tgt for e in elements
                 )
                 if not edge_exists:
                     new_edge = {"data": {"id": str(uuid.uuid4()), "source": src, "target": tgt}}
@@ -386,21 +460,32 @@ def create_app():
             with open(fp) as f:
                 comp_def = json.load(f)
 
-        children = [html.H4(data.get("name", "Unknown"), className="node-title"),
-                    html.P(f"Type: {comp_type.replace('_', ' ').title()}", className="node-type"),
-                    # Store selected node ID for delete button
-                    dcc.Store(id="selected-node-id", data=node_id)]
+        children = [
+            html.H4(data.get("name", "Unknown"), className="node-title"),
+            html.P(f"Type: {comp_type.replace('_', ' ').title()}", className="node-type"),
+            # Store selected node ID for delete button
+            dcc.Store(id="selected-node-id", data=node_id),
+        ]
         if comp_def and "description" in comp_def:
             children.append(html.P(comp_def["description"], className="node-description"))
         if comp_def and "parameters" in comp_def:
             for p in comp_def["parameters"]:
                 pn, pt = p["name"], p.get("datatype", "string")
-                children.append(html.Div([
-                    html.Label(pn, className="param-label"),
-                    dcc.Input(id={"type": "param-input", "param": pn, "node": node_id},
-                              type="number" if pt in ("integer", "real") else "text",
-                              value=params.get(pn, p.get("default", "")), className="param-input", debounce=True),
-                ], className="param-group"))
+                children.append(
+                    html.Div(
+                        [
+                            html.Label(pn, className="param-label"),
+                            dcc.Input(
+                                id={"type": "param-input", "param": pn, "node": node_id},
+                                type="number" if pt in ("integer", "real") else "text",
+                                value=params.get(pn, p.get("default", "")),
+                                className="param-input",
+                                debounce=True,
+                            ),
+                        ],
+                        className="param-group",
+                    )
+                )
         return html.Div(children, className="node-editor")
 
     @app.callback(
@@ -427,7 +512,8 @@ def create_app():
             return dash.no_update, dash.no_update
         # Remove node and any connected edges
         new_el = [
-            e for e in elements
+            e
+            for e in elements
             if e.get("data", {}).get("id") != nid
             and e.get("data", {}).get("source") != nid
             and e.get("data", {}).get("target") != nid
@@ -448,7 +534,10 @@ def create_app():
         if nid not in node_data:
             return dash.no_update
         new_nd = {**node_data}
-        new_nd[nid] = {**new_nd[nid], "parameters": {**new_nd[nid].get("parameters", {}), pn: ctx.triggered[0]["value"]}}
+        new_nd[nid] = {
+            **new_nd[nid],
+            "parameters": {**new_nd[nid].get("parameters", {}), pn: ctx.triggered[0]["value"]},
+        }
         return new_nd
 
     @app.callback(
@@ -466,28 +555,21 @@ def create_app():
         for e in elements or []:
             d = e.get("data", {})
             if "source" in d:
-                conns.append({
-                    "id": d.get("id"),
-                    "source": d["source"],
-                    "target": d["target"],
-                    "controlPoints": None
-                })
+                conns.append({"id": d.get("id"), "source": d["source"], "target": d["target"], "controlPoints": None})
             else:
                 ni = (node_data or {}).get(d.get("id"), {})
-                nodes.append({
-                    "id": d.get("id"),
-                    "type": ni.get("componentType", ""),
-                    "x": e.get("position", {}).get("x", 0),
-                    "y": e.get("position", {}).get("y", 0),
-                    "componentFile": ni.get("componentFile", ""),
-                    "parameters": ni.get("parameters", {})
-                })
+                nodes.append(
+                    {
+                        "id": d.get("id"),
+                        "type": ni.get("componentType", ""),
+                        "x": e.get("position", {}).get("x", 0),
+                        "y": e.get("position", {}).get("y", 0),
+                        "componentFile": ni.get("componentFile", ""),
+                        "parameters": ni.get("parameters", {}),
+                    }
+                )
 
-        workflow_data = {
-            "name": "workflow",
-            "nodes": nodes,
-            "connections": conns
-        }
+        workflow_data = {"name": "workflow", "nodes": nodes, "connections": conns}
 
         return {
             "content": json.dumps(workflow_data, indent=2),

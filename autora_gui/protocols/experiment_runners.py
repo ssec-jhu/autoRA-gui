@@ -1,11 +1,9 @@
 """Data models for experiment runners modules."""
 
-import json
 import uuid
 from pathlib import Path
 
 import autora_gui.data_model as dm
-
 
 parameters = [
     dm.PrimitiveVariableType(
