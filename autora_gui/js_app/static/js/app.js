@@ -56,9 +56,44 @@ function getTypeIcon(type) {
     const icons = {
         theorists: '\u{1F9E0}',           // Brain
         experimentalists: '\u{1F52C}',     // Microscope
-        experiment_runners: '\u{1F3C3}'    // Runner
+        experiment_runners: '\u{1F3C3}',   // Runner
+        control: '\u{2699}'                // Gear
     };
     return icons[type] || '\u{1F4E6}';     // Package
+}
+
+/**
+ * Get specific icon for control node types
+ */
+function getControlNodeIcon(protocolType) {
+    const icons = {
+        start_point: '\u{25B6}',    // Play arrow
+        end_point: '\u{23F9}',      // Stop
+        filter_point: '\u{1F500}'   // Shuffle/branch
+    };
+    return icons[protocolType] || '\u{2699}';
+}
+
+/**
+ * Check if a node can be a connection source (has outputs)
+ */
+function canBeSource(nodeData) {
+    const comp = nodeData.componentData;
+    // If no type info, allow (backwards compatibility)
+    if (!comp.inputDataType && !comp.outputDataType) return true;
+    // Has outputDataType means it can be a source
+    return !!comp.outputDataType;
+}
+
+/**
+ * Check if a node can be a connection target (has inputs)
+ */
+function canBeTarget(nodeData) {
+    const comp = nodeData.componentData;
+    // If no type info, allow (backwards compatibility)
+    if (!comp.inputDataType && !comp.outputDataType) return true;
+    // Has inputDataType means it can be a target
+    return !!comp.inputDataType;
 }
 
 /**
@@ -295,20 +330,51 @@ function renderNode(nodeData) {
 
     // Set content
     const name = nodeData.componentData.name || 'Unnamed';
-    node.querySelector('.node-icon').textContent = getTypeIcon(nodeData.type);
+    const protocolType = nodeData.componentData.protocolType;
+
+    // Use special icon for control nodes
+    if (nodeData.type === 'control' && protocolType) {
+        node.querySelector('.node-icon').textContent = getControlNodeIcon(protocolType);
+        node.classList.add(protocolType.replace(/_/g, '-'));
+    } else {
+        node.querySelector('.node-icon').textContent = getTypeIcon(nodeData.type);
+    }
+
     node.querySelector('.node-title').textContent = name;
-    node.querySelector('.node-type').textContent = formatTypeName(nodeData.type);
+    node.querySelector('.node-type').textContent = formatTypeName(protocolType || nodeData.type);
+
+    // Configure connection borders based on input/output capabilities
+    const hasInput = canBeTarget(nodeData);
+    const hasOutput = canBeSource(nodeData);
+
+    node.querySelectorAll('.connection-border').forEach(border => {
+        const isLeftBorder = border.classList.contains('border-left');
+        const isRightBorder = border.classList.contains('border-right');
+
+        // Left border is typically for input, right for output
+        // Hide borders that don't apply to this node type
+        if (isLeftBorder && !hasInput) {
+            border.classList.add('hidden');
+        } else if (isRightBorder && !hasOutput) {
+            border.classList.add('hidden');
+        }
+
+        // Add event listener only for active borders
+        if (!border.classList.contains('hidden')) {
+            border.addEventListener('mousedown', (e) => handleBorderMouseDown(e, nodeData.id, border));
+        }
+    });
+
+    // For filter nodes, add special styling class for dual output
+    if (protocolType === 'filter_point') {
+        node.classList.add('filter-node');
+    }
 
     // Event listeners
     node.addEventListener('mousedown', handleNodeMouseDown);
     node.querySelector('.node-delete').addEventListener('click', (e) => {
         e.stopPropagation();
         deleteNode(nodeData.id);
-    });
-
-    // Connection border event listeners
-    node.querySelectorAll('.connection-border').forEach(border => {
-        border.addEventListener('mousedown', (e) => handleBorderMouseDown(e, nodeData.id, border));
     });
 
     document.getElementById('workflow-canvas').appendChild(node);
@@ -640,6 +706,14 @@ function handleBorderMouseDown(e, nodeId, border) {
         cancelConnection();
     }
 
+    const nodeData = state.nodes.get(nodeId);
+
+    // Check if this node can be a source (has outputs)
+    if (!canBeSource(nodeData)) {
+        updateStatus('This node has no outputs');
+        return;
+    }
+
     const node = document.querySelector(`[data-node-id="${nodeId}"]`);
     const svg = document.getElementById('connections-svg');
     const svgRect = svg.getBoundingClientRect();
@@ -681,10 +755,15 @@ function handleBorderMouseDown(e, nodeId, border) {
 
     node.classList.add('connecting-source');
 
-    // Highlight valid target nodes
+    // Highlight valid target nodes (only those that can accept inputs)
     document.querySelectorAll('.workflow-node').forEach(n => {
         if (n.dataset.nodeId !== nodeId) {
-            n.classList.add('valid-target');
+            const targetData = state.nodes.get(n.dataset.nodeId);
+            if (canBeTarget(targetData)) {
+                n.classList.add('valid-target');
+            } else {
+                n.classList.add('invalid-target');
+            }
         }
     });
 
@@ -764,6 +843,14 @@ function completeConnection(targetNodeId, endX, endY, targetBorder) {
         return;
     }
 
+    // Check if target node can accept inputs
+    const targetData = state.nodes.get(targetNodeId);
+    if (!canBeTarget(targetData)) {
+        updateStatus('This node cannot accept inputs');
+        cancelConnection();
+        return;
+    }
+
     // Prevent duplicate connections
     const exists = state.connections.some(c =>
         c.source === state.connecting.source && c.target === targetNodeId
@@ -826,8 +913,8 @@ function cancelConnection() {
     }
 
     // Remove highlights
-    document.querySelectorAll('.connecting-source, .valid-target').forEach(el => {
-        el.classList.remove('connecting-source', 'valid-target');
+    document.querySelectorAll('.connecting-source, .valid-target, .invalid-target').forEach(el => {
+        el.classList.remove('connecting-source', 'valid-target', 'invalid-target');
     });
 
     document.removeEventListener('mousemove', handleConnectionMouseMove);

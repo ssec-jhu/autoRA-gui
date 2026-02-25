@@ -18,6 +18,10 @@
     --color-theorists: #6366f1;
     --color-experimentalists: #22c55e;
     --color-experiment-runners: #f59e0b;
+    --color-control: #ec4899;
+    --color-start: #10b981;
+    --color-end: #ef4444;
+    --color-filter: #8b5cf6;
 }
 
 /* ===== Reset & Base ===== */
@@ -335,6 +339,28 @@ body {
     background: var(--color-experiment-runners);
 }
 
+.workflow-node.control .node-header {
+    background: var(--color-control);
+}
+
+/* Control node specific styles */
+.workflow-node.start-point .node-header {
+    background: var(--color-start);
+}
+
+.workflow-node.end-point .node-header {
+    background: var(--color-end);
+}
+
+.workflow-node.filter-point .node-header {
+    background: var(--color-filter);
+}
+
+/* Filter node - special styling for dual output */
+.workflow-node.filter-node .node-body {
+    padding-bottom: 20px;
+}
+
 .node-icon {
     font-size: 14px;
 }
@@ -424,6 +450,20 @@ body {
 
 .workflow-node.valid-target .connection-border:hover {
     background: rgba(245, 158, 11, 0.5);
+}
+
+/* Invalid target nodes (cannot accept connections) */
+.workflow-node.invalid-target {
+    opacity: 0.5;
+}
+
+.workflow-node.invalid-target .connection-border {
+    cursor: not-allowed;
+}
+
+/* Hidden border (for input-only or output-only nodes) */
+.connection-border.hidden {
+    display: none;
 }
 
 @keyframes pulse {

@@ -2,7 +2,7 @@
   "uuid": "filter-point",
   "protocolType": "filter_point",
   "name": "Workflow Filter Point",
-  "description": "Loop control for a workflow execution.",
+  "description": "Loop control for a workflow execution with two output branches.",
   "githubCommit": "",
   "parameters": [
     {
@@ -28,13 +28,23 @@
   ],
   "outputDataType": [
     {
-      "name": "conditions",
-      "description": "Generated pool of experimental conditions.",
+      "name": "continue",
+      "description": "Output when loop should continue.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "complete",
+      "description": "Output when loop is complete.",
       "datatype": "real",
       "minOccurs": 1,
       "maxOccurs": -1,
       "validValues": null,
       "default": null
     }
-  ]
+  ],
+  "maxOutputConnections": 2
 }

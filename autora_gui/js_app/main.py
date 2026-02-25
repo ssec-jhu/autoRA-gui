@@ -75,6 +75,21 @@ async def get_components():
             ],
         }
 
+    # Load control nodes from root level (start, end, filter)
+    control_nodes = []
+    for json_file in sorted(components_dir.glob("*.json")):
+        try:
+            with open(json_file) as f:
+                data = json.load(f)
+                data["file"] = json_file.name
+                data["_type"] = "control"
+                control_nodes.append(data)
+        except (OSError, json.JSONDecodeError) as e:
+            print(f"Error loading {json_file}: {e}")
+
+    if control_nodes:
+        components["control"] = control_nodes
+
     # Scan all subdirectories for JSON files
     for type_dir in components_dir.iterdir():
         if type_dir.is_dir():
