@@ -2,8 +2,19 @@
   "uuid": "filter-point",
   "protocolType": "filter_point",
   "name": "Workflow Filter Point",
-  "description": "Output of any experimentalist, representing the final results of a workflow execution.",
+  "description": "Loop control for a workflow execution.",
   "githubCommit": "",
+  "parameters": [
+    {
+      "name": "counter",
+      "description": "Number of times to perform given loop.",
+      "datatype": "integer",
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "validValues": null,
+      "default": 1
+    }
+  ],
   "inputDataType": [
     {
       "name": "conditions",
