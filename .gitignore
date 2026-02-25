@@ -167,3 +167,9 @@ cython_debug/
 
 # File system
 .DS_Store
+
+# Claude files
+SKILL.md
+
+# JS tests
+node_modules
