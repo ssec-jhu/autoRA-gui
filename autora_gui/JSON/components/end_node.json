@@ -1,0 +1,18 @@
+{
+  "uuid": "end-point",
+  "protocolType": "end_point",
+  "name": "Workflow End Point",
+  "description": "Output of any experimentalist, representing the final results of a workflow execution.",
+  "githubCommit": "",
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "Generated pool of experimental conditions.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "validValues": null,
+      "default": null
+    }
+  ]
+}
