@@ -1,7 +1,8 @@
 """Component loader for parsing JSON component files."""
+
 import json
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator
 
 from ..models.node import ComponentDefinition
 
@@ -44,9 +45,7 @@ class ComponentLoader:
 
         return self._components
 
-    def _load_category(
-        self, category_path: Path, category_name: str
-    ) -> Iterator[ComponentDefinition]:
+    def _load_category(self, category_path: Path, category_name: str) -> Iterator[ComponentDefinition]:
         """Load all components from a category folder."""
         for json_file in sorted(category_path.glob("*.json")):
             try:
@@ -63,7 +62,7 @@ class ComponentLoader:
     def _load_component(self, file_path: Path) -> ComponentDefinition | None:
         """Load a single component from a JSON file."""
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 data = json.load(f)
 
             # Use relative path from components directory

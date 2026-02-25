@@ -1,9 +1,9 @@
 """Canvas view with pan and zoom support."""
-from PySide6.QtWidgets import QGraphicsView, QWidget
-from PySide6.QtCore import Qt, QMimeData, Signal
-from PySide6.QtGui import QWheelEvent, QMouseEvent, QDragEnterEvent, QDropEvent, QPainter
 
-from ..models.node import ComponentDefinition
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QDragEnterEvent, QDropEvent, QMouseEvent, QPainter, QWheelEvent
+from PySide6.QtWidgets import QGraphicsView, QWidget
+
 from .canvas_scene import CanvasScene
 
 
@@ -78,12 +78,8 @@ class CanvasView(QGraphicsView):
             self._pan_start_y = event.position().y()
 
             # Pan the view
-            self.horizontalScrollBar().setValue(
-                int(self.horizontalScrollBar().value() - delta_x)
-            )
-            self.verticalScrollBar().setValue(
-                int(self.verticalScrollBar().value() - delta_y)
-            )
+            self.horizontalScrollBar().setValue(int(self.horizontalScrollBar().value() - delta_x))
+            self.verticalScrollBar().setValue(int(self.verticalScrollBar().value() - delta_y))
             event.accept()
             return
 
@@ -121,6 +117,7 @@ class CanvasView(QGraphicsView):
 
             # Get component data from mime data
             import pickle
+
             data = event.mimeData().data("application/x-component")
             component = pickle.loads(bytes(data))
 

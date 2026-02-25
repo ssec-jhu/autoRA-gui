@@ -1,12 +1,14 @@
 """Data models for nodes and components."""
+
+import uuid as uuid_module
 from dataclasses import dataclass, field
 from typing import Any
-import uuid as uuid_module
 
 
 @dataclass
 class ParameterDef:
     """Definition of a component parameter."""
+
     name: str
     description: str
     datatype: str  # integer, real, boolean, string, categorical, object
@@ -19,6 +21,7 @@ class ParameterDef:
 @dataclass
 class PortDef:
     """Definition of an input/output port."""
+
     name: str
     description: str
     datatype: str
@@ -29,6 +32,7 @@ class PortDef:
 @dataclass
 class ComponentDefinition:
     """Definition of a component loaded from JSON."""
+
     uuid: str
     protocol_type: str  # experimentalist, theorist, experiment_runner
     name: str
@@ -93,6 +97,7 @@ class ComponentDefinition:
 @dataclass
 class PortData:
     """Runtime data for a port on a node instance."""
+
     name: str
     port_type: str  # "input" or "output"
     datatype: str
@@ -101,6 +106,7 @@ class PortData:
 @dataclass
 class NodeData:
     """Runtime data for a node instance on the canvas."""
+
     uuid: str
     component: ComponentDefinition
     x: float = 0

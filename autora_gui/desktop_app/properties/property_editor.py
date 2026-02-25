@@ -1,22 +1,22 @@
 """Property editor panel for editing node parameters."""
-from typing import Any, Callable
+
+from typing import Any
+
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QFormLayout,
-    QLabel,
-    QLineEdit,
-    QSpinBox,
-    QDoubleSpinBox,
     QCheckBox,
     QComboBox,
-    QScrollArea,
+    QDoubleSpinBox,
+    QFormLayout,
     QFrame,
-    QTextEdit,
     QGroupBox,
+    QLabel,
+    QLineEdit,
+    QScrollArea,
+    QSpinBox,
+    QVBoxLayout,
+    QWidget,
 )
-from PySide6.QtCore import Qt, Signal
 
 from ..models.node import NodeData, ParameterDef
 
@@ -38,9 +38,7 @@ class PropertyEditor(QWidget):
 
         # Header
         self.header_label = QLabel("Properties")
-        self.header_label.setStyleSheet(
-            "font-weight: bold; padding: 10px; background: #f0f0f0;"
-        )
+        self.header_label.setStyleSheet("font-weight: bold; padding: 10px; background: #f0f0f0;")
         main_layout.addWidget(self.header_label)
 
         # Scroll area for properties
@@ -142,9 +140,7 @@ class PropertyEditor(QWidget):
         # Add stretch
         self.content_layout.addStretch()
 
-    def _create_param_widget(
-        self, param_def: ParameterDef, node_data: NodeData
-    ) -> QWidget | None:
+    def _create_param_widget(self, param_def: ParameterDef, node_data: NodeData) -> QWidget | None:
         """Create appropriate widget for a parameter."""
         current_value = node_data.parameters.get(param_def.name, param_def.default)
 
@@ -154,56 +150,44 @@ class PropertyEditor(QWidget):
             widget.setSpecialValueText("null")
             if current_value is not None:
                 widget.setValue(int(current_value))
-            widget.valueChanged.connect(
-                lambda v: self._on_param_changed(param_def.name, v)
-            )
+            widget.valueChanged.connect(lambda v: self._on_param_changed(param_def.name, v))
             return widget
 
-        elif param_def.datatype == "real":
+        if param_def.datatype == "real":
             widget = QDoubleSpinBox()
             widget.setRange(-999999.0, 999999.0)
             widget.setDecimals(6)
             if current_value is not None:
                 widget.setValue(float(current_value))
-            widget.valueChanged.connect(
-                lambda v: self._on_param_changed(param_def.name, v)
-            )
+            widget.valueChanged.connect(lambda v: self._on_param_changed(param_def.name, v))
             return widget
 
-        elif param_def.datatype == "boolean":
+        if param_def.datatype == "boolean":
             widget = QCheckBox()
             if current_value is not None:
                 widget.setChecked(bool(current_value))
-            widget.stateChanged.connect(
-                lambda s: self._on_param_changed(param_def.name, s == Qt.Checked)
-            )
+            widget.stateChanged.connect(lambda s: self._on_param_changed(param_def.name, s == Qt.Checked))
             return widget
 
-        elif param_def.datatype == "categorical" and param_def.valid_values:
+        if param_def.datatype == "categorical" and param_def.valid_values:
             widget = QComboBox()
             widget.addItems(param_def.valid_values)
             if current_value in param_def.valid_values:
                 widget.setCurrentText(str(current_value))
-            widget.currentTextChanged.connect(
-                lambda t: self._on_param_changed(param_def.name, t)
-            )
+            widget.currentTextChanged.connect(lambda t: self._on_param_changed(param_def.name, t))
             return widget
 
-        else:  # string or other
-            widget = QLineEdit()
-            if current_value is not None:
-                widget.setText(str(current_value))
-            else:
-                widget.setPlaceholderText("null")
-            widget.textChanged.connect(
-                lambda t: self._on_param_changed(param_def.name, t if t else None)
-            )
-            return widget
+        # string or other
+        widget = QLineEdit()
+        if current_value is not None:
+            widget.setText(str(current_value))
+        else:
+            widget.setPlaceholderText("null")
+        widget.textChanged.connect(lambda t: self._on_param_changed(param_def.name, t if t else None))
+        return widget
 
     def _on_param_changed(self, param_name: str, value: Any):
         """Handle parameter value change."""
         if self._current_node:
             self._current_node.parameters[param_name] = value
-            self.parameter_changed.emit(
-                self._current_node.uuid, param_name, value
-            )
+            self.parameter_changed.emit(self._current_node.uuid, param_name, value)

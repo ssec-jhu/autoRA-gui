@@ -1,7 +1,9 @@
 """Entry point for the AutoRA desktop GUI application."""
+
 import sys
-from PySide6.QtWidgets import QApplication
+
 from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QApplication
 
 from .main_window import MainWindow
 
@@ -9,9 +11,7 @@ from .main_window import MainWindow
 def main():
     """Run the application."""
     # Enable high DPI scaling
-    QApplication.setHighDpiScaleFactorRoundingPolicy(
-        Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
-    )
+    QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
 
     app = QApplication(sys.argv)
     app.setApplicationName("AutoRA Workflow Editor")

@@ -1,22 +1,22 @@
 """Visual node item for the canvas."""
-from PySide6.QtWidgets import (
-    QGraphicsItem,
-    QGraphicsEllipseItem,
-    QStyleOptionGraphicsItem,
-    QWidget,
-)
-from PySide6.QtCore import Qt, QRectF, QPointF, Signal, QObject
+
+from PySide6.QtCore import QObject, QPointF, QRectF, Qt, Signal
 from PySide6.QtGui import (
-    QPainter,
     QBrush,
-    QPen,
     QColor,
     QFont,
     QLinearGradient,
+    QPainter,
+    QPen,
+)
+from PySide6.QtWidgets import (
+    QGraphicsEllipseItem,
+    QGraphicsItem,
+    QStyleOptionGraphicsItem,
+    QWidget,
 )
 
 from ..models.node import NodeData, PortDef
-
 
 # Color scheme for different node types
 NODE_COLORS = {
@@ -53,6 +53,7 @@ class PortItem(QGraphicsEllipseItem):
 
 class NodeItemSignals(QObject):
     """Signals for NodeItem (QGraphicsItem can't have signals directly)."""
+
     selected = Signal(object)  # Emits NodeData
     position_changed = Signal(str, float, float)  # uuid, x, y
 
@@ -85,9 +86,7 @@ class NodeItem(QGraphicsItem):
         self._create_connection_points()
 
         # Color based on type
-        self._color = NODE_COLORS.get(
-            node_data.component.protocol_type, QColor("#9E9E9E")
-        )
+        self._color = NODE_COLORS.get(node_data.component.protocol_type, QColor("#9E9E9E"))
 
     def _create_connection_points(self):
         """Create invisible connection points at node edges."""
@@ -211,10 +210,10 @@ class NodeItem(QGraphicsItem):
         """Get the connection point for the specified side."""
         if side == "left":
             return self.get_left_center()
-        elif side == "right":
+        if side == "right":
             return self.get_right_center()
-        elif side == "top":
+        if side == "top":
             return self.get_top_center()
-        elif side == "bottom":
+        if side == "bottom":
             return self.get_bottom_center()
         return self.get_right_center()  # Default

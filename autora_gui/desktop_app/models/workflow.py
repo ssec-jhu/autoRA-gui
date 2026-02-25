@@ -1,15 +1,16 @@
 """Workflow data model for saving and loading."""
-from dataclasses import dataclass, field
-from typing import Any
+
 import json
 import uuid as uuid_module
+from dataclasses import dataclass, field
 
-from .node import NodeData, ComponentDefinition
+from .node import ComponentDefinition, NodeData
 
 
 @dataclass
 class Connection:
     """A connection between two nodes."""
+
     uuid: str
     source_node_id: str
     target_node_id: str
@@ -37,6 +38,7 @@ class Connection:
 @dataclass
 class Workflow:
     """A complete workflow with nodes and connections."""
+
     name: str = "Untitled Workflow"
     description: str = ""
     nodes: list[NodeData] = field(default_factory=list)
@@ -49,10 +51,7 @@ class Workflow:
     def remove_node(self, node_id: str) -> None:
         """Remove a node and its connections from the workflow."""
         self.nodes = [n for n in self.nodes if n.uuid != node_id]
-        self.connections = [
-            c for c in self.connections
-            if c.source_node_id != node_id and c.target_node_id != node_id
-        ]
+        self.connections = [c for c in self.connections if c.source_node_id != node_id and c.target_node_id != node_id]
 
     def add_connection(self, connection: Connection) -> None:
         """Add a connection to the workflow."""
@@ -115,7 +114,7 @@ class Workflow:
             file_path: Path to the workflow JSON file.
             component_lookup: Dict mapping component file paths to definitions.
         """
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             data = json.load(f)
 
         workflow = cls(

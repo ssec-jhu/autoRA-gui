@@ -1,20 +1,21 @@
 """Component browser tree widget for the left panel."""
+
 import pickle
+
+from PySide6.QtCore import QByteArray, QMimeData, Qt
+from PySide6.QtGui import QColor, QDrag, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import (
+    QAbstractItemView,
+    QLabel,
+    QLineEdit,
     QTreeWidget,
     QTreeWidgetItem,
     QVBoxLayout,
     QWidget,
-    QLabel,
-    QLineEdit,
-    QAbstractItemView,
 )
-from PySide6.QtCore import Qt, QMimeData, QByteArray
-from PySide6.QtGui import QDrag, QColor, QIcon, QPixmap, QPainter
 
 from ..models.node import ComponentDefinition
 from .component_loader import ComponentLoader
-
 
 # Display names for categories
 CATEGORY_DISPLAY_NAMES = {
@@ -183,10 +184,7 @@ class ComponentBrowser(QWidget):
                 component: ComponentDefinition = comp_item.data(0, Qt.UserRole)
 
                 # Check if matches search
-                matches = (
-                    text in component.name.lower()
-                    or text in component.description.lower()
-                )
+                matches = text in component.name.lower() or text in component.description.lower()
                 comp_item.setHidden(not matches)
 
                 if matches:

@@ -1,12 +1,13 @@
 """Canvas scene for managing nodes and connections."""
-from PySide6.QtWidgets import QGraphicsScene, QGraphicsSceneMouseEvent
-from PySide6.QtCore import Qt, Signal, QPointF
-from PySide6.QtGui import QColor, QPen
 
-from ..models.node import NodeData, ComponentDefinition
-from ..models.workflow import Workflow, Connection
-from .node_item import NodeItem, PortItem
+from PySide6.QtCore import QPointF, Qt, Signal
+from PySide6.QtGui import QColor
+from PySide6.QtWidgets import QGraphicsScene, QGraphicsSceneMouseEvent
+
+from ..models.node import ComponentDefinition, NodeData
+from ..models.workflow import Connection, Workflow
 from .connection_item import ConnectionItem, TempConnectionItem
+from .node_item import NodeItem, PortItem
 
 
 class CanvasScene(QGraphicsScene):
@@ -75,9 +76,7 @@ class CanvasScene(QGraphicsScene):
         source_port = source_node.get_output_port(connection.source_port)
         target_port = target_node.get_input_port(connection.target_port)
 
-        conn_item = ConnectionItem(
-            connection, source_node, target_node, source_port, target_port
-        )
+        conn_item = ConnectionItem(connection, source_node, target_node, source_port, target_port)
         self.addItem(conn_item)
         self._connection_items[connection.uuid] = conn_item
         return conn_item
@@ -109,7 +108,8 @@ class CanvasScene(QGraphicsScene):
 
         # Remove connected connections
         connections_to_remove = [
-            conn_item for conn_item in self._connection_items.values()
+            conn_item
+            for conn_item in self._connection_items.values()
             if conn_item.source_node == node_item or conn_item.target_node == node_item
         ]
         for conn_item in connections_to_remove:
@@ -205,8 +205,7 @@ class CanvasScene(QGraphicsScene):
             return None
 
         conn_item = ConnectionItem(
-            connection, source_node, target_node,
-            source_side=source_side, target_side=target_side
+            connection, source_node, target_node, source_side=source_side, target_side=target_side
         )
         self.addItem(conn_item)
         self._connection_items[connection.uuid] = conn_item
@@ -245,12 +244,11 @@ class CanvasScene(QGraphicsScene):
 
         if min_dist == dist_left:
             return "left", min_dist
-        elif min_dist == dist_right:
+        if min_dist == dist_right:
             return "right", min_dist
-        elif min_dist == dist_top:
+        if min_dist == dist_top:
             return "top", min_dist
-        else:
-            return "bottom", min_dist
+        return "bottom", min_dist
 
     def _get_closest_side(self, node: NodeItem, scene_pos: QPointF) -> str:
         """Determine which side of the node is closest to the given position."""

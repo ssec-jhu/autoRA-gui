@@ -1,7 +1,8 @@
 """Connection/arrow item for linking nodes."""
-from PySide6.QtWidgets import QGraphicsPathItem, QGraphicsItem
-from PySide6.QtCore import Qt, QPointF
-from PySide6.QtGui import QPainter, QPen, QColor, QPainterPath, QPolygonF
+
+from PySide6.QtCore import QPointF, Qt
+from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPolygonF
+from PySide6.QtWidgets import QGraphicsItem, QGraphicsPathItem
 
 from ..models.workflow import Connection
 from .node_item import NodeItem, PortItem
@@ -46,11 +47,11 @@ class ConnectionItem(QGraphicsPathItem):
         """Get control point for bezier curve based on side."""
         if side == "right":
             return QPointF(point.x() + offset, point.y())
-        elif side == "left":
+        if side == "left":
             return QPointF(point.x() - offset, point.y())
-        elif side == "bottom":
+        if side == "bottom":
             return QPointF(point.x(), point.y() + offset)
-        elif side == "top":
+        if side == "top":
             return QPointF(point.x(), point.y() - offset)
         return QPointF(point.x() + offset, point.y())  # Default
 
@@ -149,11 +150,11 @@ class TempConnectionItem(QGraphicsPathItem):
         """Get control point for bezier curve based on side."""
         if side == "right":
             return QPointF(point.x() + offset, point.y())
-        elif side == "left":
+        if side == "left":
             return QPointF(point.x() - offset, point.y())
-        elif side == "bottom":
+        if side == "bottom":
             return QPointF(point.x(), point.y() + offset)
-        elif side == "top":
+        if side == "top":
             return QPointF(point.x(), point.y() - offset)
         return QPointF(point.x() + offset, point.y())  # Default
 
@@ -166,9 +167,8 @@ class TempConnectionItem(QGraphicsPathItem):
         if abs(dx) > abs(dy):
             # Horizontal movement dominant
             return "left" if dx > 0 else "right"
-        else:
-            # Vertical movement dominant
-            return "top" if dy > 0 else "bottom"
+        # Vertical movement dominant
+        return "top" if dy > 0 else "bottom"
 
     def _update_path(self):
         """Update the bezier path."""

@@ -1,25 +1,25 @@
 """Main application window with 3-panel layout."""
+
 from pathlib import Path
-from PySide6.QtWidgets import (
-    QMainWindow,
-    QSplitter,
-    QWidget,
-    QVBoxLayout,
-    QToolBar,
-    QFileDialog,
-    QMessageBox,
-    QStatusBar,
-)
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction, QKeySequence
+from PySide6.QtWidgets import (
+    QFileDialog,
+    QMainWindow,
+    QMessageBox,
+    QSplitter,
+    QStatusBar,
+    QToolBar,
+)
 
-from .components.component_loader import ComponentLoader, get_default_components_dir
-from .components.component_browser import ComponentBrowser
 from .canvas.canvas_scene import CanvasScene
 from .canvas.canvas_view import CanvasView
-from .properties.property_editor import PropertyEditor
-from .models.workflow import Workflow
+from .components.component_browser import ComponentBrowser
+from .components.component_loader import ComponentLoader, get_default_components_dir
 from .models.node import ComponentDefinition
+from .models.workflow import Workflow
+from .properties.property_editor import PropertyEditor
 
 
 class MainWindow(QMainWindow):
@@ -235,18 +235,14 @@ class MainWindow(QMainWindow):
 
         if file_path:
             try:
-                workflow = Workflow.load_from_file(
-                    file_path, self.component_loader.component_lookup
-                )
+                workflow = Workflow.load_from_file(file_path, self.component_loader.component_lookup)
                 self.canvas_scene.set_workflow(workflow)
                 self._current_file = file_path
                 self._modified = False
                 self._update_title()
                 self.statusbar.showMessage(f"Opened: {file_path}")
             except Exception as e:
-                QMessageBox.critical(
-                    self, "Error", f"Failed to open workflow:\n{str(e)}"
-                )
+                QMessageBox.critical(self, "Error", f"Failed to open workflow:\n{e!s}")
 
     def _save_workflow(self) -> bool:
         """Save the current workflow - always shows file dialog."""
@@ -278,9 +274,7 @@ class MainWindow(QMainWindow):
                 self.statusbar.showMessage(f"Saved: {file_path}")
                 return True
             except Exception as e:
-                QMessageBox.critical(
-                    self, "Error", f"Failed to save workflow:\n{str(e)}"
-                )
+                QMessageBox.critical(self, "Error", f"Failed to save workflow:\n{e!s}")
         return False
 
     def _save_workflow_as(self) -> bool:
@@ -309,9 +303,7 @@ class MainWindow(QMainWindow):
         self._modified = True
         self._update_title()
 
-    def _on_component_dropped(
-        self, component: ComponentDefinition, x: float, y: float
-    ):
+    def _on_component_dropped(self, component: ComponentDefinition, x: float, y: float):
         """Handle component dropped on canvas."""
         self.canvas_scene.add_node(component, x, y)
         self.statusbar.showMessage(f"Added node: {component.name}")
