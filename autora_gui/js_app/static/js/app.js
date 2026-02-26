@@ -693,6 +693,8 @@ function handleSelectionEnd(e) {
 
 let tempLine = null;
 let tempLineStart = null;
+let mousePathPoints = [];  // Track mouse path for curve direction
+let connectionMode = 'auto';  // 'straight', 'parabolic', or 'auto'
 
 /**
  * Handle mouse down on node border for creating connections
@@ -715,42 +717,52 @@ function handleBorderMouseDown(e, nodeId, border) {
     }
 
     const node = document.querySelector(`[data-node-id="${nodeId}"]`);
+    const nodeRect = node.getBoundingClientRect();
     const svg = document.getElementById('connections-svg');
     const svgRect = svg.getBoundingClientRect();
 
     // Calculate connection point based on where user clicked on the border
     const borderRect = border.getBoundingClientRect();
-    let startX, startY;
+    let startX, startY, relativePos;
     const borderClass = border.classList.contains('border-top') ? 'border-top' :
                         border.classList.contains('border-bottom') ? 'border-bottom' :
                         border.classList.contains('border-left') ? 'border-left' : 'border-right';
 
     if (borderClass === 'border-top') {
         startX = e.clientX - svgRect.left;
-        startY = borderRect.bottom - svgRect.top;
+        startY = nodeRect.top - svgRect.top;
+        relativePos = (e.clientX - nodeRect.left) / nodeRect.width;
     } else if (borderClass === 'border-bottom') {
         startX = e.clientX - svgRect.left;
-        startY = borderRect.top - svgRect.top;
+        startY = nodeRect.bottom - svgRect.top;
+        relativePos = (e.clientX - nodeRect.left) / nodeRect.width;
     } else if (borderClass === 'border-left') {
-        startX = borderRect.right - svgRect.left;
+        startX = nodeRect.left - svgRect.left;
         startY = e.clientY - svgRect.top;
+        relativePos = (e.clientY - nodeRect.top) / nodeRect.height;
     } else {
-        startX = borderRect.left - svgRect.left;
+        startX = nodeRect.right - svgRect.left;
         startY = e.clientY - svgRect.top;
+        relativePos = (e.clientY - nodeRect.top) / nodeRect.height;
     }
+
+    // Clamp relativePos to 0-1 range
+    relativePos = Math.max(0, Math.min(1, relativePos));
 
     // Start new connection
     tempLineStart = {
         nodeId: nodeId,
         x: startX,
         y: startY,
-        border: borderClass
+        border: borderClass,
+        relativePos: relativePos
     };
 
     state.connecting = {
         source: nodeId,
         sourcePoint: { x: startX, y: startY },
-        sourceBorder: borderClass
+        sourceBorder: borderClass,
+        sourceRelativePos: relativePos
     };
 
     node.classList.add('connecting-source');
@@ -802,27 +814,34 @@ function handleConnectionMouseUp(e) {
 
             const minDist = Math.min(distTop, distBottom, distLeft, distRight);
 
-            let targetBorder, endX, endY;
+            let targetBorder, endX, endY, targetRelativePos;
 
             if (minDist === distTop) {
                 targetBorder = 'border-top';
                 endX = mouseX - svgRect.left;
                 endY = nodeRect.top - svgRect.top;
+                targetRelativePos = (mouseX - nodeRect.left) / nodeRect.width;
             } else if (minDist === distBottom) {
                 targetBorder = 'border-bottom';
                 endX = mouseX - svgRect.left;
                 endY = nodeRect.bottom - svgRect.top;
+                targetRelativePos = (mouseX - nodeRect.left) / nodeRect.width;
             } else if (minDist === distLeft) {
                 targetBorder = 'border-left';
                 endX = nodeRect.left - svgRect.left;
                 endY = mouseY - svgRect.top;
+                targetRelativePos = (mouseY - nodeRect.top) / nodeRect.height;
             } else {
                 targetBorder = 'border-right';
                 endX = nodeRect.right - svgRect.left;
                 endY = mouseY - svgRect.top;
+                targetRelativePos = (mouseY - nodeRect.top) / nodeRect.height;
             }
 
-            completeConnection(targetNodeId, endX, endY, targetBorder);
+            // Clamp to 0-1 range
+            targetRelativePos = Math.max(0, Math.min(1, targetRelativePos));
+
+            completeConnection(targetNodeId, endX, endY, targetBorder, targetRelativePos);
             return;
         }
     }
@@ -835,7 +854,7 @@ function handleConnectionMouseUp(e) {
 /**
  * Complete a connection to target node
  */
-function completeConnection(targetNodeId, endX, endY, targetBorder) {
+function completeConnection(targetNodeId, endX, endY, targetBorder, targetRelativePos = 0.5) {
     // Prevent self-connection
     if (targetNodeId === state.connecting.source) {
         updateStatus('Cannot connect a node to itself');
@@ -862,14 +881,25 @@ function completeConnection(targetNodeId, endX, endY, targetBorder) {
         return;
     }
 
-    // Create connection with anchor points
+    // Calculate curve offset from mouse path before creating connection
+    const curveOffset = calculateCurveOffset(
+        state.connecting.sourcePoint.x,
+        state.connecting.sourcePoint.y,
+        endX, endY,
+        mousePathPoints
+    );
+
+    // Create connection with anchor points, relative positions, and curve offset
     createConnection(
         state.connecting.source,
         targetNodeId,
         state.connecting.sourcePoint,
         { x: endX, y: endY },
         state.connecting.sourceBorder,
-        targetBorder
+        targetBorder,
+        state.connecting.sourceRelativePos,
+        targetRelativePos,
+        curveOffset
     );
     cancelConnection();
     updateStatus('Connection created');
@@ -887,6 +917,13 @@ function handleConnectionMouseMove(e) {
     const endX = e.clientX - svgRect.left;
     const endY = e.clientY - svgRect.top;
 
+    // Track mouse path for determining curve direction
+    mousePathPoints.push({ x: endX, y: endY, time: Date.now() });
+    // Keep only recent points (last 20) for performance
+    if (mousePathPoints.length > 20) {
+        mousePathPoints.shift();
+    }
+
     if (!tempLine) {
         tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         tempLine.classList.add('connection-line', 'temp');
@@ -895,8 +932,21 @@ function handleConnectionMouseMove(e) {
         svg.appendChild(tempLine);
     }
 
-    // Use same convex curve algorithm for preview
-    const path = createBezierPath(tempLineStart.x, tempLineStart.y, endX, endY);
+    // Check if source is start node - use straight line
+    const sourceData = state.nodes.get(tempLineStart.nodeId);
+    const sourceProtocol = sourceData?.componentData?.protocolType;
+    const useStraightLine = sourceProtocol === 'start_point';
+
+    let path;
+    if (useStraightLine) {
+        path = createStraightPath(tempLineStart.x, tempLineStart.y, endX, endY);
+    } else {
+        path = createConnectionPath(
+            tempLineStart.x, tempLineStart.y,
+            endX, endY,
+            mousePathPoints
+        );
+    }
     tempLine.setAttribute('d', path);
 }
 
@@ -906,6 +956,7 @@ function handleConnectionMouseMove(e) {
 function cancelConnection() {
     state.connecting = null;
     tempLineStart = null;
+    mousePathPoints = [];  // Clear mouse path
 
     if (tempLine) {
         tempLine.remove();
@@ -935,16 +986,19 @@ function handleConnectionEscape(e) {
 /**
  * Create a connection between two nodes
  */
-function createConnection(sourceId, targetId, sourcePoint = null, targetPoint = null, sourceBorder = null, targetBorder = null) {
+function createConnection(sourceId, targetId, sourcePoint = null, targetPoint = null, sourceBorder = null, targetBorder = null, sourceRelativePos = 0.5, targetRelativePos = 0.5, curveOffset = 0) {
     const connection = {
         id: generateUUID(),
         source: sourceId,
         target: targetId,
-        sourceAnchor: sourcePoint,  // Relative anchor point on source node
-        targetAnchor: targetPoint,  // Relative anchor point on target node
+        sourceAnchor: sourcePoint,  // Absolute anchor point on source node (for reference)
+        targetAnchor: targetPoint,  // Absolute anchor point on target node (for reference)
         sourceBorder: sourceBorder, // Which border the connection starts from
         targetBorder: targetBorder, // Which border the connection ends at
-        controlPoints: null         // Will use defaults
+        sourceRelativePos: sourceRelativePos, // Position along source border (0-1)
+        targetRelativePos: targetRelativePos, // Position along target border (0-1)
+        controlPoints: null,        // Legacy - for backwards compatibility
+        curveOffset: curveOffset    // Curve offset from mouse path (positive = left, negative = right)
     };
 
     state.connections.push(connection);
@@ -1021,11 +1075,112 @@ function selectConnection(connectionId) {
 }
 
 /**
- * Create bezier path string
+ * Create connection path based on mouse movement
+ * Returns either a straight line or parabolic curve
+ */
+function createConnectionPath(x1, y1, x2, y2, pathPoints = null) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Always use parabolic curves
+    // Determine curve direction from mouse path
+    let curveOffset = calculateCurveOffset(x1, y1, x2, y2, pathPoints);
+
+    // If no significant mouse deviation, use default curve offset
+    if (Math.abs(curveOffset) < 5) {
+        curveOffset = distance * -0.3;  // Default curve (negative = opposite direction)
+    }
+
+    return createParabolicPath(x1, y1, x2, y2, curveOffset);
+}
+
+/**
+ * Create a straight line path
+ */
+function createStraightPath(x1, y1, x2, y2) {
+    return `M ${x1} ${y1} L ${x2} ${y2}`;
+}
+
+/**
+ * Create a parabolic (quadratic bezier) curve
+ * The curve bows in the direction of the offset
+ */
+function createParabolicPath(x1, y1, x2, y2, curveOffset) {
+    const midX = (x1 + x2) / 2;
+    const midY = (y1 + y2) / 2;
+
+    // Calculate perpendicular direction
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance === 0) {
+        return `M ${x1} ${y1} L ${x2} ${y2}`;
+    }
+
+    // Perpendicular unit vector
+    const perpX = -dy / distance;
+    const perpY = dx / distance;
+
+    // Control point at midpoint, offset perpendicular to the line
+    const cpX = midX + perpX * curveOffset;
+    const cpY = midY + perpY * curveOffset;
+
+    // Quadratic bezier curve (single control point = parabola)
+    return `M ${x1} ${y1} Q ${cpX} ${cpY}, ${x2} ${y2}`;
+}
+
+/**
+ * Calculate curve offset based on mouse path deviation from straight line
+ */
+function calculateCurveOffset(x1, y1, x2, y2, pathPoints) {
+    if (!pathPoints || pathPoints.length < 3) {
+        return 0;
+    }
+
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance === 0) return 0;
+
+    // Calculate average deviation from the straight line
+    let totalDeviation = 0;
+    let count = 0;
+
+    for (const point of pathPoints) {
+        // Calculate perpendicular distance from point to line
+        // Using cross product formula: |AB x AP| / |AB|
+        const apX = point.x - x1;
+        const apY = point.y - y1;
+
+        // Cross product gives signed distance (positive = left, negative = right)
+        const crossProduct = dx * apY - dy * apX;
+        const deviation = crossProduct / distance;
+
+        totalDeviation += deviation;
+        count++;
+    }
+
+    const avgDeviation = totalDeviation / count;
+
+    // Scale the deviation for visual effect (but cap it)
+    // Using 1.5x multiplier to make curves more pronounced
+    const scaledOffset = Math.max(-150, Math.min(150, avgDeviation * 1.5));
+
+    return scaledOffset;
+}
+
+/**
+ * Create bezier path string (legacy, for stored connections)
  */
 function createBezierPath(x1, y1, x2, y2, controlPoints = null) {
-    const cp = controlPoints || getDefaultControlPoints(x1, y1, x2, y2);
-    return `M ${x1} ${y1} C ${cp.cp1.x} ${cp.cp1.y}, ${cp.cp2.x} ${cp.cp2.y}, ${x2} ${y2}`;
+    if (controlPoints) {
+        return `M ${x1} ${y1} C ${controlPoints.cp1.x} ${controlPoints.cp1.y}, ${controlPoints.cp2.x} ${controlPoints.cp2.y}, ${x2} ${y2}`;
+    }
+    // Default to parabolic for new connections
+    return createParabolicPath(x1, y1, x2, y2, 0);
 }
 
 /**
@@ -1036,6 +1191,13 @@ function getDefaultControlPoints(x1, y1, x2, y2) {
     const dx = x2 - x1;
     const dy = y2 - y1;
     const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance === 0) {
+        return {
+            cp1: { x: x1, y: y1 },
+            cp2: { x: x2, y: y2 }
+        };
+    }
 
     // Calculate perpendicular offset for concave curve
     // The curve will bow inward (counter-clockwise direction)
@@ -1167,10 +1329,14 @@ function renderConnectionLine(connection) {
     // Use stored anchors or calculate best borders
     let startX, startY, endX, endY;
 
+    // Get relative positions (default to 0.5 if not stored)
+    const sourceRelPos = connection.sourceRelativePos !== undefined ? connection.sourceRelativePos : 0.5;
+    const targetRelPos = connection.targetRelativePos !== undefined ? connection.targetRelativePos : 0.5;
+
     if (connection.sourceBorder && connection.targetBorder) {
-        // Use stored border preferences
-        const sourceAnchor = getConnectionAnchor(sourceNode, svgRect, connection.sourceBorder);
-        const targetAnchor = getConnectionAnchor(targetNode, svgRect, connection.targetBorder);
+        // Use stored border preferences with relative positions
+        const sourceAnchor = getConnectionAnchor(sourceNode, svgRect, connection.sourceBorder, sourceRelPos);
+        const targetAnchor = getConnectionAnchor(targetNode, svgRect, connection.targetBorder, targetRelPos);
         startX = sourceAnchor.x;
         startY = sourceAnchor.y;
         endX = targetAnchor.x;
@@ -1178,8 +1344,8 @@ function renderConnectionLine(connection) {
     } else {
         // Auto-determine best borders based on node positions
         const { sourceBorder, targetBorder } = determineBestBorder(sourceNode, targetNode, svgRect);
-        const sourceAnchor = getConnectionAnchor(sourceNode, svgRect, sourceBorder);
-        const targetAnchor = getConnectionAnchor(targetNode, svgRect, targetBorder);
+        const sourceAnchor = getConnectionAnchor(sourceNode, svgRect, sourceBorder, sourceRelPos);
+        const targetAnchor = getConnectionAnchor(targetNode, svgRect, targetBorder, targetRelPos);
         startX = sourceAnchor.x;
         startY = sourceAnchor.y;
         endX = targetAnchor.x;
@@ -1212,13 +1378,38 @@ function renderConnectionLine(connection) {
         svg.appendChild(path);
     }
 
-    // Calculate control points
-    const controlPoints = connection.controlPoints || getDefaultControlPoints(startX, startY, endX, endY);
-    const pathD = createBezierPath(startX, startY, endX, endY, controlPoints);
+    // Determine path type based on source/target node types
+    let pathD;
+    const dx = endX - startX;
+    const dy = endY - startY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Check if source is start node or target is end node - use straight line
+    const sourceData = state.nodes.get(connection.source);
+    const targetData = state.nodes.get(connection.target);
+    const sourceProtocol = sourceData?.componentData?.protocolType;
+    const targetProtocol = targetData?.componentData?.protocolType;
+    const useStraightLine = sourceProtocol === 'start_point' || targetProtocol === 'end_point';
+
+    if (useStraightLine) {
+        // Straight line for start node outputs and end node inputs
+        pathD = createStraightPath(startX, startY, endX, endY);
+    } else if (connection.curveOffset !== undefined && connection.curveOffset !== null && Math.abs(connection.curveOffset) > 5) {
+        // Use stored curve offset from mouse movement
+        pathD = createParabolicPath(startX, startY, endX, endY, connection.curveOffset);
+    } else if (connection.controlPoints) {
+        // Legacy: use stored control points (cubic bezier)
+        pathD = createBezierPath(startX, startY, endX, endY, connection.controlPoints);
+    } else {
+        // Default: parabolic curve with automatic offset (negative = opposite direction)
+        const defaultCurveOffset = distance * -0.3;
+        pathD = createParabolicPath(startX, startY, endX, endY, defaultCurveOffset);
+    }
     path.setAttribute('d', pathD);
 
-    // Render control point handles if selected
-    if (state.selectedConnection === connection.id) {
+    // Render control point handles if selected (only for legacy connections with control points)
+    if (state.selectedConnection === connection.id && connection.controlPoints) {
+        const controlPoints = connection.controlPoints || getDefaultControlPoints(startX, startY, endX, endY);
         renderControlPointHandles(connection, startX, startY, endX, endY, controlPoints, svg);
     }
 }

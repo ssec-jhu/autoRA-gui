@@ -127,8 +127,8 @@
       "componentType": "control",
       "parameterSetting": [],
       "canvasLocation": {
-        "x": 293,
-        "y": 15
+        "x": 539,
+        "y": 14
       }
     },
     {
@@ -159,20 +159,6 @@
   ],
   "links": [
     {
-      "source": "6835a845-b3d7-455a-9d83-40d1079884c9",
-      "target": "d05446aa-a3e0-4f00-8e67-59ca593d3c2a",
-      "sourceBorder": "border-right",
-      "targetBorder": "border-top",
-      "controlPoints": null
-    },
-    {
-      "source": "d05446aa-a3e0-4f00-8e67-59ca593d3c2a",
-      "target": "89987c6e-5e01-41c9-a423-844c03d655d9",
-      "sourceBorder": "border-right",
-      "targetBorder": "border-top",
-      "controlPoints": null
-    },
-    {
       "source": "89987c6e-5e01-41c9-a423-844c03d655d9",
       "target": "f70d72a5-e4c3-48f4-88a7-48e27dc97046",
       "sourceBorder": "border-bottom",
@@ -194,10 +180,24 @@
       "controlPoints": null
     },
     {
+      "source": "6835a845-b3d7-455a-9d83-40d1079884c9",
+      "target": "d05446aa-a3e0-4f00-8e67-59ca593d3c2a",
+      "sourceBorder": "border-bottom",
+      "targetBorder": "border-top",
+      "controlPoints": null
+    },
+    {
+      "source": "d05446aa-a3e0-4f00-8e67-59ca593d3c2a",
+      "target": "89987c6e-5e01-41c9-a423-844c03d655d9",
+      "sourceBorder": "border-right",
+      "targetBorder": "border-top",
+      "controlPoints": null
+    },
+    {
       "source": "18e7e587-50ea-411e-8ff8-c1021d9ddda7",
       "target": "3f95ba5e-5484-4788-8841-5af0519fb057",
       "sourceBorder": "border-bottom",
-      "targetBorder": "border-right",
+      "targetBorder": "border-top",
       "controlPoints": null
     }
   ]

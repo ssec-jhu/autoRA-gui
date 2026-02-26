@@ -78,7 +78,8 @@ describe('createBezierPath', () => {
   test('creates valid SVG path string', () => {
     const path = createBezierPath(0, 0, 100, 100);
 
-    expect(path).toMatch(/^M \d+\.?\d* \d+\.?\d* C/);
+    // Without control points, uses quadratic bezier (Q)
+    expect(path).toMatch(/^M \d+\.?\d* \d+\.?\d* Q/);
     expect(path).toContain('M 0 0');
     expect(path).toContain('100 100');
   });
@@ -90,14 +91,15 @@ describe('createBezierPath', () => {
     };
     const path = createBezierPath(0, 0, 100, 100, controlPoints);
 
+    // With control points, uses cubic bezier (C)
     expect(path).toContain('C 25 50, 75 50,');
   });
 
-  test('calculates default control points when none provided', () => {
+  test('uses quadratic bezier when no control points provided', () => {
     const path = createBezierPath(0, 0, 100, 100);
 
-    // Should have all path components
-    expect(path).toMatch(/M .* C .*, .*, .* .*/);
+    // Should use quadratic bezier (Q) with single control point
+    expect(path).toMatch(/M .* Q .*, .* .*/);
   });
 
   test('handles negative coordinates', () => {
@@ -261,5 +263,154 @@ describe('completeConnection', () => {
 
     // Should still have only 1 connection
     expect(state.connections.length).toBe(1);
+  });
+});
+
+describe('createConnectionPath', () => {
+  test('creates straight line for short distances', () => {
+    const path = createConnectionPath(0, 0, 20, 20);
+
+    expect(path).toMatch(/^M .* L .*/);
+  });
+
+  test('uses parabolic path for longer distances with offset', () => {
+    // Create path points that deviate significantly from straight line
+    // Need at least 3 points and large deviation (>15px after scaling)
+    const pathPoints = [
+      { x: 0, y: 0 },
+      { x: 25, y: 60 },   // Deviate significantly
+      { x: 50, y: 80 },   // More deviation
+      { x: 75, y: 60 },   // Continue deviating
+      { x: 100, y: 0 }
+    ];
+    const path = createConnectionPath(0, 0, 100, 0, pathPoints);
+
+    // Should use quadratic bezier due to deviation
+    expect(path).toMatch(/^M .* Q .*/);
+  });
+
+  test('uses straight line when path is mostly direct', () => {
+    // Path points that stay close to the straight line
+    const pathPoints = [
+      { x: 0, y: 0 },
+      { x: 50, y: 2 },  // Small deviation
+      { x: 100, y: 0 }
+    ];
+    const path = createConnectionPath(0, 0, 100, 0, pathPoints);
+
+    expect(path).toMatch(/^M .* L .*/);
+  });
+
+  test('handles null path points', () => {
+    const path = createConnectionPath(0, 0, 100, 100, null);
+
+    // Should still produce valid path
+    expect(path).toBeTruthy();
+    expect(path).toMatch(/^M/);
+  });
+});
+
+describe('createStraightPath', () => {
+  test('creates L command path', () => {
+    const path = createStraightPath(10, 20, 30, 40);
+
+    expect(path).toBe('M 10 20 L 30 40');
+  });
+
+  test('handles zero coordinates', () => {
+    const path = createStraightPath(0, 0, 0, 0);
+
+    expect(path).toBe('M 0 0 L 0 0');
+  });
+
+  test('handles negative coordinates', () => {
+    const path = createStraightPath(-10, -20, 30, 40);
+
+    expect(path).toBe('M -10 -20 L 30 40');
+  });
+});
+
+describe('createParabolicPath', () => {
+  test('creates Q command path', () => {
+    const path = createParabolicPath(0, 0, 100, 0, 50);
+
+    expect(path).toMatch(/^M 0 0 Q .*, 100 0$/);
+  });
+
+  test('control point is perpendicular to line direction', () => {
+    // Horizontal line with positive offset
+    // Perpendicular vector for horizontal line (dx=100, dy=0) is (0, 1)
+    // So control point is offset in positive Y direction
+    const path = createParabolicPath(0, 0, 100, 0, 50);
+
+    // Extract control point from Q command
+    const match = path.match(/Q ([\d.-]+) ([\d.-]+),/);
+    expect(match).toBeTruthy();
+    const cpX = parseFloat(match[1]);
+    const cpY = parseFloat(match[2]);
+
+    // Control point should be at midpoint X, offset Y
+    expect(cpX).toBe(50);  // midpoint
+    expect(cpY).toBe(50);  // perpendicular offset (+Y for horizontal line)
+  });
+
+  test('handles zero distance gracefully', () => {
+    const path = createParabolicPath(50, 50, 50, 50, 20);
+
+    // Should fall back to straight line
+    expect(path).toMatch(/^M .* L .*/);
+  });
+
+  test('negative offset curves opposite direction', () => {
+    const pathPositive = createParabolicPath(0, 0, 100, 0, 50);
+    const pathNegative = createParabolicPath(0, 0, 100, 0, -50);
+
+    // Extract Y control points
+    const matchPos = pathPositive.match(/Q [\d.-]+ ([\d.-]+),/);
+    const matchNeg = pathNegative.match(/Q [\d.-]+ ([\d.-]+),/);
+
+    const cpYPos = parseFloat(matchPos[1]);
+    const cpYNeg = parseFloat(matchNeg[1]);
+
+    // Should be opposite signs
+    expect(Math.sign(cpYPos)).toBe(-Math.sign(cpYNeg));
+  });
+});
+
+describe('calculateCurveOffset', () => {
+  test('returns 0 for null path points', () => {
+    const offset = calculateCurveOffset(0, 0, 100, 100, null);
+
+    expect(offset).toBe(0);
+  });
+
+  test('returns 0 for empty path points', () => {
+    const offset = calculateCurveOffset(0, 0, 100, 100, []);
+
+    expect(offset).toBe(0);
+  });
+
+  test('returns 0 for single path point', () => {
+    const offset = calculateCurveOffset(0, 0, 100, 100, [{ x: 50, y: 50 }]);
+
+    expect(offset).toBe(0);
+  });
+
+  test('calculates positive offset for deviation one side', () => {
+    // Points deviating to one side of the straight line
+    const pathPoints = [
+      { x: 0, y: 0 },
+      { x: 50, y: 50 },  // Above the line y = x
+      { x: 100, y: 0 }
+    ];
+    const offset = calculateCurveOffset(0, 0, 100, 0, pathPoints);
+
+    expect(offset).not.toBe(0);
+  });
+
+  test('handles zero distance between endpoints', () => {
+    const offset = calculateCurveOffset(50, 50, 50, 50, [{ x: 60, y: 60 }]);
+
+    expect(offset).toBe(0);  // Should not throw, returns 0
   });
 });
