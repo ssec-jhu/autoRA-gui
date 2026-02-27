@@ -1,0 +1,127 @@
+.node {
+  position: absolute;
+  width: 160px;
+  background: var(--bg-panel);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  cursor: grab;
+  user-select: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  z-index: 1;
+}
+
+.node:hover {
+  border-color: var(--border-light);
+}
+
+.node.selected {
+  border-color: var(--accent-danger);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+  z-index: 10;
+}
+
+.node.dragging {
+  cursor: grabbing;
+  opacity: 0.9;
+  z-index: 100;
+}
+
+.node.connecting {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+}
+
+.node-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px 6px 0 0;
+  color: white;
+}
+
+.node-icon {
+  font-size: 14px;
+}
+
+.node-title {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.node-delete {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.2);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.node:hover .node-delete {
+  opacity: 1;
+}
+
+.node-delete:hover {
+  background: rgba(239, 68, 68, 0.6);
+}
+
+.node-body {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  min-height: 44px;
+}
+
+.port {
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.port-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--border-light);
+  border: 2px solid var(--bg-panel);
+  border-radius: 50%;
+  transition: transform 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.port:hover .port-dot {
+  transform: scale(1.4);
+  background: var(--accent-primary);
+  box-shadow: 0 0 8px var(--accent-primary);
+}
+
+.port-input {
+  margin-left: -6px;
+}
+
+.port-output {
+  margin-right: -6px;
+}
+
+.node-content {
+  flex: 1;
+  text-align: center;
+}
+
+.node-type {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
