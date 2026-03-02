@@ -10,6 +10,7 @@ function Canvas() {
   const [tempLine, setTempLine] = useState(null)
   const [isPanning, setIsPanning] = useState(false)
   const [panStart, setPanStart] = useState({ x: 0, y: 0 })
+  const [connectingFrom, setConnectingFrom] = useState(null) // { nodeId, point: {x, y} }
 
   const screenToCanvas = useCallback((screenX, screenY) => {
     if (!canvasRef.current) return { x: 0, y: 0 }
@@ -42,6 +43,8 @@ function Canvas() {
   const handleCanvasClick = (e) => {
     if (e.target === canvasRef.current || e.target.classList.contains('canvas-inner')) {
       dispatch({ type: 'DESELECT_ALL' })
+      setConnectingFrom(null)
+      setTempLine(null)
     }
   }
 
@@ -54,7 +57,7 @@ function Canvas() {
   }, [state.zoom, dispatch])
 
   const handleMouseDown = (e) => {
-    if (e.button === 1 || (e.button === 0 && e.altKey)) {
+    if (e.button === 1) {
       setIsPanning(true)
       setPanStart({ x: e.clientX - state.pan.x * state.zoom, y: e.clientY - state.pan.y * state.zoom })
     }
@@ -71,19 +74,16 @@ function Canvas() {
       })
     }
 
-    if (state.connectingFrom) {
-      const sourceNode = state.nodes.find(n => n.id === state.connectingFrom)
-      if (sourceNode) {
-        const { x, y } = screenToCanvas(e.clientX, e.clientY)
-        setTempLine({
-          x1: sourceNode.x + 160,
-          y1: sourceNode.y + 40,
-          x2: x,
-          y2: y
-        })
-      }
+    if (connectingFrom) {
+      const { x, y } = screenToCanvas(e.clientX, e.clientY)
+      setTempLine({
+        x1: connectingFrom.point.x,
+        y1: connectingFrom.point.y,
+        x2: x,
+        y2: y
+      })
     }
-  }, [isPanning, panStart, state.zoom, state.connectingFrom, state.nodes, screenToCanvas, dispatch])
+  }, [isPanning, panStart, state.zoom, connectingFrom, screenToCanvas, dispatch])
 
   const handleMouseUp = () => {
     setIsPanning(false)
@@ -97,27 +97,48 @@ function Canvas() {
     }
   }, [handleWheel])
 
-  useEffect(() => {
-    if (!state.connectingFrom) {
-      setTempLine(null)
-    }
-  }, [state.connectingFrom])
-
-  const handlePortClick = useCallback((nodeId, portType) => {
-    if (portType === 'output') {
-      dispatch({ type: 'START_CONNECTING', payload: nodeId })
-    } else if (portType === 'input' && state.connectingFrom) {
+  const handleBorderClick = useCallback((nodeId, point) => {
+    if (!connectingFrom) {
+      // Start new connection
+      setConnectingFrom({ nodeId, point })
+    } else if (connectingFrom.nodeId !== nodeId) {
+      // Complete connection to different node
       dispatch({
         type: 'ADD_CONNECTION',
-        payload: { sourceId: state.connectingFrom, targetId: nodeId }
+        payload: {
+          sourceId: connectingFrom.nodeId,
+          targetId: nodeId,
+          sourcePoint: connectingFrom.point,
+          targetPoint: point
+        }
       })
+      setConnectingFrom(null)
+      setTempLine(null)
     }
-  }, [state.connectingFrom, dispatch])
+  }, [connectingFrom, dispatch])
+
+  // Calculate bezier curve for temp line
+  const getTempLinePath = () => {
+    if (!tempLine) return ''
+    const { x1, y1, x2, y2 } = tempLine
+    const dx = x2 - x1
+    const dy = y2 - y1
+    const dist = Math.sqrt(dx * dx + dy * dy)
+    const cpDist = Math.min(dist * 0.4, 80)
+
+    // Control points perpendicular to line direction
+    const cp1x = x1 + cpDist * Math.sign(dx || 1)
+    const cp1y = y1
+    const cp2x = x2 - cpDist * Math.sign(dx || 1)
+    const cp2y = y2
+
+    return `M ${x1} ${y1} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x2} ${y2}`
+  }
 
   return (
     <div
       ref={canvasRef}
-      className={`canvas ${isPanning ? 'panning' : ''}`}
+      className={`canvas ${isPanning ? 'panning' : ''} ${connectingFrom ? 'connecting-mode' : ''}`}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       onClick={handleCanvasClick}
@@ -173,7 +194,7 @@ function Canvas() {
           {tempLine && (
             <path
               className="temp-connection"
-              d={`M ${tempLine.x1} ${tempLine.y1} C ${tempLine.x1 + 60} ${tempLine.y1}, ${tempLine.x2 - 60} ${tempLine.y2}, ${tempLine.x2} ${tempLine.y2}`}
+              d={getTempLinePath()}
               stroke="var(--accent-primary)"
               strokeWidth="2"
               strokeDasharray="5,5"
@@ -186,11 +207,11 @@ function Canvas() {
             key={node.id}
             node={node}
             isSelected={state.selectedNodeId === node.id}
-            isConnecting={state.connectingFrom === node.id}
+            isConnecting={connectingFrom?.nodeId === node.id}
             onSelect={(id) => dispatch({ type: 'SELECT_NODE', payload: id })}
             onDelete={(id) => dispatch({ type: 'DELETE_NODE', payload: id })}
             onPositionChange={(id, x, y) => dispatch({ type: 'UPDATE_NODE_POSITION', payload: { id, x, y } })}
-            onPortClick={handlePortClick}
+            onBorderClick={handleBorderClick}
             zoom={state.zoom}
           />
         ))}
@@ -199,6 +220,7 @@ function Canvas() {
         <span>Zoom: {Math.round(state.zoom * 100)}%</span>
         <span>Nodes: {state.nodes.length}</span>
         <span>Connections: {state.connections.length}</span>
+        {connectingFrom && <span className="connecting-hint">Click another node to connect</span>}
       </div>
     </div>
   )

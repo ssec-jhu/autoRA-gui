@@ -50,11 +50,39 @@ function workflowReducer(state, action) {
 
     case 'UPDATE_NODE_POSITION': {
       const { id, x, y } = action.payload
+      const oldNode = state.nodes.find(n => n.id === id)
+      if (!oldNode) return state
+
+      const dx = x - oldNode.x
+      const dy = y - oldNode.y
+
+      // Update node position
+      const newNodes = state.nodes.map(node =>
+        node.id === id ? { ...node, x, y } : node
+      )
+
+      // Update connection points attached to this node
+      const newConnections = state.connections.map(conn => {
+        let updated = { ...conn }
+        if (conn.sourceId === id && conn.sourcePoint) {
+          updated.sourcePoint = {
+            x: conn.sourcePoint.x + dx,
+            y: conn.sourcePoint.y + dy
+          }
+        }
+        if (conn.targetId === id && conn.targetPoint) {
+          updated.targetPoint = {
+            x: conn.targetPoint.x + dx,
+            y: conn.targetPoint.y + dy
+          }
+        }
+        return updated
+      })
+
       return {
         ...state,
-        nodes: state.nodes.map(node =>
-          node.id === id ? { ...node, x, y } : node
-        )
+        nodes: newNodes,
+        connections: newConnections
       }
     }
 
@@ -78,7 +106,7 @@ function workflowReducer(state, action) {
       }
 
     case 'ADD_CONNECTION': {
-      const { sourceId, targetId } = action.payload
+      const { sourceId, targetId, sourcePoint, targetPoint } = action.payload
       const exists = state.connections.some(
         c => c.sourceId === sourceId && c.targetId === targetId
       )
@@ -86,7 +114,9 @@ function workflowReducer(state, action) {
       const newConnection = {
         id: uuidv4(),
         sourceId,
-        targetId
+        targetId,
+        sourcePoint,
+        targetPoint
       }
       return {
         ...state,

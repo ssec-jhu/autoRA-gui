@@ -77,3 +77,12 @@
   font-size: 12px;
   color: var(--text-muted);
 }
+
+.connecting-hint {
+  color: var(--accent-primary);
+  font-weight: 500;
+}
+
+.canvas.connecting-mode {
+  cursor: crosshair;
+}

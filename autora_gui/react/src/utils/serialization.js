@@ -21,7 +21,9 @@ export function serializeWorkflow(state) {
     })),
     links: state.connections.map(conn => ({
       source: conn.sourceId,
-      target: conn.targetId
+      target: conn.targetId,
+      sourcePoint: conn.sourcePoint,
+      targetPoint: conn.targetPoint
     }))
   }
 }
@@ -67,7 +69,9 @@ export function deserializeWorkflow(workflow, componentsMap) {
     .map(link => ({
       id: uuidv4(),
       sourceId: link.source,
-      targetId: link.target
+      targetId: link.target,
+      sourcePoint: link.sourcePoint,
+      targetPoint: link.targetPoint
     }))
 
   return { nodes, connections }

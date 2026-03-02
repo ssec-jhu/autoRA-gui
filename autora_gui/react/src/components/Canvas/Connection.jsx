@@ -4,18 +4,34 @@ const NODE_WIDTH = 160
 const NODE_HEIGHT = 80
 
 function Connection({ connection, sourceNode, targetNode, isSelected, onSelect }) {
-  const x1 = sourceNode.x + NODE_WIDTH
-  const y1 = sourceNode.y + NODE_HEIGHT / 2
-  const x2 = targetNode.x
-  const y2 = targetNode.y + NODE_HEIGHT / 2
+  // Use stored connection points if available, otherwise calculate defaults
+  const x1 = connection.sourcePoint?.x ?? (sourceNode.x + NODE_WIDTH)
+  const y1 = connection.sourcePoint?.y ?? (sourceNode.y + NODE_HEIGHT / 2)
+  const x2 = connection.targetPoint?.x ?? targetNode.x
+  const y2 = connection.targetPoint?.y ?? (targetNode.y + NODE_HEIGHT / 2)
 
+  // Calculate control points for smooth parabolic curve
   const dx = x2 - x1
-  const cpOffset = Math.min(Math.abs(dx) * 0.5, 100)
+  const dy = y2 - y1
+  const dist = Math.sqrt(dx * dx + dy * dy)
+  const cpDist = Math.min(dist * 0.4, 100)
 
-  const cp1x = x1 + cpOffset
-  const cp1y = y1
-  const cp2x = x2 - cpOffset
-  const cp2y = y2
+  // Determine curve direction based on relative positions
+  let cp1x, cp1y, cp2x, cp2y
+
+  if (Math.abs(dx) > Math.abs(dy)) {
+    // Horizontal-ish connection
+    cp1x = x1 + cpDist * Math.sign(dx || 1)
+    cp1y = y1
+    cp2x = x2 - cpDist * Math.sign(dx || 1)
+    cp2y = y2
+  } else {
+    // Vertical-ish connection
+    cp1x = x1
+    cp1y = y1 + cpDist * Math.sign(dy || 1)
+    cp2x = x2
+    cp2y = y2 - cpDist * Math.sign(dy || 1)
+  }
 
   const pathD = `M ${x1} ${y1} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x2} ${y2}`
 
@@ -44,6 +60,9 @@ function Connection({ connection, sourceNode, targetNode, isSelected, onSelect }
           onSelect(connection.id)
         }}
       />
+      {/* Connection endpoints */}
+      <circle cx={x1} cy={y1} r="4" fill={isSelected ? 'var(--accent-danger)' : 'var(--accent-primary)'} />
+      <circle cx={x2} cy={y2} r="4" fill={isSelected ? 'var(--accent-danger)' : 'var(--accent-primary)'} />
     </g>
   )
 }

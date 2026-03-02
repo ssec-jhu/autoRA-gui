@@ -10,23 +10,71 @@ const typeConfig = {
   filter_point: { color: 'var(--node-controls)', icon: '🔁' }
 }
 
-function Node({ node, isSelected, isConnecting, onSelect, onDelete, onPositionChange, onPortClick, zoom }) {
+const NODE_WIDTH = 160
+const NODE_HEIGHT = 80
+
+function Node({ node, isSelected, isConnecting, onSelect, onDelete, onPositionChange, onBorderClick, zoom }) {
   const nodeRef = useRef(null)
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
 
   const config = typeConfig[node.type] || { color: '#666', icon: '●' }
 
+  const getClickPositionOnBorder = useCallback((e) => {
+    if (!nodeRef.current) return null
+    const rect = nodeRef.current.getBoundingClientRect()
+    const x = (e.clientX - rect.left) / zoom
+    const y = (e.clientY - rect.top) / zoom
+
+    // Determine which edge is closest
+    const distToLeft = x
+    const distToRight = NODE_WIDTH - x
+    const distToTop = y
+    const distToBottom = NODE_HEIGHT - y
+
+    const minDist = Math.min(distToLeft, distToRight, distToTop, distToBottom)
+
+    // Snap to the closest edge
+    if (minDist === distToLeft) {
+      return { x: node.x, y: node.y + y }
+    } else if (minDist === distToRight) {
+      return { x: node.x + NODE_WIDTH, y: node.y + y }
+    } else if (minDist === distToTop) {
+      return { x: node.x + x, y: node.y }
+    } else {
+      return { x: node.x + x, y: node.y + NODE_HEIGHT }
+    }
+  }, [node.x, node.y, zoom])
+
   const handleMouseDown = useCallback((e) => {
-    if (e.target.closest('.port') || e.target.closest('.node-delete')) return
+    if (e.target.closest('.node-delete')) return
     e.stopPropagation()
+
+    // Alt+click or right-click to start connection
+    if (e.altKey || e.button === 2) {
+      e.preventDefault()
+      const borderPoint = getClickPositionOnBorder(e)
+      if (borderPoint && onBorderClick) {
+        onBorderClick(node.id, borderPoint)
+      }
+      return
+    }
+
     setIsDragging(true)
     setDragOffset({
       x: e.clientX / zoom - node.x,
       y: e.clientY / zoom - node.y
     })
     onSelect(node.id)
-  }, [node.id, node.x, node.y, zoom, onSelect])
+  }, [node.id, node.x, node.y, zoom, onSelect, getClickPositionOnBorder, onBorderClick])
+
+  const handleContextMenu = useCallback((e) => {
+    e.preventDefault()
+    const borderPoint = getClickPositionOnBorder(e)
+    if (borderPoint && onBorderClick) {
+      onBorderClick(node.id, borderPoint)
+    }
+  }, [node.id, getClickPositionOnBorder, onBorderClick])
 
   const handleMouseMove = useCallback((e) => {
     if (!isDragging) return
@@ -60,6 +108,7 @@ function Node({ node, isSelected, isConnecting, onSelect, onDelete, onPositionCh
         '--node-color': config.color
       }}
       onMouseDown={handleMouseDown}
+      onContextMenu={handleContextMenu}
     >
       <div className="node-header" style={{ backgroundColor: config.color }}>
         <span className="node-icon">{config.icon}</span>
@@ -76,30 +125,11 @@ function Node({ node, isSelected, isConnecting, onSelect, onDelete, onPositionCh
         </button>
       </div>
       <div className="node-body">
-        <div
-          className="port port-input"
-          onClick={(e) => {
-            e.stopPropagation()
-            onPortClick(node.id, 'input')
-          }}
-          title="Input"
-        >
-          <span className="port-dot" />
-        </div>
         <div className="node-content">
           <span className="node-type">{node.type.replace('_', ' ')}</span>
         </div>
-        <div
-          className="port port-output"
-          onClick={(e) => {
-            e.stopPropagation()
-            onPortClick(node.id, 'output')
-          }}
-          title="Output - Click to connect"
-        >
-          <span className="port-dot" />
-        </div>
       </div>
+      <div className="connection-hint">Alt+Click or Right-Click to connect</div>
     </div>
   )
 }
