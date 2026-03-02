@@ -1,0 +1,76 @@
+{
+  "name": "New Workflow",
+  "description": "",
+  "nodes": [
+    {
+      "uuid": "1d3a106d-3e32-4956-a436-b0a1bb65db9b",
+      "componentUuid": "5de1908c-f561-11f0-8344-eefea9c7fa3b",
+      "componentFile": "experimentalists/bandit_random.json",
+      "protocolType": "experimentalist",
+      "x": -334.62424826562483,
+      "y": -495.7033513749997,
+      "parameters": {
+        "num_rewards": "required",
+        "sequence_length": "required",
+        "initial_probabilities": "none",
+        "sigmas": "none",
+        "num_samples": 1,
+        "random_state": "none"
+      }
+    },
+    {
+      "uuid": "7ba58f17-a643-4e30-b81a-342b956d6536",
+      "componentUuid": "bsr-regressor-001",
+      "componentFile": "theorists/bsr_regressor.json",
+      "protocolType": "theorist",
+      "x": 55.652173913043484,
+      "y": -186.08695652173915,
+      "parameters": {
+        "tree_num": 3,
+        "itr_num": 5000,
+        "alpha1": 0.4,
+        "alpha2": 0.4,
+        "beta": -1.0,
+        "show_log": false,
+        "val": 100,
+        "last_idx": -1,
+        "prior_name": "Uniform"
+      }
+    },
+    {
+      "uuid": "3be3d113-d119-47bf-94ee-95374ef4452a",
+      "componentUuid": "firebase-runner-001",
+      "componentFile": "experiment_runners/firebase_runner.json",
+      "protocolType": "experiment_runner",
+      "x": -534.3170368593748,
+      "y": 97.14855215624995,
+      "parameters": {
+        "time_out": 300,
+        "sleep_time": 30
+      }
+    }
+  ],
+  "connections": [
+    {
+      "uuid": "ea2d424f-4597-4e8e-bc64-0e1c27ec2709",
+      "source": "1d3a106d-3e32-4956-a436-b0a1bb65db9b",
+      "target": "7ba58f17-a643-4e30-b81a-342b956d6536",
+      "sourcePort": "right",
+      "targetPort": "top"
+    },
+    {
+      "uuid": "551e1921-3002-46d0-8d4f-7b6f03f16256",
+      "source": "7ba58f17-a643-4e30-b81a-342b956d6536",
+      "target": "3be3d113-d119-47bf-94ee-95374ef4452a",
+      "sourcePort": "bottom",
+      "targetPort": "right"
+    },
+    {
+      "uuid": "565a25f8-749c-469c-9d84-867d3b77084d",
+      "source": "3be3d113-d119-47bf-94ee-95374ef4452a",
+      "target": "1d3a106d-3e32-4956-a436-b0a1bb65db9b",
+      "sourcePort": "left",
+      "targetPort": "left"
+    }
+  ]
+}
