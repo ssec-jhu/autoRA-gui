@@ -15,6 +15,7 @@ class ComponentLoader:
         "experimentalists": "experimentalist",
         "theorists": "theorist",
         "experiment_runners": "experiment_runner",
+        "controls": "control",
     }
 
     def __init__(self, components_dir: str | Path):

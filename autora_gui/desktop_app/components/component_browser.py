@@ -23,6 +23,7 @@ CATEGORY_DISPLAY_NAMES = {
     "experimentalists": "Experimentalists",
     "theorists": "Theorists",
     "experiment_runners": "Experiment Runners",
+    "controls": "Controls",
 }
 
 # Colors for categories
@@ -30,6 +31,7 @@ CATEGORY_COLORS = {
     "experimentalists": "#4CAF50",
     "theorists": "#2196F3",
     "experiment_runners": "#FF9800",
+    "controls": "#9C27B0",
 }
 
 

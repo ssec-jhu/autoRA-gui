@@ -3,12 +3,50 @@
   "description": "",
   "nodes": [
     {
-      "uuid": "1d3a106d-3e32-4956-a436-b0a1bb65db9b",
+      "uuid": "3a2e299b-b0ef-4dc1-8f27-e1c1507fc981",
+      "componentUuid": "start-point",
+      "componentFile": "controls/start_node.json",
+      "protocolType": "start_point",
+      "x": -220.0,
+      "y": -332.0,
+      "parameters": {}
+    },
+    {
+      "uuid": "fb8bef00-74fc-4583-9cca-b2bdf6211a48",
+      "componentUuid": "exp-learning-001",
+      "componentFile": "experiment_runners/exp_learning.json",
+      "protocolType": "experiment_runner",
+      "x": -202.0,
+      "y": -157.0,
+      "parameters": {
+        "name": "Exponential Learning",
+        "resolution": 100,
+        "minimum_trial": 1,
+        "minimum_initial_value": 0,
+        "maximum_initial_value": 0.5,
+        "lr": 0.03,
+        "p_asymptotic": 1.0
+      }
+    },
+    {
+      "uuid": "1a9af4ff-2e59-4737-a052-b7940a838c2d",
+      "componentUuid": "bms-regressor-001",
+      "componentFile": "theorists/bms_regressor.json",
+      "protocolType": "theorist",
+      "x": 98.0,
+      "y": -6.0,
+      "parameters": {
+        "epochs": 1500,
+        "prior_name": "Guimera2020"
+      }
+    },
+    {
+      "uuid": "603fc861-7a97-4a28-89be-f5730840fc42",
       "componentUuid": "5de1908c-f561-11f0-8344-eefea9c7fa3b",
       "componentFile": "experimentalists/bandit_random.json",
       "protocolType": "experimentalist",
-      "x": -334.62424826562483,
-      "y": -495.7033513749997,
+      "x": -52.0,
+      "y": 135.0,
       "parameters": {
         "num_rewards": "required",
         "sequence_length": "required",
@@ -19,57 +57,67 @@
       }
     },
     {
-      "uuid": "7ba58f17-a643-4e30-b81a-342b956d6536",
-      "componentUuid": "bsr-regressor-001",
-      "componentFile": "theorists/bsr_regressor.json",
-      "protocolType": "theorist",
-      "x": 55.652173913043484,
-      "y": -186.08695652173915,
+      "uuid": "4f0ea6ce-3521-4d0b-8a49-e56f23c8955e",
+      "componentUuid": "filter-point",
+      "componentFile": "controls/filter_node.json",
+      "protocolType": "filter_point",
+      "x": -263.0,
+      "y": 39.0,
       "parameters": {
-        "tree_num": 3,
-        "itr_num": 5000,
-        "alpha1": 0.4,
-        "alpha2": 0.4,
-        "beta": -1.0,
-        "show_log": false,
-        "val": 100,
-        "last_idx": -1,
-        "prior_name": "Uniform"
+        "counter": 1
       }
     },
     {
-      "uuid": "3be3d113-d119-47bf-94ee-95374ef4452a",
-      "componentUuid": "firebase-runner-001",
-      "componentFile": "experiment_runners/firebase_runner.json",
-      "protocolType": "experiment_runner",
-      "x": -534.3170368593748,
-      "y": 97.14855215624995,
-      "parameters": {
-        "time_out": 300,
-        "sleep_time": 30
-      }
+      "uuid": "81725ef3-5c0b-458b-8bf6-64f66b8b3202",
+      "componentUuid": "end-point",
+      "componentFile": "controls/end_node.json",
+      "protocolType": "end_point",
+      "x": -112.0,
+      "y": 246.0,
+      "parameters": {}
     }
   ],
   "connections": [
     {
-      "uuid": "ea2d424f-4597-4e8e-bc64-0e1c27ec2709",
-      "source": "1d3a106d-3e32-4956-a436-b0a1bb65db9b",
-      "target": "7ba58f17-a643-4e30-b81a-342b956d6536",
+      "uuid": "9593c0ed-69f1-4f75-be01-177b91502bce",
+      "source": "3a2e299b-b0ef-4dc1-8f27-e1c1507fc981",
+      "target": "fb8bef00-74fc-4583-9cca-b2bdf6211a48",
+      "sourcePort": "bottom",
+      "targetPort": "top"
+    },
+    {
+      "uuid": "7d8d54f6-6f31-4396-809f-494dd2a9289a",
+      "source": "fb8bef00-74fc-4583-9cca-b2bdf6211a48",
+      "target": "1a9af4ff-2e59-4737-a052-b7940a838c2d",
       "sourcePort": "right",
       "targetPort": "top"
     },
     {
-      "uuid": "551e1921-3002-46d0-8d4f-7b6f03f16256",
-      "source": "7ba58f17-a643-4e30-b81a-342b956d6536",
-      "target": "3be3d113-d119-47bf-94ee-95374ef4452a",
+      "uuid": "ea8ae22d-6ffc-4a4c-8cf9-5a1b1b15d228",
+      "source": "1a9af4ff-2e59-4737-a052-b7940a838c2d",
+      "target": "603fc861-7a97-4a28-89be-f5730840fc42",
       "sourcePort": "bottom",
       "targetPort": "right"
     },
     {
-      "uuid": "565a25f8-749c-469c-9d84-867d3b77084d",
-      "source": "3be3d113-d119-47bf-94ee-95374ef4452a",
-      "target": "1d3a106d-3e32-4956-a436-b0a1bb65db9b",
+      "uuid": "7bcfc9b1-9555-4e1c-b86f-a93c4a2ce19b",
+      "source": "603fc861-7a97-4a28-89be-f5730840fc42",
+      "target": "4f0ea6ce-3521-4d0b-8a49-e56f23c8955e",
       "sourcePort": "left",
+      "targetPort": "bottom"
+    },
+    {
+      "uuid": "fec9d544-2395-4773-a7b2-37e5d7ae8975",
+      "source": "4f0ea6ce-3521-4d0b-8a49-e56f23c8955e",
+      "target": "fb8bef00-74fc-4583-9cca-b2bdf6211a48",
+      "sourcePort": "left",
+      "targetPort": "left"
+    },
+    {
+      "uuid": "0e6caef7-69ff-422a-b6b2-16fdc84a2fb8",
+      "source": "4f0ea6ce-3521-4d0b-8a49-e56f23c8955e",
+      "target": "81725ef3-5c0b-458b-8bf6-64f66b8b3202",
+      "sourcePort": "bottom",
       "targetPort": "left"
     }
   ]
