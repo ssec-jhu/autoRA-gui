@@ -171,6 +171,7 @@ cython_debug/
 # Claude AI
 .claude
 SKILL.md
+CLAUDE.md
 
 # JS tests
 node_modules
