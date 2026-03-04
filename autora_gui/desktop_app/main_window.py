@@ -245,16 +245,18 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, "Error", f"Failed to open workflow:\n{e!s}")
 
     def _save_workflow(self) -> bool:
-        """Save the current workflow - always shows file dialog."""
-        # Always show file dialog
-        default_dir = str(get_default_components_dir().parent / "workflows")
+        """Save the current workflow to the current file, or prompt if no file."""
         if self._current_file:
-            default_dir = self._current_file
+            return self._do_save(self._current_file)
+        else:
+            return self._save_workflow_as()
 
+    def _save_workflow_as(self) -> bool:
+        """Save the workflow with a new filename."""
         file_path, _ = QFileDialog.getSaveFileName(
             self,
             "Save Workflow",
-            default_dir,
+            str(get_default_components_dir().parent / "workflows"),
             "JSON Files (*.json);;All Files (*)",
         )
 
@@ -264,6 +266,10 @@ class MainWindow(QMainWindow):
         if not file_path.endswith(".json"):
             file_path += ".json"
 
+        return self._do_save(file_path)
+
+    def _do_save(self, file_path: str) -> bool:
+        """Actually save the workflow to the specified file path."""
         workflow = self.canvas_scene.get_workflow()
         if workflow:
             try:
@@ -275,23 +281,6 @@ class MainWindow(QMainWindow):
                 return True
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to save workflow:\n{e!s}")
-        return False
-
-    def _save_workflow_as(self) -> bool:
-        """Save the workflow with a new filename."""
-        file_path, _ = QFileDialog.getSaveFileName(
-            self,
-            "Save Workflow",
-            str(get_default_components_dir().parent / "workflows"),
-            "JSON Files (*.json);;All Files (*)",
-        )
-
-        if file_path:
-            if not file_path.endswith(".json"):
-                file_path += ".json"
-            self._current_file = file_path
-            return self._save_workflow()
-
         return False
 
     def _on_node_selected(self, node_data):

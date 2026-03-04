@@ -3,21 +3,58 @@
   "description": "",
   "nodes": [
     {
-      "uuid": "3a2e299b-b0ef-4dc1-8f27-e1c1507fc981",
+      "uuid": "0ef08f1a-97eb-4d5c-8b79-386bf54eac55",
       "componentUuid": "start-point",
       "componentFile": "controls/start_node.json",
       "protocolType": "start_point",
-      "x": -220.0,
-      "y": -332.0,
+      "x": -92.52243062499994,
+      "y": -430.22930240624976,
       "parameters": {}
     },
     {
-      "uuid": "fb8bef00-74fc-4583-9cca-b2bdf6211a48",
+      "uuid": "b5bcac92-064c-4f14-a1eb-2a07028afb58",
+      "componentUuid": "end-point",
+      "componentFile": "controls/end_node.json",
+      "protocolType": "end_point",
+      "x": 25.443668421874985,
+      "y": 878.9630909374995,
+      "parameters": {}
+    },
+    {
+      "uuid": "e9c7c3f0-e965-45c9-88fc-495b4f2179ac",
+      "componentUuid": "5de1908c-f561-11f0-8344-eefea9c7fa3b",
+      "componentFile": "experimentalists/bandit_random.json",
+      "protocolType": "experimentalist",
+      "x": -15.295114312695299,
+      "y": -67.29850297585932,
+      "parameters": {
+        "num_rewards": "required",
+        "sequence_length": "required",
+        "initial_probabilities": "none",
+        "sigmas": "none",
+        "num_samples": 1,
+        "random_state": "none"
+      }
+    },
+    {
+      "uuid": "2d605e9f-05c9-4e72-86a7-78d27ebd610c",
+      "componentUuid": "bms-regressor-001",
+      "componentFile": "theorists/bms_regressor.json",
+      "protocolType": "theorist",
+      "x": 648.5128468582807,
+      "y": 247.78085186566386,
+      "parameters": {
+        "epochs": 1500,
+        "prior_name": "Guimera2020"
+      }
+    },
+    {
+      "uuid": "00224273-9851-46e2-89a1-e152893b8d37",
       "componentUuid": "exp-learning-001",
       "componentFile": "experiment_runners/exp_learning.json",
       "protocolType": "experiment_runner",
-      "x": -202.0,
-      "y": -157.0,
+      "x": 82.59361728855461,
+      "y": 452.7353836557809,
       "parameters": {
         "name": "Exponential Learning",
         "resolution": 100,
@@ -29,96 +66,16 @@
       }
     },
     {
-      "uuid": "1a9af4ff-2e59-4737-a052-b7940a838c2d",
-      "componentUuid": "bms-regressor-001",
-      "componentFile": "theorists/bms_regressor.json",
-      "protocolType": "theorist",
-      "x": 98.0,
-      "y": -6.0,
-      "parameters": {
-        "epochs": 1500,
-        "prior_name": "Guimera2020"
-      }
-    },
-    {
-      "uuid": "603fc861-7a97-4a28-89be-f5730840fc42",
-      "componentUuid": "5de1908c-f561-11f0-8344-eefea9c7fa3b",
-      "componentFile": "experimentalists/bandit_random.json",
-      "protocolType": "experimentalist",
-      "x": -52.0,
-      "y": 135.0,
-      "parameters": {
-        "num_rewards": "required",
-        "sequence_length": "required",
-        "initial_probabilities": "none",
-        "sigmas": "none",
-        "num_samples": 1,
-        "random_state": "none"
-      }
-    },
-    {
-      "uuid": "4f0ea6ce-3521-4d0b-8a49-e56f23c8955e",
+      "uuid": "99a6ab17-4631-4a97-be05-ae2c13105dfa",
       "componentUuid": "filter-point",
       "componentFile": "controls/filter_node.json",
       "protocolType": "filter_point",
-      "x": -263.0,
-      "y": 39.0,
+      "x": -409.90906358023403,
+      "y": 223.30866896535136,
       "parameters": {
         "counter": 1
       }
-    },
-    {
-      "uuid": "81725ef3-5c0b-458b-8bf6-64f66b8b3202",
-      "componentUuid": "end-point",
-      "componentFile": "controls/end_node.json",
-      "protocolType": "end_point",
-      "x": -112.0,
-      "y": 246.0,
-      "parameters": {}
     }
   ],
-  "connections": [
-    {
-      "uuid": "9593c0ed-69f1-4f75-be01-177b91502bce",
-      "source": "3a2e299b-b0ef-4dc1-8f27-e1c1507fc981",
-      "target": "fb8bef00-74fc-4583-9cca-b2bdf6211a48",
-      "sourcePort": "bottom",
-      "targetPort": "top"
-    },
-    {
-      "uuid": "7d8d54f6-6f31-4396-809f-494dd2a9289a",
-      "source": "fb8bef00-74fc-4583-9cca-b2bdf6211a48",
-      "target": "1a9af4ff-2e59-4737-a052-b7940a838c2d",
-      "sourcePort": "right",
-      "targetPort": "top"
-    },
-    {
-      "uuid": "ea8ae22d-6ffc-4a4c-8cf9-5a1b1b15d228",
-      "source": "1a9af4ff-2e59-4737-a052-b7940a838c2d",
-      "target": "603fc861-7a97-4a28-89be-f5730840fc42",
-      "sourcePort": "bottom",
-      "targetPort": "right"
-    },
-    {
-      "uuid": "7bcfc9b1-9555-4e1c-b86f-a93c4a2ce19b",
-      "source": "603fc861-7a97-4a28-89be-f5730840fc42",
-      "target": "4f0ea6ce-3521-4d0b-8a49-e56f23c8955e",
-      "sourcePort": "left",
-      "targetPort": "bottom"
-    },
-    {
-      "uuid": "fec9d544-2395-4773-a7b2-37e5d7ae8975",
-      "source": "4f0ea6ce-3521-4d0b-8a49-e56f23c8955e",
-      "target": "fb8bef00-74fc-4583-9cca-b2bdf6211a48",
-      "sourcePort": "left",
-      "targetPort": "left"
-    },
-    {
-      "uuid": "0e6caef7-69ff-422a-b6b2-16fdc84a2fb8",
-      "source": "4f0ea6ce-3521-4d0b-8a49-e56f23c8955e",
-      "target": "81725ef3-5c0b-458b-8bf6-64f66b8b3202",
-      "sourcePort": "bottom",
-      "targetPort": "left"
-    }
-  ]
+  "connections": []
 }
