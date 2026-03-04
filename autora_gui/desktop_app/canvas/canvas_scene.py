@@ -72,11 +72,13 @@ class CanvasScene(QGraphicsScene):
         if not source_node or not target_node:
             return None
 
-        # Get specific ports or use defaults
-        source_port = source_node.get_output_port(connection.source_port)
-        target_port = target_node.get_input_port(connection.target_port)
+        # source_port and target_port contain side info ("left", "right", "top", "bottom")
+        source_side = connection.source_port if connection.source_port else "right"
+        target_side = connection.target_port if connection.target_port else "left"
 
-        conn_item = ConnectionItem(connection, source_node, target_node, source_port, target_port)
+        conn_item = ConnectionItem(
+            connection, source_node, target_node, source_side=source_side, target_side=target_side
+        )
         self.addItem(conn_item)
         self._connection_items[connection.uuid] = conn_item
         return conn_item
