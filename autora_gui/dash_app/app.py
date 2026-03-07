@@ -2,8 +2,12 @@
 
 import base64
 import json
+import logging
 import uuid
 from pathlib import Path
+
+# Suppress Flask/Werkzeug development server warning
+logging.getLogger("werkzeug").setLevel(logging.ERROR)
 
 import dash
 import dash_cytoscape as cyto
