@@ -6,12 +6,12 @@ import logging
 import uuid
 from pathlib import Path
 
-# Suppress Flask/Werkzeug development server warning
-logging.getLogger("werkzeug").setLevel(logging.ERROR)
-
 import dash
 import dash_cytoscape as cyto
 from dash import Dash, Input, Output, State, ctx, dcc, html
+
+# Suppress Flask/Werkzeug development server warning
+logging.getLogger("werkzeug").setLevel(logging.ERROR)
 
 # Load extra cytoscape layouts
 cyto.load_extra_layouts()
@@ -433,7 +433,11 @@ def create_app():
                 for c in wf.get("connections", []):
                     new_elements.append({"data": {"id": c["id"], "source": c["source"], "target": c["target"]}})
                 return new_elements, new_node_data
-            except (json.JSONDecodeError, UnicodeDecodeError):
+            except (json.JSONDecodeError, UnicodeDecodeError) as e:
+                print(f"Error loading workflow: {e}")
+                return dash.no_update, dash.no_update
+            except Exception as e:
+                print(f"Unexpected error loading workflow: {e}")
                 return dash.no_update, dash.no_update
 
         return dash.no_update, dash.no_update

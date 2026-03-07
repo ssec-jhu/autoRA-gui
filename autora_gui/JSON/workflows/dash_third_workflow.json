@@ -1,0 +1,107 @@
+{
+  "name": "workflow",
+  "nodes": [
+    {
+      "id": "009d9622-c072-40ae-a6fc-332635734a72",
+      "type": "experimentalists",
+      "x": 411.86908298749023,
+      "y": 278.05482901274206,
+      "componentFile": "bandit_random.json",
+      "parameters": {
+        "name": "Bandit Random Experimentalist",
+        "num_rewards": "required"
+      }
+    },
+    {
+      "id": "7c564eaa-4f54-4691-b82d-025d6fe43b3f",
+      "type": "theorists",
+      "x": 641.2313221519171,
+      "y": 163.64770202536792,
+      "componentFile": "darts_regressor.json",
+      "parameters": {
+        "name": "DARTS Regressor",
+        "batch_size": 64
+      }
+    },
+    {
+      "id": "9d551b2f-4827-44cf-aad4-79e84d817c9b",
+      "type": "experiment_runners",
+      "x": 392.9266652151046,
+      "y": 28.002064911154257,
+      "componentFile": "synthetic_expected_value.json",
+      "parameters": {
+        "name": "Expected Value Theory (Synthetic)",
+        "choice_temperature": 0.1
+      }
+    },
+    {
+      "id": "2853b5a3-4cf8-48fb-a0aa-a27c58b9d4ac",
+      "type": "controls",
+      "x": 133.03701154430675,
+      "y": -119,
+      "componentFile": "start_node.json",
+      "parameters": {
+        "name": "Workflow Start Point"
+      }
+    },
+    {
+      "id": "288f1727-9db7-4e29-aaee-3b4bc5b488e7",
+      "type": "controls",
+      "x": 50,
+      "y": 127.89959486059264,
+      "componentFile": "filter_node.json",
+      "parameters": {
+        "name": "Workflow Filter Point",
+        "counter": 1
+      }
+    },
+    {
+      "id": "ca6df8df-6e8d-4a94-b369-fb4590cd639c",
+      "type": "controls",
+      "x": 196.05758222761435,
+      "y": 461.96230015197517,
+      "componentFile": "end_node.json",
+      "parameters": {
+        "name": "Workflow End Point"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "1278c470-5c0e-485b-a30d-6ae3ff60de4b",
+      "source": "2853b5a3-4cf8-48fb-a0aa-a27c58b9d4ac",
+      "target": "9d551b2f-4827-44cf-aad4-79e84d817c9b",
+      "controlPoints": null
+    },
+    {
+      "id": "8fa5a6a6-1c8d-4e98-a045-2ee24efbbf38",
+      "source": "9d551b2f-4827-44cf-aad4-79e84d817c9b",
+      "target": "7c564eaa-4f54-4691-b82d-025d6fe43b3f",
+      "controlPoints": null
+    },
+    {
+      "id": "87bd2624-1efe-4ce2-bf7a-2007ec99055d",
+      "source": "7c564eaa-4f54-4691-b82d-025d6fe43b3f",
+      "target": "009d9622-c072-40ae-a6fc-332635734a72",
+      "controlPoints": null
+    },
+    {
+      "id": "8b0794ce-bff8-447d-af02-c8f41b790910",
+      "source": "009d9622-c072-40ae-a6fc-332635734a72",
+      "target": "288f1727-9db7-4e29-aaee-3b4bc5b488e7",
+      "controlPoints": null
+    },
+    {
+      "id": "02f42681-f8aa-4d62-858e-de187602b23d",
+      "source": "288f1727-9db7-4e29-aaee-3b4bc5b488e7",
+      "target": "9d551b2f-4827-44cf-aad4-79e84d817c9b",
+      "controlPoints": null
+    },
+    {
+      "id": "d9400e60-338e-4e48-853d-1d4415423013",
+      "source": "288f1727-9db7-4e29-aaee-3b4bc5b488e7",
+      "target": "ca6df8df-6e8d-4a94-b369-fb4590cd639c",
+      "controlPoints": null
+    }
+  ]
+}
