@@ -117,22 +117,25 @@ function Canvas() {
     }
   }, [connectingFrom, dispatch])
 
-  // Calculate bezier curve for temp line
+  // Calculate parabolic curve for temp line
   const getTempLinePath = () => {
     if (!tempLine) return ''
     const { x1, y1, x2, y2 } = tempLine
     const dx = x2 - x1
-    const dy = y2 - y1
-    const dist = Math.sqrt(dx * dx + dy * dy)
-    const cpDist = Math.min(dist * 0.4, 80)
+    const dist = Math.sqrt(dx * dx + (y2 - y1) ** 2)
+    const curveOffset = Math.min(dist * 0.3, 60)
 
-    // Control points perpendicular to line direction
-    const cp1x = x1 + cpDist * Math.sign(dx || 1)
-    const cp1y = y1
-    const cp2x = x2 - cpDist * Math.sign(dx || 1)
-    const cp2y = y2
+    // Midpoint
+    const midX = (x1 + x2) / 2
+    const midY = (y1 + y2) / 2
 
-    return `M ${x1} ${y1} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x2} ${y2}`
+    // Left-to-right: negative curvature (curve goes up/above)
+    // Right-to-left: positive curvature (curve goes down/below)
+    const direction = dx >= 0 ? -1 : 1
+    const cpx = midX
+    const cpy = midY + curveOffset * direction
+
+    return `M ${x1} ${y1} Q ${cpx} ${cpy}, ${x2} ${y2}`
   }
 
   return (
