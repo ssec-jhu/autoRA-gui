@@ -23,6 +23,7 @@ WORKFLOWS_PATH = JSON_PATH / "workflows"
 
 # Node type colors
 NODE_COLORS = {
+    "controls": "#9C27B0",
     "experiment_runners": "#4CAF50",
     "experimentalists": "#2196F3",
     "theorists": "#FF9800",
