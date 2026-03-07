@@ -168,13 +168,9 @@ cython_debug/
 # File system
 .DS_Store
 
-# Claude AI
+# Claude files
 .claude
-CLAUDE.md
+SKILL.md
 
 # JS tests
 node_modules
-
-# React files
-.vite
-dist
