@@ -1,0 +1,250 @@
+{
+  "name": "workflow",
+  "description": null,
+  "independentVariables": {
+    "name": "X",
+    "description": "Independent variables",
+    "datatype": "real",
+    "minOccurs": 1,
+    "maxOccurs": -1,
+    "validValues": null,
+    "default": null
+  },
+  "dependentVariables": {
+    "name": "Y",
+    "description": "Dependent variables",
+    "datatype": "real",
+    "minOccurs": 1,
+    "maxOccurs": -1,
+    "validValues": null,
+    "default": null
+  },
+  "components": [
+    {
+      "uuid": "f70d72a5-e4c3-48f4-88a7-48e27dc97046",
+      "protocolUuid": "falsification-sample-001",
+      "componentType": "experimentalists",
+      "parameterSetting": [
+        {
+          "name": "conditions",
+          "value": "null"
+        },
+        {
+          "name": "model",
+          "value": "null"
+        },
+        {
+          "name": "reference_conditions",
+          "value": "null"
+        },
+        {
+          "name": "reference_observations",
+          "value": "null"
+        },
+        {
+          "name": "metadata",
+          "value": "null"
+        },
+        {
+          "name": "num_samples",
+          "value": "null"
+        },
+        {
+          "name": "training_epochs",
+          "value": "1000"
+        },
+        {
+          "name": "training_lr",
+          "value": "0.001"
+        },
+        {
+          "name": "plot",
+          "value": "false"
+        }
+      ],
+      "canvasLocation": {
+        "x": 652,
+        "y": 684
+      }
+    },
+    {
+      "uuid": "89987c6e-5e01-41c9-a423-844c03d655d9",
+      "protocolUuid": "bms-regressor-001",
+      "componentType": "theorists",
+      "parameterSetting": [
+        {
+          "name": "epochs",
+          "value": "1600"
+        },
+        {
+          "name": "prior_name",
+          "value": "Guimera2020"
+        }
+      ],
+      "canvasLocation": {
+        "x": 902,
+        "y": 406
+      }
+    },
+    {
+      "uuid": "d05446aa-a3e0-4f00-8e67-59ca593d3c2a",
+      "protocolUuid": "expected-value-theory-001",
+      "componentType": "experiment_runners",
+      "parameterSetting": [
+        {
+          "name": "name",
+          "value": "Expected Value Theory"
+        },
+        {
+          "name": "choice_temperature",
+          "value": "0.1"
+        },
+        {
+          "name": "value_lambda",
+          "value": "0.5"
+        },
+        {
+          "name": "resolution",
+          "value": "10"
+        },
+        {
+          "name": "minimum_value",
+          "value": "-1"
+        },
+        {
+          "name": "maximum_value",
+          "value": "1"
+        }
+      ],
+      "canvasLocation": {
+        "x": 538,
+        "y": 183
+      }
+    },
+    {
+      "uuid": "6835a845-b3d7-455a-9d83-40d1079884c9",
+      "protocolUuid": "start-point",
+      "componentType": "control",
+      "parameterSetting": [],
+      "canvasLocation": {
+        "x": 539,
+        "y": 14
+      }
+    },
+    {
+      "uuid": "18e7e587-50ea-411e-8ff8-c1021d9ddda7",
+      "protocolUuid": "filter-point",
+      "componentType": "control",
+      "parameterSetting": [
+        {
+          "name": "counter",
+          "value": "1"
+        }
+      ],
+      "canvasLocation": {
+        "x": 362,
+        "y": 439
+      }
+    },
+    {
+      "uuid": "3f95ba5e-5484-4788-8841-5af0519fb057",
+      "protocolUuid": "end-point",
+      "componentType": "control",
+      "parameterSetting": [],
+      "canvasLocation": {
+        "x": 198,
+        "y": 790
+      }
+    },
+    {
+      "uuid": "44244baf-6e20-4b12-a138-bb5ee20767ac",
+      "protocolUuid": "exp-learning-001",
+      "componentType": "experiment_runners",
+      "parameterSetting": [
+        {
+          "name": "name",
+          "value": "Exponential Learning"
+        },
+        {
+          "name": "resolution",
+          "value": "100"
+        },
+        {
+          "name": "minimum_trial",
+          "value": "1"
+        },
+        {
+          "name": "minimum_initial_value",
+          "value": "0"
+        },
+        {
+          "name": "maximum_initial_value",
+          "value": "0.5"
+        },
+        {
+          "name": "lr",
+          "value": "0.03"
+        },
+        {
+          "name": "p_asymptotic",
+          "value": "1"
+        }
+      ],
+      "canvasLocation": {
+        "x": 1059,
+        "y": 765
+      }
+    }
+  ],
+  "links": [
+    {
+      "source": "89987c6e-5e01-41c9-a423-844c03d655d9",
+      "target": "f70d72a5-e4c3-48f4-88a7-48e27dc97046",
+      "sourceBorder": "border-bottom",
+      "targetBorder": "border-right",
+      "controlPoints": null
+    },
+    {
+      "source": "18e7e587-50ea-411e-8ff8-c1021d9ddda7",
+      "target": "d05446aa-a3e0-4f00-8e67-59ca593d3c2a",
+      "sourceBorder": "border-top",
+      "targetBorder": "border-left",
+      "controlPoints": null
+    },
+    {
+      "source": "f70d72a5-e4c3-48f4-88a7-48e27dc97046",
+      "target": "18e7e587-50ea-411e-8ff8-c1021d9ddda7",
+      "sourceBorder": "border-left",
+      "targetBorder": "border-bottom",
+      "controlPoints": null
+    },
+    {
+      "source": "6835a845-b3d7-455a-9d83-40d1079884c9",
+      "target": "d05446aa-a3e0-4f00-8e67-59ca593d3c2a",
+      "sourceBorder": "border-bottom",
+      "targetBorder": "border-top",
+      "controlPoints": null
+    },
+    {
+      "source": "d05446aa-a3e0-4f00-8e67-59ca593d3c2a",
+      "target": "89987c6e-5e01-41c9-a423-844c03d655d9",
+      "sourceBorder": "border-right",
+      "targetBorder": "border-top",
+      "controlPoints": null
+    },
+    {
+      "source": "18e7e587-50ea-411e-8ff8-c1021d9ddda7",
+      "target": "3f95ba5e-5484-4788-8841-5af0519fb057",
+      "sourceBorder": "border-bottom",
+      "targetBorder": "border-top",
+      "controlPoints": null
+    },
+    {
+      "source": "89987c6e-5e01-41c9-a423-844c03d655d9",
+      "target": "44244baf-6e20-4b12-a138-bb5ee20767ac",
+      "sourceBorder": "border-bottom",
+      "targetBorder": "border-top",
+      "controlPoints": null
+    }
+  ]
+}
