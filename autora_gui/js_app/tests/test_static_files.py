@@ -59,30 +59,39 @@ class TestStaticFileContent:
         assert ".connection-line" in content
         assert ".component-item" in content
 
-    def test_app_js_exists(self) -> None:
-        """Test that app.js exists."""
-        js_file = STATIC_DIR / "js" / "app.js"
+    def test_main_js_exists(self) -> None:
+        """Test that main.js module exists."""
+        js_file = STATIC_DIR / "js" / "modules" / "main.js"
         assert js_file.exists()
 
-    def test_app_js_contains_expected_functions(self) -> None:
-        """Test that app.js contains expected functions."""
-        js_file = STATIC_DIR / "js" / "app.js"
+    def test_modules_contain_expected_functions(self) -> None:
+        """Test that JS modules contain expected functions."""
+        modules_dir = STATIC_DIR / "js" / "modules"
+
+        # Check main.js has init
+        main_content = (modules_dir / "main.js").read_text()
+        assert "function init()" in main_content
+
+        # Check nodes.js has node functions
+        nodes_content = (modules_dir / "nodes.js").read_text()
+        assert "function createNode" in nodes_content
+        assert "function renderNode" in nodes_content
+
+        # Check connections.js has connection functions
+        connections_content = (modules_dir / "connections.js").read_text()
+        assert "function createConnection" in connections_content
+
+        # Check workflow.js has save/load
+        workflow_content = (modules_dir / "workflow.js").read_text()
+        assert "function saveWorkflow" in workflow_content
+        assert "function loadWorkflow" in workflow_content
+
+    def test_state_module_contains_state_object(self) -> None:
+        """Test that state.js contains the state management object."""
+        js_file = STATIC_DIR / "js" / "modules" / "state.js"
         content = js_file.read_text()
 
-        # Check for key functions
-        assert "function init()" in content
-        assert "function createNode" in content
-        assert "function renderNode" in content
-        assert "function createConnection" in content
-        assert "function saveWorkflow" in content
-        assert "function loadWorkflow" in content
-
-    def test_app_js_contains_state_object(self) -> None:
-        """Test that app.js contains the state management object."""
-        js_file = STATIC_DIR / "js" / "app.js"
-        content = js_file.read_text()
-
-        assert "const state = {" in content
+        assert "export const state = {" in content
         assert "nodes:" in content
         assert "connections:" in content
 
@@ -151,12 +160,13 @@ class TestTemplateContent:
         assert "btn-load" in content
         assert "btn-clear" in content
 
-    def test_index_html_loads_app_js(self) -> None:
-        """Test that index.html loads app.js."""
+    def test_index_html_loads_main_module(self) -> None:
+        """Test that index.html loads the main ES module."""
         html_file = TEMPLATES_DIR / "index.html"
         content = html_file.read_text()
 
-        assert "/static/js/app.js" in content
+        assert 'type="module"' in content
+        assert "/static/js/modules/main.js" in content
 
 
 class TestStaticFilesServing:
@@ -170,7 +180,7 @@ class TestStaticFilesServing:
 
     def test_js_file_is_served(self, client: TestClient) -> None:
         """Test that JS files are served correctly."""
-        response = client.get("/static/js/app.js")
+        response = client.get("/static/js/modules/main.js")
         assert response.status_code == 200
         assert "javascript" in response.headers["content-type"]
 

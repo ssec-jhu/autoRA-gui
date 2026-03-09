@@ -116,8 +116,8 @@ class TestFullPageLoad:
         response = client.get("/static/css/styles.css")
         assert response.status_code == 200
 
-        # Check JS loads
-        response = client.get("/static/js/app.js")
+        # Check JS module loads
+        response = client.get("/static/js/modules/main.js")
         assert response.status_code == 200
 
     def test_api_endpoints_accessible(self, client: TestClient) -> None:
