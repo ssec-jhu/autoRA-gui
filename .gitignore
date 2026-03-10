@@ -174,3 +174,6 @@ SKILL.md
 
 # JS tests
 node_modules
+
+# React
+.vite/
