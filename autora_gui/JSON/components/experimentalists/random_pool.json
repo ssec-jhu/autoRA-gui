@@ -12,7 +12,7 @@
       "minOccurs": 1,
       "maxOccurs": 1,
       "validValues": null,
-      "default": 100
+      "default": 5
     },
     {
       "name": "random_state",
@@ -22,6 +22,15 @@
       "maxOccurs": 1,
       "validValues": null,
       "default": null
+    },
+    {
+      "name": "replace",
+      "description": "If true, allow repeated values in sampling.",
+      "datatype": "boolean",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": true
     }
   ],
   "inputDataType": [
