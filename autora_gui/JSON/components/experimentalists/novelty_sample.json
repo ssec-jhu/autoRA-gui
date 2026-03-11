@@ -38,7 +38,7 @@
       "datatype": "categorical",
       "minOccurs": 1,
       "maxOccurs": 1,
-      "validValues": ["euclidean", "manhattan", "chebyshev", "minkowski", "cosine", "correlation"],
+      "validValues": ["euclidean", "manhattan", "chebyshev", "minkowski", "cosine", "correlation", "seuclidean", "mahalanobis", "haversine", "hamming", "canberra", "braycurtis", "matching", "jaccard", "dice", "kulsinski", "rogerstanimoto", "russellrao", "sokalmichener", "sokalsneath", "yule"],
       "default": "euclidean"
     },
     {
@@ -47,7 +47,7 @@
       "datatype": "categorical",
       "minOccurs": 1,
       "maxOccurs": 1,
-      "validValues": ["min", "mean", "max"],
+      "validValues": ["min", "sum", "prod", "mean", "max"],
       "default": "min"
     }
   ],

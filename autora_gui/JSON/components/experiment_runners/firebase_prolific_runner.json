@@ -6,6 +6,24 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/8c004a8995908aa6963662ad23d20d6fe3113735/src/autora/experiment_runner/firebase_prolific/__init__.py#L152",
   "parameters": [
     {
+      "name": "exclude_studies",
+      "description": "List of study names to exclude from Prolific recruitment.",
+      "datatype": "string",
+      "minOccurs": 0,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": ["default"]
+    },
+    {
+      "name": "approve_no_code",
+      "description": "Set approve_no_code to False if no code submissions should be requested to return.",
+      "datatype": "boolean",
+      "minOccurs": 0,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": true
+    },
+    {
       "name": "firebase_credentials",
       "description": "Firebase service account credentials dictionary.",
       "datatype": "string",
