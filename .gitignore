@@ -169,7 +169,12 @@ cython_debug/
 .DS_Store
 
 # Claude files
+.claude
 SKILL.md
+CLAUDE.md
 
 # JS tests
 node_modules
+
+# React
+.vite/
