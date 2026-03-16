@@ -122,41 +122,6 @@
       }
     },
     {
-      "uuid": "6835a845-b3d7-455a-9d83-40d1079884c9",
-      "protocolUuid": "start-point",
-      "componentType": "control",
-      "parameterSetting": [],
-      "canvasLocation": {
-        "x": 539,
-        "y": 14
-      }
-    },
-    {
-      "uuid": "18e7e587-50ea-411e-8ff8-c1021d9ddda7",
-      "protocolUuid": "filter-point",
-      "componentType": "control",
-      "parameterSetting": [
-        {
-          "name": "counter",
-          "value": "1"
-        }
-      ],
-      "canvasLocation": {
-        "x": 362,
-        "y": 439
-      }
-    },
-    {
-      "uuid": "3f95ba5e-5484-4788-8841-5af0519fb057",
-      "protocolUuid": "end-point",
-      "componentType": "control",
-      "parameterSetting": [],
-      "canvasLocation": {
-        "x": 198,
-        "y": 790
-      }
-    },
-    {
       "uuid": "44244baf-6e20-4b12-a138-bb5ee20767ac",
       "protocolUuid": "exp-learning-001",
       "componentType": "experiment_runners",
@@ -194,6 +159,41 @@
         "x": 1059,
         "y": 765
       }
+    },
+    {
+      "uuid": "ecef1a53-8d0e-4c0e-9c59-30536d5798b8",
+      "protocolUuid": "start-point",
+      "componentType": "controls",
+      "parameterSetting": [],
+      "canvasLocation": {
+        "x": 541,
+        "y": 8
+      }
+    },
+    {
+      "uuid": "d2ee7d2c-c522-4230-96ca-8661a351de74",
+      "protocolUuid": "filter-point",
+      "componentType": "controls",
+      "parameterSetting": [
+        {
+          "name": "counter",
+          "value": "1"
+        }
+      ],
+      "canvasLocation": {
+        "x": 294,
+        "y": 439
+      }
+    },
+    {
+      "uuid": "d9c8fff2-e4b2-47f5-a574-d23e35347977",
+      "protocolUuid": "end-point",
+      "componentType": "controls",
+      "parameterSetting": [],
+      "canvasLocation": {
+        "x": 631,
+        "y": 895
+      }
     }
   ],
   "links": [
@@ -205,27 +205,6 @@
       "controlPoints": null
     },
     {
-      "source": "18e7e587-50ea-411e-8ff8-c1021d9ddda7",
-      "target": "d05446aa-a3e0-4f00-8e67-59ca593d3c2a",
-      "sourceBorder": "border-top",
-      "targetBorder": "border-left",
-      "controlPoints": null
-    },
-    {
-      "source": "f70d72a5-e4c3-48f4-88a7-48e27dc97046",
-      "target": "18e7e587-50ea-411e-8ff8-c1021d9ddda7",
-      "sourceBorder": "border-left",
-      "targetBorder": "border-bottom",
-      "controlPoints": null
-    },
-    {
-      "source": "6835a845-b3d7-455a-9d83-40d1079884c9",
-      "target": "d05446aa-a3e0-4f00-8e67-59ca593d3c2a",
-      "sourceBorder": "border-bottom",
-      "targetBorder": "border-top",
-      "controlPoints": null
-    },
-    {
       "source": "d05446aa-a3e0-4f00-8e67-59ca593d3c2a",
       "target": "89987c6e-5e01-41c9-a423-844c03d655d9",
       "sourceBorder": "border-right",
@@ -233,8 +212,8 @@
       "controlPoints": null
     },
     {
-      "source": "18e7e587-50ea-411e-8ff8-c1021d9ddda7",
-      "target": "3f95ba5e-5484-4788-8841-5af0519fb057",
+      "source": "ecef1a53-8d0e-4c0e-9c59-30536d5798b8",
+      "target": "d05446aa-a3e0-4f00-8e67-59ca593d3c2a",
       "sourceBorder": "border-bottom",
       "targetBorder": "border-top",
       "controlPoints": null
@@ -244,6 +223,27 @@
       "target": "44244baf-6e20-4b12-a138-bb5ee20767ac",
       "sourceBorder": "border-bottom",
       "targetBorder": "border-top",
+      "controlPoints": null
+    },
+    {
+      "source": "f70d72a5-e4c3-48f4-88a7-48e27dc97046",
+      "target": "d2ee7d2c-c522-4230-96ca-8661a351de74",
+      "sourceBorder": "border-left",
+      "targetBorder": "border-bottom",
+      "controlPoints": null
+    },
+    {
+      "source": "d2ee7d2c-c522-4230-96ca-8661a351de74",
+      "target": "d05446aa-a3e0-4f00-8e67-59ca593d3c2a",
+      "sourceBorder": "border-top",
+      "targetBorder": "border-left",
+      "controlPoints": null
+    },
+    {
+      "source": "d2ee7d2c-c522-4230-96ca-8661a351de74",
+      "target": "d9c8fff2-e4b2-47f5-a574-d23e35347977",
+      "sourceBorder": "border-bottom",
+      "targetBorder": "border-left",
       "controlPoints": null
     }
   ]

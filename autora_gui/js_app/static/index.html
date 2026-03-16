@@ -1,0 +1,5453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow Editor (Standalone)</title>
+    <style>
+/* ===== CSS Variables ===== */
+:root {
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #16213e;
+    --bg-tertiary: #0f3460;
+    --text-primary: #e8e8e8;
+    --text-secondary: #c0c0c0;
+    --text-muted: #808080;
+    --accent-primary: #4a90d9;
+    --accent-secondary: #3a7bc8;
+    --accent-danger: #ef4444;
+    --accent-success: #22c55e;
+    --accent-warning: #f59e0b;
+    --border-color: #2a2a4a;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+
+    /* Node type colors */
+    --color-theorists: #6366f1;
+    --color-experimentalists: #22c55e;
+    --color-experiment-runners: #f59e0b;
+    --color-control: #ec4899;
+    --color-start: #10b981;
+    --color-end: #ef4444;
+    --color-filter: #8b5cf6;
+}
+
+/* ===== Reset & Base ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+}
+
+/* ===== App Layout ===== */
+.app-container {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    height: 100vh;
+    gap: 1px;
+    background: var(--border-color);
+}
+
+/* ===== Panels ===== */
+.panel {
+    background: var(--bg-secondary);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.panel-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.panel-header h2 {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+}
+
+/* ===== Search Input ===== */
+.search-input {
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+.search-input::placeholder {
+    color: var(--text-muted);
+}
+
+/* ===== Component Palette ===== */
+.component-section {
+    margin-bottom: 16px;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--bg-tertiary);
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+}
+
+.section-header:hover {
+    background: var(--border-color);
+}
+
+.section-title {
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-icon {
+    font-size: 16px;
+}
+
+.section-count {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--bg-primary);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.section-toggle {
+    font-size: 12px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+}
+
+.section-header.collapsed .section-toggle {
+    transform: rotate(-90deg);
+}
+
+.section-items {
+    padding: 8px 0;
+}
+
+.section-header.collapsed + .section-items {
+    display: none;
+}
+
+.component-item {
+    padding: 10px 12px;
+    margin: 4px 0;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: grab;
+    transition: all 0.2s;
+    font-size: 13px;
+}
+
+.component-item:hover {
+    border-color: var(--accent-primary);
+    transform: translateX(4px);
+}
+
+.component-item:active {
+    cursor: grabbing;
+}
+
+.component-item.dragging {
+    opacity: 0.5;
+}
+
+.component-name {
+    font-weight: 500;
+}
+
+.component-description {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ===== Toolbar ===== */
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 16px;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toolbar button {
+    padding: 6px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.toolbar button:hover {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+.toolbar span {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+#zoom-level {
+    min-width: 50px;
+    text-align: center;
+}
+
+/* ===== Canvas ===== */
+.canvas-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-primary);
+    background-image:
+        radial-gradient(circle, var(--border-color) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+#workflow-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform-origin: 0 0;
+}
+
+#connections-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+#connections-svg .connection-line {
+    pointer-events: stroke;
+}
+
+.canvas-hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-muted);
+    font-size: 16px;
+    text-align: center;
+    pointer-events: none;
+}
+
+.canvas-hint.hidden {
+    display: none;
+}
+
+.canvas-container.drag-over {
+    background-color: rgba(74, 144, 217, 0.05);
+}
+
+/* ===== Workflow Nodes ===== */
+.workflow-node {
+    position: absolute;
+    min-width: 180px;
+    max-width: 240px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    cursor: move;
+    z-index: 10;
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.workflow-node:hover {
+    box-shadow: 0 6px 20px var(--shadow-color);
+}
+
+.workflow-node.selected {
+    border-color: var(--accent-danger) !important;
+    border-width: 3px !important;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3), 0 6px 20px var(--shadow-color);
+}
+
+.workflow-node.dragging {
+    z-index: 100;
+    opacity: 0.9;
+}
+
+.node-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px 6px 0 0;
+    gap: 8px;
+}
+
+.workflow-node.theorists .node-header {
+    background: var(--color-theorists);
+}
+
+.workflow-node.experimentalists .node-header {
+    background: var(--color-experimentalists);
+}
+
+.workflow-node.experiment-runners .node-header {
+    background: var(--color-experiment-runners);
+}
+
+.workflow-node.control .node-header {
+    background: var(--color-control);
+}
+
+/* Control node specific styles */
+.workflow-node.start-point .node-header {
+    background: var(--color-start);
+}
+
+.workflow-node.end-point .node-header {
+    background: var(--color-end);
+}
+
+.workflow-node.filter-point .node-header {
+    background: var(--color-filter);
+}
+
+/* Filter node - special styling for dual output */
+.workflow-node.filter-node .node-body {
+    padding-bottom: 20px;
+}
+
+.node-icon {
+    font-size: 14px;
+}
+
+.node-title {
+    flex: 1;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.node-delete {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.node-delete:hover {
+    color: white;
+}
+
+.node-body {
+    padding: 12px;
+}
+
+.node-content {
+    text-align: center;
+}
+
+.node-type {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* ===== Connection Border Zones ===== */
+.connection-border {
+    position: absolute;
+    background: transparent;
+    z-index: 100;
+    cursor: crosshair;
+}
+
+.connection-border.border-top {
+    top: -4px;
+    left: 0;
+    right: 0;
+    height: 8px;
+}
+
+.connection-border.border-bottom {
+    bottom: -4px;
+    left: 0;
+    right: 0;
+    height: 8px;
+}
+
+.connection-border.border-left {
+    left: -4px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+}
+
+.connection-border.border-right {
+    right: -4px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+}
+
+/* Highlight border on hover when not dragging node */
+.connection-border:hover {
+    background: rgba(74, 144, 217, 0.3);
+}
+
+/* Highlight when connecting */
+.workflow-node.connecting-source .connection-border {
+    background: rgba(34, 197, 94, 0.3);
+}
+
+.workflow-node.valid-target .connection-border:hover {
+    background: rgba(245, 158, 11, 0.5);
+}
+
+/* Invalid target nodes (cannot accept connections) */
+.workflow-node.invalid-target {
+    opacity: 0.5;
+}
+
+.workflow-node.invalid-target .connection-border {
+    cursor: not-allowed;
+}
+
+/* Hidden border (for input-only or output-only nodes) */
+.connection-border.hidden {
+    display: none;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+}
+
+/* ===== Connections ===== */
+.connection-line {
+    fill: none;
+    stroke: var(--accent-primary);
+    stroke-width: 3;
+    cursor: pointer;
+    transition: stroke-width 0.2s;
+}
+
+.connection-line:hover {
+    stroke-width: 5;
+}
+
+.connection-line.selected {
+    stroke: var(--accent-danger);
+    stroke-width: 4;
+    filter: drop-shadow(0 0 4px var(--accent-danger));
+}
+
+.connection-line.temp {
+    stroke: var(--accent-success);
+    stroke-dasharray: 8 4;
+    pointer-events: none;
+}
+
+.control-line {
+    stroke: var(--text-muted);
+    stroke-width: 1;
+    stroke-dasharray: 4 4;
+    pointer-events: none;
+}
+
+.waypoint-handle {
+    fill: var(--accent-warning);
+    stroke: var(--bg-secondary);
+    stroke-width: 2;
+    cursor: grab;
+    transition: r 0.2s;
+}
+
+.waypoint-handle:hover {
+    r: 10;
+}
+
+.waypoint-handle:active {
+    cursor: grabbing;
+}
+
+/* ===== Selection Rectangle ===== */
+.selection-rect {
+    position: absolute;
+    border: 2px dashed var(--accent-primary);
+    background: rgba(74, 144, 217, 0.1);
+    pointer-events: none;
+    z-index: 1000;
+}
+
+/* ===== Properties Panel ===== */
+.no-selection {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 40px 20px;
+    font-size: 14px;
+}
+
+.property-section {
+    margin-bottom: 20px;
+}
+
+.property-section-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.property-row {
+    margin-bottom: 12px;
+}
+
+.property-label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.property-input,
+.property-select {
+    width: 100%;
+    padding: 8px 10px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.property-input:focus,
+.property-select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+.property-value {
+    font-size: 13px;
+    color: var(--text-primary);
+    padding: 6px 0;
+}
+
+.property-type-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* ===== Status Bar ===== */
+.status-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 6px 16px;
+    background: var(--bg-tertiary);
+    border-top: 1px solid var(--border-color);
+    font-size: 12px;
+    color: var(--text-muted);
+    z-index: 1000;
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Left Panel: Component Palette -->
+        <aside class="panel panel-left">
+            <div class="panel-header">
+                <h2>Components</h2>
+                <input type="text" id="component-search" placeholder="Search components..." class="search-input">
+            </div>
+            <div class="panel-content" id="component-palette">
+                <!-- Components loaded dynamically -->
+            </div>
+        </aside>
+
+        <!-- Center Panel: Canvas -->
+        <main class="panel panel-center">
+            <div class="toolbar">
+                <div class="toolbar-group">
+                    <button id="btn-save" title="Save workflow (Ctrl+S)">Save</button>
+                    <button id="btn-load" title="Load workflow">Load</button>
+                    <input type="file" id="file-input" accept=".json" hidden>
+                    <button id="btn-clear" title="Clear canvas">Clear</button>
+                </div>
+                <div class="toolbar-group">
+                    <button id="btn-zoom-out" title="Zoom out">-</button>
+                    <span id="zoom-level">100%</span>
+                    <button id="btn-zoom-in" title="Zoom in">+</button>
+                </div>
+                <div class="toolbar-group">
+                    <span id="node-count">Nodes: 0</span>
+                    <span id="connection-count">Connections: 0</span>
+                </div>
+            </div>
+            <div class="canvas-container">
+                <svg id="connections-svg"></svg>
+                <div id="workflow-canvas">
+                    <div id="canvas-hint" class="canvas-hint">
+                        Drag components here to build your workflow
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Panel: Properties -->
+        <aside class="panel panel-right">
+            <div class="panel-header">
+                <h2>Properties</h2>
+            </div>
+            <div class="panel-content" id="properties-panel">
+                <div class="no-selection">Select a node to edit properties</div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Node Template -->
+    <template id="node-template">
+        <div class="workflow-node" data-node-id="">
+            <div class="node-header">
+                <span class="node-icon"></span>
+                <span class="node-title"></span>
+                <button class="node-delete" title="Delete node">&times;</button>
+            </div>
+            <div class="node-body">
+                <div class="node-content">
+                    <span class="node-type"></span>
+                </div>
+            </div>
+            <!-- Invisible border zones for connection dragging -->
+            <div class="connection-border border-top"></div>
+            <div class="connection-border border-right"></div>
+            <div class="connection-border border-bottom"></div>
+            <div class="connection-border border-left"></div>
+        </div>
+    </template>
+
+    <!-- Status Bar -->
+    <div id="status-bar" class="status-bar">Ready</div>
+
+    <script>
+// ===== Embedded Component Data =====
+const EMBEDDED_COMPONENTS = {
+  "experimentalists": [
+    {
+      "uuid": "falsification-sample-001",
+      "protocolType": "experimentalist",
+      "name": "Falsification Sample",
+      "description": "Selects experimental conditions most likely to falsify the current model by identifying regions where the model predictions may deviate from ground truth.",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L45",
+      "parameters": [
+        {
+          "name": "conditions",
+          "description": "Pool of candidate experimental conditions to evaluate for falsification potential.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "model",
+          "description": "Scikit-learn compatible model (regression or classification) to attempt to falsify.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "reference_conditions",
+          "description": "Experimental conditions that the model was trained on.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "reference_observations",
+          "description": "Observations that the model was trained to predict.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "metadata",
+          "description": "VariableCollection with meta-data about the dependent and independent variables.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "num_samples",
+          "description": "Number of high-falsification-potential samples to select.",
+          "datatype": "integer",
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "training_epochs",
+          "description": "Number of epochs to train the internal falsification network.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1000
+        },
+        {
+          "name": "training_lr",
+          "description": "Learning rate for training the falsification network.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.001
+        },
+        {
+          "name": "plot",
+          "description": "Whether to display network predictions and training loss visualization.",
+          "datatype": "boolean",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": false
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "DataFrame or array of candidate experimental conditions.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "model",
+          "description": "Fitted model to attempt to falsify.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "reference_conditions",
+          "description": "Training conditions for the model.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "reference_observations",
+          "description": "Training observations for the model.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "conditions",
+          "description": "DataFrame of conditions with highest falsification potential.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "falsification_sample.json"
+    },
+    {
+      "uuid": "falsification-sampler-001",
+      "protocolType": "experimentalist",
+      "name": "Falsification Sampler",
+      "description": "Selects experimental conditions that are most likely to falsify the current model by maximizing predicted model error.",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/efdb238da206eb4a67141b3ac6fcba7fe5b28d74/src/autora/experimentalist/falsification/__init__.py#L193",
+      "parameters": [
+        {
+          "name": "num_samples",
+          "description": "Number of samples to select that may falsify the model.",
+          "datatype": "integer",
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "training_epochs",
+          "description": "Number of epochs to train the Popper network for error approximation.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1000
+        },
+        {
+          "name": "training_lr",
+          "description": "Learning rate for training the Popper network.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.001
+        },
+        {
+          "name": "plot",
+          "description": "Whether to display Popper network predictions and training loss.",
+          "datatype": "boolean",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": false
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "Pool of candidate experimental conditions to evaluate.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "model",
+          "description": "Trained sklearn model to attempt to falsify.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "reference_conditions",
+          "description": "Experimental conditions the model was trained on.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "reference_observations",
+          "description": "Observations the model was trained to predict.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "metadata",
+          "description": "Variable collection with dependent and independent variable metadata.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "conditions",
+          "description": "Selected conditions with highest predicted model error.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "falsification_sampler.json"
+    },
+    {
+      "uuid": "grid-pool-001",
+      "protocolType": "experimentalist",
+      "name": "Grid Pool",
+      "description": "Generates a pool of experimental conditions as a complete grid of all combinations from the allowed values of independent variables.",
+      "githubCommit": "https://github.com/AutoResearch/autora-core/blob/5aa08d217d7ab24da4d334e4671e37712768e90a/src/autora/experimentalist/grid.py#L106",
+      "parameters": [],
+      "inputDataType": [
+        {
+          "name": "variables",
+          "description": "Variable collection with allowed_values for each independent variable.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "conditions",
+          "description": "Complete grid of experimental conditions.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "grid_pool.json"
+    },
+    {
+      "uuid": "model-disagreement-sample-001",
+      "protocolType": "experimentalist",
+      "name": "Model Disagreement Sample",
+      "description": "Selects experimental conditions where multiple models disagree the most in their predictions, useful for model comparison and ensemble learning.",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-model-disagreement/blob/main/src/autora/experimentalist/model_disagreement/__init__.py#L28",
+      "parameters": [
+        {
+          "name": "conditions",
+          "description": "Pool of candidate experimental conditions to evaluate for model disagreement.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "models",
+          "description": "List of scikit-learn compatible models (regression or classification) to compare.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "num_samples",
+          "description": "Number of high-disagreement samples to select.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "DataFrame or array of candidate experimental conditions.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "models",
+          "description": "List of fitted models for prediction comparison.",
+          "datatype": "object",
+          "minOccurs": 2,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "conditions",
+          "description": "DataFrame of selected high-disagreement experimental conditions.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "model_disagreement_sample.json"
+    },
+    {
+      "uuid": "model-disagreement-sampler-001",
+      "protocolType": "experimentalist",
+      "name": "Model Disagreement Sampler",
+      "description": "Selects experimental conditions where multiple models show the greatest prediction disagreement, useful for identifying informative experiments.",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-model-disagreement/blob/46f7693df0dbcbfc74b0913b22495173b13e3a73/src/autora/experimentalist/model_disagreement/__init__.py#L286",
+      "parameters": [
+        {
+          "name": "num_samples",
+          "description": "Number of samples to select where models disagree most.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "Pool of candidate experimental conditions to evaluate.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "models",
+          "description": "List of trained sklearn models to compare predictions.",
+          "datatype": "string",
+          "minOccurs": 2,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "conditions",
+          "description": "Selected conditions with highest model disagreement.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "model_disagreement_sampler.json"
+    },
+    {
+      "uuid": "novelty-sample-001",
+      "protocolType": "experimentalist",
+      "name": "Novelty Sample",
+      "description": "Selects experimental conditions that are most dissimilar (novel) compared to a reference pool of existing conditions using distance metrics.",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L36",
+      "parameters": [
+        {
+          "name": "conditions",
+          "description": "Pool of candidate experimental conditions to evaluate for dissimilarity.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "reference_conditions",
+          "description": "Reference pool of existing experimental conditions to compare against.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "num_samples",
+          "description": "Number of novel samples to select. If unspecified, all samples are returned ordered by novelty.",
+          "datatype": "integer",
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "metric",
+          "description": "Distance metric for measuring dissimilarity between conditions.",
+          "datatype": "categorical",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": [
+            "euclidean",
+            "manhattan",
+            "chebyshev",
+            "minkowski",
+            "cosine",
+            "correlation"
+          ],
+          "default": "euclidean"
+        },
+        {
+          "name": "integration",
+          "description": "Method for integrating pairwise distances into overall dissimilarity scores.",
+          "datatype": "categorical",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": [
+            "min",
+            "mean",
+            "max"
+          ],
+          "default": "min"
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "DataFrame or array of candidate experimental conditions.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "reference_conditions",
+          "description": "DataFrame or array of reference experimental conditions.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "conditions",
+          "description": "DataFrame of selected novel experimental conditions.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "novelty_sample.json"
+    },
+    {
+      "uuid": "novelty-sampler-001",
+      "protocolType": "experimentalist",
+      "name": "Novelty Sampler",
+      "description": "Selects experimental conditions that are most novel (dissimilar) with respect to existing reference conditions using pairwise distance metrics.",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/d1931c5409bac262559e343eb3c25fef12180bcb/src/autora/experimentalist/novelty/__init__.py#L36",
+      "parameters": [
+        {
+          "name": "num_samples",
+          "description": "Number of novel samples to select from the condition pool.",
+          "datatype": "integer",
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "metric",
+          "description": "Distance metric for measuring dissimilarity between conditions.",
+          "datatype": "categorical",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": [
+            "euclidean",
+            "manhattan",
+            "chebyshev",
+            "minkowski",
+            "cosine",
+            "correlation"
+          ],
+          "default": "euclidean"
+        },
+        {
+          "name": "integration",
+          "description": "Method for combining pairwise distances into overall dissimilarity score.",
+          "datatype": "categorical",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": [
+            "min",
+            "sum",
+            "prod",
+            "mean",
+            "max"
+          ],
+          "default": "min"
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "Pool of candidate experimental conditions to evaluate.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "reference_conditions",
+          "description": "Existing experimental conditions to compare against.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "conditions",
+          "description": "Selected novel experimental conditions.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "novelty_sampler.json"
+    },
+    {
+      "uuid": "random-pool-001",
+      "protocolType": "experimentalist",
+      "name": "Random Pool",
+      "description": "Generates a pool of experimental conditions by randomly sampling from the defined variable space.",
+      "githubCommit": "https://github.com/AutoResearch/autora-core/blob/5aa08d217d7ab24da4d334e4671e37712768e90a/src/autora/experimentalist/random.py#L132",
+      "parameters": [
+        {
+          "name": "num_samples",
+          "description": "Number of random samples to generate from the variable space.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 100
+        },
+        {
+          "name": "random_state",
+          "description": "Seed for random number generator to ensure reproducibility.",
+          "datatype": "integer",
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "variables",
+          "description": "Variable collection defining the experimental space.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "conditions",
+          "description": "Generated pool of experimental conditions.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "random_pool.json"
+    },
+    {
+      "uuid": "random-sample-001",
+      "protocolType": "experimentalist",
+      "name": "Random Sample",
+      "description": "Randomly selects a subset of experimental conditions from a given pool.",
+      "githubCommit": "https://github.com/AutoResearch/autora-core/blob/5aa08d217d7ab24da4d334e4671e37712768e90a/src/autora/experimentalist/random.py#L185",
+      "parameters": [
+        {
+          "name": "num_samples",
+          "description": "Number of samples to randomly select from the condition pool.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 10
+        },
+        {
+          "name": "random_state",
+          "description": "Seed for random number generator to ensure reproducibility.",
+          "datatype": "integer",
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "Pool of experimental conditions to sample from.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "conditions",
+          "description": "Randomly selected subset of experimental conditions.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "random_sample.json"
+    },
+    {
+      "uuid": "uncertainty-sample-001",
+      "protocolType": "experimentalist",
+      "name": "Uncertainty Sample",
+      "description": "Selects experimental conditions where the model exhibits the highest uncertainty in its predictions, enabling active learning strategies.",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-uncertainty/blob/main/src/autora/experimentalist/uncertainty/__init__.py#L32",
+      "parameters": [
+        {
+          "name": "conditions",
+          "description": "Pool of candidate experimental conditions to evaluate for model uncertainty.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "model",
+          "description": "Scikit-learn compatible model with a predict_proba method for uncertainty estimation.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "num_samples",
+          "description": "Number of high-uncertainty samples to select.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 10
+        },
+        {
+          "name": "measure",
+          "description": "Uncertainty evaluation method: least_confident (1 - max probability), margin (difference between top two probabilities), or entropy (Shannon entropy).",
+          "datatype": "categorical",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": [
+            "least_confident",
+            "margin",
+            "entropy"
+          ],
+          "default": "least_confident"
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "DataFrame or array of candidate experimental conditions.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "model",
+          "description": "Fitted model with predict_proba method.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "conditions",
+          "description": "DataFrame of selected high-uncertainty experimental conditions.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "uncertainty_sample.json"
+    },
+    {
+      "uuid": "uncertainty-sampler-001",
+      "protocolType": "experimentalist",
+      "name": "Uncertainty Sampler",
+      "description": "Selects experimental conditions where the model has highest prediction uncertainty, enabling active learning to improve model performance.",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-uncertainty/blob/21d4a292159f416e01f95662ca02889cd786a140/src/autora/experimentalist/uncertainty/__init__.py#L9",
+      "parameters": [
+        {
+          "name": "num_samples",
+          "description": "Number of uncertain samples to select.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 10
+        },
+        {
+          "name": "measure",
+          "description": "Method to evaluate prediction uncertainty.",
+          "datatype": "categorical",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": [
+            "least_confident",
+            "margin",
+            "entropy"
+          ],
+          "default": "least_confident"
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "Pool of candidate experimental conditions to evaluate.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "model",
+          "description": "Trained model with predict_proba method for uncertainty estimation.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "conditions",
+          "description": "Selected high-uncertainty experimental conditions.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "uncertainty_sampler.json"
+    }
+  ],
+  "theorists": [
+    {
+      "uuid": "bms-regressor-001",
+      "protocolType": "theorist",
+      "name": "BMS Regressor",
+      "description": "Bayesian Machine Scientist that discovers symbolic equations using MCMC sampling with informed priors over mathematical expressions.",
+      "githubCommit": "https://github.com/AutoResearch/autora-theorist-bms/blob/ce3d7edf707c54a12108700076d841c138086be1/src/autora/theorist/bms/regressor.py#L23",
+      "parameters": [
+        {
+          "name": "epochs",
+          "description": "Number of MCMC iterations for equation sampling.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1500
+        },
+        {
+          "name": "prior_name",
+          "description": "Name of the prior distribution to use for operations.",
+          "datatype": "categorical",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": [
+            "Guimera2020",
+            "GuimeraTest2020"
+          ],
+          "default": "Guimera2020"
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "X",
+          "description": "Input features as a 2D array.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "y",
+          "description": "Predicted target values.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "bms_regressor.json"
+    },
+    {
+      "uuid": "bsr-regressor-001",
+      "protocolType": "theorist",
+      "name": "BSR Regressor",
+      "description": "Bayesian Symbolic Regression that discovers mathematical expressions using MCMC sampling to build up equations from basic functions.",
+      "githubCommit": "https://github.com/AutoResearch/autora-theorist-bsr/blob/cdbf04f2fb3712924826ba283152fc459ee21f6e/src/autora/theorist/bsr/regressor.py#L18",
+      "parameters": [
+        {
+          "name": "tree_num",
+          "description": "Number of symbolic regression trees for model fitting.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 3
+        },
+        {
+          "name": "itr_num",
+          "description": "Total iteration steps during model fitting.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 5000
+        },
+        {
+          "name": "alpha1",
+          "description": "Prior hyperparameter for tree structure.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.4
+        },
+        {
+          "name": "alpha2",
+          "description": "Prior hyperparameter for tree structure.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.4
+        },
+        {
+          "name": "beta",
+          "description": "Prior hyperparameter for tree depth penalty.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": -1.0
+        },
+        {
+          "name": "show_log",
+          "description": "Whether to display logging information during fitting.",
+          "datatype": "boolean",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": false
+        },
+        {
+          "name": "val",
+          "description": "Validation steps per iteration.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 100
+        },
+        {
+          "name": "last_idx",
+          "description": "Index of model to use; -1 selects the final iteration.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": -1
+        },
+        {
+          "name": "prior_name",
+          "description": "Prior distribution specification for the model.",
+          "datatype": "categorical",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": [
+            "Uniform"
+          ],
+          "default": "Uniform"
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "X",
+          "description": "Input features as a 2D array.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "y",
+          "description": "Predicted target values.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "bsr_regressor.json"
+    },
+    {
+      "uuid": "darts-regressor-001",
+      "protocolType": "theorist",
+      "name": "DARTS Regressor",
+      "description": "Finds a composition of functions and coefficients to minimize a loss function using Differentiable Architecture Search (DARTS).",
+      "githubCommit": "https://github.com/AutoResearch/autora-theorist-darts/blob/60e30ebd3fb10a3dd901de4183664c7b6bea9990/src/autora/theorist/darts/regressor.py#L436",
+      "parameters": [
+        {
+          "name": "batch_size",
+          "description": "Batch size for the data loader.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 64
+        },
+        {
+          "name": "num_graph_nodes",
+          "description": "Number of nodes in the computation graph.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 2
+        },
+        {
+          "name": "output_type",
+          "description": "Output transformation function type.",
+          "datatype": "categorical",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": [
+            "real",
+            "sigmoid",
+            "softmax"
+          ],
+          "default": "real"
+        },
+        {
+          "name": "classifier_weight_decay",
+          "description": "Weight decay for classifier.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.01
+        },
+        {
+          "name": "darts_type",
+          "description": "Type of DARTS algorithm to use ('original' or 'fair').",
+          "datatype": "categorical",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": [
+            "original",
+            "fair"
+          ],
+          "default": "original"
+        },
+        {
+          "name": "param_updates_per_epoch",
+          "description": "Number of operation parameter updates per epoch.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 10
+        },
+        {
+          "name": "param_updates_for_sampled_model",
+          "description": "Number of parameter updates for final sampled model.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 100
+        },
+        {
+          "name": "param_learning_rate_max",
+          "description": "Initial learning rate for operation parameters.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.025
+        },
+        {
+          "name": "param_learning_rate_min",
+          "description": "Final learning rate for operation parameters.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.01
+        },
+        {
+          "name": "param_momentum",
+          "description": "Momentum coefficient for parameter optimization.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.9
+        },
+        {
+          "name": "arch_updates_per_epoch",
+          "description": "Number of architecture weight updates per epoch.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1
+        },
+        {
+          "name": "arch_learning_rate_max",
+          "description": "Initial learning rate for architecture weights.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.003
+        },
+        {
+          "name": "arch_weight_decay",
+          "description": "Weight decay for architecture weights.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.0001
+        },
+        {
+          "name": "arch_weight_decay_df",
+          "description": "Scaled weight decay based on number of parameters per operation.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.0003
+        },
+        {
+          "name": "arch_weight_decay_base",
+          "description": "Base weight decay added to scaled decay.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.0
+        },
+        {
+          "name": "arch_momentum",
+          "description": "Momentum coefficient for architecture weight optimization.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.9
+        },
+        {
+          "name": "fair_darts_loss_weight",
+          "description": "Loss weight forcing architecture weights toward 0 or 1.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1
+        },
+        {
+          "name": "max_epochs",
+          "description": "Maximum number of training epochs.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 10
+        },
+        {
+          "name": "grad_clip",
+          "description": "Gradient clipping value.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 5.0
+        },
+        {
+          "name": "primitives",
+          "description": "List of primitive operations to choose from.",
+          "datatype": "categorical",
+          "minOccurs": 1,
+          "maxOccurs": 21,
+          "validValues": [
+            "none",
+            "add",
+            "subtract",
+            "mult",
+            "linear",
+            "relu",
+            "exp",
+            "logistic",
+            "sin",
+            "cos",
+            "tanh",
+            "linear_relu",
+            "linear_exp",
+            "linear_logistic",
+            "linear_sin",
+            "linear_cos",
+            "linear_tanh",
+            "reciprocal",
+            "ln",
+            "softplus",
+            "softminus"
+          ],
+          "default": "none"
+        },
+        {
+          "name": "train_classifier_coefficients",
+          "description": "Whether to train edge contribution coefficients.",
+          "datatype": "boolean",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": false
+        },
+        {
+          "name": "train_classifier_bias",
+          "description": "Whether to train classifier bias term.",
+          "datatype": "boolean",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": false
+        },
+        {
+          "name": "sampling_strategy",
+          "description": "Strategy for selecting operations from the graph.",
+          "datatype": "categorical",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": [
+            "max",
+            "sample"
+          ],
+          "default": "max"
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "X",
+          "description": "Input features as a 2D array.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "y",
+          "description": "Predicted target values.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "darts_regressor.json"
+    }
+  ],
+  "controls": [
+    {
+      "uuid": "end-point",
+      "protocolType": "end_point",
+      "name": "Workflow End Point",
+      "description": "Output of any experimentalist, representing the final results of a workflow execution.",
+      "githubCommit": "",
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "Generated pool of experimental conditions.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "end_node.json"
+    },
+    {
+      "uuid": "filter-point",
+      "protocolType": "filter_point",
+      "name": "Workflow Filter Point",
+      "description": "Loop control for a workflow execution with two output branches.",
+      "githubCommit": "",
+      "parameters": [
+        {
+          "name": "counter",
+          "description": "Number of times to perform given loop.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": 1
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "Generated pool of experimental conditions.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "continue",
+          "description": "Output when loop should continue.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "complete",
+          "description": "Output when loop is complete.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "maxOutputConnections": 2,
+      "file": "filter_node.json"
+    },
+    {
+      "uuid": "start-point",
+      "protocolType": "start_point",
+      "name": "Workflow Start Point",
+      "description": "Input for any experiment runner, representing the input for a workflow execution.",
+      "githubCommit": "",
+      "outputDataType": [
+        {
+          "name": "conditions",
+          "description": "DataFrame with values and probabilities",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "start_node.json"
+    }
+  ],
+  "experiment_runners": [
+    {
+      "uuid": "exp-learning-001",
+      "protocolType": "experiment_runner",
+      "name": "Exponential Learning",
+      "description": "Synthetic experiment runner simulating exponential learning curves based on psychological research modeling performance acquisition over trials.",
+      "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychology/exp_learning.py#L46",
+      "parameters": [
+        {
+          "name": "name",
+          "description": "Identifier name for the experiment.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": "Exponential Learning"
+        },
+        {
+          "name": "resolution",
+          "description": "Number of permissible stimulus values for the independent variables.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 100
+        },
+        {
+          "name": "minimum_trial",
+          "description": "Lower bound for the trial number (exponential constant).",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1
+        },
+        {
+          "name": "minimum_initial_value",
+          "description": "Lower threshold for the initial performance value.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0
+        },
+        {
+          "name": "maximum_initial_value",
+          "description": "Upper threshold for the initial performance value.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.5
+        },
+        {
+          "name": "lr",
+          "description": "Learning rate coefficient for the exponential learning curve.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.03
+        },
+        {
+          "name": "p_asymptotic",
+          "description": "Asymptotic performance level (constant offset applied to multiplier).",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1.0
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "DataFrame with trial and asymptotic performance conditions.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "observations",
+          "description": "DataFrame with performance observations over trials.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "exp_learning.json"
+    },
+    {
+      "uuid": "expected-value-theory-001",
+      "protocolType": "experiment_runner",
+      "name": "Expected Value Theory",
+      "description": "Synthetic experiment runner implementing Expected Value Theory for decision-making under risk, modeling choices between probabilistic options.",
+      "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/economics/expected_value_theory.py#L12",
+      "parameters": [
+        {
+          "name": "name",
+          "description": "Identifier name for the experiment.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": "Expected Value Theory"
+        },
+        {
+          "name": "choice_temperature",
+          "description": "Softmax temperature parameter controlling choice stochasticity (lower = more deterministic).",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.1
+        },
+        {
+          "name": "value_lambda",
+          "description": "Scaling factor applied to option values.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.5
+        },
+        {
+          "name": "resolution",
+          "description": "Number of discrete points in the allowed values range.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 10
+        },
+        {
+          "name": "minimum_value",
+          "description": "Lower bound for option values.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": -1
+        },
+        {
+          "name": "maximum_value",
+          "description": "Upper bound for option values.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "DataFrame with values and probabilities for options A and B.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "observations",
+          "description": "DataFrame with probability of choosing option A as dependent variable.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "expected_value_theory.json"
+    },
+    {
+      "uuid": "firebase-prolific-runner-001",
+      "protocolType": "experiment_runner",
+      "name": "Firebase Prolific Runner",
+      "description": "Experiment runner for conducting human behavioral experiments with participant recruitment via Prolific and experiment hosting on Firebase.",
+      "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/8c004a8995908aa6963662ad23d20d6fe3113735/src/autora/experiment_runner/firebase_prolific/__init__.py#L152",
+      "parameters": [
+        {
+          "name": "firebase_credentials",
+          "description": "Firebase service account credentials dictionary.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "prolific_token",
+          "description": "API token for Prolific authentication.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "study_name",
+          "description": "Display name for the study in Prolific.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "study_description",
+          "description": "Study description visible to Prolific participants.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "study_url",
+          "description": "URL pointing to the hosted experiment.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "study_completion_time",
+          "description": "Estimated time in minutes for participants to complete.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 10
+        },
+        {
+          "name": "completion_code",
+          "description": "Code provided to participants upon study completion.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "sleep_time",
+          "description": "Interval in seconds between Firebase/Prolific status checks.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 30
+        },
+        {
+          "name": "approve_no_code",
+          "description": "Auto-approve submissions without completion codes.",
+          "datatype": "boolean",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": false
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "Experimental conditions to present to participants.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "observations",
+          "description": "Participant responses collected from the experiment.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "firebase_prolific_runner.json"
+    },
+    {
+      "uuid": "firebase-runner-001",
+      "protocolType": "experiment_runner",
+      "name": "Firebase Runner",
+      "description": "Experiment runner for hosting web-based experiments on Firebase and collecting participant responses via Firestore.",
+      "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/8c004a8995908aa6963662ad23d20d6fe3113735/src/autora/experiment_runner/firebase_prolific/__init__.py#L175",
+      "parameters": [
+        {
+          "name": "firebase_credentials",
+          "description": "Firebase service account credentials dictionary.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "time_out",
+          "description": "Timeout duration in seconds for resetting unfinished conditions.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 300
+        },
+        {
+          "name": "sleep_time",
+          "description": "Interval in seconds between Firebase database status checks.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 30
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "Experimental conditions to present to participants.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "observations",
+          "description": "Participant responses collected from the experiment.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "firebase_runner.json"
+    },
+    {
+      "uuid": "luce-choice-ratio-001",
+      "protocolType": "experiment_runner",
+      "name": "Luce Choice Ratio",
+      "description": "Synthetic experiment runner implementing the Shepard-Luce choice model for category selection based on similarity measures.",
+      "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychology/luce_choice_ratio.py#L39",
+      "parameters": [
+        {
+          "name": "name",
+          "description": "Identifier name for the experiment.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": "Luce-Choice-Ratio"
+        },
+        {
+          "name": "resolution",
+          "description": "Number of allowed values for stimulus similarity variables.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 8
+        },
+        {
+          "name": "maximum_similarity",
+          "description": "Upper bound for similarity values.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 10
+        },
+        {
+          "name": "focus",
+          "description": "Parameter measuring participant focus/attention (affects choice probability).",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.8
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "DataFrame with four similarity measures as independent variables.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "observations",
+          "description": "DataFrame with choice probability (choose_A1) as dependent variable.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "luce_choice_ratio.json"
+    },
+    {
+      "uuid": "prospect-theory-001",
+      "protocolType": "experiment_runner",
+      "name": "Prospect Theory",
+      "description": "Synthetic experiment runner implementing Kahneman and Tversky's Prospect Theory for decision-making under risk with loss aversion and probability weighting.",
+      "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/economics/prospect_theory.py#L12",
+      "parameters": [
+        {
+          "name": "name",
+          "description": "Identifier name for the experiment.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": "Prospect Theory"
+        },
+        {
+          "name": "choice_temperature",
+          "description": "Softmax temperature parameter for choice probability.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.1
+        },
+        {
+          "name": "value_alpha",
+          "description": "Exponent for the value function on gains (risk attitude for gains).",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.88
+        },
+        {
+          "name": "value_beta",
+          "description": "Exponent for the value function on losses (risk attitude for losses).",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.88
+        },
+        {
+          "name": "value_lambda",
+          "description": "Loss aversion coefficient (losses loom larger than gains).",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 2.25
+        },
+        {
+          "name": "probability_alpha",
+          "description": "Exponent for probability weighting function on gains.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.61
+        },
+        {
+          "name": "probability_beta",
+          "description": "Exponent for probability weighting function on losses.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.69
+        },
+        {
+          "name": "resolution",
+          "description": "Grid resolution for variable value generation.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 10
+        },
+        {
+          "name": "minimum_value",
+          "description": "Lower bound for option values.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": -1
+        },
+        {
+          "name": "maximum_value",
+          "description": "Upper bound for option values.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "DataFrame with values and probabilities for options A and B.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "observations",
+          "description": "DataFrame with probability of choosing option A as dependent variable.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "prospect_theory.json"
+    },
+    {
+      "uuid": "q-learning-001",
+      "protocolType": "experiment_runner",
+      "name": "Q-Learning",
+      "description": "Synthetic experiment runner implementing Q-learning for an n-armed bandit task, simulating reinforcement learning agent behavior.",
+      "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychology/q_learning.py#L113",
+      "parameters": [
+        {
+          "name": "name",
+          "description": "Identifier name for the experiment.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": "Q-Learning"
+        },
+        {
+          "name": "learning_rate",
+          "description": "Learning rate for Q-value updates.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.2
+        },
+        {
+          "name": "decision_noise",
+          "description": "Softmax temperature parameter controlling decision noise (higher = more random).",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 3.0
+        },
+        {
+          "name": "n_actions",
+          "description": "Number of available actions in the bandit task.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 2
+        },
+        {
+          "name": "forget_rate",
+          "description": "Rate at which Q-values decay toward initial values (forgetting).",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.0
+        },
+        {
+          "name": "perseverance_bias",
+          "description": "Bias toward choosing the previously chosen action.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.0
+        },
+        {
+          "name": "correlated_reward",
+          "description": "Whether rewards across actions are correlated.",
+          "datatype": "boolean",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": false
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "DataFrame with reward sequences for each action.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "observations",
+          "description": "DataFrame with agent choice probabilities across trials.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "q_learning.json"
+    },
+    {
+      "uuid": "stevens-power-law-001",
+      "protocolType": "experiment_runner",
+      "name": "Stevens' Power Law",
+      "description": "Synthetic experiment runner implementing Stevens' Power Law, a psychophysical principle relating physical stimulus intensity to perceived magnitude via a power function.",
+      "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychophysics/stevens_power_law.py#L12",
+      "parameters": [
+        {
+          "name": "name",
+          "description": "Identifier name for the experiment.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": "Stevens' Power Law"
+        },
+        {
+          "name": "resolution",
+          "description": "Number of allowed values for stimulus intensity.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 100
+        },
+        {
+          "name": "proportionality_constant",
+          "description": "Constant multiplier (k) in Stevens' Power Law formula: \u03c8 = k * S^n.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1.0
+        },
+        {
+          "name": "modality_constant",
+          "description": "Power exponent (n) that varies by sensory modality in Stevens' Power Law.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.8
+        },
+        {
+          "name": "maximum_stimulus_intensity",
+          "description": "Maximum value for the stimulus intensity.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 5.0
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "DataFrame with stimulus intensity as independent variable.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "observations",
+          "description": "DataFrame with perceived intensity as dependent variable.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "stevens_power_law.json"
+    },
+    {
+      "uuid": "synthetic-exp-learning-001",
+      "protocolType": "experiment_runner",
+      "name": "Exponential Learning (Synthetic)",
+      "description": "Synthetic experiment runner implementing exponential learning curves based on Heathcote, Brown, & Mewhort (2000) and Thurstone (1919).",
+      "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychology/exp_learning.py#L10",
+      "parameters": [
+        {
+          "name": "resolution",
+          "description": "Number of allowed values for stimulus.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 100
+        },
+        {
+          "name": "minimum_trial",
+          "description": "Lower bound for trial number.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1
+        },
+        {
+          "name": "minimum_initial_value",
+          "description": "Lower bound for initial performance value.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.0
+        },
+        {
+          "name": "maximum_initial_value",
+          "description": "Upper bound for initial performance value.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.5
+        },
+        {
+          "name": "lr",
+          "description": "Learning rate parameter.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.03
+        },
+        {
+          "name": "p_asymptotic",
+          "description": "Asymptotic performance level.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1.0
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "Experimental conditions specifying trial parameters.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "observations",
+          "description": "Simulated learning performance over trials.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "synthetic_exp_learning.json"
+    },
+    {
+      "uuid": "synthetic-expected-value-001",
+      "protocolType": "experiment_runner",
+      "name": "Expected Value Theory (Synthetic)",
+      "description": "Synthetic experiment runner modeling decision-making between options based on expected utilities calculated as value multiplied by probability.",
+      "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/economics/expected_value_theory.py#L70",
+      "parameters": [
+        {
+          "name": "choice_temperature",
+          "description": "Softmax temperature controlling choice stochasticity.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.1
+        },
+        {
+          "name": "value_lambda",
+          "description": "Scaling factor applied to option values.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.5
+        },
+        {
+          "name": "resolution",
+          "description": "Number of discrete points in variable ranges.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 10
+        },
+        {
+          "name": "minimum_value",
+          "description": "Lower bound for value variables.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": -1.0
+        },
+        {
+          "name": "maximum_value",
+          "description": "Upper bound for value variables.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1.0
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "Option values and probabilities for choices.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "observations",
+          "description": "Choice probabilities between options.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "synthetic_expected_value.json"
+    },
+    {
+      "uuid": "synthetic-luce-choice-ratio-001",
+      "protocolType": "experiment_runner",
+      "name": "Luce Choice Ratio (Synthetic)",
+      "description": "Synthetic experiment runner implementing the Shepard-Luce Choice Rule for modeling choice probability based on similarity ratings to categories.",
+      "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychology/luce_choice_ratio.py#L10",
+      "parameters": [
+        {
+          "name": "resolution",
+          "description": "Number of allowed values for stimulus similarity ratings.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 8
+        },
+        {
+          "name": "maximum_similarity",
+          "description": "Upper bound for similarity values.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 10
+        },
+        {
+          "name": "focus",
+          "description": "Parameter measuring participant focus/attention.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.8
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "Similarity ratings to categories (A1, A2, B1, B2).",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "observations",
+          "description": "Probability of selecting category A1.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "synthetic_luce_choice_ratio.json"
+    },
+    {
+      "uuid": "synthetic-prospect-theory-001",
+      "protocolType": "experiment_runner",
+      "name": "Prospect Theory (Synthetic)",
+      "description": "Synthetic experiment runner implementing Kahneman & Tversky's (1979) Prospect Theory with nonlinear value and probability weighting functions.",
+      "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/economics/prospect_theory.py#L12",
+      "parameters": [
+        {
+          "name": "choice_temperature",
+          "description": "Softmax temperature for choice probability.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.1
+        },
+        {
+          "name": "value_alpha",
+          "description": "Power exponent for gains in value function.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.88
+        },
+        {
+          "name": "value_beta",
+          "description": "Power exponent for losses in value function.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.88
+        },
+        {
+          "name": "value_lambda",
+          "description": "Loss aversion coefficient.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 2.25
+        },
+        {
+          "name": "probability_alpha",
+          "description": "Probability weighting exponent for gains.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.61
+        },
+        {
+          "name": "probability_beta",
+          "description": "Probability weighting exponent for losses.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.69
+        },
+        {
+          "name": "resolution",
+          "description": "Grid resolution for independent variable ranges.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 10
+        },
+        {
+          "name": "minimum_value",
+          "description": "Lower bound for value variables.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": -1
+        },
+        {
+          "name": "maximum_value",
+          "description": "Upper bound for value variables.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "Gamble options with values and probabilities.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "observations",
+          "description": "Choice probabilities reflecting prospect theory predictions.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "synthetic_prospect_theory.json"
+    },
+    {
+      "uuid": "synthetic-q-learning-001",
+      "protocolType": "experiment_runner",
+      "name": "Q-Learning (Synthetic)",
+      "description": "Synthetic experiment runner implementing Q-learning for n-armed bandit tasks. Simulates agent decision-making behavior with configurable learning parameters.",
+      "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychology/q_learning.py#L113",
+      "parameters": [
+        {
+          "name": "learning_rate",
+          "description": "Rate at which Q-values update based on rewards.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.2
+        },
+        {
+          "name": "decision_noise",
+          "description": "Softmax temperature parameter controlling exploration vs exploitation.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 3.0
+        },
+        {
+          "name": "n_actions",
+          "description": "Number of available actions in the bandit task.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 2
+        },
+        {
+          "name": "forget_rate",
+          "description": "Decay rate for non-chosen action Q-values.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.0
+        },
+        {
+          "name": "perseverance_bias",
+          "description": "Bias toward repeating the previous action.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.0
+        },
+        {
+          "name": "correlated_reward",
+          "description": "Whether rewards correlate across actions.",
+          "datatype": "boolean",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": false
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "Experimental conditions specifying trial parameters.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "observations",
+          "description": "Simulated agent choices and rewards.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "synthetic_q_learning.json"
+    },
+    {
+      "uuid": "synthetic-stevens-power-law-001",
+      "protocolType": "experiment_runner",
+      "name": "Stevens Power Law (Synthetic)",
+      "description": "Synthetic experiment runner implementing Stevens' Power Law, which models perceived intensity as a power function of physical stimulus intensity.",
+      "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychophysics/stevens_power_law.py#L10",
+      "parameters": [
+        {
+          "name": "resolution",
+          "description": "Number of allowed stimulus values.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 100
+        },
+        {
+          "name": "proportionality_constant",
+          "description": "Constant multiplier in the power law equation.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1.0
+        },
+        {
+          "name": "modality_constant",
+          "description": "Exponent/power constant specific to sensory modality.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 0.8
+        },
+        {
+          "name": "maximum_stimulus_intensity",
+          "description": "Upper bound for stimulus values.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 5.0
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "Physical stimulus intensity values.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "observations",
+          "description": "Perceived stimulus intensity.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "synthetic_stevens_power_law.json"
+    },
+    {
+      "uuid": "synthetic-weber-fechner-001",
+      "protocolType": "experiment_runner",
+      "name": "Weber-Fechner Law (Synthetic)",
+      "description": "Synthetic experiment runner implementing the Weber-Fechner Law, which relates perceived intensity to physical stimulus intensity logarithmically.",
+      "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychophysics/weber_fechner_law.py#L10",
+      "parameters": [
+        {
+          "name": "resolution",
+          "description": "Number of allowed values for stimulus intensities.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 100
+        },
+        {
+          "name": "constant",
+          "description": "Constant multiplier in the Weber-Fechner calculation.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1.0
+        },
+        {
+          "name": "maximum_stimulus_intensity",
+          "description": "Maximum value for stimulus intensity parameters.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 5.0
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "Physical stimulus intensity values.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "observations",
+          "description": "Perceived stimulus intensity.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "synthetic_weber_fechner.json"
+    },
+    {
+      "uuid": "weber-fechner-law-001",
+      "protocolType": "experiment_runner",
+      "name": "Weber-Fechner Law",
+      "description": "Synthetic experiment runner implementing the Weber-Fechner psychophysical law relating physical stimulus intensity to perceived sensation.",
+      "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychophysics/weber_fechner_law.py#L12",
+      "parameters": [
+        {
+          "name": "name",
+          "description": "Identifier name for the experiment.",
+          "datatype": "string",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": "Weber-Fechner Law"
+        },
+        {
+          "name": "resolution",
+          "description": "Number of allowed values for stimulus intensities.",
+          "datatype": "integer",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 100
+        },
+        {
+          "name": "constant",
+          "description": "Constant multiplier in the Weber-Fechner formula.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 1.0
+        },
+        {
+          "name": "maximum_stimulus_intensity",
+          "description": "Maximum value for stimulus intensities S1 and S2.",
+          "datatype": "real",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": 5.0
+        }
+      ],
+      "inputDataType": [
+        {
+          "name": "conditions",
+          "description": "DataFrame with two stimulus intensities (S1, S2) as independent variables.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "outputDataType": [
+        {
+          "name": "observations",
+          "description": "DataFrame with detected difference in sensation as dependent variable.",
+          "datatype": "object",
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "validValues": null,
+          "default": null
+        }
+      ],
+      "file": "weber_fechner_law.json"
+    }
+  ]
+};
+
+// ===== state.js =====
+/**
+ * Global State Management
+ */
+
+const state = {
+    components: {},           // Available components from API
+    nodes: new Map(),         // Nodes on canvas: Map<nodeId, nodeData>
+    connections: [],          // Connections between nodes
+    selectedNode: null,       // Currently selected node ID
+    selectedNodes: new Set(), // Multi-selected node IDs
+    selectedConnection: null, // Selected connection ID
+    selectedConnections: new Set(), // Multi-selected connection IDs
+    draggedComponent: null,   // Component being dragged from palette
+    connecting: null,         // Connection in progress {source: nodeId}
+    zoom: 1,                  // Canvas zoom level
+    pan: { x: 0, y: 0 }       // Canvas pan offset
+};
+
+
+// ===== utils.js =====
+/**
+ * Utility Functions
+ */
+
+
+/**
+ * Generate a UUID v4
+ */
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+/**
+ * Update status bar message
+ */
+function updateStatus(message) {
+    const statusBar = document.getElementById('status-bar');
+    if (statusBar) {
+        statusBar.textContent = message;
+    }
+}
+
+/**
+ * Update node and connection counts in toolbar
+ */
+function updateCounts() {
+    document.getElementById('node-count').textContent = `Nodes: ${state.nodes.size}`;
+    document.getElementById('connection-count').textContent = `Connections: ${state.connections.length}`;
+}
+
+/**
+ * Get icon for component type
+ */
+function getTypeIcon(type) {
+    const icons = {
+        theorists: '\u{1F9E0}',           // Brain
+        experimentalists: '\u{1F52C}',     // Microscope
+        experiment_runners: '\u{1F3C3}',   // Runner
+        control: '\u{2699}'                // Gear
+    };
+    return icons[type] || '\u{1F4E6}';     // Package
+}
+
+/**
+ * Get specific icon for control node types
+ */
+function getControlNodeIcon(protocolType) {
+    const icons = {
+        start_point: '\u{25B6}',    // Play arrow
+        end_point: '\u{23F9}',      // Stop
+        filter_point: '\u{1F500}'   // Shuffle/branch
+    };
+    return icons[protocolType] || '\u{2699}';
+}
+
+/**
+ * Check if a node can be a connection source (has outputs)
+ */
+function canBeSource(nodeData) {
+    const comp = nodeData.componentData;
+    if (!comp.inputDataType && !comp.outputDataType) return true;
+    return !!comp.outputDataType;
+}
+
+/**
+ * Check if a node can be a connection target (has inputs)
+ */
+function canBeTarget(nodeData) {
+    const comp = nodeData.componentData;
+    if (!comp.inputDataType && !comp.outputDataType) return true;
+    return !!comp.inputDataType;
+}
+
+/**
+ * Format type name for display
+ */
+function formatTypeName(type) {
+    return type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+
+// ===== properties.js =====
+/**
+ * Properties Panel Module
+ */
+
+
+/**
+ * Render the properties panel for a selected node
+ */
+function renderPropertiesPanel(nodeData) {
+    const panel = document.getElementById('properties-panel');
+
+    if (!nodeData) {
+        panel.innerHTML = '<div class="no-selection">Select a node to edit properties</div>';
+        return;
+    }
+
+    const componentData = nodeData.componentData;
+    const params = nodeData.parameters;
+
+    const displayType = componentData.protocolType || nodeData.type;
+
+    let html = `
+        <!-- General Section -->
+        <div class="property-section">
+            <div class="property-section-title">General</div>
+            <div class="property-row">
+                <label class="property-label">Name</label>
+                <div class="property-value">${componentData.name || 'Unnamed'}</div>
+            </div>
+            <div class="property-row">
+                <label class="property-label">Type</label>
+                <span class="property-type-badge">${formatTypeName(displayType)}</span>
+            </div>
+            ${componentData.description ? `
+            <div class="property-row">
+                <label class="property-label">Description</label>
+                <div class="property-value" style="font-size: 12px; color: var(--text-muted);">${componentData.description}</div>
+            </div>
+            ` : ''}
+            ${componentData.githubCommit ? `
+            <div class="property-row">
+                <label class="property-label">Source</label>
+                <div class="property-value"><a href="${componentData.githubCommit}" target="_blank" style="color: var(--accent-primary);">View on GitHub</a></div>
+            </div>
+            ` : ''}
+        </div>
+    `;
+
+    // Parameters section
+    if (componentData.parameters && componentData.parameters.length > 0) {
+        html += `
+            <div class="property-section">
+                <div class="property-section-title">Parameters</div>
+        `;
+
+        componentData.parameters.forEach(param => {
+            const value = params[param.name];
+            html += renderParameterInput(param, value, nodeData.id);
+        });
+
+        html += '</div>';
+    }
+
+    // Input/Output types
+    const inputTypes = componentData.inputDataType || componentData.inputDataTypes;
+    const outputTypes = componentData.outputDataType || componentData.outputDataTypes;
+
+    if (inputTypes || outputTypes) {
+        html += `
+            <div class="property-section">
+                <div class="property-section-title">Data Types</div>
+        `;
+
+        if (inputTypes) {
+            html += `
+                <div class="property-row">
+                    <label class="property-label">Input</label>
+                    <div class="property-value">${formatDataTypes(inputTypes)}</div>
+                </div>
+            `;
+        }
+
+        if (outputTypes) {
+            html += `
+                <div class="property-row">
+                    <label class="property-label">Output</label>
+                    <div class="property-value">${formatDataTypes(outputTypes)}</div>
+                </div>
+            `;
+        }
+
+        html += '</div>';
+    }
+
+    panel.innerHTML = html;
+
+    // Add event listeners to inputs
+    panel.querySelectorAll('.property-input, .property-select').forEach(input => {
+        input.addEventListener('change', (e) => {
+            const paramName = e.target.dataset.param;
+            let value = e.target.value;
+
+            if (e.target.type === 'number') {
+                value = e.target.step === '1' ? parseInt(value) : parseFloat(value);
+            } else if (e.target.tagName === 'SELECT' && (value === 'true' || value === 'false')) {
+                value = value === 'true';
+            }
+
+            params[paramName] = value;
+            updateStatus(`Updated ${paramName}`);
+        });
+    });
+}
+
+/**
+ * Render a parameter input based on datatype
+ */
+function renderParameterInput(param, value, nodeId) {
+    const name = param.name;
+    const datatype = param.datatype || param.type || 'string';
+    const displayValue = value !== null && value !== undefined ? value : param.default || '';
+    const description = param.description || '';
+
+    let input = '';
+
+    switch (datatype) {
+        case 'integer':
+            input = `<input type="number" step="1" class="property-input" data-param="${name}" value="${displayValue}">`;
+            break;
+
+        case 'real':
+        case 'float':
+        case 'number':
+            input = `<input type="number" step="any" class="property-input" data-param="${name}" value="${displayValue}">`;
+            break;
+
+        case 'boolean':
+            input = `
+                <select class="property-select" data-param="${name}">
+                    <option value="true" ${displayValue === true ? 'selected' : ''}>True</option>
+                    <option value="false" ${displayValue === false ? 'selected' : ''}>False</option>
+                </select>
+            `;
+            break;
+
+        case 'categorical':
+            const options = param.validValues || [];
+            input = `
+                <select class="property-select" data-param="${name}">
+                    ${options.map(opt => `<option value="${opt}" ${displayValue === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+                </select>
+            `;
+            break;
+
+        default:
+            input = `<input type="text" class="property-input" data-param="${name}" value="${displayValue}">`;
+    }
+
+    return `
+        <div class="property-row">
+            <label class="property-label" title="${description}">${name}</label>
+            ${input}
+        </div>
+    `;
+}
+
+/**
+ * Format data types for display
+ */
+function formatDataTypes(types) {
+    if (!types) return '';
+
+    if (Array.isArray(types)) {
+        if (types.length > 0 && typeof types[0] === 'object') {
+            return types.map(t => `${t.name || 'unnamed'}: ${t.datatype || 'any'}`).join(', ');
+        }
+        return types.join(', ');
+    }
+
+    if (typeof types === 'object') {
+        return `${types.name || 'unnamed'}: ${types.datatype || 'any'}`;
+    }
+
+    return String(types);
+}
+
+
+// ===== selection.js =====
+/**
+ * Selection Module
+ */
+
+
+// Rectangle selection state
+let isSelecting = false;
+let selectionStart = { x: 0, y: 0 };
+let selectionRect = null;
+
+/**
+ * Clear all node selections
+ */
+function clearSelection() {
+    state.selectedNodes.forEach(nodeId => {
+        document.querySelector(`[data-node-id="${nodeId}"]`)?.classList.remove('selected');
+    });
+    state.selectedNodes.clear();
+    state.selectedNode = null;
+}
+
+/**
+ * Deselect all connections
+ */
+function deselectConnections() {
+    state.selectedConnections.forEach(connId => {
+        const line = document.querySelector(`[data-connection-id="${connId}"]`);
+        if (line) line.classList.remove('selected');
+    });
+    state.selectedConnections.clear();
+    state.selectedConnection = null;
+
+    // Remove control point handles
+    document.querySelectorAll('.waypoint-handle, .control-line').forEach(el => el.remove());
+}
+
+/**
+ * Select all nodes and connections
+ */
+function selectAll() {
+    state.nodes.forEach((_, nodeId) => {
+        state.selectedNodes.add(nodeId);
+        document.querySelector(`[data-node-id="${nodeId}"]`)?.classList.add('selected');
+    });
+
+    state.connections.forEach(conn => {
+        state.selectedConnections.add(conn.id);
+        document.querySelector(`[data-connection-id="${conn.id}"]`)?.classList.add('selected');
+    });
+
+    updateStatus(`Selected ${state.selectedNodes.size} nodes and ${state.selectedConnections.size} connections`);
+}
+
+/**
+ * Handle canvas mouse down for rectangle selection
+ */
+function handleCanvasMouseDown(e) {
+    if (e.target.id !== 'workflow-canvas') return;
+
+    // Click on canvas: deselect all
+    if (!e.shiftKey) {
+        clearSelection();
+        deselectConnections();
+        renderPropertiesPanel(null);
+    }
+
+    // Start rectangle selection
+    isSelecting = true;
+    const canvas = document.getElementById('workflow-canvas');
+    const rect = canvas.getBoundingClientRect();
+
+    selectionStart = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+    };
+
+    selectionRect = document.createElement('div');
+    selectionRect.className = 'selection-rect';
+    selectionRect.style.left = `${selectionStart.x}px`;
+    selectionRect.style.top = `${selectionStart.y}px`;
+    canvas.appendChild(selectionRect);
+
+    document.addEventListener('mousemove', handleSelectionDrag);
+    document.addEventListener('mouseup', handleSelectionEnd);
+}
+
+/**
+ * Handle selection rectangle dragging
+ */
+function handleSelectionDrag(e) {
+    if (!isSelecting || !selectionRect) return;
+
+    const canvas = document.getElementById('workflow-canvas');
+    const rect = canvas.getBoundingClientRect();
+
+    const currentX = e.clientX - rect.left;
+    const currentY = e.clientY - rect.top;
+
+    const left = Math.min(selectionStart.x, currentX);
+    const top = Math.min(selectionStart.y, currentY);
+    const width = Math.abs(currentX - selectionStart.x);
+    const height = Math.abs(currentY - selectionStart.y);
+
+    selectionRect.style.left = `${left}px`;
+    selectionRect.style.top = `${top}px`;
+    selectionRect.style.width = `${width}px`;
+    selectionRect.style.height = `${height}px`;
+
+    // Check intersection with nodes
+    const selectionBounds = {
+        left: left / state.zoom,
+        top: top / state.zoom,
+        right: (left + width) / state.zoom,
+        bottom: (top + height) / state.zoom
+    };
+
+    state.nodes.forEach((nodeData, nodeId) => {
+        const nodeEl = document.querySelector(`[data-node-id="${nodeId}"]`);
+        if (!nodeEl) return;
+
+        const nodeBounds = {
+            left: nodeData.x,
+            top: nodeData.y,
+            right: nodeData.x + nodeEl.offsetWidth,
+            bottom: nodeData.y + nodeEl.offsetHeight
+        };
+
+        const intersects = !(
+            nodeBounds.right < selectionBounds.left ||
+            nodeBounds.left > selectionBounds.right ||
+            nodeBounds.bottom < selectionBounds.top ||
+            nodeBounds.top > selectionBounds.bottom
+        );
+
+        if (intersects) {
+            state.selectedNodes.add(nodeId);
+            nodeEl.classList.add('selected');
+        } else if (!e.shiftKey) {
+            state.selectedNodes.delete(nodeId);
+            nodeEl.classList.remove('selected');
+        }
+    });
+}
+
+/**
+ * Handle selection rectangle end
+ */
+function handleSelectionEnd(e) {
+    isSelecting = false;
+
+    if (selectionRect) {
+        selectionRect.remove();
+        selectionRect = null;
+    }
+
+    document.removeEventListener('mousemove', handleSelectionDrag);
+    document.removeEventListener('mouseup', handleSelectionEnd);
+
+    if (state.selectedNodes.size > 0) {
+        updateStatus(`Selected ${state.selectedNodes.size} nodes`);
+    }
+}
+
+
+// ===== connections.js =====
+/**
+ * Connection System Module
+ */
+
+
+// Connection state
+let tempLine = null;
+let tempLineStart = null;
+let mousePathPoints = [];
+let draggingControlPoint = null;
+
+/**
+ * Handle mouse down on node border for creating connections
+ */
+function handleBorderMouseDown(e, nodeId, border) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (state.connecting) {
+        cancelConnection();
+    }
+
+    const nodeData = state.nodes.get(nodeId);
+
+    if (!canBeSource(nodeData)) {
+        updateStatus('This node has no outputs');
+        return;
+    }
+
+    const node = document.querySelector(`[data-node-id="${nodeId}"]`);
+    const nodeRect = node.getBoundingClientRect();
+    const svg = document.getElementById('connections-svg');
+    const svgRect = svg.getBoundingClientRect();
+
+    const borderRect = border.getBoundingClientRect();
+    let startX, startY, relativePos;
+    const borderClass = border.classList.contains('border-top') ? 'border-top' :
+                        border.classList.contains('border-bottom') ? 'border-bottom' :
+                        border.classList.contains('border-left') ? 'border-left' : 'border-right';
+
+    if (borderClass === 'border-top') {
+        startX = e.clientX - svgRect.left;
+        startY = nodeRect.top - svgRect.top;
+        relativePos = (e.clientX - nodeRect.left) / nodeRect.width;
+    } else if (borderClass === 'border-bottom') {
+        startX = e.clientX - svgRect.left;
+        startY = nodeRect.bottom - svgRect.top;
+        relativePos = (e.clientX - nodeRect.left) / nodeRect.width;
+    } else if (borderClass === 'border-left') {
+        startX = nodeRect.left - svgRect.left;
+        startY = e.clientY - svgRect.top;
+        relativePos = (e.clientY - nodeRect.top) / nodeRect.height;
+    } else {
+        startX = nodeRect.right - svgRect.left;
+        startY = e.clientY - svgRect.top;
+        relativePos = (e.clientY - nodeRect.top) / nodeRect.height;
+    }
+
+    relativePos = Math.max(0, Math.min(1, relativePos));
+
+    tempLineStart = {
+        nodeId: nodeId,
+        x: startX,
+        y: startY,
+        border: borderClass,
+        relativePos: relativePos
+    };
+
+    state.connecting = {
+        source: nodeId,
+        sourcePoint: { x: startX, y: startY },
+        sourceBorder: borderClass,
+        sourceRelativePos: relativePos
+    };
+
+    node.classList.add('connecting-source');
+
+    document.querySelectorAll('.workflow-node').forEach(n => {
+        if (n.dataset.nodeId !== nodeId) {
+            const targetData = state.nodes.get(n.dataset.nodeId);
+            if (canBeTarget(targetData)) {
+                n.classList.add('valid-target');
+            } else {
+                n.classList.add('invalid-target');
+            }
+        }
+    });
+
+    document.addEventListener('mousemove', handleConnectionMouseMove);
+    document.addEventListener('mouseup', handleConnectionMouseUp);
+    document.addEventListener('keydown', handleConnectionEscape);
+
+    updateStatus('Drag to another node to create connection');
+}
+
+/**
+ * Handle mouse move during connection creation
+ */
+function handleConnectionMouseMove(e) {
+    if (!tempLineStart) return;
+
+    const svg = document.getElementById('connections-svg');
+    const svgRect = svg.getBoundingClientRect();
+
+    const endX = e.clientX - svgRect.left;
+    const endY = e.clientY - svgRect.top;
+
+    mousePathPoints.push({ x: endX, y: endY, time: Date.now() });
+    if (mousePathPoints.length > 20) {
+        mousePathPoints.shift();
+    }
+
+    if (!tempLine) {
+        tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        tempLine.classList.add('connection-line', 'temp');
+        ensureArrowMarker(svg, 'temp');
+        tempLine.setAttribute('marker-end', 'url(#arrowhead-temp)');
+        svg.appendChild(tempLine);
+    }
+
+    const sourceData = state.nodes.get(tempLineStart.nodeId);
+    const sourceProtocol = sourceData?.componentData?.protocolType;
+    const useStraightLine = sourceProtocol === 'start_point';
+
+    let path;
+    if (useStraightLine) {
+        path = createStraightPath(tempLineStart.x, tempLineStart.y, endX, endY);
+    } else {
+        path = createConnectionPath(tempLineStart.x, tempLineStart.y, endX, endY, mousePathPoints);
+    }
+    tempLine.setAttribute('d', path);
+}
+
+/**
+ * Handle mouse up to complete connection
+ */
+function handleConnectionMouseUp(e) {
+    if (!state.connecting) return;
+
+    const targetNode = e.target.closest('.workflow-node');
+
+    if (targetNode) {
+        const targetNodeId = targetNode.dataset.nodeId;
+
+        if (targetNodeId !== state.connecting.source) {
+            const svg = document.getElementById('connections-svg');
+            const svgRect = svg.getBoundingClientRect();
+            const nodeRect = targetNode.getBoundingClientRect();
+
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            const distTop = Math.abs(mouseY - nodeRect.top);
+            const distBottom = Math.abs(mouseY - nodeRect.bottom);
+            const distLeft = Math.abs(mouseX - nodeRect.left);
+            const distRight = Math.abs(mouseX - nodeRect.right);
+
+            const minDist = Math.min(distTop, distBottom, distLeft, distRight);
+
+            let targetBorder, endX, endY, targetRelativePos;
+
+            if (minDist === distTop) {
+                targetBorder = 'border-top';
+                endX = mouseX - svgRect.left;
+                endY = nodeRect.top - svgRect.top;
+                targetRelativePos = (mouseX - nodeRect.left) / nodeRect.width;
+            } else if (minDist === distBottom) {
+                targetBorder = 'border-bottom';
+                endX = mouseX - svgRect.left;
+                endY = nodeRect.bottom - svgRect.top;
+                targetRelativePos = (mouseX - nodeRect.left) / nodeRect.width;
+            } else if (minDist === distLeft) {
+                targetBorder = 'border-left';
+                endX = nodeRect.left - svgRect.left;
+                endY = mouseY - svgRect.top;
+                targetRelativePos = (mouseY - nodeRect.top) / nodeRect.height;
+            } else {
+                targetBorder = 'border-right';
+                endX = nodeRect.right - svgRect.left;
+                endY = mouseY - svgRect.top;
+                targetRelativePos = (mouseY - nodeRect.top) / nodeRect.height;
+            }
+
+            targetRelativePos = Math.max(0, Math.min(1, targetRelativePos));
+
+            completeConnection(targetNodeId, endX, endY, targetBorder, targetRelativePos);
+            return;
+        }
+    }
+
+    cancelConnection();
+    updateStatus('Connection cancelled');
+}
+
+/**
+ * Complete a connection to target node
+ */
+function completeConnection(targetNodeId, endX, endY, targetBorder, targetRelativePos = 0.5) {
+    if (targetNodeId === state.connecting.source) {
+        updateStatus('Cannot connect a node to itself');
+        cancelConnection();
+        return;
+    }
+
+    const targetData = state.nodes.get(targetNodeId);
+    if (!canBeTarget(targetData)) {
+        updateStatus('This node cannot accept inputs');
+        cancelConnection();
+        return;
+    }
+
+    const exists = state.connections.some(c =>
+        c.source === state.connecting.source && c.target === targetNodeId
+    );
+
+    if (exists) {
+        updateStatus('Connection already exists');
+        cancelConnection();
+        return;
+    }
+
+    const curveOffset = calculateCurveOffset(
+        state.connecting.sourcePoint.x,
+        state.connecting.sourcePoint.y,
+        endX, endY,
+        mousePathPoints
+    );
+
+    createConnection(
+        state.connecting.source,
+        targetNodeId,
+        state.connecting.sourcePoint,
+        { x: endX, y: endY },
+        state.connecting.sourceBorder,
+        targetBorder,
+        state.connecting.sourceRelativePos,
+        targetRelativePos,
+        curveOffset
+    );
+    cancelConnection();
+    updateStatus('Connection created');
+}
+
+/**
+ * Cancel connection in progress
+ */
+function cancelConnection() {
+    state.connecting = null;
+    tempLineStart = null;
+    mousePathPoints = [];
+
+    if (tempLine) {
+        tempLine.remove();
+        tempLine = null;
+    }
+
+    document.querySelectorAll('.connecting-source, .valid-target, .invalid-target').forEach(el => {
+        el.classList.remove('connecting-source', 'valid-target', 'invalid-target');
+    });
+
+    document.removeEventListener('mousemove', handleConnectionMouseMove);
+    document.removeEventListener('mouseup', handleConnectionMouseUp);
+    document.removeEventListener('keydown', handleConnectionEscape);
+}
+
+/**
+ * Handle escape key to cancel connection
+ */
+function handleConnectionEscape(e) {
+    if (e.key === 'Escape') {
+        cancelConnection();
+        updateStatus('Connection cancelled');
+    }
+}
+
+/**
+ * Create a connection between two nodes
+ */
+function createConnection(sourceId, targetId, sourcePoint = null, targetPoint = null, sourceBorder = null, targetBorder = null, sourceRelativePos = 0.5, targetRelativePos = 0.5, curveOffset = 0) {
+    const connection = {
+        id: generateUUID(),
+        source: sourceId,
+        target: targetId,
+        sourceAnchor: sourcePoint,
+        targetAnchor: targetPoint,
+        sourceBorder: sourceBorder,
+        targetBorder: targetBorder,
+        sourceRelativePos: sourceRelativePos,
+        targetRelativePos: targetRelativePos,
+        controlPoints: null,
+        curveOffset: curveOffset
+    };
+
+    state.connections.push(connection);
+    renderConnectionLine(connection);
+    updateCounts();
+
+    return connection.id;
+}
+
+/**
+ * Delete a connection
+ */
+function deleteConnection(connectionId) {
+    const index = state.connections.findIndex(c => c.id === connectionId);
+    if (index === -1) return;
+
+    state.connections.splice(index, 1);
+    removeConnectionLine(connectionId);
+
+    state.selectedConnections.delete(connectionId);
+    if (state.selectedConnection === connectionId) {
+        state.selectedConnection = null;
+    }
+
+    updateCounts();
+    updateStatus('Connection deleted');
+}
+
+/**
+ * Delete all selected connections
+ */
+function deleteSelectedConnections() {
+    const toDelete = [...state.selectedConnections];
+    toDelete.forEach(connId => deleteConnection(connId));
+}
+
+/**
+ * Remove connection line from SVG
+ */
+function removeConnectionLine(connectionId) {
+    const svg = document.getElementById('connections-svg');
+    svg.querySelectorAll(`[data-connection-id="${connectionId}"], [data-cp-connection="${connectionId}"]`).forEach(el => el.remove());
+}
+
+/**
+ * Select a connection
+ */
+function selectConnection(connectionId) {
+    clearSelection();
+    renderPropertiesPanel(null);
+
+    if (state.selectedConnection === connectionId) {
+        deselectConnectionsInternal();
+        return;
+    }
+
+    deselectConnectionsInternal();
+
+    state.selectedConnection = connectionId;
+    state.selectedConnections.add(connectionId);
+
+    const line = document.querySelector(`[data-connection-id="${connectionId}"]`);
+    if (line) line.classList.add('selected');
+
+    const connection = state.connections.find(c => c.id === connectionId);
+    if (connection) {
+        renderConnectionLine(connection);
+    }
+
+    updateStatus('Connection selected - drag control points to reshape');
+}
+
+function deselectConnectionsInternal() {
+    state.selectedConnections.forEach(connId => {
+        const line = document.querySelector(`[data-connection-id="${connId}"]`);
+        if (line) line.classList.remove('selected');
+    });
+    state.selectedConnections.clear();
+    state.selectedConnection = null;
+    document.querySelectorAll('.waypoint-handle, .control-line').forEach(el => el.remove());
+}
+
+/**
+ * Create connection path based on mouse movement
+ */
+function createConnectionPath(x1, y1, x2, y2, pathPoints = null) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    let curveOffset = calculateCurveOffset(x1, y1, x2, y2, pathPoints);
+
+    if (Math.abs(curveOffset) < 5) {
+        curveOffset = distance * -0.3;
+    }
+
+    return createParabolicPath(x1, y1, x2, y2, curveOffset);
+}
+
+/**
+ * Create a straight line path
+ */
+function createStraightPath(x1, y1, x2, y2) {
+    return `M ${x1} ${y1} L ${x2} ${y2}`;
+}
+
+/**
+ * Create a parabolic (quadratic bezier) curve
+ */
+function createParabolicPath(x1, y1, x2, y2, curveOffset) {
+    const midX = (x1 + x2) / 2;
+    const midY = (y1 + y2) / 2;
+
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance === 0) {
+        return `M ${x1} ${y1} L ${x2} ${y2}`;
+    }
+
+    const perpX = -dy / distance;
+    const perpY = dx / distance;
+
+    const cpX = midX + perpX * curveOffset;
+    const cpY = midY + perpY * curveOffset;
+
+    return `M ${x1} ${y1} Q ${cpX} ${cpY}, ${x2} ${y2}`;
+}
+
+/**
+ * Calculate curve offset based on mouse path deviation
+ */
+function calculateCurveOffset(x1, y1, x2, y2, pathPoints) {
+    if (!pathPoints || pathPoints.length < 3) {
+        return 0;
+    }
+
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance === 0) return 0;
+
+    let totalDeviation = 0;
+    let count = 0;
+
+    for (const point of pathPoints) {
+        const apX = point.x - x1;
+        const apY = point.y - y1;
+        const crossProduct = dx * apY - dy * apX;
+        const deviation = crossProduct / distance;
+        totalDeviation += deviation;
+        count++;
+    }
+
+    const avgDeviation = totalDeviation / count;
+    const scaledOffset = Math.max(-150, Math.min(150, avgDeviation * 1.5));
+
+    return scaledOffset;
+}
+
+/**
+ * Create bezier path string (legacy)
+ */
+function createBezierPath(x1, y1, x2, y2, controlPoints = null) {
+    if (controlPoints) {
+        return `M ${x1} ${y1} C ${controlPoints.cp1.x} ${controlPoints.cp1.y}, ${controlPoints.cp2.x} ${controlPoints.cp2.y}, ${x2} ${y2}`;
+    }
+    return createParabolicPath(x1, y1, x2, y2, 0);
+}
+
+/**
+ * Calculate default control points for bezier curve
+ */
+function getDefaultControlPoints(x1, y1, x2, y2) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance === 0) {
+        return {
+            cp1: { x: x1, y: y1 },
+            cp2: { x: x2, y: y2 }
+        };
+    }
+
+    const curvature = Math.max(30, distance * 0.3);
+    const perpX = dy / distance;
+    const perpY = -dx / distance;
+
+    const cp1 = {
+        x: x1 + dx * 0.25 + perpX * curvature,
+        y: y1 + dy * 0.25 + perpY * curvature
+    };
+
+    const cp2 = {
+        x: x1 + dx * 0.75 + perpX * curvature,
+        y: y1 + dy * 0.75 + perpY * curvature
+    };
+
+    return { cp1, cp2 };
+}
+
+/**
+ * Ensure arrow marker exists in SVG
+ */
+function ensureArrowMarker(svg, suffix = '') {
+    const id = suffix ? `arrowhead-${suffix}` : 'arrowhead';
+    if (svg.querySelector(`#${id}`)) return;
+
+    const defs = svg.querySelector('defs') || svg.insertBefore(
+        document.createElementNS('http://www.w3.org/2000/svg', 'defs'),
+        svg.firstChild
+    );
+
+    const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+    marker.setAttribute('id', id);
+    marker.setAttribute('markerWidth', '12');
+    marker.setAttribute('markerHeight', '12');
+    marker.setAttribute('refX', '12');
+    marker.setAttribute('refY', '6');
+    marker.setAttribute('orient', 'auto');
+    marker.setAttribute('markerUnits', 'userSpaceOnUse');
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M0,0 L12,6 L0,12 L3,6 Z');
+    path.setAttribute('fill', suffix === 'temp' ? '#22c55e' : '#4a90d9');
+
+    marker.appendChild(path);
+    defs.appendChild(marker);
+}
+
+/**
+ * Calculate connection anchor point on a node
+ */
+function getConnectionAnchor(nodeElement, svgRect, border, relativePos = 0.5) {
+    const nodeRect = nodeElement.getBoundingClientRect();
+    let x, y;
+
+    switch (border) {
+        case 'border-top':
+            x = nodeRect.left + nodeRect.width * relativePos - svgRect.left;
+            y = nodeRect.top - svgRect.top;
+            break;
+        case 'border-bottom':
+            x = nodeRect.left + nodeRect.width * relativePos - svgRect.left;
+            y = nodeRect.bottom - svgRect.top;
+            break;
+        case 'border-left':
+            x = nodeRect.left - svgRect.left;
+            y = nodeRect.top + nodeRect.height * relativePos - svgRect.top;
+            break;
+        case 'border-right':
+        default:
+            x = nodeRect.right - svgRect.left;
+            y = nodeRect.top + nodeRect.height * relativePos - svgRect.top;
+            break;
+    }
+
+    return { x, y };
+}
+
+/**
+ * Determine best border for connecting two nodes
+ */
+function determineBestBorder(sourceNode, targetNode, svgRect) {
+    const sourceRect = sourceNode.getBoundingClientRect();
+    const targetRect = targetNode.getBoundingClientRect();
+
+    const sourceCenterX = sourceRect.left + sourceRect.width / 2;
+    const sourceCenterY = sourceRect.top + sourceRect.height / 2;
+    const targetCenterX = targetRect.left + targetRect.width / 2;
+    const targetCenterY = targetRect.top + targetRect.height / 2;
+
+    const dx = targetCenterX - sourceCenterX;
+    const dy = targetCenterY - sourceCenterY;
+
+    let sourceBorder, targetBorder;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+        sourceBorder = dx > 0 ? 'border-right' : 'border-left';
+        targetBorder = dx > 0 ? 'border-left' : 'border-right';
+    } else {
+        sourceBorder = dy > 0 ? 'border-bottom' : 'border-top';
+        targetBorder = dy > 0 ? 'border-top' : 'border-bottom';
+    }
+
+    return { sourceBorder, targetBorder };
+}
+
+/**
+ * Render a connection line
+ */
+function renderConnectionLine(connection) {
+    const svg = document.getElementById('connections-svg');
+    const sourceNode = document.querySelector(`[data-node-id="${connection.source}"]`);
+    const targetNode = document.querySelector(`[data-node-id="${connection.target}"]`);
+
+    if (!sourceNode || !targetNode) return;
+
+    const svgRect = svg.getBoundingClientRect();
+
+    let startX, startY, endX, endY;
+
+    const sourceRelPos = connection.sourceRelativePos !== undefined ? connection.sourceRelativePos : 0.5;
+    const targetRelPos = connection.targetRelativePos !== undefined ? connection.targetRelativePos : 0.5;
+
+    if (connection.sourceBorder && connection.targetBorder) {
+        const sourceAnchor = getConnectionAnchor(sourceNode, svgRect, connection.sourceBorder, sourceRelPos);
+        const targetAnchor = getConnectionAnchor(targetNode, svgRect, connection.targetBorder, targetRelPos);
+        startX = sourceAnchor.x;
+        startY = sourceAnchor.y;
+        endX = targetAnchor.x;
+        endY = targetAnchor.y;
+    } else {
+        const { sourceBorder, targetBorder } = determineBestBorder(sourceNode, targetNode, svgRect);
+        const sourceAnchor = getConnectionAnchor(sourceNode, svgRect, sourceBorder, sourceRelPos);
+        const targetAnchor = getConnectionAnchor(targetNode, svgRect, targetBorder, targetRelPos);
+        startX = sourceAnchor.x;
+        startY = sourceAnchor.y;
+        endX = targetAnchor.x;
+        endY = targetAnchor.y;
+
+        connection.sourceBorder = sourceBorder;
+        connection.targetBorder = targetBorder;
+    }
+
+    let path = svg.querySelector(`[data-connection-id="${connection.id}"]`);
+    if (!path) {
+        path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.classList.add('connection-line');
+        path.dataset.connectionId = connection.id;
+
+        path.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectConnection(connection.id);
+        });
+
+        path.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            deleteConnection(connection.id);
+        });
+
+        ensureArrowMarker(svg);
+        path.setAttribute('marker-end', 'url(#arrowhead)');
+        svg.appendChild(path);
+    }
+
+    let pathD;
+    const dx = endX - startX;
+    const dy = endY - startY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    const sourceData = state.nodes.get(connection.source);
+    const targetData = state.nodes.get(connection.target);
+    const sourceProtocol = sourceData?.componentData?.protocolType;
+    const targetProtocol = targetData?.componentData?.protocolType;
+    const useStraightLine = sourceProtocol === 'start_point' || targetProtocol === 'end_point';
+
+    if (useStraightLine) {
+        pathD = createStraightPath(startX, startY, endX, endY);
+    } else if (connection.curveOffset !== undefined && connection.curveOffset !== null && Math.abs(connection.curveOffset) > 5) {
+        pathD = createParabolicPath(startX, startY, endX, endY, connection.curveOffset);
+    } else if (connection.controlPoints) {
+        pathD = createBezierPath(startX, startY, endX, endY, connection.controlPoints);
+    } else {
+        const defaultCurveOffset = distance * -0.3;
+        pathD = createParabolicPath(startX, startY, endX, endY, defaultCurveOffset);
+    }
+    path.setAttribute('d', pathD);
+
+    if (state.selectedConnection === connection.id && connection.controlPoints) {
+        const controlPoints = connection.controlPoints || getDefaultControlPoints(startX, startY, endX, endY);
+        renderControlPointHandles(connection, startX, startY, endX, endY, controlPoints, svg);
+    }
+}
+
+/**
+ * Render control point handles for a selected connection
+ */
+function renderControlPointHandles(connection, startX, startY, endX, endY, controlPoints, svg) {
+    svg.querySelectorAll(`[data-cp-connection="${connection.id}"]`).forEach(el => el.remove());
+
+    const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line1.setAttribute('x1', startX);
+    line1.setAttribute('y1', startY);
+    line1.setAttribute('x2', controlPoints.cp1.x);
+    line1.setAttribute('y2', controlPoints.cp1.y);
+    line1.classList.add('control-line');
+    line1.dataset.cpConnection = connection.id;
+    svg.appendChild(line1);
+
+    const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line2.setAttribute('x1', endX);
+    line2.setAttribute('y1', endY);
+    line2.setAttribute('x2', controlPoints.cp2.x);
+    line2.setAttribute('y2', controlPoints.cp2.y);
+    line2.classList.add('control-line');
+    line2.dataset.cpConnection = connection.id;
+    svg.appendChild(line2);
+
+    createControlPointHandle(connection, controlPoints.cp1, 'cp1', svg, startX, startY, endX, endY);
+    createControlPointHandle(connection, controlPoints.cp2, 'cp2', svg, startX, startY, endX, endY);
+}
+
+/**
+ * Create a draggable control point handle
+ */
+function createControlPointHandle(connection, point, cpName, svg, startX, startY, endX, endY) {
+    const handle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    handle.setAttribute('cx', point.x);
+    handle.setAttribute('cy', point.y);
+    handle.setAttribute('r', '8');
+    handle.classList.add('waypoint-handle');
+    handle.dataset.cpConnection = connection.id;
+    handle.dataset.cpName = cpName;
+
+    handle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        startDraggingControlPoint(e, connection, cpName, svg, startX, startY, endX, endY);
+    });
+
+    svg.appendChild(handle);
+}
+
+/**
+ * Start dragging a control point
+ */
+function startDraggingControlPoint(e, connection, cpName, svg, startX, startY, endX, endY) {
+    const svgRect = svg.getBoundingClientRect();
+
+    draggingControlPoint = {
+        connection,
+        cpName,
+        svg,
+        svgRect,
+        startX,
+        startY,
+        endX,
+        endY
+    };
+
+    document.addEventListener('mousemove', handleControlPointDrag);
+    document.addEventListener('mouseup', handleControlPointDragEnd);
+}
+
+/**
+ * Handle control point dragging
+ */
+function handleControlPointDrag(e) {
+    if (!draggingControlPoint) return;
+
+    const { connection, cpName, svg, svgRect, startX, startY, endX, endY } = draggingControlPoint;
+
+    const x = e.clientX - svgRect.left;
+    const y = e.clientY - svgRect.top;
+
+    if (!connection.controlPoints) {
+        connection.controlPoints = getDefaultControlPoints(startX, startY, endX, endY);
+    }
+
+    connection.controlPoints[cpName] = { x, y };
+
+    renderConnectionLine(connection);
+}
+
+/**
+ * Handle control point drag end
+ */
+function handleControlPointDragEnd(e) {
+    draggingControlPoint = null;
+    document.removeEventListener('mousemove', handleControlPointDrag);
+    document.removeEventListener('mouseup', handleControlPointDragEnd);
+}
+
+/**
+ * Update all connection lines
+ */
+function updateConnectionLines() {
+    state.connections.forEach(conn => renderConnectionLine(conn));
+}
+
+
+// ===== nodes.js =====
+/**
+ * Node Management Module
+ */
+
+
+// Node dragging state
+let isDraggingNode = false;
+let dragStartPos = { x: 0, y: 0 };
+let dragStartNodePos = { x: 0, y: 0 };
+let dragStartPositions = new Map();
+
+/**
+ * Extract editable parameters from component data
+ */
+function extractParameters(componentData) {
+    const params = {};
+
+    if (componentData.parameters && Array.isArray(componentData.parameters)) {
+        componentData.parameters.forEach(param => {
+            params[param.name] = param.default !== undefined ? param.default : null;
+        });
+    }
+
+    // Include basic info
+    params._name = componentData.name || '';
+    params._description = componentData.description || '';
+
+    return params;
+}
+
+/**
+ * Create a new node on the canvas
+ */
+function createNode(type, componentData, x, y) {
+    const nodeId = generateUUID();
+    const nodeData = {
+        id: nodeId,
+        type: type,
+        componentData: componentData,
+        x: x,
+        y: y,
+        parameters: extractParameters(componentData)
+    };
+
+    state.nodes.set(nodeId, nodeData);
+    renderNode(nodeData);
+    updateCounts();
+
+    return nodeId;
+}
+
+/**
+ * Render a node element on the canvas
+ */
+function renderNode(nodeData) {
+    const template = document.getElementById('node-template');
+    const clone = template.content.cloneNode(true);
+    const node = clone.querySelector('.workflow-node');
+
+    // Set attributes
+    node.dataset.nodeId = nodeData.id;
+    node.classList.add(nodeData.type.replace(/_/g, '-'));
+
+    // Set position
+    node.style.left = `${nodeData.x}px`;
+    node.style.top = `${nodeData.y}px`;
+
+    // Set content
+    const name = nodeData.componentData.name || 'Unnamed';
+    const protocolType = nodeData.componentData.protocolType;
+
+    // Use special icon for control nodes
+    if (nodeData.type === 'control' && protocolType) {
+        node.querySelector('.node-icon').textContent = getControlNodeIcon(protocolType);
+        node.classList.add(protocolType.replace(/_/g, '-'));
+    } else {
+        node.querySelector('.node-icon').textContent = getTypeIcon(nodeData.type);
+    }
+
+    node.querySelector('.node-title').textContent = name;
+    node.querySelector('.node-type').textContent = formatTypeName(protocolType || nodeData.type);
+
+    // Configure connection borders based on input/output capabilities
+    const hasInput = canBeTarget(nodeData);
+    const hasOutput = canBeSource(nodeData);
+
+    node.querySelectorAll('.connection-border').forEach(border => {
+        const isLeftBorder = border.classList.contains('border-left');
+        const isRightBorder = border.classList.contains('border-right');
+
+        if (isLeftBorder && !hasInput) {
+            border.classList.add('hidden');
+        } else if (isRightBorder && !hasOutput) {
+            border.classList.add('hidden');
+        }
+
+        if (!border.classList.contains('hidden')) {
+            border.addEventListener('mousedown', (e) => handleBorderMouseDown(e, nodeData.id, border));
+        }
+    });
+
+    // For filter nodes, add special styling class for dual output
+    if (protocolType === 'filter_point') {
+        node.classList.add('filter-node');
+    }
+
+    // Event listeners
+    node.addEventListener('mousedown', handleNodeMouseDown);
+    node.querySelector('.node-delete').addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteNode(nodeData.id);
+    });
+
+    document.getElementById('workflow-canvas').appendChild(node);
+}
+
+/**
+ * Delete a node and its connections
+ */
+function deleteNode(nodeId) {
+    // Remove connections involving this node
+    state.connections = state.connections.filter(conn => {
+        if (conn.source === nodeId || conn.target === nodeId) {
+            removeConnectionLine(conn.id);
+            return false;
+        }
+        return true;
+    });
+
+    // Remove from DOM
+    const nodeElement = document.querySelector(`[data-node-id="${nodeId}"]`);
+    if (nodeElement) nodeElement.remove();
+
+    // Remove from state
+    state.nodes.delete(nodeId);
+    state.selectedNodes.delete(nodeId);
+
+    if (state.selectedNode === nodeId) {
+        state.selectedNode = null;
+        renderPropertiesPanel(null);
+    }
+
+    updateCounts();
+    updateStatus('Node deleted');
+}
+
+/**
+ * Delete all selected nodes
+ */
+function deleteSelectedNodes() {
+    if (state.selectedNodes.size === 0) return;
+
+    const nodesToDelete = [...state.selectedNodes];
+    nodesToDelete.forEach(nodeId => deleteNode(nodeId));
+
+    state.selectedNodes.clear();
+}
+
+/**
+ * Handle mouse down on a node
+ */
+function handleNodeMouseDown(e) {
+    if (e.target.closest('.connection-border') || e.target.closest('.node-delete')) return;
+
+    const node = e.target.closest('.workflow-node');
+    const nodeId = node.dataset.nodeId;
+    const nodeData = state.nodes.get(nodeId);
+
+    // Handle selection
+    if (e.shiftKey) {
+        if (state.selectedNodes.has(nodeId)) {
+            state.selectedNodes.delete(nodeId);
+            node.classList.remove('selected');
+        } else {
+            state.selectedNodes.add(nodeId);
+            node.classList.add('selected');
+        }
+    } else if (!state.selectedNodes.has(nodeId)) {
+        clearSelection();
+        state.selectedNodes.add(nodeId);
+        node.classList.add('selected');
+    }
+
+    state.selectedNode = nodeId;
+    renderPropertiesPanel(nodeData);
+
+    // Deselect connections
+    deselectConnections();
+
+    // Start dragging
+    isDraggingNode = true;
+    dragStartPos = { x: e.clientX, y: e.clientY };
+    dragStartNodePos = { x: nodeData.x, y: nodeData.y };
+
+    // Store initial positions for all selected nodes
+    dragStartPositions.clear();
+    state.selectedNodes.forEach(id => {
+        const data = state.nodes.get(id);
+        dragStartPositions.set(id, { x: data.x, y: data.y });
+        document.querySelector(`[data-node-id="${id}"]`)?.classList.add('dragging');
+    });
+
+    document.addEventListener('mousemove', handleNodeDrag);
+    document.addEventListener('mouseup', handleNodeDragEnd);
+
+    e.preventDefault();
+}
+
+/**
+ * Handle node dragging
+ */
+function handleNodeDrag(e) {
+    if (!isDraggingNode) return;
+
+    const deltaX = (e.clientX - dragStartPos.x) / state.zoom;
+    const deltaY = (e.clientY - dragStartPos.y) / state.zoom;
+
+    // Move all selected nodes
+    state.selectedNodes.forEach(nodeId => {
+        const startPos = dragStartPositions.get(nodeId);
+        const newX = Math.max(0, startPos.x + deltaX);
+        const newY = Math.max(0, startPos.y + deltaY);
+
+        // Update state
+        const nodeData = state.nodes.get(nodeId);
+        nodeData.x = newX;
+        nodeData.y = newY;
+
+        // Update DOM
+        const nodeElement = document.querySelector(`[data-node-id="${nodeId}"]`);
+        if (nodeElement) {
+            nodeElement.style.left = `${newX}px`;
+            nodeElement.style.top = `${newY}px`;
+        }
+    });
+
+    // Update connection lines
+    updateConnectionLines();
+}
+
+/**
+ * Handle node drag end
+ */
+function handleNodeDragEnd(e) {
+    isDraggingNode = false;
+    dragStartPositions.clear();
+
+    state.selectedNodes.forEach(nodeId => {
+        document.querySelector(`[data-node-id="${nodeId}"]`)?.classList.remove('dragging');
+    });
+
+    document.removeEventListener('mousemove', handleNodeDrag);
+    document.removeEventListener('mouseup', handleNodeDragEnd);
+}
+
+
+// ===== canvas.js =====
+/**
+ * Canvas Module - Zoom and Pan
+ */
+
+
+/**
+ * Update zoom level
+ */
+function setZoom(newZoom) {
+    state.zoom = Math.max(0.25, Math.min(2, newZoom));
+
+    const canvas = document.getElementById('workflow-canvas');
+    canvas.style.transform = `scale(${state.zoom}) translate(${state.pan.x}px, ${state.pan.y}px)`;
+
+    document.getElementById('zoom-level').textContent = `${Math.round(state.zoom * 100)}%`;
+
+    updateConnectionLines();
+}
+
+/**
+ * Handle mouse wheel for zooming
+ */
+function handleWheel(e) {
+    if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        setZoom(state.zoom + delta);
+    }
+}
+
+
+// ===== dragDrop.js =====
+/**
+ * Drag and Drop Module - Palette to Canvas
+ */
+
+
+/**
+ * Handle drag start from component palette
+ */
+function handleDragStart(e) {
+    const item = e.target.closest('.component-item');
+    const type = item.dataset.type;
+    const index = parseInt(item.dataset.index);
+
+    state.draggedComponent = {
+        type: type,
+        data: state.components[type][index]
+    };
+
+    e.dataTransfer.effectAllowed = 'copy';
+    e.dataTransfer.setData('text/plain', JSON.stringify(state.draggedComponent));
+    item.classList.add('dragging');
+
+    updateStatus(`Dragging ${state.draggedComponent.data.name || 'component'}...`);
+}
+
+/**
+ * Handle drag end
+ */
+function handleDragEnd(e) {
+    e.target.classList.remove('dragging');
+    state.draggedComponent = null;
+}
+
+/**
+ * Handle drag over canvas
+ */
+function handleCanvasDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    e.currentTarget.classList.add('drag-over');
+}
+
+/**
+ * Handle drag leave canvas
+ */
+function handleCanvasDragLeave(e) {
+    e.currentTarget.classList.remove('drag-over');
+}
+
+/**
+ * Handle drop on canvas
+ */
+function handleCanvasDrop(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
+
+    if (!state.draggedComponent) return;
+
+    // Calculate position accounting for zoom and pan
+    const canvas = document.getElementById('workflow-canvas');
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / state.zoom - state.pan.x;
+    const y = (e.clientY - rect.top) / state.zoom - state.pan.y;
+
+    createNode(state.draggedComponent.type, state.draggedComponent.data, x, y);
+
+    // Hide hint
+    document.getElementById('canvas-hint')?.classList.add('hidden');
+    updateStatus('Node added to workflow');
+}
+
+
+// ===== palette.js =====
+/**
+ * Component Palette Module
+ */
+
+
+/**
+ * Load components from API and render palette
+ */
+async function loadComponents() {
+    try {
+        const response = await fetch('/api/components');
+        if (!response.ok) throw new Error('Failed to load components');
+
+        state.components = await response.json();
+        renderComponentPalette();
+        updateStatus('Components loaded');
+    } catch (error) {
+        console.error('Error loading components:', error);
+        updateStatus('Error loading components');
+    }
+}
+
+/**
+ * Render the component palette with sections
+ */
+function renderComponentPalette() {
+    const palette = document.getElementById('component-palette');
+    palette.innerHTML = '';
+
+    for (const [type, components] of Object.entries(state.components)) {
+        const section = document.createElement('div');
+        section.className = 'component-section';
+        section.dataset.type = type;
+
+        // Section header - collapsed by default
+        const header = document.createElement('div');
+        header.className = 'section-header collapsed';
+        header.innerHTML = `
+            <span class="section-title">
+                <span class="section-icon">${getTypeIcon(type)}</span>
+                ${formatTypeName(type)}
+            </span>
+            <span class="section-count">${components.length}</span>
+            <span class="section-toggle">\u25BC</span>
+        `;
+        header.addEventListener('click', () => {
+            header.classList.toggle('collapsed');
+        });
+
+        // Section items
+        const items = document.createElement('div');
+        items.className = 'section-items';
+
+        components.forEach((component, index) => {
+            const item = document.createElement('div');
+            item.className = 'component-item';
+            item.draggable = true;
+            item.dataset.type = type;
+            item.dataset.index = index;
+
+            const name = component.name || component.title || `Component ${index + 1}`;
+            const description = component.description || '';
+
+            item.innerHTML = `
+                <div class="component-name">${name}</div>
+                ${description ? `<div class="component-description">${description}</div>` : ''}
+            `;
+
+            // Drag events
+            item.addEventListener('dragstart', handleDragStart);
+            item.addEventListener('dragend', handleDragEnd);
+
+            items.appendChild(item);
+        });
+
+        section.appendChild(header);
+        section.appendChild(items);
+        palette.appendChild(section);
+    }
+}
+
+/**
+ * Filter components by search query
+ */
+function filterComponents(query) {
+    const items = document.querySelectorAll('.component-item');
+    const lowerQuery = query.toLowerCase();
+
+    items.forEach(item => {
+        const name = item.querySelector('.component-name').textContent.toLowerCase();
+        const desc = item.querySelector('.component-description')?.textContent.toLowerCase() || '';
+        const matches = name.includes(lowerQuery) || desc.includes(lowerQuery);
+        item.style.display = matches ? '' : 'none';
+    });
+
+    // Show/hide sections based on visible items
+    document.querySelectorAll('.component-section').forEach(section => {
+        const visibleItems = section.querySelectorAll('.component-item:not([style*="display: none"])');
+        section.style.display = visibleItems.length > 0 ? '' : 'none';
+    });
+}
+
+
+// ===== workflow.js =====
+/**
+ * Workflow Save/Load Module
+ */
+
+
+/**
+ * Save workflow to JSON file
+ */
+function saveWorkflow() {
+    const workflow = {
+        name: 'workflow',
+        description: null,
+        independentVariables: {
+            name: 'X',
+            description: 'Independent variables',
+            datatype: 'real',
+            minOccurs: 1,
+            maxOccurs: -1,
+            validValues: null,
+            default: null
+        },
+        dependentVariables: {
+            name: 'Y',
+            description: 'Dependent variables',
+            datatype: 'real',
+            minOccurs: 1,
+            maxOccurs: -1,
+            validValues: null,
+            default: null
+        },
+        components: Array.from(state.nodes.values()).map(node => ({
+            uuid: node.id,
+            protocolUuid: node.componentData.uuid || node.id,
+            componentType: node.type,
+            parameterSetting: Object.entries(node.parameters)
+                .filter(([key, _]) => !key.startsWith('_'))
+                .map(([name, value]) => ({
+                    name: name,
+                    value: String(value)
+                })),
+            canvasLocation: {
+                x: Math.round(node.x),
+                y: Math.round(node.y)
+            }
+        })),
+        links: state.connections.map(conn => ({
+            source: conn.source,
+            target: conn.target,
+            sourceBorder: conn.sourceBorder || null,
+            targetBorder: conn.targetBorder || null,
+            controlPoints: conn.controlPoints || null
+        }))
+    };
+
+    const blob = new Blob([JSON.stringify(workflow, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'workflow.json';
+    a.click();
+
+    URL.revokeObjectURL(url);
+    updateStatus('Workflow saved');
+}
+
+/**
+ * Load workflow from JSON file
+ */
+function loadWorkflow(file) {
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+        try {
+            const workflow = JSON.parse(e.target.result);
+
+            clearCanvas();
+
+            const components = workflow.components || workflow.nodes || [];
+            components.forEach(compData => {
+                if (compData.uuid && compData.canvasLocation) {
+                    const type = compData.componentType || compData._type || 'theorists';
+
+                    const componentData = findComponentDataByProtocolUuid(
+                        compData.protocolUuid,
+                        type
+                    );
+
+                    const parameters = {};
+                    if (componentData.parameters) {
+                        componentData.parameters.forEach(p => {
+                            parameters[p.name] = p.default;
+                        });
+                    }
+                    if (compData.parameterSetting) {
+                        compData.parameterSetting.forEach(ps => {
+                            if (ps.name) {
+                                let value = ps.value;
+                                if (value === 'true') value = true;
+                                else if (value === 'false') value = false;
+                                else if (!isNaN(value) && value !== '' && value !== null) value = Number(value);
+                                parameters[ps.name] = value;
+                            }
+                        });
+                    }
+                    parameters._name = componentData.name || '';
+                    parameters._description = componentData.description || '';
+
+                    const node = {
+                        id: compData.uuid,
+                        type: type,
+                        x: compData.canvasLocation.x,
+                        y: compData.canvasLocation.y,
+                        componentData: componentData,
+                        parameters: parameters
+                    };
+
+                    state.nodes.set(node.id, node);
+                    renderNode(node);
+                }
+                else if (compData.id) {
+                    const componentData = findComponentData(
+                        compData.componentType || compData.type,
+                        compData.parameters
+                    );
+
+                    const node = {
+                        id: compData.id,
+                        type: compData.type || compData.componentType,
+                        x: compData.x,
+                        y: compData.y,
+                        componentData: componentData,
+                        parameters: compData.parameters
+                    };
+
+                    state.nodes.set(node.id, node);
+                    renderNode(node);
+                }
+            });
+
+            const links = workflow.links || workflow.connections || [];
+            links.forEach(linkData => {
+                const connection = {
+                    id: linkData.id || generateUUID(),
+                    source: linkData.source,
+                    target: linkData.target,
+                    sourceBorder: linkData.sourceBorder || linkData._sourceBorder || null,
+                    targetBorder: linkData.targetBorder || linkData._targetBorder || null,
+                    controlPoints: linkData.controlPoints || linkData._controlPoints || null
+                };
+
+                state.connections.push(connection);
+                renderConnectionLine(connection);
+            });
+
+            updateCounts();
+            document.getElementById('canvas-hint')?.classList.add('hidden');
+            updateStatus('Workflow loaded');
+
+        } catch (error) {
+            console.error('Error loading workflow:', error);
+            updateStatus('Error loading workflow');
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+/**
+ * Find component data by protocol UUID
+ */
+function findComponentDataByProtocolUuid(protocolUuid, type) {
+    const components = state.components[type];
+    if (!components) {
+        return { name: 'Unknown', description: '', parameters: [] };
+    }
+
+    const byUuid = components.find(c => c.uuid === protocolUuid);
+    if (byUuid) return byUuid;
+
+    return components[0] || { name: 'Unknown', description: '', parameters: [] };
+}
+
+/**
+ * Find component data by type and parameters
+ */
+function findComponentData(type, parameters, fileName = null) {
+    const components = state.components[type];
+    if (!components) {
+        return {
+            name: parameters._name || 'Unknown',
+            description: parameters._description || '',
+            parameters: []
+        };
+    }
+
+    if (fileName) {
+        const byFile = components.find(c => c.file === fileName);
+        if (byFile) return byFile;
+    }
+
+    const name = parameters._name;
+    if (name) {
+        const byName = components.find(c => c.name === name);
+        if (byName) return byName;
+    }
+
+    return components[0] || {
+        name: name || 'Unknown',
+        description: '',
+        parameters: []
+    };
+}
+
+/**
+ * Clear the canvas
+ */
+function clearCanvas() {
+    state.nodes.forEach((_, nodeId) => {
+        const el = document.querySelector(`[data-node-id="${nodeId}"]`);
+        if (el) el.remove();
+    });
+    state.nodes.clear();
+
+    state.connections.forEach(conn => removeConnectionLine(conn.id));
+    state.connections = [];
+
+    clearSelection();
+    deselectConnections();
+    renderPropertiesPanel(null);
+
+    document.getElementById('canvas-hint')?.classList.remove('hidden');
+
+    updateCounts();
+    updateStatus('Canvas cleared');
+}
+
+
+// ===== main.js =====
+/**
+ * Main Entry Point - Initialization and Event Wiring
+ */
+
+
+/**
+ * Handle keyboard shortcuts
+ */
+function handleKeyDown(e) {
+    if (e.target.matches('input, textarea, select')) return;
+
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    const ctrlKey = isMac ? e.metaKey : e.ctrlKey;
+
+    // Delete selected
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+        deleteSelectedNodes();
+        deleteSelectedConnections();
+        e.preventDefault();
+    }
+
+    // Select all
+    if (ctrlKey && e.key === 'a') {
+        selectAll();
+        e.preventDefault();
+    }
+
+    // Save
+    if (ctrlKey && e.key === 's') {
+        saveWorkflow();
+        e.preventDefault();
+    }
+
+    // Escape
+    if (e.key === 'Escape') {
+        if (state.connecting) {
+            cancelConnection();
+        } else {
+            clearSelection();
+            deselectConnections();
+            renderPropertiesPanel(null);
+        }
+        updateStatus('Deselected');
+    }
+}
+
+/**
+ * Initialize the application
+ */
+function init() {
+    // Clear any existing arrow markers
+    const svg = document.getElementById('connections-svg');
+    const existingDefs = svg.querySelector('defs');
+    if (existingDefs) existingDefs.remove();
+
+    // Load components
+    loadComponents();
+
+    // Canvas events
+    const canvasContainer = document.querySelector('.canvas-container');
+    canvasContainer.addEventListener('dragover', handleCanvasDragOver);
+    canvasContainer.addEventListener('dragleave', handleCanvasDragLeave);
+    canvasContainer.addEventListener('drop', handleCanvasDrop);
+
+    const canvas = document.getElementById('workflow-canvas');
+    canvas.addEventListener('mousedown', handleCanvasMouseDown);
+
+    // Zoom
+    canvasContainer.addEventListener('wheel', handleWheel, { passive: false });
+
+    // Toolbar buttons
+    document.getElementById('btn-save').addEventListener('click', saveWorkflow);
+    document.getElementById('btn-load').addEventListener('click', () => {
+        document.getElementById('file-input').click();
+    });
+    document.getElementById('file-input').addEventListener('change', (e) => {
+        if (e.target.files[0]) {
+            loadWorkflow(e.target.files[0]);
+            e.target.value = '';
+        }
+    });
+    document.getElementById('btn-clear').addEventListener('click', clearCanvas);
+    document.getElementById('btn-zoom-in').addEventListener('click', () => setZoom(state.zoom + 0.1));
+    document.getElementById('btn-zoom-out').addEventListener('click', () => setZoom(state.zoom - 0.1));
+
+    // Search
+    document.getElementById('component-search').addEventListener('input', (e) => {
+        filterComponents(e.target.value);
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', handleKeyDown);
+
+    updateStatus('Ready');
+}
+
+// Start the app
+document.addEventListener('DOMContentLoaded', init);
+
+
+// ===== Override loadComponents to use embedded data =====
+function loadComponents() {
+    state.components = EMBEDDED_COMPONENTS;
+    renderComponentPalette();
+    updateStatus('Components loaded (Standalone Mode)');
+}
+    </script>
+</body>
+</html>
