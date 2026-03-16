@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Build a standalone version of the workflow editor that works without a server.
+"""Build a standalone version of the workflow editor that works without a server.
 Creates a single self-contained HTML file with all CSS and JS inlined.
 """
 
@@ -20,11 +19,11 @@ def load_components():
 
             for json_file in sorted(type_dir.glob("*.json")):
                 try:
-                    with open(json_file, 'r') as f:
+                    with open(json_file) as f:
                         data = json.load(f)
-                        data['file'] = json_file.name
+                        data["file"] = json_file.name
                         components[type_name].append(data)
-                except (json.JSONDecodeError, IOError) as e:
+                except (OSError, json.JSONDecodeError) as e:
                     print(f"Warning: Could not load {json_file}: {e}")
 
     return components
@@ -42,17 +41,17 @@ def load_js_modules():
 
     # Order matters due to dependencies
     module_order = [
-        'state.js',
-        'utils.js',
-        'properties.js',
-        'selection.js',
-        'connections.js',
-        'nodes.js',
-        'canvas.js',
-        'dragDrop.js',
-        'palette.js',
-        'workflow.js',
-        'main.js'
+        "state.js",
+        "utils.js",
+        "properties.js",
+        "selection.js",
+        "connections.js",
+        "nodes.js",
+        "canvas.js",
+        "dragDrop.js",
+        "palette.js",
+        "workflow.js",
+        "main.js",
     ]
 
     js_content = []
@@ -62,24 +61,24 @@ def load_js_modules():
             content = module_path.read_text()
             # Remove import/export statements for bundling
             lines = []
-            for line in content.split('\n'):
+            for line in content.split("\n"):
                 stripped = line.strip()
-                if stripped.startswith('import ') or stripped.startswith('export '):
+                if stripped.startswith("import ") or stripped.startswith("export "):
                     # Keep function/const declarations but remove export keyword
-                    if stripped.startswith('export '):
-                        lines.append(line.replace('export ', '', 1))
+                    if stripped.startswith("export "):
+                        lines.append(line.replace("export ", "", 1))
                 else:
                     lines.append(line)
-            js_content.append(f"// ===== {module_name} =====\n" + '\n'.join(lines))
+            js_content.append(f"// ===== {module_name} =====\n" + "\n".join(lines))
 
-    return '\n\n'.join(js_content)
+    return "\n\n".join(js_content)
 
 
 def generate_standalone_html(components, css, js):
     """Generate fully self-contained HTML."""
     components_json = json.dumps(components, indent=2)
 
-    return f'''<!DOCTYPE html>
+    return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -181,7 +180,7 @@ function loadComponents() {{
     </script>
 </body>
 </html>
-'''
+"""
 
 
 def main():
@@ -209,9 +208,9 @@ def main():
     html_file.write_text(html)
     print(f"Generated: {html_file}")
 
-    print(f"\nStandalone build complete!")
+    print("\nStandalone build complete!")
     print(f"Total size: {len(html) / 1024:.1f} KB")
-    print(f"\nOpen this file in your browser:")
+    print("\nOpen this file in your browser:")
     print(f"  {html_file.absolute()}")
 
 
