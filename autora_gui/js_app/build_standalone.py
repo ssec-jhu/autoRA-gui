@@ -185,7 +185,8 @@ function loadComponents() {{
 
 def main():
     script_dir = Path(__file__).parent
-    static_dir = script_dir / "static"
+    # Output to repo root for GitHub Pages
+    root_dir = script_dir.parent.parent
 
     print("Building standalone version...")
 
@@ -204,7 +205,7 @@ def main():
 
     # Generate and write standalone HTML
     html = generate_standalone_html(components, css, js)
-    html_file = static_dir / "index.html"
+    html_file = root_dir / "index.html"
     html_file.write_text(html)
     print(f"Generated: {html_file}")
 
