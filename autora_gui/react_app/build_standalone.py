@@ -50,23 +50,13 @@ export const EMBEDDED_COMPONENTS = {components_json}
 def run_npm_build(react_app_dir):
     """Run npm build to create production bundle."""
     print("Running npm install...")
-    result = subprocess.run(
-        ["npm", "install"],
-        cwd=react_app_dir,
-        capture_output=True,
-        text=True
-    )
+    result = subprocess.run(["npm", "install"], cwd=react_app_dir, capture_output=True, text=True)
     if result.returncode != 0:
         print(f"npm install failed: {result.stderr}")
         return False
 
     print("Running npm run build...")
-    result = subprocess.run(
-        ["npm", "run", "build"],
-        cwd=react_app_dir,
-        capture_output=True,
-        text=True
-    )
+    result = subprocess.run(["npm", "run", "build"], cwd=react_app_dir, capture_output=True, text=True)
     if result.returncode != 0:
         print(f"npm build failed: {result.stderr}")
         print(result.stdout)
@@ -91,13 +81,11 @@ def create_single_html(dist_dir, output_file):
         # Replace link tag with inline style
         css_filename = css_file.name
         html_content = html_content.replace(
-            f'<link rel="stylesheet" crossorigin href="./assets/{css_filename}">',
-            f'<style>{css_content}</style>'
+            f'<link rel="stylesheet" crossorigin href="./assets/{css_filename}">', f"<style>{css_content}</style>"
         )
         # Also try without crossorigin
         html_content = html_content.replace(
-            f'<link rel="stylesheet" href="./assets/{css_filename}">',
-            f'<style>{css_content}</style>'
+            f'<link rel="stylesheet" href="./assets/{css_filename}">', f"<style>{css_content}</style>"
         )
 
     # Find and inline JS files
@@ -107,12 +95,12 @@ def create_single_html(dist_dir, output_file):
         # Replace script tag with inline script
         html_content = html_content.replace(
             f'<script type="module" crossorigin src="./assets/{js_filename}"></script>',
-            f'<script type="module">{js_content}</script>'
+            f'<script type="module">{js_content}</script>',
         )
         # Also try without crossorigin
         html_content = html_content.replace(
             f'<script type="module" src="./assets/{js_filename}"></script>',
-            f'<script type="module">{js_content}</script>'
+            f'<script type="module">{js_content}</script>',
         )
 
     output_file.write_text(html_content)
@@ -166,7 +154,7 @@ def main():
         print(f"Copied: {output_file} and assets/")
 
     print("\nStandalone build complete!")
-    print(f"Open this file in your browser:")
+    print("Open this file in your browser:")
     print(f"  {output_file.absolute()}")
 
 
