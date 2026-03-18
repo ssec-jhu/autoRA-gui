@@ -16,32 +16,32 @@
       "protocolUuid": "expected-value-theory-001",
       "parameterSetting": [
         {
-          "uuid": "444332d4-30f1-406a-a675-13d169c515d0",
+          "uuid": "53f55751-c38a-4cfd-99c2-469132f484ba",
           "name": "name",
           "value": "Expected Value Theory"
         },
         {
-          "uuid": "22d6b946-468f-4258-af1a-7d59dd52840a",
+          "uuid": "588e3e9d-1f40-4049-8e17-47ec5d4b7c7c",
           "name": "choice_temperature",
           "value": 0.1
         },
         {
-          "uuid": "55121bf6-0505-46ce-a0e8-3aa84ec32fa1",
+          "uuid": "92b5be49-c5fb-4e2c-b8ba-ebdcb37e3eb9",
           "name": "value_lambda",
           "value": 0.5
         },
         {
-          "uuid": "59e16f73-b501-4363-8355-3cb78aacd27e",
+          "uuid": "977b36d9-ea2d-4412-8db9-5397ff051729",
           "name": "resolution",
           "value": 10
         },
         {
-          "uuid": "90a9061b-1c9d-4bda-b01f-167076a394f0",
+          "uuid": "da14fba4-2dbb-469e-9566-92e2a8bfb967",
           "name": "minimum_value",
           "value": -1
         },
         {
-          "uuid": "f89a6765-ab73-4187-a6ba-90ef61b5002b",
+          "uuid": "e49b5ed0-22da-4d5d-91d0-95193541159f",
           "name": "maximum_value",
           "value": 1
         }
@@ -56,12 +56,12 @@
       "protocolUuid": "uncertainty-sampler-001",
       "parameterSetting": [
         {
-          "uuid": "49f38cb6-7ad1-477d-8051-7ed30d6df860",
+          "uuid": "15cfb2bf-9283-4c19-893a-a6393b844cc8",
           "name": "num_samples",
           "value": 10
         },
         {
-          "uuid": "5606e538-e4f2-4df0-8f21-1dd15def6325",
+          "uuid": "97fa0807-d4a9-42ab-8c80-e0602f4f14d7",
           "name": "measure",
           "value": "least_confident"
         }
@@ -76,12 +76,12 @@
       "protocolUuid": "bms-regressor-001",
       "parameterSetting": [
         {
-          "uuid": "a498b50a-ff21-461a-9dca-6aaef9e52dac",
+          "uuid": "d5fff131-7c4a-4a68-8e91-b934bff18475",
           "name": "epochs",
           "value": 1500
         },
         {
-          "uuid": "bce530ed-afdf-4104-bf10-bdc50011641d",
+          "uuid": "c1e01c68-8c20-44f0-a2bf-e996819696e9",
           "name": "prior_name",
           "value": "Guimera2020"
         }
@@ -105,14 +105,14 @@
       "protocolUuid": "filter-point",
       "parameterSetting": [
         {
-          "uuid": "66b34770-def7-4280-a65d-bb3a4217176d",
+          "uuid": "6d608603-5db5-4aca-a9c2-7bac632d02ea",
           "name": "counter",
           "value": 1
         }
       ],
       "canvasLocation": {
-        "x": 105,
-        "y": 237
+        "x": 115,
+        "y": 267
       }
     }
   ],
@@ -121,8 +121,8 @@
       "source": "7eefa649-f415-41d6-b019-0169259b2508",
       "target": "15ad1afe-f829-4e8a-a76a-971aaf51e6b7",
       "sourcePoint": {
-        "x": 181,
-        "y": 317
+        "x": 191,
+        "y": 347
       },
       "targetPoint": {
         "x": 328,
@@ -173,8 +173,20 @@
         "y": 474
       },
       "targetPoint": {
-        "x": 194,
-        "y": 317
+        "x": 204,
+        "y": 347
+      }
+    },
+    {
+      "source": "7eefa649-f415-41d6-b019-0169259b2508",
+      "target": "e3ea88d6-dab5-4d36-a9eb-f295b57c719c",
+      "sourcePoint": {
+        "x": 153,
+        "y": 347
+      },
+      "targetPoint": {
+        "x": 506,
+        "y": 687
       }
     }
   ]
