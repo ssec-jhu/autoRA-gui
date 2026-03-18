@@ -13,10 +13,10 @@ function ComponentPalette() {
   const { state } = useWorkflow()
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedSections, setExpandedSections] = useState({
-    controls: true,
-    theorists: true,
-    experimentalists: true,
-    experiment_runners: true
+    controls: false,
+    theorists: false,
+    experimentalists: false,
+    experiment_runners: false
   })
 
   const filteredComponents = useMemo(() => {
