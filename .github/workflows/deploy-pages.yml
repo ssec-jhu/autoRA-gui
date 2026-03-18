@@ -75,62 +75,28 @@ jobs:
           <!DOCTYPE html>
           <html lang="en">
           <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>AutoRA Workflow Editor</title>
-            <style>
-              body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                background: #1a1a2e;
-                color: #e8e8e8;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh;
-                margin: 0;
-              }
-              .container {
-                text-align: center;
-                padding: 40px;
-              }
-              h1 { color: #4a90d9; margin-bottom: 40px; }
-              .versions {
-                display: flex;
-                gap: 30px;
-                justify-content: center;
-                flex-wrap: wrap;
-              }
-              .version-card {
-                background: #16213e;
-                border: 2px solid #2a2a4a;
-                border-radius: 12px;
-                padding: 30px 40px;
-                text-decoration: none;
-                color: #e8e8e8;
-                transition: all 0.3s;
-              }
-              .version-card:hover {
-                border-color: #4a90d9;
-                transform: translateY(-5px);
-              }
-              .version-card h2 { margin: 0 0 10px 0; color: #4a90d9; }
-              .version-card p { margin: 0; color: #808080; font-size: 14px; }
-            </style>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>AutoRA Workflow Editor</title>
+          <style>
+          body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a2e;color:#e8e8e8;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0}
+          .container{text-align:center;padding:40px}
+          h1{color:#4a90d9;margin-bottom:40px}
+          .versions{display:flex;gap:30px;justify-content:center;flex-wrap:wrap}
+          .version-card{background:#16213e;border:2px solid #2a2a4a;border-radius:12px;padding:30px 40px;text-decoration:none;color:#e8e8e8;transition:all 0.3s}
+          .version-card:hover{border-color:#4a90d9;transform:translateY(-5px)}
+          .version-card h2{margin:0 0 10px 0;color:#4a90d9}
+          .version-card p{margin:0;color:#808080;font-size:14px}
+          </style>
           </head>
           <body>
-            <div class="container">
-              <h1>AutoRA Workflow Editor</h1>
-              <div class="versions">
-                <a href="./react/" class="version-card">
-                  <h2>React Version</h2>
-                  <p>Modern React-based implementation</p>
-                </a>
-                <a href="./js/" class="version-card">
-                  <h2>Vanilla JS Version</h2>
-                  <p>Lightweight vanilla JavaScript</p>
-                </a>
-              </div>
-            </div>
+          <div class="container">
+          <h1>AutoRA Workflow Editor</h1>
+          <div class="versions">
+          <a href="./react/" class="version-card"><h2>React Version</h2><p>Modern React-based implementation</p></a>
+          <a href="./js/" class="version-card"><h2>Vanilla JS Version</h2><p>Lightweight vanilla JavaScript</p></a>
+          </div>
+          </div>
           </body>
           </html>
           EOF
