@@ -49,7 +49,8 @@ jobs:
           cd react-branch/autora_gui/react_app
           npm install
           python build_standalone.py
-          cp ../../index.html ../../../deploy/index.html
+          mkdir -p ../../../deploy/react
+          cp ../../index.html ../../../deploy/react/index.html
         continue-on-error: true
 
       # Build JS version from gui_poc_js branch
@@ -67,10 +68,10 @@ jobs:
           cp index.html ../deploy/js/index.html
         continue-on-error: true
 
-      # Create landing page if both versions exist
+      # Create landing page as main index
       - name: Create landing page
         run: |
-          cat > deploy/landing.html << 'EOF'
+          cat > deploy/index.html << 'EOF'
           <!DOCTYPE html>
           <html lang="en">
           <head>
@@ -120,11 +121,11 @@ jobs:
             <div class="container">
               <h1>AutoRA Workflow Editor</h1>
               <div class="versions">
-                <a href="./index.html" class="version-card">
+                <a href="./react/" class="version-card">
                   <h2>React Version</h2>
                   <p>Modern React-based implementation</p>
                 </a>
-                <a href="./js/index.html" class="version-card">
+                <a href="./js/" class="version-card">
                   <h2>Vanilla JS Version</h2>
                   <p>Lightweight vanilla JavaScript</p>
                 </a>
