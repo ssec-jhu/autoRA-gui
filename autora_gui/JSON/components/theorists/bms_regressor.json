@@ -15,20 +15,11 @@
       "default": 1500
     },
     {
-      "name": "prior_par",
-      "description": "Dictionary of prior probabilities for different functions based on Wikipedia data.",
-      "datatype": "object",
-      "minOccurs": 0,
-      "maxOccurs": 1,
-      "validValues": null,
-      "default": null
-    },
-    {
       "name": "ts",
       "description": "List of temperatures for parallel tempering MCMC sampling.",
       "datatype": "real",
       "minOccurs": 0,
-      "maxOccurs": -1,
+      "maxOccurs": 20,
       "validValues": null,
       "default": null
     }
