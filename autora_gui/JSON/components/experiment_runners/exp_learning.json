@@ -67,6 +67,15 @@
       "maxOccurs": 1,
       "validValues": null,
       "default": 1.0
+    },
+    {
+      "name": "added_noise",
+      "description": "Amount of noise added to the performance observations.",
+      "datatype": "real",
+      "minOccurs": 1,
+      "maxOccurs": 1,
+      "validValues": null,
+      "default": 0.01
     }
   ],
   "inputDataType": [
