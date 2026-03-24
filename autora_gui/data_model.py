@@ -43,23 +43,30 @@ class VariableType(BaseModel):
     description: str | None
 
 
+class Cardinality(BaseModel):
+    """A model for cardinality in the workflow."""
+
+    minOccurs: int = 0
+    maxOccurs: int = 1
+    unique: bool = True
+
+
 class PrimitiveVariableType(VariableType):
     """Primitive variable type model for the workflow."""
 
     datatype: Datatype
-    minOccurs: int | None = 1
-    maxOccurs: int | None = -1
+    cardinality: Cardinality | None = None
     validValues: list[str] | None = None
     default: Any | None = None
 
 
-class TupleVariableType(VariableType):
-    """A model for tuple variables in the workflow."""
+class DictVariableType(VariableType):
+    """A model for dictionary variables in the workflow."""
 
     variables: list[VariableType]
 
 
-VariableTypes = PrimitiveVariableType | TupleVariableType
+VariableTypes = PrimitiveVariableType | DictVariableType
 
 
 class Protocol(AutoraBaseModel):
@@ -70,8 +77,12 @@ class Protocol(AutoraBaseModel):
 
     protocolType: ProtocolType
     name: str
-    description: str | None = None
-    githubCommit: str
+    description: str
+    githubCommit: str | None = None
+    className: str
+    importPath: str | None = None
+    pipInstall: str | None = None
+    pipVersion: str | None = None
     parameters: list[VariableTypes] | None
     inputDataType: list[VariableTypes] | None  # could be a bunch of allowed datatypes
     outputDataType: list[VariableTypes] | None  # could be a bunch of allowed datatypes
