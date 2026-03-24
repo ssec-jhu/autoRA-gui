@@ -4,6 +4,10 @@
   "name": "BSR Regressor",
   "description": "Bayesian Symbolic Regression that discovers mathematical expressions using MCMC sampling to build up equations from basic functions.",
   "githubCommit": "https://github.com/AutoResearch/autora-theorist-bsr/blob/cdbf04f2fb3712924826ba283152fc459ee21f6e/src/autora/theorist/bsr/regressor.py#L18",
+  "classname": "BSRRegressor",
+  "importPath": "autora.theorist.bsr.regressor",
+  "pipInstall": "autora-theorist-bsr",
+  "pipVersion": "1.0.0",
   "parameters": [
     {
       "name": "tree_num",

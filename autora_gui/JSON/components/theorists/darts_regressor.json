@@ -4,6 +4,10 @@
   "name": "DARTS Regressor",
   "description": "Finds a composition of functions and coefficients to minimize a loss function using Differentiable Architecture Search (DARTS).",
   "githubCommit": "https://github.com/AutoResearch/autora-theorist-darts/blob/60e30ebd3fb10a3dd901de4183664c7b6bea9990/src/autora/theorist/darts/regressor.py#L436",
+  "classname": "DARTSRegressor",
+  "importPath": "autora.theorist.darts.regressor",
+  "pipInstall": "autora-theorist-darts",
+  "pipVersion": "1.1.0",
   "parameters": [
     {
       "name": "batch_size",
@@ -29,7 +33,7 @@
       "datatype": "categorical",
       "minOccurs": 1,
       "maxOccurs": 1,
-      "validValues": ["real", "sigmoid", "softmax"],
+      "validValues": ["real", "sigmoid", "probability", "probability_sample", "probability_distribution"],
       "default": "real"
     },
     {
@@ -181,9 +185,9 @@
       "description": "List of primitive operations to choose from.",
       "datatype": "categorical",
       "minOccurs": 1,
-      "maxOccurs": 21,
-      "validValues": ["none", "add", "subtract", "mult", "linear", "relu", "exp", "logistic", "sin", "cos", "tanh", "linear_relu", "linear_exp", "linear_logistic", "linear_sin", "linear_cos", "linear_tanh", "reciprocal", "ln", "softplus", "softminus"],
-      "default": "none"
+      "maxOccurs": 6,
+      "validValues": ["none", "add", "subtract", "linear", "linear_logistic", "linear_relu"],
+      "default": ["none", "add", "subtract", "linear", "linear_logistic", "linear_relu"]
     },
     {
       "name": "train_classifier_coefficients",
