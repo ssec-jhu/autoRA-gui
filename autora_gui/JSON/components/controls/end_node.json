@@ -4,6 +4,10 @@
   "name": "Workflow End Point",
   "description": "Output of any experimentalist, representing the final results of a workflow execution.",
   "githubCommit": "",
+  "classname": "EndPoint",
+  "importPath": "",
+  "pipInstall": "",
+  "pipVersion": "",
   "inputDataType": [
     {
       "name": "conditions",

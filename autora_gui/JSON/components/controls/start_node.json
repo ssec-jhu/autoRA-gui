@@ -4,6 +4,10 @@
   "name": "Workflow Start Point",
   "description": "Input for any experiment runner, representing the input for a workflow execution.",
   "githubCommit": "",
+  "classname": "StartPoint",
+  "importPath": "",
+  "pipInstall": "",
+  "pipVersion": "",
   "outputDataType": [
     {
       "name": "conditions",

@@ -4,6 +4,10 @@
   "name": "Workflow Filter Point",
   "description": "Loop control for a workflow execution with two output branches.",
   "githubCommit": "",
+  "classname": "FilterNode",
+  "importPath": "",
+  "pipInstall": "",
+  "pipVersion": "",
   "parameters": [
     {
       "name": "counter",
