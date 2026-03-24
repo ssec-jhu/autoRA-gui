@@ -16,9 +16,6 @@
             "orcid": "0000-0001-5041-2458"
         }
     ],
-    "references": [
-        "https://github.com/ssec-jhu/base-template 10.5281/zenodo.14052740."
-    ],
     "description": "GUI for AutoRA project",
     "license": "bsd-3-clause",
     "upload_type": "software",
