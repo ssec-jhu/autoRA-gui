@@ -132,27 +132,51 @@ class CanvasLocation(BaseModel):
 
 
 class Component(AutoraBaseModel):
-    """A component model for Autora gui.
+    """A component model for AutoRA GUI.
 
-    Includes node parameters and canvas location.
+    Includes canvas location.
+    """
+
+    canvasLocation: CanvasLocation | None
+
+
+class ProtocolComponent(Component):
+    """A protocol component model for AutoRA GUI.
+
+    Includes node parameters.
     """
 
     protocolUuid: uuid.UUID  # uuid of the Protocol
     parameterSetting: list[ParameterSetting] | None
-    canvasLocation: CanvasLocation | None
+
+
+class StartComponent(Component):
+    """A start component model for AutoRA GUI.
+
+    Serves as the starting point of the workflow.
+    """
+
+
+class EndComponent(Component):
+    """An end component model for AutoRA GUI.
+
+    Serves as the ending point of the workflow.
+    """
 
 
 class Workflow(BaseModel):
-    """A workflow model for Autora gui.
+    """A workflow model for AutoRA GUI.
 
     Includes all possible elements like nodes and links.
     """
 
     name: str
     description: str | None = None
+    start: StartComponent | None = None
+    end: EndComponent | None = None
     independentVariables: VariableTypes
     dependentVariables: VariableTypes
-    components: list[Component]
+    components: list[ProtocolComponent]
     links: list[Link]
 
 

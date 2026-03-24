@@ -12,12 +12,15 @@ from autora_gui.data_model import (
     Component,
     Datatype,
     DictVariableType,
+    EndComponent,
     Filter,
     Link,
     ParameterSetting,
     PrimitiveVariableType,
     Protocol,
+    ProtocolComponent,
     ProtocolType,
+    StartComponent,
     VariableType,
     Workflow,
 )
@@ -245,8 +248,31 @@ class TestComponent:
 
     def test_create_component_minimal(self):
         comp_uuid = uuid.uuid4()
-        protocol_uuid = uuid.uuid4()
         comp = Component(
+            uuid=comp_uuid,
+            canvasLocation=None,
+        )
+        assert comp.uuid == comp_uuid
+        assert comp.canvasLocation is None
+
+    def test_create_component_with_location(self):
+        comp_uuid = uuid.uuid4()
+        loc = CanvasLocation(x=50, y=75)
+        comp = Component(
+            uuid=comp_uuid,
+            canvasLocation=loc,
+        )
+        assert comp.canvasLocation.x == 50
+        assert comp.canvasLocation.y == 75
+
+
+class TestProtocolComponent:
+    """Tests for the ProtocolComponent class."""
+
+    def test_create_protocol_component_minimal(self):
+        comp_uuid = uuid.uuid4()
+        protocol_uuid = uuid.uuid4()
+        comp = ProtocolComponent(
             uuid=comp_uuid,
             protocolUuid=protocol_uuid,
             parameterSetting=None,
@@ -257,13 +283,13 @@ class TestComponent:
         assert comp.parameterSetting is None
         assert comp.canvasLocation is None
 
-    def test_create_component_with_all_fields(self):
+    def test_create_protocol_component_with_all_fields(self):
         comp_uuid = uuid.uuid4()
         protocol_uuid = uuid.uuid4()
         param_uuid = uuid.uuid4()
         param = ParameterSetting(uuid=param_uuid, value="param_value")
         loc = CanvasLocation(x=50, y=75)
-        comp = Component(
+        comp = ProtocolComponent(
             uuid=comp_uuid,
             protocolUuid=protocol_uuid,
             parameterSetting=[param],
@@ -271,6 +297,48 @@ class TestComponent:
         )
         assert len(comp.parameterSetting) == 1
         assert comp.canvasLocation.x == 50
+
+
+class TestStartComponent:
+    """Tests for the StartComponent class."""
+
+    def test_create_start_component(self):
+        comp_uuid = uuid.uuid4()
+        comp = StartComponent(
+            uuid=comp_uuid,
+            canvasLocation=None,
+        )
+        assert comp.uuid == comp_uuid
+
+    def test_create_start_component_with_location(self):
+        comp_uuid = uuid.uuid4()
+        loc = CanvasLocation(x=0, y=0)
+        comp = StartComponent(
+            uuid=comp_uuid,
+            canvasLocation=loc,
+        )
+        assert comp.canvasLocation.x == 0
+
+
+class TestEndComponent:
+    """Tests for the EndComponent class."""
+
+    def test_create_end_component(self):
+        comp_uuid = uuid.uuid4()
+        comp = EndComponent(
+            uuid=comp_uuid,
+            canvasLocation=None,
+        )
+        assert comp.uuid == comp_uuid
+
+    def test_create_end_component_with_location(self):
+        comp_uuid = uuid.uuid4()
+        loc = CanvasLocation(x=100, y=100)
+        comp = EndComponent(
+            uuid=comp_uuid,
+            canvasLocation=loc,
+        )
+        assert comp.canvasLocation.x == 100
 
 
 class TestProtocol:
@@ -332,7 +400,7 @@ class TestWorkflow:
     def test_create_workflow(self):
         comp_uuid = uuid.uuid4()
         protocol_uuid = uuid.uuid4()
-        component = Component(
+        component = ProtocolComponent(
             uuid=comp_uuid,
             protocolUuid=protocol_uuid,
             parameterSetting=None,
@@ -369,7 +437,7 @@ class TestWorkflow:
     def test_create_workflow_without_description(self):
         comp_uuid = uuid.uuid4()
         protocol_uuid = uuid.uuid4()
-        component = Component(
+        component = ProtocolComponent(
             uuid=comp_uuid,
             protocolUuid=protocol_uuid,
             parameterSetting=None,
@@ -396,6 +464,37 @@ class TestWorkflow:
         )
         assert workflow.description is None
         assert workflow.links == []
+
+    def test_create_workflow_with_start_and_end(self):
+        start_uuid = uuid.uuid4()
+        end_uuid = uuid.uuid4()
+        start = StartComponent(uuid=start_uuid, canvasLocation=CanvasLocation(x=0, y=50))
+        end = EndComponent(uuid=end_uuid, canvasLocation=CanvasLocation(x=500, y=50))
+
+        ind_var = PrimitiveVariableType(
+            name="x",
+            description="Independent variable",
+            datatype=Datatype.REAL,
+        )
+        dep_var = PrimitiveVariableType(
+            name="y",
+            description="Dependent variable",
+            datatype=Datatype.REAL,
+        )
+
+        workflow = Workflow(
+            name="Workflow with Start/End",
+            independentVariables=ind_var,
+            dependentVariables=dep_var,
+            start=start,
+            end=end,
+            components=[],
+            links=[],
+        )
+        assert workflow.start is not None
+        assert workflow.start.uuid == start_uuid
+        assert workflow.end is not None
+        assert workflow.end.uuid == end_uuid
 
     def test_workflow_missing_required_field_raises_error(self):
         with pytest.raises(ValidationError):
@@ -429,7 +528,7 @@ class TestModelSerialization:
     def test_workflow_dict_roundtrip(self):
         comp_uuid = uuid.uuid4()
         protocol_uuid = uuid.uuid4()
-        component = Component(
+        component = ProtocolComponent(
             uuid=comp_uuid,
             protocolUuid=protocol_uuid,
             parameterSetting=None,
