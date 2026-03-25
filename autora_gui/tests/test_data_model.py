@@ -149,7 +149,7 @@ class TestDictVariableType:
     """Tests for the DictVariableType class."""
 
     def test_create_with_nested_variables(self):
-        inner_var = VariableType(name="inner", description="Inner variable")
+        inner_var = PrimitiveVariableType(name="inner", description="Inner variable", datatype=Datatype.REAL)
         dict_var = DictVariableType(
             name="outer",
             description="Outer dict",
@@ -166,6 +166,71 @@ class TestDictVariableType:
             variables=[],
         )
         assert dict_var.variables == []
+
+    def test_create_from_dict_with_nested_primitive_preserves_datatype(self):
+        dict_var = DictVariableType.model_validate(
+            {
+                "name": "outer",
+                "description": "Outer dict",
+                "variables": [
+                    {
+                        "name": "inner_primitive",
+                        "description": "Inner primitive",
+                        "datatype": "real",
+                    }
+                ],
+            }
+        )
+        assert isinstance(dict_var.variables[0], PrimitiveVariableType)
+        assert dict_var.variables[0].datatype == Datatype.REAL
+
+    def test_create_from_dict_with_nested_dict_variable_preserves_subtype(self):
+        dict_var = DictVariableType.model_validate(
+            {
+                "name": "outer",
+                "description": "Outer dict",
+                "variables": [
+                    {
+                        "name": "inner_dict",
+                        "description": "Inner dict",
+                        "variables": [
+                            {
+                                "name": "leaf",
+                                "description": "Leaf primitive",
+                                "datatype": "integer",
+                            }
+                        ],
+                    }
+                ],
+            }
+        )
+        assert isinstance(dict_var.variables[0], DictVariableType)
+        leaf = dict_var.variables[0].variables[0]
+        assert isinstance(leaf, PrimitiveVariableType)
+        assert leaf.datatype == Datatype.INTEGER
+
+    def test_nested_variable_subtype_fields_survive_roundtrip(self):
+        original = DictVariableType(
+            name="outer",
+            description="Outer dict",
+            variables=[
+                PrimitiveVariableType(name="p", description="Primitive", datatype=Datatype.STRING),
+                DictVariableType(
+                    name="inner_dict",
+                    description="Inner dict",
+                    variables=[
+                        PrimitiveVariableType(name="q", description="Nested prim", datatype=Datatype.BOOLEAN),
+                    ],
+                ),
+            ],
+        )
+        roundtripped = DictVariableType.model_validate(original.model_dump())
+        assert isinstance(roundtripped.variables[0], PrimitiveVariableType)
+        assert roundtripped.variables[0].datatype == Datatype.STRING
+        assert isinstance(roundtripped.variables[1], DictVariableType)
+        nested_leaf = roundtripped.variables[1].variables[0]
+        assert isinstance(nested_leaf, PrimitiveVariableType)
+        assert nested_leaf.datatype == Datatype.BOOLEAN
 
 
 class TestLink:
