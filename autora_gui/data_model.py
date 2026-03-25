@@ -78,11 +78,11 @@ class Protocol(AutoraBaseModel):
     protocolType: ProtocolType
     name: str
     description: str
-    githubCommit: str | None = None
+    githubCommit: str
     className: str
-    importPath: str | None = None
-    pipInstall: str | None = None
-    pipVersion: str | None = None
+    importPath: str
+    pipInstall: str
+    pipVersion: str
     parameters: list[VariableTypes] | None
     inputDataType: list[VariableTypes] | None  # could be a bunch of allowed datatypes
     outputDataType: list[VariableTypes] | None  # could be a bunch of allowed datatypes

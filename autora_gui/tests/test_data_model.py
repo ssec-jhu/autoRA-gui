@@ -351,7 +351,11 @@ class TestProtocol:
             protocolType=ProtocolType.THEORIST,
             name="Test Protocol",
             description="A test protocol",
+            githubCommit="commit123",
             className="TestClass",
+            importPath="test.module",
+            pipInstall="test-package",
+            pipVersion="0.1.0",
             parameters=None,
             inputDataType=None,
             outputDataType=None,
@@ -361,10 +365,10 @@ class TestProtocol:
         assert protocol.name == "Test Protocol"
         assert protocol.description == "A test protocol"
         assert protocol.className == "TestClass"
-        assert protocol.githubCommit is None
-        assert protocol.importPath is None
-        assert protocol.pipInstall is None
-        assert protocol.pipVersion is None
+        assert protocol.githubCommit == "commit123"
+        assert protocol.importPath == "test.module"
+        assert protocol.pipInstall == "test-package"
+        assert protocol.pipVersion == "0.1.0"
 
     def test_create_protocol_with_all_fields(self):
         test_uuid = uuid.uuid4()
@@ -515,7 +519,11 @@ class TestModelSerialization:
             protocolType=ProtocolType.THEORIST,
             name="Test Protocol",
             description="A test protocol",
+            githubCommit="abc123",
             className="TestClass",
+            importPath="some.module",
+            pipInstall="some-package",
+            pipVersion="1.0.0",
             parameters=None,
             inputDataType=None,
             outputDataType=None,
