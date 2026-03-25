@@ -148,8 +148,8 @@ class TestPrimitiveVariableType:
 class TestDictVariableType:
     """Tests for the DictVariableType class."""
 
-    def test_create_with_nested_variables(self):
-        inner_var = VariableType(name="inner", description="Inner variable")
+    def test_create_with_nested_primitive_variable(self):
+        inner_var = PrimitiveVariableType(name="inner", description="Inner variable", datatype=Datatype.REAL)
         dict_var = DictVariableType(
             name="outer",
             description="Outer dict",
@@ -158,6 +158,14 @@ class TestDictVariableType:
         assert dict_var.name == "outer"
         assert len(dict_var.variables) == 1
         assert dict_var.variables[0].name == "inner"
+        assert isinstance(dict_var.variables[0], PrimitiveVariableType)
+
+    def test_create_with_nested_dict_variable(self):
+        inner_primitive = PrimitiveVariableType(name="x", description="x coord", datatype=Datatype.REAL)
+        inner_dict = DictVariableType(name="inner_dict", description="Nested dict", variables=[inner_primitive])
+        outer_dict = DictVariableType(name="outer", description="Outer dict", variables=[inner_dict])
+        assert len(outer_dict.variables) == 1
+        assert isinstance(outer_dict.variables[0], DictVariableType)
 
     def test_create_with_empty_variables(self):
         dict_var = DictVariableType(
@@ -166,6 +174,39 @@ class TestDictVariableType:
             variables=[],
         )
         assert dict_var.variables == []
+
+    def test_primitive_inside_dict_json_roundtrip(self):
+        inner_var = PrimitiveVariableType(
+            name="temperature",
+            description="Temperature reading",
+            datatype=Datatype.REAL,
+            cardinality=Cardinality(minOccurs=1, maxOccurs=1),
+        )
+        dict_var = DictVariableType(
+            name="sensor_data",
+            description="Sensor readings",
+            variables=[inner_var],
+        )
+        json_str = dict_var.model_dump_json()
+        restored = DictVariableType.model_validate_json(json_str)
+        assert restored.name == dict_var.name
+        assert len(restored.variables) == 1
+        restored_inner = restored.variables[0]
+        assert isinstance(restored_inner, PrimitiveVariableType)
+        assert restored_inner.name == "temperature"
+        assert restored_inner.datatype == Datatype.REAL
+        assert restored_inner.cardinality is not None
+        assert restored_inner.cardinality.minOccurs == 1
+
+    def test_nested_dict_json_roundtrip(self):
+        leaf = PrimitiveVariableType(name="val", description="A value", datatype=Datatype.INTEGER)
+        inner_dict = DictVariableType(name="inner", description="Inner dict", variables=[leaf])
+        outer_dict = DictVariableType(name="outer", description="Outer dict", variables=[inner_dict])
+        json_str = outer_dict.model_dump_json()
+        restored = DictVariableType.model_validate_json(json_str)
+        assert isinstance(restored.variables[0], DictVariableType)
+        assert isinstance(restored.variables[0].variables[0], PrimitiveVariableType)
+        assert restored.variables[0].variables[0].datatype == Datatype.INTEGER
 
 
 class TestLink:
