@@ -176,5 +176,6 @@ CLAUDE.md
 # JS tests
 node_modules
 
-# React
-.vite/
+# React files
+.vite
+dist
