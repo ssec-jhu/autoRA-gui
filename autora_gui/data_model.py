@@ -63,10 +63,12 @@ class PrimitiveVariableType(VariableType):
 class DictVariableType(VariableType):
     """A model for dictionary variables in the workflow."""
 
-    variables: list[VariableType]
+    variables: list["VariableTypes"]
 
 
 VariableTypes = PrimitiveVariableType | DictVariableType
+
+DictVariableType.model_rebuild()
 
 
 class Protocol(AutoraBaseModel):
@@ -79,7 +81,7 @@ class Protocol(AutoraBaseModel):
     name: str
     description: str
     githubCommit: str
-    className: str
+    className: str | None = None
     importPath: str
     pipInstall: str
     pipVersion: str

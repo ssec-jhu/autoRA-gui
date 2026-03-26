@@ -73,7 +73,14 @@
         },
         "variables": {
           "items": {
-            "$ref": "#/$defs/VariableType"
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PrimitiveVariableType"
+              },
+              {
+                "$ref": "#/$defs/DictVariableType"
+              }
+            ]
           },
           "title": "Variables",
           "type": "array"
@@ -291,32 +298,6 @@
         "canvasLocation"
       ],
       "title": "StartComponent",
-      "type": "object"
-    },
-    "VariableType": {
-      "description": "Variable type model for the workflow.",
-      "properties": {
-        "name": {
-          "title": "Name",
-          "type": "string"
-        },
-        "description": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "Description"
-        }
-      },
-      "required": [
-        "name",
-        "description"
-      ],
-      "title": "VariableType",
       "type": "object"
     }
   },

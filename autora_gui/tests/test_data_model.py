@@ -149,7 +149,11 @@ class TestDictVariableType:
     """Tests for the DictVariableType class."""
 
     def test_create_with_nested_variables(self):
-        inner_var = VariableType(name="inner", description="Inner variable")
+        inner_var = PrimitiveVariableType(
+            name="inner",
+            description="Inner variable",
+            datatype=Datatype.STRING,
+        )
         dict_var = DictVariableType(
             name="outer",
             description="Outer dict",
@@ -158,6 +162,27 @@ class TestDictVariableType:
         assert dict_var.name == "outer"
         assert len(dict_var.variables) == 1
         assert dict_var.variables[0].name == "inner"
+
+    def test_create_with_nested_dict_variable(self):
+        inner_primitive = PrimitiveVariableType(
+            name="inner_primitive",
+            description="Inner primitive variable",
+            datatype=Datatype.INTEGER,
+        )
+        inner_dict = DictVariableType(
+            name="inner_dict",
+            description="Inner dict",
+            variables=[inner_primitive],
+        )
+        outer_dict = DictVariableType(
+            name="outer_dict",
+            description="Outer dict",
+            variables=[inner_dict],
+        )
+        assert outer_dict.name == "outer_dict"
+        assert len(outer_dict.variables) == 1
+        assert outer_dict.variables[0].name == "inner_dict"
+        assert len(outer_dict.variables[0].variables) == 1
 
     def test_create_with_empty_variables(self):
         dict_var = DictVariableType(
@@ -352,7 +377,6 @@ class TestProtocol:
             name="Test Protocol",
             description="A test protocol",
             githubCommit="commit123",
-            className="TestClass",
             importPath="test.module",
             pipInstall="test-package",
             pipVersion="0.1.0",
@@ -364,11 +388,29 @@ class TestProtocol:
         assert protocol.protocolType == ProtocolType.THEORIST
         assert protocol.name == "Test Protocol"
         assert protocol.description == "A test protocol"
-        assert protocol.className == "TestClass"
+        assert protocol.className is None
         assert protocol.githubCommit == "commit123"
         assert protocol.importPath == "test.module"
         assert protocol.pipInstall == "test-package"
         assert protocol.pipVersion == "0.1.0"
+
+    def test_create_protocol_with_class_name(self):
+        test_uuid = uuid.uuid4()
+        protocol = Protocol(
+            uuid=test_uuid,
+            protocolType=ProtocolType.THEORIST,
+            name="Test Protocol",
+            description="A test protocol",
+            githubCommit="commit123",
+            className="TestClass",
+            importPath="test.module",
+            pipInstall="test-package",
+            pipVersion="0.1.0",
+            parameters=None,
+            inputDataType=None,
+            outputDataType=None,
+        )
+        assert protocol.className == "TestClass"
 
     def test_create_protocol_with_all_fields(self):
         test_uuid = uuid.uuid4()
