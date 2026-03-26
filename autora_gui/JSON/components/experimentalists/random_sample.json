@@ -1,16 +1,23 @@
 {
-  "uuid": "random-sample-001",
+  "uuid": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
   "protocolType": "experimentalist",
   "name": "Random Sample",
   "description": "Randomly selects a subset of experimental conditions from a given pool.",
   "githubCommit": "https://github.com/AutoResearch/autora-core/blob/5aa08d217d7ab24da4d334e4671e37712768e90a/src/autora/experimentalist/random.py#L185",
+  "pythonName": "random_sample",
+  "importPath": "autora.experimentalist.random",
+  "pipInstall": "autora-core",
+  "pipVersion": "1.0.0",
   "parameters": [
     {
       "name": "num_samples",
       "description": "Number of samples to randomly select from the condition pool.",
       "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 1
     },
@@ -18,8 +25,11 @@
       "name": "random_state",
       "description": "Seed for random number generator to ensure reproducibility.",
       "datatype": "integer",
-      "minOccurs": 0,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 0,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
@@ -27,8 +37,11 @@
       "name": "replace",
       "description": "If true, allow repeated values in sampling.",
       "datatype": "boolean",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": false
     }
@@ -38,8 +51,11 @@
       "name": "conditions",
       "description": "Pool of experimental conditions to sample from.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
@@ -49,8 +65,11 @@
       "name": "conditions",
       "description": "Randomly selected subset of experimental conditions.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }

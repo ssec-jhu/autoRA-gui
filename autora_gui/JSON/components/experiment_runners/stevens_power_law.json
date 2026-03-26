@@ -1,16 +1,23 @@
 {
-  "uuid": "stevens-power-law-001",
+  "uuid": "d2e3f4a5-b6c7-4d8e-9f0a-1b2c3d4e5f6a",
   "protocolType": "experiment_runner",
   "name": "Stevens' Power Law",
   "description": "Synthetic experiment runner implementing Stevens' Power Law, a psychophysical principle relating physical stimulus intensity to perceived magnitude via a power function.",
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychophysics/stevens_power_law.py#L12",
+  "pythonName": "stevens_power_law",
+  "importPath": "autora.experiment_runner.synthetic.psychophysics.stevens_power_law",
+  "pipInstall": "autora-synthetic",
+  "pipVersion": "1.0.0",
   "parameters": [
     {
       "name": "name",
       "description": "Identifier name for the experiment.",
       "datatype": "string",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": "Stevens' Power Law"
     },
@@ -18,8 +25,11 @@
       "name": "resolution",
       "description": "Number of allowed values for stimulus intensity.",
       "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 100
     },
@@ -27,8 +37,11 @@
       "name": "proportionality_constant",
       "description": "Constant multiplier (k) in Stevens' Power Law formula: ψ = k * S^n.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 1.0
     },
@@ -36,8 +49,11 @@
       "name": "modality_constant",
       "description": "Power exponent (n) that varies by sensory modality in Stevens' Power Law.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 0.8
     },
@@ -45,8 +61,11 @@
       "name": "maximum_stimulus_intensity",
       "description": "Maximum value for the stimulus intensity.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 5.0
     }
@@ -55,9 +74,12 @@
     {
       "name": "conditions",
       "description": "DataFrame with stimulus intensity as independent variable.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
@@ -66,9 +88,12 @@
     {
       "name": "observations",
       "description": "DataFrame with perceived intensity as dependent variable.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }

@@ -1,16 +1,23 @@
 {
-  "uuid": "weber-fechner-law-001",
+  "uuid": "e3f4a5b6-c7d8-4e9f-0a1b-2c3d4e5f6a7b",
   "protocolType": "experiment_runner",
   "name": "Weber-Fechner Law",
   "description": "Synthetic experiment runner implementing the Weber-Fechner psychophysical law relating physical stimulus intensity to perceived sensation.",
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychophysics/weber_fechner_law.py#L12",
+  "pythonName": "weber_fechner_law",
+  "importPath": "autora.experiment_runner.synthetic.psychophysics.weber_fechner_law",
+  "pipInstall": "autora-synthetic",
+  "pipVersion": "1.0.0",
   "parameters": [
     {
       "name": "name",
       "description": "Identifier name for the experiment.",
       "datatype": "string",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": "Weber-Fechner Law"
     },
@@ -18,8 +25,11 @@
       "name": "resolution",
       "description": "Number of allowed values for stimulus intensities.",
       "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 100
     },
@@ -27,8 +37,11 @@
       "name": "constant",
       "description": "Constant multiplier in the Weber-Fechner formula.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 1.0
     },
@@ -36,8 +49,11 @@
       "name": "maximum_stimulus_intensity",
       "description": "Maximum value for stimulus intensities S1 and S2.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 5.0
     }
@@ -46,9 +62,12 @@
     {
       "name": "conditions",
       "description": "DataFrame with two stimulus intensities (S1, S2) as independent variables.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
@@ -57,9 +76,12 @@
     {
       "name": "observations",
       "description": "DataFrame with detected difference in sensation as dependent variable.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }

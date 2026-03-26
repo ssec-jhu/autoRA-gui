@@ -1,16 +1,23 @@
 {
-  "uuid": "prospect-theory-001",
+  "uuid": "b0c1d2e3-f4a5-4b6c-7d8e-9f0a1b2c3d4e",
   "protocolType": "experiment_runner",
   "name": "Prospect Theory",
   "description": "Synthetic experiment runner implementing Kahneman and Tversky's Prospect Theory for decision-making under risk with loss aversion and probability weighting.",
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/economics/prospect_theory.py#L12",
+  "pythonName": "prospect_theory",
+  "importPath": "autora.experiment_runner.synthetic.economics.prospect_theory",
+  "pipInstall": "autora-synthetic",
+  "pipVersion": "1.0.0",
   "parameters": [
     {
       "name": "name",
       "description": "Identifier name for the experiment.",
       "datatype": "string",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": "Prospect Theory"
     },
@@ -18,8 +25,11 @@
       "name": "choice_temperature",
       "description": "Softmax temperature parameter for choice probability.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 0.1
     },
@@ -27,8 +37,11 @@
       "name": "value_alpha",
       "description": "Exponent for the value function on gains (risk attitude for gains).",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 0.88
     },
@@ -36,8 +49,11 @@
       "name": "value_beta",
       "description": "Exponent for the value function on losses (risk attitude for losses).",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 0.88
     },
@@ -45,8 +61,11 @@
       "name": "value_lambda",
       "description": "Loss aversion coefficient (losses loom larger than gains).",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 2.25
     },
@@ -54,8 +73,11 @@
       "name": "probability_alpha",
       "description": "Exponent for probability weighting function on gains.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 0.61
     },
@@ -63,8 +85,11 @@
       "name": "probability_beta",
       "description": "Exponent for probability weighting function on losses.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 0.69
     },
@@ -72,8 +97,11 @@
       "name": "resolution",
       "description": "Grid resolution for variable value generation.",
       "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 10
     },
@@ -81,8 +109,11 @@
       "name": "minimum_value",
       "description": "Lower bound for option values.",
       "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": -1
     },
@@ -90,8 +121,11 @@
       "name": "maximum_value",
       "description": "Upper bound for option values.",
       "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 1
     }
@@ -100,9 +134,12 @@
     {
       "name": "conditions",
       "description": "DataFrame with values and probabilities for options A and B.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
@@ -111,9 +148,12 @@
     {
       "name": "observations",
       "description": "DataFrame with probability of choosing option A as dependent variable.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }

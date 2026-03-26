@@ -1,16 +1,23 @@
 {
-  "uuid": "uncertainty-sampler-001",
+  "uuid": "b4c5d6e7-f8a9-4b0c-1d2e-3f4a5b6c7d8e",
   "protocolType": "experimentalist",
   "name": "Uncertainty Sampler",
   "description": "Selects experimental conditions where the model has highest prediction uncertainty, enabling active learning to improve model performance.",
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-uncertainty/blob/21d4a292159f416e01f95662ca02889cd786a140/src/autora/experimentalist/uncertainty/__init__.py#L9",
+  "pythonName": "uncertainty_sampler",
+  "importPath": "autora.experimentalist.uncertainty",
+  "pipInstall": "autora-experimentalist-uncertainty",
+  "pipVersion": "1.0.0",
   "parameters": [
     {
       "name": "num_samples",
       "description": "Number of uncertain samples to select.",
       "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 10
     },
@@ -18,8 +25,11 @@
       "name": "measure",
       "description": "Method to evaluate prediction uncertainty.",
       "datatype": "categorical",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": ["least_confident", "margin", "entropy"],
       "default": "least_confident"
     }
@@ -29,8 +39,11 @@
       "name": "conditions",
       "description": "Pool of candidate experimental conditions to evaluate.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
@@ -38,8 +51,11 @@
       "name": "model",
       "description": "Trained model with predict_proba method for uncertainty estimation.",
       "datatype": "string",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
@@ -49,8 +65,11 @@
       "name": "conditions",
       "description": "Selected high-uncertainty experimental conditions.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }

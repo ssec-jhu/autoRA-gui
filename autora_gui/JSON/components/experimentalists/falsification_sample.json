@@ -1,52 +1,71 @@
 {
-  "uuid": "falsification-sample-001",
+  "uuid": "a7b8c9d0-e1f2-4a3b-4c5d-6e7f8a9b0c1d",
   "protocolType": "experimentalist",
   "name": "Falsification Sample",
   "description": "Selects experimental conditions most likely to falsify the current model by identifying regions where the model predictions may deviate from ground truth.",
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L45",
+  "pythonName": "falsification_sample",
+  "importPath": "autora.experimentalist.falsification",
+  "pipInstall": "autora-experimentalist-falsification",
+  "pipVersion": "1.0.0",
   "parameters": [
     {
       "name": "conditions",
       "description": "Pool of candidate experimental conditions to evaluate for falsification potential.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
     {
       "name": "model",
       "description": "Scikit-learn compatible model (regression or classification) to attempt to falsify.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
     {
       "name": "reference_conditions",
       "description": "Experimental conditions that the model was trained on.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
     {
       "name": "reference_observations",
       "description": "Observations that the model was trained to predict.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
     {
       "name": "metadata",
       "description": "VariableCollection with meta-data about the dependent and independent variables.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
@@ -54,8 +73,11 @@
       "name": "num_samples",
       "description": "Number of high-falsification-potential samples to select.",
       "datatype": "integer",
-      "minOccurs": 0,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 0,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
@@ -63,8 +85,11 @@
       "name": "training_epochs",
       "description": "Number of epochs to train the internal falsification network.",
       "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 1000
     },
@@ -72,8 +97,11 @@
       "name": "training_lr",
       "description": "Learning rate for training the falsification network.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 0.001
     },
@@ -81,8 +109,11 @@
       "name": "plot",
       "description": "Whether to display network predictions and training loss visualization.",
       "datatype": "boolean",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": false
     }
@@ -91,36 +122,48 @@
     {
       "name": "conditions",
       "description": "DataFrame or array of candidate experimental conditions.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
     {
       "name": "model",
       "description": "Fitted model to attempt to falsify.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
     {
       "name": "reference_conditions",
       "description": "Training conditions for the model.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
     {
       "name": "reference_observations",
       "description": "Training observations for the model.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
@@ -129,9 +172,12 @@
     {
       "name": "conditions",
       "description": "DataFrame of conditions with highest falsification potential.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }

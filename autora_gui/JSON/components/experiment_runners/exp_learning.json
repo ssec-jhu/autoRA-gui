@@ -1,16 +1,23 @@
 {
-  "uuid": "exp-learning-001",
+  "uuid": "e7f8a9b0-c1d2-4e3f-4a5b-6c7d8e9f0a1b",
   "protocolType": "experiment_runner",
   "name": "Exponential Learning",
   "description": "Synthetic experiment runner simulating exponential learning curves based on psychological research modeling performance acquisition over trials.",
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychology/exp_learning.py#L46",
+  "pythonName": "exp_learning",
+  "importPath": "autora.experiment_runner.synthetic.psychology.exp_learning",
+  "pipInstall": "autora-synthetic",
+  "pipVersion": "1.0.0",
   "parameters": [
     {
       "name": "name",
       "description": "Identifier name for the experiment.",
       "datatype": "string",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": "Exponential Learning"
     },
@@ -18,8 +25,11 @@
       "name": "resolution",
       "description": "Number of permissible stimulus values for the independent variables.",
       "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 100
     },
@@ -27,8 +37,11 @@
       "name": "minimum_trial",
       "description": "Lower bound for the trial number (exponential constant).",
       "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 1
     },
@@ -36,8 +49,11 @@
       "name": "minimum_initial_value",
       "description": "Lower threshold for the initial performance value.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 0
     },
@@ -45,8 +61,11 @@
       "name": "maximum_initial_value",
       "description": "Upper threshold for the initial performance value.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 0.5
     },
@@ -54,8 +73,11 @@
       "name": "lr",
       "description": "Learning rate coefficient for the exponential learning curve.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 0.03
     },
@@ -63,8 +85,11 @@
       "name": "p_asymptotic",
       "description": "Asymptotic performance level (constant offset applied to multiplier).",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 1.0
     },
@@ -72,8 +97,11 @@
       "name": "added_noise",
       "description": "Amount of noise added to the performance observations.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 0.01
     }
@@ -82,9 +110,12 @@
     {
       "name": "conditions",
       "description": "DataFrame with trial and asymptotic performance conditions.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
@@ -93,9 +124,12 @@
     {
       "name": "observations",
       "description": "DataFrame with performance observations over trials.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }

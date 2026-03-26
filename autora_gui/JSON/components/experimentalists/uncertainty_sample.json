@@ -1,25 +1,35 @@
 {
-  "uuid": "uncertainty-sample-001",
+  "uuid": "a3b4c5d6-e7f8-4a9b-0c1d-2e3f4a5b6c7d",
   "protocolType": "experimentalist",
   "name": "Uncertainty Sample",
   "description": "Selects experimental conditions where the model exhibits the highest uncertainty in its predictions, enabling active learning strategies.",
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-uncertainty/blob/main/src/autora/experimentalist/uncertainty/__init__.py#L32",
+  "pythonName": "uncertainty_sample",
+  "importPath": "autora.experimentalist.uncertainty",
+  "pipInstall": "autora-experimentalist-uncertainty",
+  "pipVersion": "1.0.0",
   "parameters": [
     {
       "name": "conditions",
       "description": "Pool of candidate experimental conditions to evaluate for model uncertainty.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
     {
       "name": "model",
       "description": "Scikit-learn compatible model with a predict_proba method for uncertainty estimation.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
@@ -27,8 +37,11 @@
       "name": "num_samples",
       "description": "Number of high-uncertainty samples to select.",
       "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 10
     },
@@ -36,8 +49,11 @@
       "name": "measure",
       "description": "Uncertainty evaluation method: least_confident (1 - max probability), margin (difference between top two probabilities), or entropy (Shannon entropy).",
       "datatype": "categorical",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": ["least_confident", "margin", "entropy"],
       "default": "least_confident"
     }
@@ -46,18 +62,24 @@
     {
       "name": "conditions",
       "description": "DataFrame or array of candidate experimental conditions.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
     {
       "name": "model",
       "description": "Fitted model with predict_proba method.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
@@ -66,9 +88,12 @@
     {
       "name": "conditions",
       "description": "DataFrame of selected high-uncertainty experimental conditions.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }

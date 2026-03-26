@@ -1,25 +1,35 @@
 {
-  "uuid": "model-disagreement-sample-001",
+  "uuid": "c9d0e1f2-a3b4-4c5d-6e7f-8a9b0c1d2e3f",
   "protocolType": "experimentalist",
   "name": "Model Disagreement Sample",
   "description": "Selects experimental conditions where multiple models disagree the most in their predictions, useful for model comparison and ensemble learning.",
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-model-disagreement/blob/main/src/autora/experimentalist/model_disagreement/__init__.py#L28",
+  "pythonName": "model_disagreement_sample",
+  "importPath": "autora.experimentalist.model_disagreement",
+  "pipInstall": "autora-experimentalist-model-disagreement",
+  "pipVersion": "1.0.0",
   "parameters": [
     {
       "name": "conditions",
       "description": "Pool of candidate experimental conditions to evaluate for model disagreement.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
     {
       "name": "models",
       "description": "List of scikit-learn compatible models (regression or classification) to compare.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
@@ -27,8 +37,11 @@
       "name": "num_samples",
       "description": "Number of high-disagreement samples to select.",
       "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 1
     }
@@ -37,18 +50,24 @@
     {
       "name": "conditions",
       "description": "DataFrame or array of candidate experimental conditions.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
     {
       "name": "models",
       "description": "List of fitted models for prediction comparison.",
-      "datatype": "object",
-      "minOccurs": 2,
-      "maxOccurs": -1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 2,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
@@ -57,9 +76,12 @@
     {
       "name": "conditions",
       "description": "DataFrame of selected high-disagreement experimental conditions.",
-      "datatype": "object",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
