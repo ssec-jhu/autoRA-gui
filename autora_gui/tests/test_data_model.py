@@ -377,6 +377,7 @@ class TestProtocol:
             name="Test Protocol",
             description="A test protocol",
             githubCommit="commit123",
+            pythonName="TestClass",
             importPath="test.module",
             pipInstall="test-package",
             pipVersion="0.1.0",
@@ -388,29 +389,11 @@ class TestProtocol:
         assert protocol.protocolType == ProtocolType.THEORIST
         assert protocol.name == "Test Protocol"
         assert protocol.description == "A test protocol"
-        assert protocol.className is None
+        assert protocol.pythonName == "TestClass"
         assert protocol.githubCommit == "commit123"
         assert protocol.importPath == "test.module"
         assert protocol.pipInstall == "test-package"
         assert protocol.pipVersion == "0.1.0"
-
-    def test_create_protocol_with_class_name(self):
-        test_uuid = uuid.uuid4()
-        protocol = Protocol(
-            uuid=test_uuid,
-            protocolType=ProtocolType.THEORIST,
-            name="Test Protocol",
-            description="A test protocol",
-            githubCommit="commit123",
-            className="TestClass",
-            importPath="test.module",
-            pipInstall="test-package",
-            pipVersion="0.1.0",
-            parameters=None,
-            inputDataType=None,
-            outputDataType=None,
-        )
-        assert protocol.className == "TestClass"
 
     def test_create_protocol_with_all_fields(self):
         test_uuid = uuid.uuid4()
@@ -425,7 +408,7 @@ class TestProtocol:
             name="Full Protocol",
             description="A full protocol",
             githubCommit="abc123",
-            className="FullClass",
+            pythonName="FullClass",
             importPath="some.module.path",
             pipInstall="some-package",
             pipVersion="1.0.0",
@@ -433,6 +416,7 @@ class TestProtocol:
             inputDataType=[param],
             outputDataType=[param],
         )
+        assert protocol.pythonName == "FullClass"
         assert protocol.githubCommit == "abc123"
         assert protocol.importPath == "some.module.path"
         assert protocol.pipInstall == "some-package"
@@ -562,7 +546,7 @@ class TestModelSerialization:
             name="Test Protocol",
             description="A test protocol",
             githubCommit="abc123",
-            className="TestClass",
+            pythonName="TestClass",
             importPath="some.module",
             pipInstall="some-package",
             pipVersion="1.0.0",
@@ -574,6 +558,7 @@ class TestModelSerialization:
         restored = Protocol.model_validate_json(json_str)
         assert restored.uuid == protocol.uuid
         assert restored.name == protocol.name
+        assert restored.pythonName == protocol.pythonName
 
     def test_workflow_dict_roundtrip(self):
         comp_uuid = uuid.uuid4()
