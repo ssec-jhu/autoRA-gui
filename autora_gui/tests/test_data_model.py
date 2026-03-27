@@ -590,3 +590,49 @@ class TestModelSerialization:
         restored = Workflow.model_validate(workflow_dict)
         assert restored.name == workflow.name
         assert len(restored.components) == 1
+
+
+class TestComponentJsonFiles:
+    """Tests for component JSON file consistency."""
+
+    @pytest.fixture
+    def component_files(self):
+        """Get all component JSON files."""
+        import json
+        from pathlib import Path
+
+        components_dir = Path(__file__).parent.parent / "JSON" / "components"
+        return list(components_dir.rglob("*.json"))
+
+    def test_all_components_validate_against_protocol_model(self, component_files):
+        """All component JSON files should be valid Protocol instances."""
+        import json
+
+        for file_path in component_files:
+            with open(file_path) as f:
+                data = json.load(f)
+            # This will raise ValidationError if invalid
+            Protocol.model_validate(data)
+
+    def test_all_uuids_are_unique(self, component_files):
+        """All component UUIDs should be unique across files."""
+        import json
+
+        uuids = []
+        for file_path in component_files:
+            with open(file_path) as f:
+                data = json.load(f)
+            uuids.append((data["uuid"], file_path.name))
+
+        uuid_values = [u[0] for u in uuids]
+        duplicates = [u for u in uuids if uuid_values.count(u[0]) > 1]
+        assert len(duplicates) == 0, f"Duplicate UUIDs found: {duplicates}"
+
+    def test_all_uuids_are_valid_format(self, component_files):
+        """All UUIDs should be valid UUID format."""
+        import json
+
+        for file_path in component_files:
+            with open(file_path) as f:
+                data = json.load(f)
+            uuid.UUID(data["uuid"])  # Raises ValueError if invalid
