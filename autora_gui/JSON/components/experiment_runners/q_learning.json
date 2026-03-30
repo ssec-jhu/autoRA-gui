@@ -3,7 +3,7 @@
   "protocolType": "experiment_runner",
   "name": "Q-Learning",
   "description": "Synthetic experiment runner implementing Q-learning for an n-armed bandit task, simulating reinforcement learning agent behavior.",
-  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychology/q_learning.py#L113",
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychology/q_learning.py#L113",
   "pythonName": "q_learning",
   "importPath": "autora.experiment_runner.synthetic.psychology.q_learning",
   "pipInstall": "autora-synthetic",
