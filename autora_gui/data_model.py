@@ -43,23 +43,32 @@ class VariableType(BaseModel):
     description: str | None
 
 
+class Cardinality(BaseModel):
+    """A model for cardinality in the workflow."""
+
+    minOccurs: int = 0
+    maxOccurs: int = 1
+    unique: bool = True
+
+
 class PrimitiveVariableType(VariableType):
     """Primitive variable type model for the workflow."""
 
     datatype: Datatype
-    minOccurs: int | None = 1
-    maxOccurs: int | None = -1
+    cardinality: Cardinality | None = None
     validValues: list[str] | None = None
     default: Any | None = None
 
 
-class TupleVariableType(VariableType):
-    """A model for tuple variables in the workflow."""
+class DictVariableType(VariableType):
+    """A model for dictionary variables in the workflow."""
 
-    variables: list[VariableType]
+    variables: list["VariableTypes"]
 
 
-VariableTypes = PrimitiveVariableType | TupleVariableType
+VariableTypes = PrimitiveVariableType | DictVariableType
+
+DictVariableType.model_rebuild()
 
 
 class Protocol(AutoraBaseModel):
@@ -70,8 +79,12 @@ class Protocol(AutoraBaseModel):
 
     protocolType: ProtocolType
     name: str
-    description: str | None = None
+    description: str
     githubCommit: str
+    pythonName: str
+    importPath: str
+    pipInstall: str
+    pipVersion: str
     parameters: list[VariableTypes] | None
     inputDataType: list[VariableTypes] | None  # could be a bunch of allowed datatypes
     outputDataType: list[VariableTypes] | None  # could be a bunch of allowed datatypes
@@ -121,27 +134,51 @@ class CanvasLocation(BaseModel):
 
 
 class Component(AutoraBaseModel):
-    """A component model for Autora gui.
+    """A component model for AutoRA GUI.
 
-    Includes node parameters and canvas location.
+    Includes canvas location.
+    """
+
+    canvasLocation: CanvasLocation | None
+
+
+class ProtocolComponent(Component):
+    """A protocol component model for AutoRA GUI.
+
+    Includes node parameters.
     """
 
     protocolUuid: uuid.UUID  # uuid of the Protocol
     parameterSetting: list[ParameterSetting] | None
-    canvasLocation: CanvasLocation | None
+
+
+class StartComponent(Component):
+    """A start component model for AutoRA GUI.
+
+    Serves as the starting point of the workflow.
+    """
+
+
+class EndComponent(Component):
+    """An end component model for AutoRA GUI.
+
+    Serves as the ending point of the workflow.
+    """
 
 
 class Workflow(BaseModel):
-    """A workflow model for Autora gui.
+    """A workflow model for AutoRA GUI.
 
     Includes all possible elements like nodes and links.
     """
 
     name: str
     description: str | None = None
+    start: StartComponent | None = None
+    end: EndComponent | None = None
     independentVariables: VariableTypes
     dependentVariables: VariableTypes
-    components: list[Component]
+    components: list[ProtocolComponent]
     links: list[Link]
 
 
