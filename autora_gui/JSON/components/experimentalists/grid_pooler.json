@@ -1,7 +1,7 @@
 {
   "uuid": "f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c",
   "protocolType": "experimentalist",
-  "name": "Grid Pool",
+  "name": "Grid Pooler",
   "description": "Generates a pool of experimental conditions as a complete grid of all combinations from the allowed values of independent variables.",
   "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/grid.py#L106",
   "pythonName": "grid_pool",

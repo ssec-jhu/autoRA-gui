@@ -1,26 +1,14 @@
 {
   "uuid": "a7b8c9d0-e1f2-4a3b-4c5d-6e7f8a9b0c1d",
   "protocolType": "experimentalist",
-  "name": "Falsification Sample",
+  "name": "Falsification Pooler",
   "description": "Selects experimental conditions most likely to falsify the current model by identifying regions where the model predictions may deviate from ground truth.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L45",
-  "pythonName": "falsification_sample",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L22",
+  "pythonName": "falsification_pool",
   "importPath": "autora.experimentalist.falsification",
   "pipInstall": "autora-experimentalist-falsification",
   "pipVersion": "1.0.0",
   "parameters": [
-    {
-      "name": "conditions",
-      "description": "Pool of candidate experimental conditions to evaluate for falsification potential.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    },
     {
       "name": "model",
       "description": "Scikit-learn compatible model (regression or classification) to attempt to falsify.",
@@ -94,6 +82,18 @@
       "default": 1000
     },
     {
+      "name": "optimization_epochs",
+      "description": "Number of epochs to train the internal falsification network.",
+      "datatype": "integer",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 1000
+    },
+    {
       "name": "training_lr",
       "description": "Learning rate for training the falsification network.",
       "datatype": "real",
@@ -104,6 +104,42 @@
       },
       "validValues": null,
       "default": 0.001
+    },
+    {
+      "name": "optimization_lr",
+      "description": "Learning rate for training the falsification network.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 0.001
+    },
+    {
+      "name": "limit_offset",
+      "description": "Offset for limiting the number of high-falsification-potential samples.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 0,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 0
+    },
+    {
+      "name": "limit_repulsion",
+      "description": "Repulsion for limiting the number of high-falsification-potential samples.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 0,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 0
     },
     {
       "name": "plot",
