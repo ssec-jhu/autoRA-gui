@@ -598,7 +598,6 @@ class TestComponentJsonFiles:
     @pytest.fixture
     def component_files(self):
         """Get all component JSON files."""
-        import json
         from pathlib import Path
 
         components_dir = Path(__file__).parent.parent / "JSON" / "components"
