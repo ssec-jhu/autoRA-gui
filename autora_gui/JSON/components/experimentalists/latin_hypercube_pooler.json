@@ -1,0 +1,65 @@
+{
+  "uuid": "336823c9-7075-419e-96bc-a3eb9276ce3a",
+  "protocolType": "experimentalist",
+  "name": "Latin Hypercube Pooler",
+  "description": "Generates a pool of experimental conditions using Latin Hypercube Sampling (LHS). Divides the variable ranges into bins, creates hypercube combinations, and samples random values within selected regions for better space coverage than pure random sampling.",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-lhs/blob/main/src/autora/experimentalist/lhs/__init__.py#L16",
+  "pythonName": "pool",
+  "importPath": "autora.experimentalist.lhs",
+  "pipInstall": "autora-experimentalist-lhs",
+  "pipVersion": "1.0.0",
+  "parameters": [
+    {
+      "name": "num_samples",
+      "description": "The number of samples to generate using Latin Hypercube Sampling.",
+      "datatype": "integer",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 1
+    },
+    {
+      "name": "random_state",
+      "description": "Random seed for reproducibility of the sampling.",
+      "datatype": "integer",
+      "cardinality": {
+        "minOccurs": 0,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "inputDataType": [
+    {
+      "name": "variables",
+      "description": "Variable collection with minimum and maximum values for each independent variable.",
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "conditions",
+      "description": "DataFrame of experimental conditions sampled using Latin Hypercube design.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ]
+}
