@@ -3,12 +3,24 @@
   "protocolType": "experimentalist",
   "name": "Falsification Sampler",
   "description": "Selects experimental conditions that are most likely to falsify the current model by maximizing predicted model error.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L194",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L451",
   "pythonName": "falsification_sample",
   "importPath": "autora.experimentalist.falsification",
   "pipInstall": "autora-experimentalist-falsification",
   "pipVersion": "1.0.0",
   "parameters": [
+    {
+      "name": "metadata",
+      "description": "VariableCollection with dependent and independent variable metadata.",
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 0,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    },
     {
       "name": "num_samples",
       "description": "Number of samples to select that may falsify the model.",
@@ -102,18 +114,6 @@
       "cardinality": {
         "minOccurs": 1,
         "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    },
-    {
-      "name": "metadata",
-      "description": "Variable collection with dependent and independent variable metadata.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
         "unique": true
       },
       "validValues": null,

@@ -3,48 +3,12 @@
   "protocolType": "experimentalist",
   "name": "Falsification Pooler",
   "description": "Selects experimental conditions most likely to falsify the current model by identifying regions where the model predictions may deviate from ground truth.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L22",
-  "pythonName": "falsification_pool",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L447",
+  "pythonName": "falsification_pooler",
   "importPath": "autora.experimentalist.falsification",
   "pipInstall": "autora-experimentalist-falsification",
   "pipVersion": "1.0.0",
   "parameters": [
-    {
-      "name": "model",
-      "description": "Scikit-learn compatible model (regression or classification) to attempt to falsify.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    },
-    {
-      "name": "reference_conditions",
-      "description": "Experimental conditions that the model was trained on.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    },
-    {
-      "name": "reference_observations",
-      "description": "Observations that the model was trained to predict.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    },
     {
       "name": "metadata",
       "description": "VariableCollection with meta-data about the dependent and independent variables.",
@@ -62,12 +26,12 @@
       "description": "Number of high-falsification-potential samples to select.",
       "datatype": "integer",
       "cardinality": {
-        "minOccurs": 0,
+        "minOccurs": 1,
         "maxOccurs": 1,
         "unique": true
       },
       "validValues": null,
-      "default": null
+      "default": 100
     },
     {
       "name": "training_epochs",
@@ -155,18 +119,6 @@
     }
   ],
   "inputDataType": [
-    {
-      "name": "conditions",
-      "description": "DataFrame or array of candidate experimental conditions.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    },
     {
       "name": "model",
       "description": "Fitted model to attempt to falsify.",

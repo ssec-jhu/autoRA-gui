@@ -3,7 +3,7 @@
   "protocolType": "experimentalist",
   "name": "Uncertainty Sampler",
   "description": "Selects experimental conditions where the model has highest prediction uncertainty, enabling active learning to improve model performance.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-uncertainty/blob/main/src/autora/experimentalist/uncertainty/__init__.py#L9",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-uncertainty/blob/main/src/autora/experimentalist/uncertainty/__init__.py#L77",
   "pythonName": "uncertainty_sampler",
   "importPath": "autora.experimentalist.uncertainty",
   "pipInstall": "autora-experimentalist-uncertainty",
