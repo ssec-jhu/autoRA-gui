@@ -38,7 +38,7 @@ class TestWorkflowSchemaStructure:
         defs = schema["$defs"]
         required_defs = [
             "CanvasLocation",
-            "Component",
+            "ProtocolComponent",
             "Datatype",
             "Link",
             "ParameterSetting",
@@ -101,36 +101,36 @@ class TestCanvasLocationDefinition:
         assert "y" in canvas_location_def["required"]
 
 
-class TestComponentDefinition:
-    """Tests for the Component definition."""
+class TestProtocolComponentDefinition:
+    """Tests for the ProtocolComponent definition."""
 
     @pytest.fixture
     def component_def(self) -> dict:
-        """Load the Component definition."""
+        """Load the ProtocolComponent definition."""
         schema_path = Path(__file__).parent.parent.parent / "JSON" / "schemas" / "workflow_model.json"
         schema = json.loads(schema_path.read_text())
-        return schema["$defs"]["Component"]
+        return schema["$defs"]["ProtocolComponent"]
 
     def test_has_uuid_property(self, component_def: dict) -> None:
-        """Test that Component has uuid property."""
+        """Test that ProtocolComponent has uuid property."""
         assert "uuid" in component_def["properties"]
         assert component_def["properties"]["uuid"]["format"] == "uuid"
 
     def test_has_protocol_uuid_property(self, component_def: dict) -> None:
-        """Test that Component has protocolUuid property."""
+        """Test that ProtocolComponent has protocolUuid property."""
         assert "protocolUuid" in component_def["properties"]
         assert component_def["properties"]["protocolUuid"]["format"] == "uuid"
 
     def test_has_parameter_setting_property(self, component_def: dict) -> None:
-        """Test that Component has parameterSetting property."""
+        """Test that ProtocolComponent has parameterSetting property."""
         assert "parameterSetting" in component_def["properties"]
 
     def test_has_canvas_location_property(self, component_def: dict) -> None:
-        """Test that Component has canvasLocation property."""
+        """Test that ProtocolComponent has canvasLocation property."""
         assert "canvasLocation" in component_def["properties"]
 
     def test_required_fields(self, component_def: dict) -> None:
-        """Test that Component has correct required fields."""
+        """Test that ProtocolComponent has correct required fields."""
         required = component_def["required"]
         assert "uuid" in required
         assert "protocolUuid" in required
