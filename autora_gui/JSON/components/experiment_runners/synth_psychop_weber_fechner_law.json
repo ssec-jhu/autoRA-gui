@@ -1,17 +1,17 @@
 {
-  "uuid": "b6c7d8e9-f0a1-4b2c-3d4e-5f6a7b8c9d0e",
+  "uuid": "f0a1b2c3-d4e5-4f6a-7b8c-9d0e1f2a3b4c",
   "protocolType": "experiment_runner",
-  "name": "Luce Choice Ratio (Synthetic)",
-  "description": "Synthetic experiment runner implementing the Shepard-Luce Choice Rule for modeling choice probability based on similarity ratings to categories.",
-  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychology/luce_choice_ratio.py#L10",
-  "pythonName": "luce_choice_ratio",
-  "importPath": "autora.experiment_runner.synthetic.psychology.luce_choice_ratio",
+  "name": "Weber-Fechner Law (Synthetic)",
+  "description": "Synthetic experiment runner implementing the Weber-Fechner Law, which relates perceived intensity to physical stimulus intensity logarithmically.",
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychophysics/weber_fechner_law.py#L11",
+  "pythonName": "weber_fechner_law",
+  "importPath": "autora.experiment_runner.synthetic.psychophysics.weber_fechner_law",
   "pipInstall": "autora-synthetic",
   "pipVersion": "1.0.0",
   "parameters": [
     {
       "name": "resolution",
-      "description": "Number of allowed values for stimulus similarity ratings.",
+      "description": "Number of allowed values for stimulus intensities.",
       "datatype": "integer",
       "cardinality": {
         "minOccurs": 1,
@@ -19,23 +19,11 @@
         "unique": true
       },
       "validValues": null,
-      "default": 8
+      "default": 100
     },
     {
-      "name": "maximum_similarity",
-      "description": "Upper bound for similarity values.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": 10
-    },
-    {
-      "name": "focus",
-      "description": "Parameter measuring participant focus/attention.",
+      "name": "constant",
+      "description": "Constant multiplier in the Weber-Fechner calculation.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
@@ -43,13 +31,25 @@
         "unique": true
       },
       "validValues": null,
-      "default": 0.8
+      "default": 1.0
+    },
+    {
+      "name": "maximum_stimulus_intensity",
+      "description": "Maximum value for stimulus intensity parameters.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 5.0
     }
   ],
   "inputDataType": [
     {
       "name": "conditions",
-      "description": "Similarity ratings to categories (A1, A2, B1, B2).",
+      "description": "Physical stimulus intensity values.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
@@ -63,7 +63,7 @@
   "outputDataType": [
     {
       "name": "observations",
-      "description": "Probability of selecting category A1.",
+      "description": "Perceived stimulus intensity.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,

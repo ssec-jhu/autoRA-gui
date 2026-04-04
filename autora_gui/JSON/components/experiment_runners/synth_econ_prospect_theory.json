@@ -1,29 +1,17 @@
 {
-  "uuid": "b0c1d2e3-f4a5-4b6c-7d8e-9f0a1b2c3d4e",
+  "uuid": "c7d8e9f0-a1b2-4c3d-4e5f-6a7b8c9d0e1f",
   "protocolType": "experiment_runner",
-  "name": "Prospect Theory",
-  "description": "Synthetic experiment runner implementing Kahneman and Tversky's Prospect Theory for decision-making under risk with loss aversion and probability weighting.",
-  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/economics/prospect_theory.py#L12",
+  "name": "Prospect Theory (Synthetic)",
+  "description": "Synthetic experiment runner implementing Kahneman & Tversky's (1979) Prospect Theory with nonlinear value and probability weighting functions.",
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/economics/prospect_theory.py#L13",
   "pythonName": "prospect_theory",
   "importPath": "autora.experiment_runner.synthetic.economics.prospect_theory",
   "pipInstall": "autora-synthetic",
   "pipVersion": "1.0.0",
   "parameters": [
     {
-      "name": "name",
-      "description": "Identifier name for the experiment.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": "Prospect Theory"
-    },
-    {
       "name": "choice_temperature",
-      "description": "Softmax temperature parameter for choice probability.",
+      "description": "Softmax temperature for choice probability.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
@@ -35,7 +23,7 @@
     },
     {
       "name": "value_alpha",
-      "description": "Exponent for the value function on gains (risk attitude for gains).",
+      "description": "Power exponent for gains in value function.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
@@ -47,7 +35,7 @@
     },
     {
       "name": "value_beta",
-      "description": "Exponent for the value function on losses (risk attitude for losses).",
+      "description": "Power exponent for losses in value function.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
@@ -59,7 +47,7 @@
     },
     {
       "name": "value_lambda",
-      "description": "Loss aversion coefficient (losses loom larger than gains).",
+      "description": "Loss aversion coefficient.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
@@ -71,7 +59,7 @@
     },
     {
       "name": "probability_alpha",
-      "description": "Exponent for probability weighting function on gains.",
+      "description": "Probability weighting exponent for gains.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
@@ -83,7 +71,7 @@
     },
     {
       "name": "probability_beta",
-      "description": "Exponent for probability weighting function on losses.",
+      "description": "Probability weighting exponent for losses.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
@@ -95,7 +83,7 @@
     },
     {
       "name": "resolution",
-      "description": "Grid resolution for variable value generation.",
+      "description": "Grid resolution for independent variable ranges.",
       "datatype": "integer",
       "cardinality": {
         "minOccurs": 1,
@@ -107,7 +95,7 @@
     },
     {
       "name": "minimum_value",
-      "description": "Lower bound for option values.",
+      "description": "Lower bound for value variables.",
       "datatype": "integer",
       "cardinality": {
         "minOccurs": 1,
@@ -119,7 +107,7 @@
     },
     {
       "name": "maximum_value",
-      "description": "Upper bound for option values.",
+      "description": "Upper bound for value variables.",
       "datatype": "integer",
       "cardinality": {
         "minOccurs": 1,
@@ -133,11 +121,11 @@
   "inputDataType": [
     {
       "name": "conditions",
-      "description": "DataFrame with values and probabilities for options A and B.",
-      "datatype": "string",
+      "description": "Gamble options with values and probabilities.",
+      "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
-        "maxOccurs": 1,
+        "maxOccurs": -1,
         "unique": true
       },
       "validValues": null,
@@ -147,11 +135,11 @@
   "outputDataType": [
     {
       "name": "observations",
-      "description": "DataFrame with probability of choosing option A as dependent variable.",
-      "datatype": "string",
+      "description": "Choice probabilities reflecting prospect theory predictions.",
+      "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
-        "maxOccurs": 1,
+        "maxOccurs": -1,
         "unique": true
       },
       "validValues": null,

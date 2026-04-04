@@ -3,7 +3,7 @@
   "protocolType": "experiment_runner",
   "name": "Firebase Prolific Runner",
   "description": "Experiment runner for conducting human behavioral experiments with participant recruitment via Prolific and experiment hosting on Firebase.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/main/src/autora/experiment_runner/firebase_prolific/__init__.py#L152",
+  "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/main/src/autora/experiment_runner/firebase_prolific/__init__.py#L153",
   "pythonName": "firebase_prolific_runner",
   "importPath": "autora.experiment_runner.firebase_prolific",
   "pipInstall": "autora-experiment-runner-firebase-prolific",
@@ -36,18 +36,6 @@
     {
       "name": "firebase_credentials",
       "description": "Firebase service account credentials dictionary.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    },
-    {
-      "name": "prolific_token",
-      "description": "API token for Prolific authentication.",
       "datatype": "string",
       "cardinality": {
         "minOccurs": 1,
@@ -104,6 +92,18 @@
       },
       "validValues": null,
       "default": 10
+    },
+    {
+      "name": "prolific_token",
+      "description": "API token for Prolific authentication.",
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
     },
     {
       "name": "completion_code",

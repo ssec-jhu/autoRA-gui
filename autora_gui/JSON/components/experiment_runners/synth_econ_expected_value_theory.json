@@ -1,29 +1,17 @@
 {
-  "uuid": "f8a9b0c1-d2e3-4f4a-5b6c-7d8e9f0a1b2c",
+  "uuid": "a5b6c7d8-e9f0-4a1b-2c3d-4e5f6a7b8c9d",
   "protocolType": "experiment_runner",
-  "name": "Expected Value Theory",
-  "description": "Synthetic experiment runner implementing Expected Value Theory for decision-making under risk, modeling choices between probabilistic options.",
-  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/economics/expected_value_theory.py#L12",
+  "name": "Expected Value Theory (Synthetic)",
+  "description": "Synthetic experiment runner modeling decision-making between options based on expected utilities calculated as value multiplied by probability.",
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/economics/expected_value_theory.py#L71",
   "pythonName": "expected_value_theory",
   "importPath": "autora.experiment_runner.synthetic.economics.expected_value_theory",
   "pipInstall": "autora-synthetic",
   "pipVersion": "1.0.0",
   "parameters": [
     {
-      "name": "name",
-      "description": "Identifier name for the experiment.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": "Expected Value Theory"
-    },
-    {
       "name": "choice_temperature",
-      "description": "Softmax temperature parameter controlling choice stochasticity (lower = more deterministic).",
+      "description": "Softmax temperature controlling choice stochasticity.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
@@ -47,7 +35,7 @@
     },
     {
       "name": "resolution",
-      "description": "Number of discrete points in the allowed values range.",
+      "description": "Number of discrete points in variable ranges.",
       "datatype": "integer",
       "cardinality": {
         "minOccurs": 1,
@@ -59,7 +47,7 @@
     },
     {
       "name": "minimum_value",
-      "description": "Lower bound for option values.",
+      "description": "Lower bound for value variables.",
       "datatype": "integer",
       "cardinality": {
         "minOccurs": 1,
@@ -71,7 +59,7 @@
     },
     {
       "name": "maximum_value",
-      "description": "Upper bound for option values.",
+      "description": "Upper bound for value variables.",
       "datatype": "integer",
       "cardinality": {
         "minOccurs": 1,
@@ -85,11 +73,11 @@
   "inputDataType": [
     {
       "name": "conditions",
-      "description": "DataFrame with values and probabilities for options A and B.",
-      "datatype": "string",
+      "description": "Option values and probabilities for choices.",
+      "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
-        "maxOccurs": 1,
+        "maxOccurs": -1,
         "unique": true
       },
       "validValues": null,
@@ -99,11 +87,11 @@
   "outputDataType": [
     {
       "name": "observations",
-      "description": "DataFrame with probability of choosing option A as dependent variable.",
-      "datatype": "string",
+      "description": "Choice probabilities between options.",
+      "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
-        "maxOccurs": 1,
+        "maxOccurs": -1,
         "unique": true
       },
       "validValues": null,

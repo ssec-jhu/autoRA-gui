@@ -1,41 +1,17 @@
 {
-  "uuid": "a5b6c7d8-e9f0-4a1b-2c3d-4e5f6a7b8c9d",
+  "uuid": "17f22b12-3eb6-4396-b311-e72fa2e248f1",
   "protocolType": "experiment_runner",
-  "name": "Expected Value Theory (Synthetic)",
-  "description": "Synthetic experiment runner modeling decision-making between options based on expected utilities calculated as value multiplied by probability.",
-  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/economics/expected_value_theory.py#L70",
-  "pythonName": "expected_value_theory",
-  "importPath": "autora.experiment_runner.synthetic.economics.expected_value_theory",
+  "name": "Task Switching (Synthetic, Neuroscience)",
+  "description": "Synthetic experiment runner implementing a cognitive model of task-switching behavior. Performance depends on current task strength, alternative task strength, and whether a task switch occurs.",
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/neuroscience/task_switching.py#L11",
+  "pythonName": "task_switching",
+  "importPath": "autora.experiment_runner.synthetic.neuroscience.task_switching",
   "pipInstall": "autora-synthetic",
   "pipVersion": "1.0.0",
   "parameters": [
     {
-      "name": "choice_temperature",
-      "description": "Softmax temperature controlling choice stochasticity.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": 0.1
-    },
-    {
-      "name": "value_lambda",
-      "description": "Scaling factor applied to option values.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": 0.5
-    },
-    {
       "name": "resolution",
-      "description": "Number of discrete points in variable ranges.",
+      "description": "Number of stimulus value options.",
       "datatype": "integer",
       "cardinality": {
         "minOccurs": 1,
@@ -43,11 +19,11 @@
         "unique": true
       },
       "validValues": null,
-      "default": 10
+      "default": 50
     },
     {
-      "name": "minimum_value",
-      "description": "Lower bound for value variables.",
+      "name": "priming_default",
+      "description": "Task priming baseline value.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
@@ -55,11 +31,11 @@
         "unique": true
       },
       "validValues": null,
-      "default": -1.0
+      "default": 0.3
     },
     {
-      "name": "maximum_value",
-      "description": "Upper bound for value variables.",
+      "name": "temperature",
+      "description": "Softmax parameter for current task performance.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
@@ -67,13 +43,37 @@
         "unique": true
       },
       "validValues": null,
-      "default": 1.0
+      "default": 0.2
+    },
+    {
+      "name": "minimum_task_control",
+      "description": "Lower bound for task control.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 0.15
+    },
+    {
+      "name": "constant",
+      "description": "Task activation exponential constant.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 1.5
     }
   ],
   "inputDataType": [
     {
       "name": "conditions",
-      "description": "Option values and probabilities for choices.",
+      "description": "Experimental conditions specifying current task strength, alternative task strength, and is_switch.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
@@ -87,7 +87,7 @@
   "outputDataType": [
     {
       "name": "observations",
-      "description": "Choice probabilities between options.",
+      "description": "Simulated current task performance accuracy.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,

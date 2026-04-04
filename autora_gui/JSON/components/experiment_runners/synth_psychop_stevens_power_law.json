@@ -1,17 +1,17 @@
 {
-  "uuid": "f0a1b2c3-d4e5-4f6a-7b8c-9d0e1f2a3b4c",
+  "uuid": "e9f0a1b2-c3d4-4e5f-6a7b-8c9d0e1f2a3b",
   "protocolType": "experiment_runner",
-  "name": "Weber-Fechner Law (Synthetic)",
-  "description": "Synthetic experiment runner implementing the Weber-Fechner Law, which relates perceived intensity to physical stimulus intensity logarithmically.",
-  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychophysics/weber_fechner_law.py#L10",
-  "pythonName": "weber_fechner_law",
-  "importPath": "autora.experiment_runner.synthetic.psychophysics.weber_fechner_law",
+  "name": "Stevens Power Law (Synthetic)",
+  "description": "Synthetic experiment runner implementing Stevens' Power Law, which models perceived intensity as a power function of physical stimulus intensity.",
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychophysics/stevens_power_law.py#L11",
+  "pythonName": "stevens_power_law",
+  "importPath": "autora.experiment_runner.synthetic.psychophysics.stevens_power_law",
   "pipInstall": "autora-synthetic",
   "pipVersion": "1.0.0",
   "parameters": [
     {
       "name": "resolution",
-      "description": "Number of allowed values for stimulus intensities.",
+      "description": "Number of allowed stimulus values.",
       "datatype": "integer",
       "cardinality": {
         "minOccurs": 1,
@@ -22,8 +22,8 @@
       "default": 100
     },
     {
-      "name": "constant",
-      "description": "Constant multiplier in the Weber-Fechner calculation.",
+      "name": "proportionality_constant",
+      "description": "Constant multiplier in the power law equation.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
@@ -34,8 +34,20 @@
       "default": 1.0
     },
     {
+      "name": "modality_constant",
+      "description": "Exponent/power constant specific to sensory modality.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 0.8
+    },
+    {
       "name": "maximum_stimulus_intensity",
-      "description": "Maximum value for stimulus intensity parameters.",
+      "description": "Upper bound for stimulus values.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
