@@ -1,25 +1,47 @@
 {
-  "uuid": "firebase-prolific-runner-001",
+  "uuid": "d6e7f8a9-b0c1-4d2e-3f4a-5b6c7d8e9f0a",
   "protocolType": "experiment_runner",
   "name": "Firebase Prolific Runner",
   "description": "Experiment runner for conducting human behavioral experiments with participant recruitment via Prolific and experiment hosting on Firebase.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/8c004a8995908aa6963662ad23d20d6fe3113735/src/autora/experiment_runner/firebase_prolific/__init__.py#L152",
+  "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/main/src/autora/experiment_runner/firebase_prolific/__init__.py#L153",
+  "pythonName": "firebase_prolific_runner",
+  "importPath": "autora.experiment_runner.firebase_prolific",
+  "pipInstall": "autora-experiment-runner-firebase-prolific",
+  "pipVersion": "1.0.0",
   "parameters": [
+    {
+      "name": "exclude_studies",
+      "description": "List of study names to exclude from Prolific recruitment.",
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 0,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": ["default"]
+    },
+    {
+      "name": "approve_no_code",
+      "description": "Auto-approve submissions without completion codes.",
+      "datatype": "boolean",
+      "cardinality": {
+        "minOccurs": 0,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": true
+    },
     {
       "name": "firebase_credentials",
       "description": "Firebase service account credentials dictionary.",
       "datatype": "string",
-      "minOccurs": 1,
-      "maxOccurs": 1,
-      "validValues": null,
-      "default": null
-    },
-    {
-      "name": "prolific_token",
-      "description": "API token for Prolific authentication.",
-      "datatype": "string",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
@@ -27,8 +49,11 @@
       "name": "study_name",
       "description": "Display name for the study in Prolific.",
       "datatype": "string",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
@@ -36,8 +61,11 @@
       "name": "study_description",
       "description": "Study description visible to Prolific participants.",
       "datatype": "string",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
@@ -45,8 +73,11 @@
       "name": "study_url",
       "description": "URL pointing to the hosted experiment.",
       "datatype": "string",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
@@ -54,17 +85,35 @@
       "name": "study_completion_time",
       "description": "Estimated time in minutes for participants to complete.",
       "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 10
+    },
+    {
+      "name": "prolific_token",
+      "description": "API token for Prolific authentication.",
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
     },
     {
       "name": "completion_code",
       "description": "Code provided to participants upon study completion.",
       "datatype": "string",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
@@ -72,19 +121,13 @@
       "name": "sleep_time",
       "description": "Interval in seconds between Firebase/Prolific status checks.",
       "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 30
-    },
-    {
-      "name": "approve_no_code",
-      "description": "Auto-approve submissions without completion codes.",
-      "datatype": "boolean",
-      "minOccurs": 1,
-      "maxOccurs": 1,
-      "validValues": null,
-      "default": false
     }
   ],
   "inputDataType": [
@@ -92,8 +135,11 @@
       "name": "conditions",
       "description": "Experimental conditions to present to participants.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
@@ -103,8 +149,11 @@
       "name": "observations",
       "description": "Participant responses collected from the experiment.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }

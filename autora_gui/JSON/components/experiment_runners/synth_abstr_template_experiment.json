@@ -1,0 +1,40 @@
+{
+  "uuid": "da749212-4643-4f86-89b3-69ea4a90e49a",
+  "protocolType": "experiment_runner",
+  "name": "Template Experiment (Synthetic, Abstract)",
+  "description": "A template for creating synthetic experiments. Serves as a blueprint demonstrating how to structure experiments with configurable parameters, variable definitions, simulation functions with noise capability, and visualization tools.",
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/abstract/template_experiment.py#L74",
+  "pythonName": "template_experiment",
+  "importPath": "autora.experiment_runner.synthetic.abstract.template_experiment",
+  "pipInstall": "autora-synthetic",
+  "pipVersion": "1.0.0",
+  "parameters": [],
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "Experimental conditions specifying independent variable values.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "observations",
+      "description": "Simulated dependent variable values from the template experiment.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ]
+}

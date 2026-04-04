@@ -1,16 +1,23 @@
 {
-  "uuid": "synthetic-luce-choice-ratio-001",
+  "uuid": "b6c7d8e9-f0a1-4b2c-3d4e-5f6a7b8c9d0e",
   "protocolType": "experiment_runner",
   "name": "Luce Choice Ratio (Synthetic)",
   "description": "Synthetic experiment runner implementing the Shepard-Luce Choice Rule for modeling choice probability based on similarity ratings to categories.",
-  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychology/luce_choice_ratio.py#L10",
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychology/luce_choice_ratio.py#L11",
+  "pythonName": "luce_choice_ratio",
+  "importPath": "autora.experiment_runner.synthetic.psychology.luce_choice_ratio",
+  "pipInstall": "autora-synthetic",
+  "pipVersion": "1.0.0",
   "parameters": [
     {
       "name": "resolution",
       "description": "Number of allowed values for stimulus similarity ratings.",
       "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 8
     },
@@ -18,8 +25,11 @@
       "name": "maximum_similarity",
       "description": "Upper bound for similarity values.",
       "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 10
     },
@@ -27,8 +37,11 @@
       "name": "focus",
       "description": "Parameter measuring participant focus/attention.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 0.8
     }
@@ -38,8 +51,11 @@
       "name": "conditions",
       "description": "Similarity ratings to categories (A1, A2, B1, B2).",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
@@ -49,8 +65,11 @@
       "name": "observations",
       "description": "Probability of selecting category A1.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }

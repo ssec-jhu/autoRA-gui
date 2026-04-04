@@ -1,25 +1,37 @@
 {
-  "uuid": "f2a3b4c5-d6e7-4f8a-9b0c-1d2e3f4a5b6c",
+  "uuid": "288afff6-e124-49ef-9697-4fd106f95a9b",
   "protocolType": "experimentalist",
-  "name": "Novelty Sampler",
-  "description": "Selects experimental conditions that are most novel (dissimilar) with respect to existing reference conditions using pairwise distance metrics.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L148",
-  "pythonName": "novelty_sampler",
-  "importPath": "autora.experimentalist.novelty",
-  "pipInstall": "autora-experimentalist-novelty",
+  "name": "Summed Inequality Sampler",
+  "description": "Selects experimental conditions based on inequality relative to a reference pool.",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-inequality/blob/main/src/autora/experimentalist/inequality/__init__.py#L165",
+  "pythonName": "summed_inequality_sampler",
+  "importPath": "autora.experimentalist.inequality",
+  "pipInstall": "autora-experimentalist-inequality",
   "pipVersion": "1.0.0",
   "parameters": [
     {
       "name": "num_samples",
-      "description": "Number of novel samples to select from the condition pool.",
+      "description": "Number of samples to select from the condition pool.",
       "datatype": "integer",
       "cardinality": {
-        "minOccurs": 0,
+        "minOccurs": 1,
         "maxOccurs": 1,
         "unique": true
       },
       "validValues": null,
-      "default": null
+      "default": 1
+    },
+    {
+      "name": "equality_distance",
+      "description": "Distance threshold for considering two data points as equal. Points closer than this threshold are treated as identical.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 0
     },
     {
       "name": "metric",
@@ -30,20 +42,8 @@
         "maxOccurs": 1,
         "unique": true
       },
-      "validValues": ["euclidean", "manhattan", "chebyshev", "minkowski", "cosine", "correlation"],
+      "validValues": ["euclidean", "manhattan", "chebyshev", "minkowski", "cosine", "correlation", "mahalanobis", "hamming", "jaccard"],
       "default": "euclidean"
-    },
-    {
-      "name": "integration",
-      "description": "Method for combining pairwise distances into overall dissimilarity score.",
-      "datatype": "categorical",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": ["min", "sum", "prod", "mean", "max"],
-      "default": "min"
     }
   ],
   "inputDataType": [
@@ -61,7 +61,7 @@
     },
     {
       "name": "reference_conditions",
-      "description": "Existing experimental conditions to compare against.",
+      "description": "Reference pool of existing experimental conditions to compare against.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
@@ -75,7 +75,7 @@
   "outputDataType": [
     {
       "name": "conditions",
-      "description": "Selected novel experimental conditions.",
+      "description": "Selected experimental conditions with highest inequality scores.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,

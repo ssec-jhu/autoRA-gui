@@ -1,16 +1,23 @@
 {
-  "uuid": "synthetic-weber-fechner-001",
+  "uuid": "f0a1b2c3-d4e5-4f6a-7b8c-9d0e1f2a3b4c",
   "protocolType": "experiment_runner",
   "name": "Weber-Fechner Law (Synthetic)",
   "description": "Synthetic experiment runner implementing the Weber-Fechner Law, which relates perceived intensity to physical stimulus intensity logarithmically.",
-  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/psychophysics/weber_fechner_law.py#L10",
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychophysics/weber_fechner_law.py#L11",
+  "pythonName": "weber_fechner_law",
+  "importPath": "autora.experiment_runner.synthetic.psychophysics.weber_fechner_law",
+  "pipInstall": "autora-synthetic",
+  "pipVersion": "1.0.0",
   "parameters": [
     {
       "name": "resolution",
       "description": "Number of allowed values for stimulus intensities.",
       "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 100
     },
@@ -18,8 +25,11 @@
       "name": "constant",
       "description": "Constant multiplier in the Weber-Fechner calculation.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 1.0
     },
@@ -27,8 +37,11 @@
       "name": "maximum_stimulus_intensity",
       "description": "Maximum value for stimulus intensity parameters.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": 1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
       "validValues": null,
       "default": 5.0
     }
@@ -38,8 +51,11 @@
       "name": "conditions",
       "description": "Physical stimulus intensity values.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
@@ -49,8 +65,11 @@
       "name": "observations",
       "description": "Perceived stimulus intensity.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
