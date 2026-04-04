@@ -1,0 +1,137 @@
+{
+  "uuid": "b8c9d0e1-f2a3-4b4c-5d6e-7f8a9b0c1d2e",
+  "protocolType": "experimentalist",
+  "name": "Falsification Sampler",
+  "description": "Selects experimental conditions that are most likely to falsify the current model by maximizing predicted model error.",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L451",
+  "pythonName": "falsification_sample",
+  "importPath": "autora.experimentalist.falsification",
+  "pipInstall": "autora-experimentalist-falsification",
+  "pipVersion": "1.0.0",
+  "parameters": [
+    {
+      "name": "metadata",
+      "description": "VariableCollection with dependent and independent variable metadata.",
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 0,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "num_samples",
+      "description": "Number of samples to select that may falsify the model.",
+      "datatype": "integer",
+      "cardinality": {
+        "minOccurs": 0,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "training_epochs",
+      "description": "Number of epochs to train the Popper network for error approximation.",
+      "datatype": "integer",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 1000
+    },
+    {
+      "name": "training_lr",
+      "description": "Learning rate for training the Popper network.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 0.001
+    },
+    {
+      "name": "plot",
+      "description": "Whether to display Popper network predictions and training loss.",
+      "datatype": "boolean",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": false
+    }
+  ],
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "Pool of candidate experimental conditions to evaluate.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "model",
+      "description": "Trained sklearn model to attempt to falsify.",
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "reference_conditions",
+      "description": "Experimental conditions the model was trained on.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "reference_observations",
+      "description": "Observations the model was trained to predict.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "conditions",
+      "description": "Selected conditions with highest predicted model error.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "uuid": "d8e9f0a1-b2c3-4d4e-5f6a-7b8c9d0e1f2a",
+  "protocolType": "experiment_runner",
+  "name": "Q-Learning (Synthetic)",
+  "description": "Synthetic experiment runner implementing Q-learning for n-armed bandit tasks. Simulates agent decision-making behavior with configurable learning parameters.",
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychology/q_learning.py#L114",
+  "pythonName": "q_learning",
+  "importPath": "autora.experiment_runner.synthetic.psychology.q_learning",
+  "pipInstall": "autora-synthetic",
+  "pipVersion": "1.0.0",
+  "parameters": [
+    {
+      "name": "learning_rate",
+      "description": "Rate at which Q-values update based on rewards.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 0.2
+    },
+    {
+      "name": "decision_noise",
+      "description": "Softmax temperature parameter controlling exploration vs exploitation.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 3.0
+    },
+    {
+      "name": "n_actions",
+      "description": "Number of available actions in the bandit task.",
+      "datatype": "integer",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 2
+    },
+    {
+      "name": "forget_rate",
+      "description": "Decay rate for non-chosen action Q-values.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 0.0
+    },
+    {
+      "name": "perseverance_bias",
+      "description": "Bias toward repeating the previous action.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 0.0
+    },
+    {
+      "name": "correlated_reward",
+      "description": "Whether rewards correlate across actions.",
+      "datatype": "boolean",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": false
+    }
+  ],
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "Experimental conditions specifying trial parameters.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "observations",
+      "description": "Simulated agent choices and rewards.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ]
+}

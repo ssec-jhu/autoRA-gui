@@ -1,0 +1,65 @@
+{
+  "uuid": "a7b8c9d0-e1f2-4a3b-8c5d-6e7f8a9b0c1d",
+  "protocolType": "experimentalist",
+  "name": "Nearest Values Sampler",
+  "description": "Returns the nearest values between input samples and reference conditions using Euclidean distance.",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-nearest-value/blob/main/src/autora/experimentalist/nearest_value/__init__.py#L66",
+  "pythonName": "nearest_values_sampler",
+  "importPath": "autora.experimentalist.nearest_value",
+  "pipInstall": "autora-experimentalist-nearest_value",
+  "pipVersion": "1.0.0",
+  "parameters": [
+    {
+      "name": "num_samples",
+      "description": "Number of nearest samples to select from the condition pool.",
+      "datatype": "integer",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "Pool of candidate experimental condition samples to select from.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "reference_conditions",
+      "description": "Reference conditions used as distance reference points for finding nearest values.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "conditions",
+      "description": "Selected nearest experimental conditions.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ]
+}

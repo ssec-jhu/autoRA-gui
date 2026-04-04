@@ -1,0 +1,149 @@
+{
+  "uuid": "c7d8e9f0-a1b2-4c3d-4e5f-6a7b8c9d0e1f",
+  "protocolType": "experiment_runner",
+  "name": "Prospect Theory (Synthetic)",
+  "description": "Synthetic experiment runner implementing Kahneman & Tversky's (1979) Prospect Theory with nonlinear value and probability weighting functions.",
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/economics/prospect_theory.py#L13",
+  "pythonName": "prospect_theory",
+  "importPath": "autora.experiment_runner.synthetic.economics.prospect_theory",
+  "pipInstall": "autora-synthetic",
+  "pipVersion": "1.0.0",
+  "parameters": [
+    {
+      "name": "choice_temperature",
+      "description": "Softmax temperature for choice probability.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 0.1
+    },
+    {
+      "name": "value_alpha",
+      "description": "Power exponent for gains in value function.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 0.88
+    },
+    {
+      "name": "value_beta",
+      "description": "Power exponent for losses in value function.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 0.88
+    },
+    {
+      "name": "value_lambda",
+      "description": "Loss aversion coefficient.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 2.25
+    },
+    {
+      "name": "probability_alpha",
+      "description": "Probability weighting exponent for gains.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 0.61
+    },
+    {
+      "name": "probability_beta",
+      "description": "Probability weighting exponent for losses.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 0.69
+    },
+    {
+      "name": "resolution",
+      "description": "Grid resolution for independent variable ranges.",
+      "datatype": "integer",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 10
+    },
+    {
+      "name": "minimum_value",
+      "description": "Lower bound for value variables.",
+      "datatype": "integer",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": -1
+    },
+    {
+      "name": "maximum_value",
+      "description": "Upper bound for value variables.",
+      "datatype": "integer",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": 1
+    }
+  ],
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "Gamble options with values and probabilities.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "observations",
+      "description": "Choice probabilities reflecting prospect theory predictions.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ]
+}
