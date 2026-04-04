@@ -115,3 +115,7 @@ convention = "google"
 docstring-quotes = "double"  # https://docs.astral.sh/ruff/settings/#lint_flake8-quotes_docstring-quotes
 inline-quotes = "double"  # https://docs.astral.sh/ruff/settings/#lint_flake8-quotes_inline-quotes
 multiline-quotes = "double"  # https://docs.astral.sh/ruff/settings/#lint_flake8-quotes_multiline-quotes
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["autora_gui/tests", "autora_gui/js_app/tests", "autora_gui/react_app/tests"]
