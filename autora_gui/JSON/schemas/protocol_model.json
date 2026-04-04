@@ -146,10 +146,7 @@
       "enum": [
         "theorist",
         "experimentalist",
-        "experiment_runner",
-        "start_point",
-        "end_point",
-        "filter_point"
+        "experiment_runner"
       ],
       "title": "ProtocolType",
       "type": "string"

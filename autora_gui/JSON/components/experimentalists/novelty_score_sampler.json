@@ -1,17 +1,17 @@
 {
-  "uuid": "f2a3b4c5-d6e7-4f8a-9b0c-1d2e3f4a5b6c",
+  "uuid": "e9e541af-8fd2-4e17-ad86-df80a2f4106c",
   "protocolType": "experimentalist",
-  "name": "Novelty Sampler",
-  "description": "Selects experimental conditions that are most novel (dissimilar) with respect to existing reference conditions using pairwise distance metrics.",
+  "name": "Novelty Score Sampler",
+  "description": "Selects experimental conditions based on dissimilarity to reference conditions and returns both the conditions and their dissimilarity scores.",
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L148",
-  "pythonName": "novelty_sampler",
+  "pythonName": "novelty_score_sampler",
   "importPath": "autora.experimentalist.novelty",
   "pipInstall": "autora-experimentalist-novelty",
   "pipVersion": "1.0.0",
   "parameters": [
     {
       "name": "num_samples",
-      "description": "Number of novel samples to select from the condition pool.",
+      "description": "Number of novel samples to select from the condition pool. If not specified, returns all conditions sorted by novelty.",
       "datatype": "integer",
       "cardinality": {
         "minOccurs": 0,
@@ -43,7 +43,7 @@
         "unique": true
       },
       "validValues": ["min", "sum", "prod", "mean", "max"],
-      "default": "min"
+      "default": "sum"
     }
   ],
   "inputDataType": [
@@ -75,7 +75,7 @@
   "outputDataType": [
     {
       "name": "conditions",
-      "description": "Selected novel experimental conditions.",
+      "description": "Selected experimental conditions with dissimilarity scores column included.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
