@@ -1,6 +1,8 @@
 """Tests for the data_model module."""
 
+import json
 import uuid
+from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
@@ -23,6 +25,7 @@ from autora_gui.data_model import (
     StartComponent,
     VariableType,
     Workflow,
+    generate_schemas,
 )
 
 
@@ -635,3 +638,100 @@ class TestComponentJsonFiles:
             with open(file_path) as f:
                 data = json.load(f)
             uuid.UUID(data["uuid"])  # Raises ValueError if invalid
+
+
+class TestSchemaGeneration:
+    """Tests for JSON schema generation."""
+
+    def test_workflow_schema_is_valid_json_schema(self):
+        """Workflow.model_json_schema() produces valid JSON schema."""
+        schema = Workflow.model_json_schema()
+        assert isinstance(schema, dict)
+        assert "$defs" in schema or "properties" in schema
+        assert schema.get("type") == "object"
+
+    def test_protocol_schema_is_valid_json_schema(self):
+        """Protocol.model_json_schema() produces valid JSON schema."""
+        schema = Protocol.model_json_schema()
+        assert isinstance(schema, dict)
+        assert schema.get("type") == "object"
+        assert "properties" in schema
+
+    def test_protocol_schema_contains_required_fields(self):
+        """Protocol schema includes all required fields."""
+        schema = Protocol.model_json_schema()
+        required = schema.get("required", [])
+        expected_fields = [
+            "uuid",
+            "protocolType",
+            "name",
+            "description",
+            "githubCommit",
+            "pythonName",
+            "importPath",
+            "pipInstall",
+            "pipVersion",
+        ]
+        for field in expected_fields:
+            assert field in required, f"Missing required field: {field}"
+
+    def test_workflow_schema_file_is_up_to_date(self):
+        """Saved workflow schema file matches current model definition."""
+
+        schema_dir = Path(__file__).parent.parent / "JSON" / "schemas"
+        workflow_schema = Workflow.model_json_schema()
+        workflow_file = schema_dir / "workflow_model.json"
+
+        assert workflow_file.exists(), "workflow_model.json does not exist"
+        with workflow_file.open() as f:
+            saved_schema = json.load(f)
+        assert workflow_schema == saved_schema, (
+            "workflow_model.json is out of date. Run 'python -m autora_gui.data_model' to regenerate."
+        )
+
+    def test_protocol_schema_file_is_up_to_date(self):
+        """Saved protocol schema file matches current model definition."""
+
+        schema_dir = Path(__file__).parent.parent / "JSON" / "schemas"
+        protocol_schema = Protocol.model_json_schema()
+        protocol_file = schema_dir / "protocol_model.json"
+
+        assert protocol_file.exists(), "protocol_model.json does not exist"
+        with protocol_file.open() as f:
+            saved_schema = json.load(f)
+        assert protocol_schema == saved_schema, (
+            "protocol_model.json is out of date. Run 'python -m autora_gui.data_model' to regenerate."
+        )
+
+    def test_generate_schemas_creates_files(self, tmp_path):
+        """generate_schemas() creates expected files."""
+
+        generate_schemas(output_dir=tmp_path)
+
+        assert (tmp_path / "workflow_model.json").exists()
+        assert (tmp_path / "protocol_model.json").exists()
+
+    def test_generate_schemas_creates_valid_json(self, tmp_path):
+        """generate_schemas() creates valid JSON files."""
+
+        generate_schemas(output_dir=tmp_path)
+
+        with (tmp_path / "workflow_model.json").open() as f:
+            workflow_data = json.load(f)
+        assert isinstance(workflow_data, dict)
+
+        with (tmp_path / "protocol_model.json").open() as f:
+            protocol_data = json.load(f)
+        assert isinstance(protocol_data, dict)
+
+    def test_generate_schemas_creates_directory_if_missing(self, tmp_path):
+        """generate_schemas() creates output directory if it doesn't exist."""
+
+        nested_dir = tmp_path / "nested" / "schema" / "dir"
+        assert not nested_dir.exists()
+
+        generate_schemas(output_dir=nested_dir)
+
+        assert nested_dir.exists()
+        assert (nested_dir / "workflow_model.json").exists()
+        assert (nested_dir / "protocol_model.json").exists()

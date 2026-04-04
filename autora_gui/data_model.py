@@ -184,13 +184,25 @@ class Workflow(BaseModel):
 
 # Create and save schemas
 ####################################
-if __name__ == "__main__":
+
+
+def generate_schemas(output_dir: Path | str = "autora_gui/JSON/schemas") -> None:
+    """Generate JSON schemas from Pydantic models.
+
+    Args:
+        output_dir: Directory to write schema files. Defaults to autora_gui/JSON/schemas.
+    """
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     workflow_model_schema = Workflow.model_json_schema()
-    schema_path = "autora_gui/JSON/schemas/workflow_model.json"
-    with Path(schema_path).open("w", encoding="utf-8") as f:
+    with (output_dir / "workflow_model.json").open("w", encoding="utf-8") as f:
         f.write(json.dumps(workflow_model_schema, indent=2, ensure_ascii=False))
 
     protocol_model_schema = Protocol.model_json_schema()
-    schema_path = "autora_gui/JSON/schemas/protocol_model.json"
-    with Path(schema_path).open("w", encoding="utf-8") as f:
+    with (output_dir / "protocol_model.json").open("w", encoding="utf-8") as f:
         f.write(json.dumps(protocol_model_schema, indent=2, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    generate_schemas()
