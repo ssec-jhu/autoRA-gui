@@ -117,4 +117,5 @@ inline-quotes = "double"  # https://docs.astral.sh/ruff/settings/#lint_flake8-qu
 multiline-quotes = "double"  # https://docs.astral.sh/ruff/settings/#lint_flake8-quotes_multiline-quotes
 
 [tool.pytest.ini_options]
-testpaths = ["autora_gui/tests"]
+pythonpath = ["."]
+testpaths = ["autora_gui/tests", "autora_gui/js_app/tests"]
