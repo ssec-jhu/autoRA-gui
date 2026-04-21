@@ -6,46 +6,73 @@
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychology/luce_choice_ratio.py#L11",
   "pythonName": "luce_choice_ratio",
   "importPath": "autora.experiment_runner.synthetic.psychology.luce_choice_ratio",
-  "pipInstall": "autora-synthetic",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
-      "name": "resolution",
-      "description": "Number of allowed values for stimulus similarity ratings.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+  "pipInstall": "autora-synthetic==1.0.0",
+  "parameters": {
+    "luce_choice_ratio": [
+      {
+        "name": "resolution",
+        "description": "Number of allowed values for stimulus similarity ratings.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 8
       },
-      "validValues": null,
-      "default": 8
-    },
-    {
-      "name": "maximum_similarity",
-      "description": "Upper bound for similarity values.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "maximum_similarity",
+        "description": "Upper bound for similarity values.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 10
       },
-      "validValues": null,
-      "default": 10
-    },
-    {
-      "name": "focus",
-      "description": "Parameter measuring participant focus/attention.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "focus",
+        "description": "Parameter measuring participant focus/attention.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.8
+      }
+    ],
+    "run": [
+      {
+        "name": "added_noise",
+        "description": "Standard deviation of Gaussian noise added to the simulated observations.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": 0.01
       },
-      "validValues": null,
-      "default": 0.8
-    }
-  ],
+      {
+        "name": "random_state",
+        "description": "Seed for random number generation to ensure reproducibility of the simulated data.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "conditions",

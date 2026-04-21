@@ -186,24 +186,23 @@
       "title": "Pipinstall",
       "type": "string"
     },
-    "pipVersion": {
-      "title": "Pipversion",
-      "type": "string"
-    },
     "parameters": {
       "anyOf": [
         {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/PrimitiveVariableType"
-              },
-              {
-                "$ref": "#/$defs/DictVariableType"
-              }
-            ]
+          "additionalProperties": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/PrimitiveVariableType"
+                },
+                {
+                  "$ref": "#/$defs/DictVariableType"
+                }
+              ]
+            },
+            "type": "array"
           },
-          "type": "array"
+          "type": "object"
         },
         {
           "type": "null"
@@ -263,7 +262,6 @@
     "pythonName",
     "importPath",
     "pipInstall",
-    "pipVersion",
     "parameters",
     "inputDataType",
     "outputDataType"

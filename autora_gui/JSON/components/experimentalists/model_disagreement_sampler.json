@@ -6,22 +6,23 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-model-disagreement/blob/main/src/autora/experimentalist/model_disagreement/__init__.py#L310",
   "pythonName": "model_disagreement_sampler",
   "importPath": "autora.experimentalist.model_disagreement",
-  "pipInstall": "autora-experimentalist-model-disagreement",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
-      "name": "num_samples",
-      "description": "Number of samples to select where models disagree most.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": 1
-    }
-  ],
+  "pipInstall": "autora-experimentalist-model-disagreement==1.0.0",
+  "parameters": {
+    "model_disagreement_sampler": [
+      {
+        "name": "num_samples",
+        "description": "Number of samples to select where models disagree most.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "conditions",

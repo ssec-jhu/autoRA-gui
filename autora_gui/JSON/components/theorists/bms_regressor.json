@@ -6,34 +6,49 @@
   "githubCommit": "https://github.com/AutoResearch/autora-theorist-bms/blob/ce3d7edf707c54a12108700076d841c138086be1/src/autora/theorist/bms/regressor.py#L23",
   "pythonName": "BMSRegressor",
   "importPath": "autora.theorist.bms.regressor",
-  "pipInstall": "autora-theorist-bms",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
-      "name": "epochs",
-      "description": "Number of MCMC iterations for equation sampling.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+  "pipInstall": "autora-theorist-bms==1.0.0",
+  "parameters": {
+    "__init__": [
+      {
+        "name": "epochs",
+        "description": "Number of MCMC iterations for equation sampling.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1500
       },
-      "validValues": null,
-      "default": 1500
-    },
-    {
-      "name": "ts",
-      "description": "List of temperatures for parallel tempering MCMC sampling.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 0,
-        "maxOccurs": 20,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
+      {
+        "name": "ts",
+        "description": "List of temperatures for parallel tempering MCMC sampling.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 20,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      }
+    ],
+    "fit": [
+      {
+        "name": "num_param",
+        "description": "Number of parameters to fit.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "X",
