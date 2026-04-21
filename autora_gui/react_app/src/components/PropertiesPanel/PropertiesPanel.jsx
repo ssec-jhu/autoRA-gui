@@ -101,7 +101,7 @@ function PropertiesPanel() {
     )
   }
 
-  const parameters = selectedNode.componentData?.parameters || []
+  const parameters = Object.values(selectedNode.componentData?.parameters || {}).flat()
 
   return (
     <aside className="properties-panel">

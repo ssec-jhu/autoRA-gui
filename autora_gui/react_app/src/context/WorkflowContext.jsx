@@ -31,7 +31,7 @@ function workflowReducer(state, action) {
         x,
         y,
         componentData,
-        parameters: (componentData.parameters || []).reduce((acc, param) => {
+        parameters: Object.values(componentData.parameters || {}).flat().reduce((acc, param) => {
           acc[param.name] = param.default !== undefined ? param.default : null
           return acc
         }, {})

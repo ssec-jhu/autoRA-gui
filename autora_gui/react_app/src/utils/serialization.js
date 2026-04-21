@@ -98,7 +98,11 @@ export function deserializeWorkflow(workflow, componentsMap) {
     }
 
     const parameters = {}
-    ;(protocol.parameters || []).forEach(param => {
+    // parameters is now a dict with function names as keys and arrays of params as values
+    const allParams = protocol.parameters
+      ? Object.values(protocol.parameters).flat()
+      : []
+    allParams.forEach(param => {
       parameters[param.name] = param.default ?? null
     })
     ;(comp.parameterSetting || []).forEach(setting => {
