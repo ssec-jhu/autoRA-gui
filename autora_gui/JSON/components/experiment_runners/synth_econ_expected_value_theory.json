@@ -1,7 +1,7 @@
 {
   "uuid": "a5b6c7d8-e9f0-4a1b-2c3d-4e5f6a7b8c9d",
   "protocolType": "experiment_runner",
-  "name": "Expected Value Theory (Synthetic)",
+  "name": "Expected Value Theory (Synthetic, Economics)",
   "description": "Synthetic experiment runner modeling decision-making between options based on expected utilities calculated as value multiplied by probability.",
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/economics/expected_value_theory.py#L71",
   "pythonName": "expected_value_theory",

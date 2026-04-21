@@ -1,7 +1,7 @@
 {
   "uuid": "f4a5b6c7-d8e9-4f0a-1b2c-3d4e5f6a7b8c",
   "protocolType": "experiment_runner",
-  "name": "Exponential Learning (Synthetic, Abstart)",
+  "name": "Exponential Learning (Synthetic, Psychology)",
   "description": "Synthetic experiment runner implementing exponential learning curves based on Heathcote, Brown, & Mewhort (2000) and Thurstone (1919).",
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychology/exp_learning.py#L11",
   "pythonName": "exp_learning",
