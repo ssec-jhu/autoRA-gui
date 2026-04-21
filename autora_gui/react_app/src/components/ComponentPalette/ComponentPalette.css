@@ -1,8 +1,6 @@
 .component-palette {
-  width: 280px;
-  min-width: 280px;
+  flex: 1;
   background: var(--bg-panel);
-  border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   overflow: hidden;

@@ -1,8 +1,6 @@
 .properties-panel {
-  width: 300px;
-  min-width: 300px;
+  flex: 1;
   background: var(--bg-panel);
-  border-left: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   overflow: hidden;
