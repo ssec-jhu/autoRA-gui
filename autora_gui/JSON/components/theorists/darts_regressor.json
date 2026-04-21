@@ -7,8 +7,8 @@
   "pythonName": "DARTSRegressor",
   "importPath": "autora.theorist.darts.regressor",
   "pipInstall": "autora-theorist-darts",
-  "pipVersion": "1.1.0",
-  "parameters": [
+  "parameters": {
+    "__init__": [
     {
       "name": "batch_size",
       "description": "Batch size for the data loader.",
@@ -285,7 +285,8 @@
       "validValues": ["max", "sample"],
       "default": "max"
     }
-  ],
+  ]
+  },
   "inputDataType": [
     {
       "name": "X",
