@@ -1,10 +1,36 @@
 import { v4 as uuidv4 } from 'uuid'
 
+const CONTROL_NODE_TYPES = ['start_point', 'end_point']
+
 export function serializeWorkflow(state) {
+  const startNode = state.nodes.find(n => n.type === 'start_point')
+  const endNode = state.nodes.find(n => n.type === 'end_point')
+  const protocolNodes = state.nodes.filter(n => !CONTROL_NODE_TYPES.includes(n.type))
+
+  // Debug logging
+  console.log('DEBUG serializeWorkflow:')
+  console.log('  All nodes:', state.nodes.map(n => ({ id: n.id, type: n.type, name: n.name })))
+  console.log('  startNode:', startNode ? { id: startNode.id, type: startNode.type } : null)
+  console.log('  endNode:', endNode ? { id: endNode.id, type: endNode.type } : null)
+
   return {
     name: 'AutoRA Workflow',
     description: 'Workflow created with AutoRA GUI',
-    components: state.nodes.map(node => ({
+    start: startNode ? {
+      uuid: startNode.id,
+      canvasLocation: {
+        x: Math.round(startNode.x),
+        y: Math.round(startNode.y)
+      }
+    } : null,
+    end: endNode ? {
+      uuid: endNode.id,
+      canvasLocation: {
+        x: Math.round(endNode.x),
+        y: Math.round(endNode.y)
+      }
+    } : null,
+    components: protocolNodes.map(node => ({
       uuid: node.id,
       protocolUuid: node.protocolUuid,
       parameterSetting: Object.entries(node.parameters || {})
@@ -30,13 +56,45 @@ export function serializeWorkflow(state) {
 
 export function deserializeWorkflow(workflow, componentsMap) {
   const allComponents = Object.values(componentsMap).flat()
+  const nodes = []
 
-  const nodes = (workflow.components || []).map(comp => {
+  // Add start node if present
+  if (workflow.start) {
+    nodes.push({
+      id: workflow.start.uuid,
+      protocolUuid: 'start-node',
+      type: 'start_point',
+      name: 'Start',
+      description: 'Starting point of the workflow',
+      x: workflow.start.canvasLocation?.x ?? 100,
+      y: workflow.start.canvasLocation?.y ?? 100,
+      componentData: { uuid: 'start-node', protocolType: 'start_point', name: 'Start', isControlNode: true },
+      parameters: {}
+    })
+  }
+
+  // Add end node if present
+  if (workflow.end) {
+    nodes.push({
+      id: workflow.end.uuid,
+      protocolUuid: 'end-node',
+      type: 'end_point',
+      name: 'End',
+      description: 'Ending point of the workflow',
+      x: workflow.end.canvasLocation?.x ?? 100,
+      y: workflow.end.canvasLocation?.y ?? 100,
+      componentData: { uuid: 'end-node', protocolType: 'end_point', name: 'End', isControlNode: true },
+      parameters: {}
+    })
+  }
+
+  // Add protocol components
+  ;(workflow.components || []).forEach(comp => {
     const protocol = allComponents.find(c => c.uuid === comp.protocolUuid)
 
     if (!protocol) {
       console.warn(`Protocol not found: ${comp.protocolUuid}`)
-      return null
+      return
     }
 
     const parameters = {}
@@ -49,7 +107,7 @@ export function deserializeWorkflow(workflow, componentsMap) {
       }
     })
 
-    return {
+    nodes.push({
       id: comp.uuid,
       protocolUuid: comp.protocolUuid,
       type: protocol.protocolType,
@@ -59,8 +117,8 @@ export function deserializeWorkflow(workflow, componentsMap) {
       y: comp.canvasLocation?.y ?? 100,
       componentData: protocol,
       parameters
-    }
-  }).filter(Boolean)
+    })
+  })
 
   const nodeIds = new Set(nodes.map(n => n.id))
 

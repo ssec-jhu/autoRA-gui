@@ -1,0 +1,144 @@
+{
+  "name": "AutoRA Workflow",
+  "description": "Workflow created with AutoRA GUI",
+  "start": {
+    "uuid": "15225916-a1e6-464b-a4d7-e8309221070a",
+    "canvasLocation": {
+      "x": 556,
+      "y": 67
+    }
+  },
+  "end": {
+    "uuid": "0cffc571-833e-4791-8c62-d81cf1dc1962",
+    "canvasLocation": {
+      "x": 958,
+      "y": 785
+    }
+  },
+  "components": [
+    {
+      "uuid": "910ff24e-0e67-450c-ad79-c5092406284c",
+      "protocolUuid": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b",
+      "parameterSetting": [
+        {
+          "uuid": "2679099a-6303-49b1-814c-b7c003904613",
+          "name": "num_samples",
+          "value": 1
+        }
+      ],
+      "canvasLocation": {
+        "x": 865,
+        "y": 273
+      }
+    },
+    {
+      "uuid": "2200dcbb-9c36-4814-9990-4a9ac626107c",
+      "protocolUuid": "d6e7f8a9-b0c1-4d2e-3f4a-5b6c7d8e9f0a",
+      "parameterSetting": [
+        {
+          "uuid": "4dcbc5af-6c59-4be4-951c-9c6bddc299f1",
+          "name": "exclude_studies",
+          "value": [
+            "default"
+          ]
+        },
+        {
+          "uuid": "03b8a3b0-bb31-4f74-a097-218d4b22356b",
+          "name": "approve_no_code",
+          "value": true
+        },
+        {
+          "uuid": "c6ae0a2e-3034-46e6-af59-86cdbc4b3529",
+          "name": "study_completion_time",
+          "value": 10
+        },
+        {
+          "uuid": "e172c996-d1f2-45d5-bd92-37340632e711",
+          "name": "sleep_time",
+          "value": 30
+        }
+      ],
+      "canvasLocation": {
+        "x": 694,
+        "y": 535
+      }
+    },
+    {
+      "uuid": "c2ab6e86-9c8c-4979-8445-ac481e6e42fb",
+      "protocolUuid": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      "parameterSetting": [
+        {
+          "uuid": "b738daba-f9da-41bd-a980-b88a43098d6e",
+          "name": "epochs",
+          "value": 1500
+        }
+      ],
+      "canvasLocation": {
+        "x": 373,
+        "y": 352
+      }
+    }
+  ],
+  "links": [
+    {
+      "source": "15225916-a1e6-464b-a4d7-e8309221070a",
+      "target": "910ff24e-0e67-450c-ad79-c5092406284c",
+      "sourcePoint": {
+        "x": 716,
+        "y": 122.5
+      },
+      "targetPoint": {
+        "x": 917,
+        "y": 272.5
+      }
+    },
+    {
+      "source": "910ff24e-0e67-450c-ad79-c5092406284c",
+      "target": "2200dcbb-9c36-4814-9990-4a9ac626107c",
+      "sourcePoint": {
+        "x": 960,
+        "y": 352.5
+      },
+      "targetPoint": {
+        "x": 854,
+        "y": 555.5
+      }
+    },
+    {
+      "source": "2200dcbb-9c36-4814-9990-4a9ac626107c",
+      "target": "c2ab6e86-9c8c-4979-8445-ac481e6e42fb",
+      "sourcePoint": {
+        "x": 854,
+        "y": 555.5
+      },
+      "targetPoint": {
+        "x": 441,
+        "y": 431.5
+      }
+    },
+    {
+      "source": "c2ab6e86-9c8c-4979-8445-ac481e6e42fb",
+      "target": "910ff24e-0e67-450c-ad79-c5092406284c",
+      "sourcePoint": {
+        "x": 441,
+        "y": 431.5
+      },
+      "targetPoint": {
+        "x": 865,
+        "y": 291.5
+      }
+    },
+    {
+      "source": "2200dcbb-9c36-4814-9990-4a9ac626107c",
+      "target": "0cffc571-833e-4791-8c62-d81cf1dc1962",
+      "sourcePoint": {
+        "x": 794,
+        "y": 614.5
+      },
+      "targetPoint": {
+        "x": 1004,
+        "y": 784.5
+      }
+    }
+  ]
+}

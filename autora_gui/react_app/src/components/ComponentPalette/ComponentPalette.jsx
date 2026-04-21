@@ -9,11 +9,30 @@ const typeConfig = {
   experiment_runners: { label: 'Experiment Runners', icon: '⚡', color: 'var(--node-experiment-runners)' }
 }
 
+const controlNodes = [
+  {
+    uuid: 'start-node',
+    protocolType: 'start_point',
+    name: 'Start',
+    description: 'Starting point of the workflow',
+    isControlNode: true,
+    icon: '▶'
+  },
+  {
+    uuid: 'end-node',
+    protocolType: 'end_point',
+    name: 'End',
+    description: 'Ending point of the workflow',
+    isControlNode: true,
+    icon: '⏹'
+  }
+]
+
 function ComponentPalette() {
   const { state } = useWorkflow()
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedSections, setExpandedSections] = useState({
-    controls: false,
+    controls: true,
     theorists: false,
     experimentalists: false,
     experiment_runners: false
@@ -21,6 +40,18 @@ function ComponentPalette() {
 
   const filteredComponents = useMemo(() => {
     const result = {}
+
+    // Add control nodes (Start, End)
+    const filteredControls = controlNodes.filter(c => {
+      const nameMatch = c.name.toLowerCase().includes(searchTerm.toLowerCase())
+      const descMatch = c.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      return nameMatch || descMatch
+    })
+    if (filteredControls.length > 0) {
+      result.controls = filteredControls
+    }
+
+    // Add protocol components from state
     if (!state.components) return result
     Object.entries(state.components).forEach(([type, components]) => {
       if (!Array.isArray(components)) return
@@ -90,7 +121,7 @@ function ComponentPalette() {
                       title={component.description}
                     >
                       <span className="component-icon" style={{ backgroundColor: config.color }}>
-                        {config.icon}
+                        {component.icon || config.icon}
                       </span>
                       <span className="component-name">{component.name}</span>
                     </div>

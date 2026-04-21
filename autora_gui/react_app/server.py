@@ -91,6 +91,11 @@ class WorkflowComponent(BaseModel):
     canvasLocation: CanvasLocation
 
 
+class ControlComponent(BaseModel):
+    uuid: str
+    canvasLocation: CanvasLocation
+
+
 class WorkflowLink(BaseModel):
     source: str
     target: str
@@ -99,6 +104,8 @@ class WorkflowLink(BaseModel):
 class Workflow(BaseModel):
     name: str
     description: str | None = None
+    start: ControlComponent | None = None
+    end: ControlComponent | None = None
     components: list[WorkflowComponent] = []
     links: list[WorkflowLink] = []
 
@@ -134,13 +141,25 @@ def get_schema(name: str) -> dict:
 @app.post("/api/workflow/validate")
 def validate_workflow(workflow: Workflow) -> dict:
     """Validate a workflow against the schema."""
+    # Debug: print what we received
+    print(f"DEBUG: start={workflow.start}, end={workflow.end}")
+    print(f"DEBUG: components count={len(workflow.components)}, links count={len(workflow.links)}")
+
     components = load_components()
     all_protocols = []
     for category in components.values():
         all_protocols.extend(category)
 
     protocol_uuids = {p["uuid"] for p in all_protocols}
-    component_uuids = {c.uuid for c in workflow.components}
+
+    # Collect all node uuids (components + start + end)
+    node_uuids = {c.uuid for c in workflow.components}
+    if workflow.start:
+        node_uuids.add(workflow.start.uuid)
+    if workflow.end:
+        node_uuids.add(workflow.end.uuid)
+
+    print(f"DEBUG: node_uuids={node_uuids}")
 
     errors = []
 
@@ -149,9 +168,9 @@ def validate_workflow(workflow: Workflow) -> dict:
             errors.append(f"Unknown protocol: {comp.protocolUuid}")
 
     for link in workflow.links:
-        if link.source not in component_uuids:
+        if link.source not in node_uuids:
             errors.append(f"Link source not found: {link.source}")
-        if link.target not in component_uuids:
+        if link.target not in node_uuids:
             errors.append(f"Link target not found: {link.target}")
 
     if errors:
