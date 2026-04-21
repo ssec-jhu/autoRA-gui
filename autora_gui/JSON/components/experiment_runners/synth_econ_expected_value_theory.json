@@ -7,69 +7,70 @@
   "pythonName": "expected_value_theory",
   "importPath": "autora.experiment_runner.synthetic.economics.expected_value_theory",
   "pipInstall": "autora-synthetic",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
-      "name": "choice_temperature",
-      "description": "Softmax temperature controlling choice stochasticity.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+  "parameters": {
+    "expected_value_theory": [
+      {
+        "name": "choice_temperature",
+        "description": "Softmax temperature controlling choice stochasticity.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.1
       },
-      "validValues": null,
-      "default": 0.1
-    },
-    {
-      "name": "value_lambda",
-      "description": "Scaling factor applied to option values.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "value_lambda",
+        "description": "Scaling factor applied to option values.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.5
       },
-      "validValues": null,
-      "default": 0.5
-    },
-    {
-      "name": "resolution",
-      "description": "Number of discrete points in variable ranges.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "resolution",
+        "description": "Number of discrete points in variable ranges.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 10
       },
-      "validValues": null,
-      "default": 10
-    },
-    {
-      "name": "minimum_value",
-      "description": "Lower bound for value variables.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "minimum_value",
+        "description": "Lower bound for value variables.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": -1
       },
-      "validValues": null,
-      "default": -1
-    },
-    {
-      "name": "maximum_value",
-      "description": "Upper bound for value variables.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": 1
-    }
-  ],
+      {
+        "name": "maximum_value",
+        "description": "Upper bound for value variables.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "conditions",

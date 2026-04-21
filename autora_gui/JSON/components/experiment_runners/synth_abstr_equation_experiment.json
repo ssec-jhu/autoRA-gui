@@ -7,45 +7,46 @@
   "pythonName": "equation_experiment",
   "importPath": "autora.experiment_runner.synthetic.abstract.equation",
   "pipInstall": "autora-synthetic-abstract-equation",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
-      "name": "expression",
-      "description": "SymPy mathematical expression serving as ground truth model.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+  "parameters": {
+    "equation_experiment": [
+      {
+        "name": "expression",
+        "description": "SymPy mathematical expression serving as ground truth model.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
-    },
-    {
-      "name": "rename_output_columns",
-      "description": "Whether to rename output columns based on expression variable names.",
-      "datatype": "boolean",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "rename_output_columns",
+        "description": "Whether to rename output columns based on expression variable names.",
+        "datatype": "boolean",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": true
       },
-      "validValues": null,
-      "default": true
-    },
-    {
-      "name": "random_state",
-      "description": "Seed for random number generator to ensure reproducibility.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 0,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
+      {
+        "name": "random_state",
+        "description": "Seed for random number generator to ensure reproducibility.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "conditions",

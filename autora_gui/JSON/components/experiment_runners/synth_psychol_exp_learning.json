@@ -7,81 +7,108 @@
   "pythonName": "exp_learning",
   "importPath": "autora.experiment_runner.synthetic.psychology.exp_learning",
   "pipInstall": "autora-synthetic",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
-      "name": "resolution",
-      "description": "Number of allowed values for stimulus.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+  "parameters": {
+    "exp_learning": [
+      {
+        "name": "resolution",
+        "description": "Number of allowed values for stimulus.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 100
       },
-      "validValues": null,
-      "default": 100
-    },
-    {
-      "name": "minimum_trial",
-      "description": "Lower bound for trial number.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "minimum_trial",
+        "description": "Lower bound for trial number.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1
       },
-      "validValues": null,
-      "default": 1
-    },
-    {
-      "name": "minimum_initial_value",
-      "description": "Lower bound for initial performance value.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "minimum_initial_value",
+        "description": "Lower bound for initial performance value.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.0
       },
-      "validValues": null,
-      "default": 0.0
-    },
-    {
-      "name": "maximum_initial_value",
-      "description": "Upper bound for initial performance value.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "maximum_initial_value",
+        "description": "Upper bound for initial performance value.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.5
       },
-      "validValues": null,
-      "default": 0.5
-    },
-    {
-      "name": "lr",
-      "description": "Learning rate parameter.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "lr",
+        "description": "Learning rate parameter.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.03
       },
-      "validValues": null,
-      "default": 0.03
-    },
-    {
-      "name": "p_asymptotic",
-      "description": "Asymptotic performance level.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "p_asymptotic",
+        "description": "Asymptotic performance level.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1.0
+      }
+    ],
+    "run": [
+      {
+        "name": "added_noise",
+        "description": "Standard deviation of Gaussian noise added to the simulated observations.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": 0.01
       },
-      "validValues": null,
-      "default": 1.0
-    }
-  ],
+      {
+        "name": "random_state",
+        "description": "Seed for random number generation to ensure reproducibility of the simulated data.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "conditions",
