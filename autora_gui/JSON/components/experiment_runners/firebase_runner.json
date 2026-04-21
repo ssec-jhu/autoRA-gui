@@ -3,49 +3,50 @@
   "protocolType": "experiment_runner",
   "name": "Firebase Runner",
   "description": "Experiment runner for hosting web-based experiments on Firebase and collecting participant responses via Firestore.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/main/src/autora/experiment_runner/firebase_prolific/__init__.py#L176",
+  "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/main/src/autora/experiment_runner/firebase_prolific/__init__.py#L229",
   "pythonName": "firebase_runner",
   "importPath": "autora.experiment_runner.firebase_prolific",
-  "pipInstall": "autora-experiment-runner-firebase-prolific",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
-      "name": "firebase_credentials",
-      "description": "Firebase service account credentials dictionary.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+  "pipInstall": "autora-experiment-runner-firebase-prolific==1.0.0",
+  "parameters": {
+    "firebase_runner": [
+      {
+        "name": "firebase_credentials",
+        "description": "Firebase service account credentials dictionary.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
-    },
-    {
-      "name": "time_out",
-      "description": "Timeout duration in seconds for resetting unfinished conditions.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "time_out",
+        "description": "Timeout duration in seconds for resetting unfinished conditions.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 300
       },
-      "validValues": null,
-      "default": 300
-    },
-    {
-      "name": "sleep_time",
-      "description": "Interval in seconds between Firebase database status checks.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": 30
-    }
-  ],
+      {
+        "name": "sleep_time",
+        "description": "Interval in seconds between Firebase database status checks.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 30
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "conditions",

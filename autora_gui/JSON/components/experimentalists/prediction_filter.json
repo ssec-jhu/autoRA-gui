@@ -6,22 +6,23 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-prediction-filter/blob/main/src/autora/experimentalist/prediction_filter/__init__.py#L86",
   "pythonName": "prediction_filter",
   "importPath": "autora.experimentalist.prediction_filter",
-  "pipInstall": "autora-experimentalist-prediction-filter",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
-      "name": "filter_function",
-      "description": "Callable that evaluates model predictions and returns boolean values indicating which conditions to keep.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
+  "pipInstall": "autora-experimentalist-prediction-filter==1.0.0",
+  "parameters": {
+    "prediction_filter": [
+      {
+        "name": "filter_function",
+        "description": "Callable that evaluates model predictions and returns boolean values indicating which conditions to keep.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "conditions",

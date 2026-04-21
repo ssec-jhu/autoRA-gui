@@ -6,46 +6,47 @@
   "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/random.py#L186",
   "pythonName": "random_sample",
   "importPath": "autora.experimentalist.random",
-  "pipInstall": "autora-experimentalist-random",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
-      "name": "num_samples",
-      "description": "Number of samples to randomly select from the condition pool.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+  "pipInstall": "autora-experimentalist-random==1.0.0",
+  "parameters": {
+    "random_sample": [
+      {
+        "name": "num_samples",
+        "description": "Number of samples to randomly select from the condition pool.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1
       },
-      "validValues": null,
-      "default": 1
-    },
-    {
-      "name": "random_state",
-      "description": "Seed for random number generator to ensure reproducibility.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 0,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "random_state",
+        "description": "Seed for random number generator to ensure reproducibility.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
-    },
-    {
-      "name": "replace",
-      "description": "If true, allow repeated values in sampling.",
-      "datatype": "boolean",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": false
-    }
-  ],
+      {
+        "name": "replace",
+        "description": "If true, allow repeated values in sampling.",
+        "datatype": "boolean",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": false
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "conditions",

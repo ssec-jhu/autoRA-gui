@@ -6,82 +6,109 @@
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychology/q_learning.py#L114",
   "pythonName": "q_learning",
   "importPath": "autora.experiment_runner.synthetic.psychology.q_learning",
-  "pipInstall": "autora-synthetic",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
-      "name": "learning_rate",
-      "description": "Rate at which Q-values update based on rewards.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+  "pipInstall": "autora-synthetic==1.0.0",
+  "parameters": {
+    "q_learning": [
+      {
+        "name": "learning_rate",
+        "description": "Rate at which Q-values update based on rewards.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.2
       },
-      "validValues": null,
-      "default": 0.2
-    },
-    {
-      "name": "decision_noise",
-      "description": "Softmax temperature parameter controlling exploration vs exploitation.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "decision_noise",
+        "description": "Softmax temperature parameter controlling exploration vs exploitation.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 3.0
       },
-      "validValues": null,
-      "default": 3.0
-    },
-    {
-      "name": "n_actions",
-      "description": "Number of available actions in the bandit task.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "n_actions",
+        "description": "Number of available actions in the bandit task.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 2
       },
-      "validValues": null,
-      "default": 2
-    },
-    {
-      "name": "forget_rate",
-      "description": "Decay rate for non-chosen action Q-values.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "forget_rate",
+        "description": "Decay rate for non-chosen action Q-values.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.0
       },
-      "validValues": null,
-      "default": 0.0
-    },
-    {
-      "name": "perseverance_bias",
-      "description": "Bias toward repeating the previous action.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "perseverance_bias",
+        "description": "Bias toward repeating the previous action.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.0
       },
-      "validValues": null,
-      "default": 0.0
-    },
-    {
-      "name": "correlated_reward",
-      "description": "Whether rewards correlate across actions.",
-      "datatype": "boolean",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "correlated_reward",
+        "description": "Whether rewards correlate across actions.",
+        "datatype": "boolean",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": false
+      }
+    ],
+    "run": [
+      {
+        "name": "random_state",
+        "description": "Seed for random number generation to ensure reproducibility of the simulated data.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": false
-    }
-  ],
+      {
+        "name": "return_choice_probabilities",
+        "description": "Whether to return the choice probabilities for each action in addition to the chosen action and reward.",
+        "datatype": "boolean",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": false
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "conditions",

@@ -84,8 +84,7 @@ class Protocol(AutoraBaseModel):
     pythonName: str
     importPath: str
     pipInstall: str
-    pipVersion: str
-    parameters: list[VariableTypes] | None
+    parameters: dict[str, list[VariableTypes]] | None
     inputDataType: list[VariableTypes] | None  # could be a bunch of allowed datatypes
     outputDataType: list[VariableTypes] | None  # could be a bunch of allowed datatypes
 

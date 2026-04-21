@@ -6,58 +6,63 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-leverage/blob/main/src/autora/experimentalist/leverage/__init__.py#L148",
   "pythonName": "leverage_sample",
   "importPath": "autora.experimentalist.leverage",
-  "pipInstall": "autora-experimentalist-leverage",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
-      "name": "num_samples",
-      "description": "Number of influential samples to select from the condition pool.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+  "pipInstall": "autora-experimentalist-leverage==1.0.0",
+  "parameters": {
+    "leverage_sample": [
+      {
+        "name": "num_samples",
+        "description": "Number of influential samples to select from the condition pool.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 5
       },
-      "validValues": null,
-      "default": 5
-    },
-    {
-      "name": "fit",
-      "description": "Selection strategy for influential points: 'both' selects points that either increase or decrease fit, 'increase' selects only points that increase fit when removed, 'decrease' selects only points that decrease fit when removed.",
-      "datatype": "categorical",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "fit",
+        "description": "Selection strategy for influential points: 'both' selects points that either increase or decrease fit, 'increase' selects only points that increase fit when removed, 'decrease' selects only points that decrease fit when removed.",
+        "datatype": "categorical",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": [
+          "both",
+          "increase",
+          "decrease"
+        ],
+        "default": "both"
       },
-      "validValues": ["both", "increase", "decrease"],
-      "default": "both"
-    },
-    {
-      "name": "sd",
-      "description": "Standard deviation of Gaussian noise added around selected points.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "sd",
+        "description": "Standard deviation of Gaussian noise added around selected points.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.1
       },
-      "validValues": null,
-      "default": 0.1
-    },
-    {
-      "name": "random_state",
-      "description": "Random seed for reproducibility of noise generation.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 0,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
+      {
+        "name": "random_state",
+        "description": "Random seed for reproducibility of noise generation.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "conditions",

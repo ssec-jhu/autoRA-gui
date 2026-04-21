@@ -6,34 +6,39 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-uncertainty/blob/main/src/autora/experimentalist/uncertainty/__init__.py#L77",
   "pythonName": "uncertainty_sampler",
   "importPath": "autora.experimentalist.uncertainty",
-  "pipInstall": "autora-experimentalist-uncertainty",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
-      "name": "num_samples",
-      "description": "Number of uncertain samples to select.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+  "pipInstall": "autora-experimentalist-uncertainty==1.0.0",
+  "parameters": {
+    "uncertainty_sampler": [
+      {
+        "name": "num_samples",
+        "description": "Number of uncertain samples to select.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 10
       },
-      "validValues": null,
-      "default": 10
-    },
-    {
-      "name": "measure",
-      "description": "Method to evaluate prediction uncertainty.",
-      "datatype": "categorical",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": ["least_confident", "margin", "entropy"],
-      "default": "least_confident"
-    }
-  ],
+      {
+        "name": "measure",
+        "description": "Method to evaluate prediction uncertainty.",
+        "datatype": "categorical",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": [
+          "least_confident",
+          "margin",
+          "entropy"
+        ],
+        "default": "least_confident"
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "conditions",
