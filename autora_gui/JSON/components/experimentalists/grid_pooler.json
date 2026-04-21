@@ -7,8 +7,9 @@
   "pythonName": "grid_pool",
   "importPath": "autora.experimentalist.grid",
   "pipInstall": "autora-experimentalist-grid",
-  "pipVersion": "1.0.0",
-  "parameters": [],
+  "parameters": {
+    "grid_pool": []
+  },
   "inputDataType": [
     {
       "name": "variables",

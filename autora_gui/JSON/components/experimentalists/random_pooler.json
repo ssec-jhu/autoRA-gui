@@ -7,45 +7,46 @@
   "pythonName": "random_pool",
   "importPath": "autora.experimentalist.random",
   "pipInstall": "autora-experimentalist-random",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
-      "name": "num_samples",
-      "description": "Number of random samples to generate from the variable space.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+  "parameters": {
+    "random_pool": [
+      {
+        "name": "num_samples",
+        "description": "Number of random samples to generate from the variable space.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 5
       },
-      "validValues": null,
-      "default": 5
-    },
-    {
-      "name": "random_state",
-      "description": "Seed for random number generator to ensure reproducibility.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 0,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "random_state",
+        "description": "Seed for random number generator to ensure reproducibility.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
-    },
-    {
-      "name": "replace",
-      "description": "If true, allow repeated values in sampling.",
-      "datatype": "boolean",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": true
-    }
-  ],
+      {
+        "name": "replace",
+        "description": "If true, allow repeated values in sampling.",
+        "datatype": "boolean",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": true
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "variables",

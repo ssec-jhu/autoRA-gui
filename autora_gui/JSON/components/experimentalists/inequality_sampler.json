@@ -7,9 +7,9 @@
   "pythonName": "summed_inequality_sampler",
   "importPath": "autora.experimentalist.inequality",
   "pipInstall": "autora-experimentalist-inequality",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
+  "parameters": {
+    "summed_inequality_sampler": [
+      {
       "name": "num_samples",
       "description": "Number of samples to select from the condition pool.",
       "datatype": "integer",
@@ -45,7 +45,8 @@
       "validValues": ["euclidean", "manhattan", "chebyshev", "minkowski", "cosine", "correlation", "mahalanobis", "hamming", "jaccard"],
       "default": "euclidean"
     }
-  ],
+    ]
+  },
   "inputDataType": [
     {
       "name": "conditions",

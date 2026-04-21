@@ -7,21 +7,22 @@
   "pythonName": "nearest_values_sampler",
   "importPath": "autora.experimentalist.nearest_value",
   "pipInstall": "autora-experimentalist-nearest_value",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
-      "name": "num_samples",
-      "description": "Number of nearest samples to select from the condition pool.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
+  "parameters": {
+    "nearest_values_sampler": [
+      {
+        "name": "num_samples",
+        "description": "Number of nearest samples to select from the condition pool.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "conditions",

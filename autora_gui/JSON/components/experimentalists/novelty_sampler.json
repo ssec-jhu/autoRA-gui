@@ -7,45 +7,46 @@
   "pythonName": "novelty_sampler",
   "importPath": "autora.experimentalist.novelty",
   "pipInstall": "autora-experimentalist-novelty",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
-      "name": "num_samples",
-      "description": "Number of novel samples to select from the condition pool.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 0,
-        "maxOccurs": 1,
-        "unique": true
+  "parameters": {
+    "novelty_sampler": [
+      {
+        "name": "num_samples",
+        "description": "Number of novel samples to select from the condition pool.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
-    },
-    {
-      "name": "metric",
-      "description": "Distance metric for measuring dissimilarity between conditions.",
-      "datatype": "categorical",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "metric",
+        "description": "Distance metric for measuring dissimilarity between conditions.",
+        "datatype": "categorical",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": ["euclidean", "manhattan", "chebyshev", "minkowski", "cosine", "correlation"],
+        "default": "euclidean"
       },
-      "validValues": ["euclidean", "manhattan", "chebyshev", "minkowski", "cosine", "correlation"],
-      "default": "euclidean"
-    },
-    {
-      "name": "integration",
-      "description": "Method for combining pairwise distances into overall dissimilarity score.",
-      "datatype": "categorical",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": ["min", "sum", "prod", "mean", "max"],
-      "default": "min"
-    }
-  ],
+      {
+        "name": "integration",
+        "description": "Method for combining pairwise distances into overall dissimilarity score.",
+        "datatype": "categorical",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": ["min", "sum", "prod", "mean", "max"],
+        "default": "min"
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "conditions",

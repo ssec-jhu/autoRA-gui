@@ -7,81 +7,82 @@
   "pythonName": "bandit_random_pool",
   "importPath": "autora.experimentalist.bandit_random",
   "pipInstall": "autora-experimentalist-bandit-random",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
-      "name": "num_rewards",
-      "description": "Dimension of each sequence element (number of arms in the bandit task).",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+  "parameters": {
+    "bandit_random_pool": [
+      {
+        "name": "num_rewards",
+        "description": "Dimension of each sequence element (number of arms in the bandit task).",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
-    },
-    {
-      "name": "sequence_length",
-      "description": "Length of each reward sequence (number of trials).",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "sequence_length",
+        "description": "Length of each reward sequence (number of trials).",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
-    },
-    {
-      "name": "initial_probabilities",
-      "description": "Starting probability values for each arm. Can be fixed values or ranges for sampling.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 0,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "initial_probabilities",
+        "description": "Starting probability values for each arm. Can be fixed values or ranges for sampling.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
-    },
-    {
-      "name": "sigmas",
-      "description": "Drift rates per step for probability dynamics. Can be fixed values or ranges.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 0,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "sigmas",
+        "description": "Drift rates per step for probability dynamics. Can be fixed values or ranges.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
-    },
-    {
-      "name": "num_samples",
-      "description": "Number of experimental conditions (reward sequences) to generate.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "num_samples",
+        "description": "Number of experimental conditions (reward sequences) to generate.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1
       },
-      "validValues": null,
-      "default": 1
-    },
-    {
-      "name": "random_state",
-      "description": "Random seed for reproducibility.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 0,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
+      {
+        "name": "random_state",
+        "description": "Random seed for reproducibility.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
   "inputDataType": [],
   "outputDataType": [
     {

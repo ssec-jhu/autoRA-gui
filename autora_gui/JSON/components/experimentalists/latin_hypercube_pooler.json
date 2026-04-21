@@ -7,33 +7,34 @@
   "pythonName": "pool",
   "importPath": "autora.experimentalist.lhs",
   "pipInstall": "autora-experimentalist-lhs",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
-      "name": "num_samples",
-      "description": "The number of samples to generate using Latin Hypercube Sampling.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+  "parameters": {
+    "pool": [
+      {
+        "name": "num_samples",
+        "description": "The number of samples to generate using Latin Hypercube Sampling.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1
       },
-      "validValues": null,
-      "default": 1
-    },
-    {
-      "name": "random_state",
-      "description": "Random seed for reproducibility of the sampling.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 0,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
+      {
+        "name": "random_state",
+        "description": "Random seed for reproducibility of the sampling.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "variables",

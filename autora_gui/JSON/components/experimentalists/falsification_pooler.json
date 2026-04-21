@@ -7,9 +7,9 @@
   "pythonName": "falsification_pooler",
   "importPath": "autora.experimentalist.falsification",
   "pipInstall": "autora-experimentalist-falsification",
-  "pipVersion": "1.0.0",
-  "parameters": [
-    {
+  "parameters": {
+    "falsification_pooler": [
+      {
       "name": "metadata",
       "description": "VariableCollection with meta-data about the dependent and independent variables.",
       "datatype": "string",
@@ -117,7 +117,8 @@
       "validValues": null,
       "default": false
     }
-  ],
+  ]
+  },
   "inputDataType": [
     {
       "name": "model",
