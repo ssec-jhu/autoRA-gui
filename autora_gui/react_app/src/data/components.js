@@ -2608,7 +2608,7 @@ export const EMBEDDED_COMPONENTS = {
     {
       "uuid": "a5b6c7d8-e9f0-4a1b-2c3d-4e5f6a7b8c9d",
       "protocolType": "experiment_runner",
-      "name": "Expected Value Theory (Synthetic)",
+      "name": "Expected Value Theory (Synthetic, Economics)",
       "description": "Synthetic experiment runner modeling decision-making between options based on expected utilities calculated as value multiplied by probability.",
       "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/economics/expected_value_theory.py#L71",
       "pythonName": "expected_value_theory",
@@ -2711,7 +2711,7 @@ export const EMBEDDED_COMPONENTS = {
     {
       "uuid": "c7d8e9f0-a1b2-4c3d-4e5f-6a7b8c9d0e1f",
       "protocolType": "experiment_runner",
-      "name": "Prospect Theory (Synthetic)",
+      "name": "Prospect Theory (Synthetic, Economics)",
       "description": "Synthetic experiment runner implementing Kahneman & Tversky's (1979) Prospect Theory with nonlinear value and probability weighting functions.",
       "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/economics/prospect_theory.py#L13",
       "pythonName": "prospect_theory",
@@ -3017,7 +3017,7 @@ export const EMBEDDED_COMPONENTS = {
     {
       "uuid": "f4a5b6c7-d8e9-4f0a-1b2c-3d4e5f6a7b8c",
       "protocolType": "experiment_runner",
-      "name": "Exponential Learning (Synthetic, Abstart)",
+      "name": "Exponential Learning (Synthetic, Psychology)",
       "description": "Synthetic experiment runner implementing exponential learning curves based on Heathcote, Brown, & Mewhort (2000) and Thurstone (1919).",
       "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychology/exp_learning.py#L11",
       "pythonName": "exp_learning",
@@ -3158,7 +3158,7 @@ export const EMBEDDED_COMPONENTS = {
     {
       "uuid": "b6c7d8e9-f0a1-4b2c-3d4e-5f6a7b8c9d0e",
       "protocolType": "experiment_runner",
-      "name": "Luce Choice Ratio (Synthetic)",
+      "name": "Luce Choice Ratio (Synthetic, Psychology)",
       "description": "Synthetic experiment runner implementing the Shepard-Luce Choice Rule for modeling choice probability based on similarity ratings to categories.",
       "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychology/luce_choice_ratio.py#L11",
       "pythonName": "luce_choice_ratio",
@@ -3263,7 +3263,7 @@ export const EMBEDDED_COMPONENTS = {
     {
       "uuid": "d8e9f0a1-b2c3-4d4e-5f6a-7b8c9d0e1f2a",
       "protocolType": "experiment_runner",
-      "name": "Q-Learning (Synthetic)",
+      "name": "Q-Learning (Synthetic, Psychology)",
       "description": "Synthetic experiment runner implementing Q-learning for n-armed bandit tasks. Simulates agent decision-making behavior with configurable learning parameters.",
       "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychology/q_learning.py#L114",
       "pythonName": "q_learning",
@@ -3404,7 +3404,7 @@ export const EMBEDDED_COMPONENTS = {
     {
       "uuid": "e9f0a1b2-c3d4-4e5f-6a7b-8c9d0e1f2a3b",
       "protocolType": "experiment_runner",
-      "name": "Stevens Power Law (Synthetic)",
+      "name": "Stevens Power Law (Synthetic, Psychophysics)",
       "description": "Synthetic experiment runner implementing Stevens' Power Law, which models perceived intensity as a power function of physical stimulus intensity.",
       "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychophysics/stevens_power_law.py#L11",
       "pythonName": "stevens_power_law",
@@ -3521,7 +3521,7 @@ export const EMBEDDED_COMPONENTS = {
     {
       "uuid": "f0a1b2c3-d4e5-4f6a-7b8c-9d0e1f2a3b4c",
       "protocolType": "experiment_runner",
-      "name": "Weber-Fechner Law (Synthetic)",
+      "name": "Weber-Fechner Law (Synthetic, Psychophysics)",
       "description": "Synthetic experiment runner implementing the Weber-Fechner Law, which relates perceived intensity to physical stimulus intensity logarithmically.",
       "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychophysics/weber_fechner_law.py#L11",
       "pythonName": "weber_fechner_law",
