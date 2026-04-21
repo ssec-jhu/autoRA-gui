@@ -48,7 +48,7 @@ function ComponentPalette() {
       return nameMatch || descMatch
     })
     if (filteredControls.length > 0) {
-      result.controls = filteredControls
+      result.controls = filteredControls.sort((a, b) => a.name.localeCompare(b.name))
     }
 
     // Add protocol components from state
@@ -62,7 +62,7 @@ function ComponentPalette() {
         return nameMatch || descMatch
       })
       if (filtered.length > 0) {
-        result[type] = filtered
+        result[type] = filtered.sort((a, b) => a.name.localeCompare(b.name))
       }
     })
     return result
