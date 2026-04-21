@@ -383,7 +383,6 @@ class TestProtocol:
             pythonName="TestClass",
             importPath="test.module",
             pipInstall="test-package",
-            pipVersion="0.1.0",
             parameters=None,
             inputDataType=None,
             outputDataType=None,
@@ -396,7 +395,6 @@ class TestProtocol:
         assert protocol.githubCommit == "commit123"
         assert protocol.importPath == "test.module"
         assert protocol.pipInstall == "test-package"
-        assert protocol.pipVersion == "0.1.0"
 
     def test_create_protocol_with_all_fields(self):
         test_uuid = uuid.uuid4()
@@ -414,8 +412,7 @@ class TestProtocol:
             pythonName="FullClass",
             importPath="some.module.path",
             pipInstall="some-package",
-            pipVersion="1.0.0",
-            parameters=[param],
+            parameters={"__init__": [param]},
             inputDataType=[param],
             outputDataType=[param],
         )
@@ -423,7 +420,6 @@ class TestProtocol:
         assert protocol.githubCommit == "abc123"
         assert protocol.importPath == "some.module.path"
         assert protocol.pipInstall == "some-package"
-        assert protocol.pipVersion == "1.0.0"
         assert len(protocol.parameters) == 1
 
 
@@ -552,7 +548,6 @@ class TestModelSerialization:
             pythonName="TestClass",
             importPath="some.module",
             pipInstall="some-package",
-            pipVersion="1.0.0",
             parameters=None,
             inputDataType=None,
             outputDataType=None,
@@ -670,7 +665,6 @@ class TestSchemaGeneration:
             "pythonName",
             "importPath",
             "pipInstall",
-            "pipVersion",
         ]
         for field in expected_fields:
             assert field in required, f"Missing required field: {field}"
