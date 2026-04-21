@@ -6,45 +6,55 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-inequality/blob/main/src/autora/experimentalist/inequality/__init__.py#L165",
   "pythonName": "summed_inequality_sampler",
   "importPath": "autora.experimentalist.inequality",
-  "pipInstall": "autora-experimentalist-inequality",
+  "pipInstall": "autora-experimentalist-inequality==1.0.0",
   "parameters": {
     "summed_inequality_sampler": [
       {
-      "name": "num_samples",
-      "description": "Number of samples to select from the condition pool.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+        "name": "num_samples",
+        "description": "Number of samples to select from the condition pool.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1
       },
-      "validValues": null,
-      "default": 1
-    },
-    {
-      "name": "equality_distance",
-      "description": "Distance threshold for considering two data points as equal. Points closer than this threshold are treated as identical.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "equality_distance",
+        "description": "Distance threshold for considering two data points as equal. Points closer than this threshold are treated as identical.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0
       },
-      "validValues": null,
-      "default": 0
-    },
-    {
-      "name": "metric",
-      "description": "Distance metric for measuring dissimilarity between conditions.",
-      "datatype": "categorical",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": ["euclidean", "manhattan", "chebyshev", "minkowski", "cosine", "correlation", "mahalanobis", "hamming", "jaccard"],
-      "default": "euclidean"
-    }
+      {
+        "name": "metric",
+        "description": "Distance metric for measuring dissimilarity between conditions.",
+        "datatype": "categorical",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": [
+          "euclidean",
+          "manhattan",
+          "chebyshev",
+          "minkowski",
+          "cosine",
+          "correlation",
+          "mahalanobis",
+          "hamming",
+          "jaccard"
+        ],
+        "default": "euclidean"
+      }
     ]
   },
   "inputDataType": [

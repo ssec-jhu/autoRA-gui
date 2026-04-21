@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-uncertainty/blob/main/src/autora/experimentalist/uncertainty/__init__.py#L77",
   "pythonName": "uncertainty_sampler",
   "importPath": "autora.experimentalist.uncertainty",
-  "pipInstall": "autora-experimentalist-uncertainty",
+  "pipInstall": "autora-experimentalist-uncertainty==1.0.0",
   "parameters": {
     "uncertainty_sampler": [
       {
@@ -30,7 +30,11 @@
           "maxOccurs": 1,
           "unique": true
         },
-        "validValues": ["least_confident", "margin", "entropy"],
+        "validValues": [
+          "least_confident",
+          "margin",
+          "entropy"
+        ],
         "default": "least_confident"
       }
     ]

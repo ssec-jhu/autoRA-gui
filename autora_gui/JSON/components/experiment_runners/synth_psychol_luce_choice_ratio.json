@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychology/luce_choice_ratio.py#L11",
   "pythonName": "luce_choice_ratio",
   "importPath": "autora.experiment_runner.synthetic.psychology.luce_choice_ratio",
-  "pipInstall": "autora-synthetic",
+  "pipInstall": "autora-synthetic==1.0.0",
   "parameters": {
     "luce_choice_ratio": [
       {

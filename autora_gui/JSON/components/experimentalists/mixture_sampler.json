@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/blinodelka/mixture_experimental_strategies/blob/main/src/autora/experimentalist/mixture/__init__.py#L91",
   "pythonName": "mixture_sample",
   "importPath": "autora.experimentalist.mixture",
-  "pipInstall": "experimentalist-sampler-mixture",
+  "pipInstall": "experimentalist-sampler-mixture==1.0.0",
   "parameters": {
     "mixture_sample": [
       {

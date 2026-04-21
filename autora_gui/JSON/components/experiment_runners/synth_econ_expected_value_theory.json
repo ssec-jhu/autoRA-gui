@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/economics/expected_value_theory.py#L71",
   "pythonName": "expected_value_theory",
   "importPath": "autora.experiment_runner.synthetic.economics.expected_value_theory",
-  "pipInstall": "autora-synthetic",
+  "pipInstall": "autora-synthetic==1.0.0",
   "parameters": {
     "expected_value_theory": [
       {

@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/random.py#L133",
   "pythonName": "random_pool",
   "importPath": "autora.experimentalist.random",
-  "pipInstall": "autora-experimentalist-random",
+  "pipInstall": "autora-experimentalist-random==1.0.0",
   "parameters": {
     "random_pool": [
       {

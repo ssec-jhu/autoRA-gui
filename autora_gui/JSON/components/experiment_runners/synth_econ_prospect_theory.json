@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/economics/prospect_theory.py#L13",
   "pythonName": "prospect_theory",
   "importPath": "autora.experiment_runner.synthetic.economics.prospect_theory",
-  "pipInstall": "autora-synthetic",
+  "pipInstall": "autora-synthetic==1.0.0",
   "parameters": {
     "prospect_theory": [
       {

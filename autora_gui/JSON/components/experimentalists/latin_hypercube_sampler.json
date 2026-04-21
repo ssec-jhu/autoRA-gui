@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-lhs/blob/main/src/autora/experimentalist/lhs/__init__.py#L107",
   "pythonName": "sample",
   "importPath": "autora.experimentalist.lhs",
-  "pipInstall": "autora-experimentalist-lhs",
+  "pipInstall": "autora-experimentalist-lhs==1.0.0",
   "parameters": {
     "sample": [
       {

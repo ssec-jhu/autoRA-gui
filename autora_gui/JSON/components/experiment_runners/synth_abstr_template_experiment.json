@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/abstract/template_experiment.py#L74",
   "pythonName": "template_experiment",
   "importPath": "autora.experiment_runner.synthetic.abstract.template_experiment",
-  "pipInstall": "autora-synthetic",
+  "pipInstall": "autora-synthetic==1.0.0",
   "parameters": {
     "template_experiment": [],
     "run": [

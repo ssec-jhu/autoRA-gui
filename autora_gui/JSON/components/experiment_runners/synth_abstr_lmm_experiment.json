@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/abstract/lmm.py#L164",
   "pythonName": "lmm_experiment",
   "importPath": "autora.experiment_runner.synthetic.abstract.lmm",
-  "pipInstall": "autora-synthetic",
+  "pipInstall": "autora-synthetic==1.0.0",
   "parameters": {
     "lmm_experiment": [
       {

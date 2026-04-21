@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-theorist-bsr/blob/cdbf04f2fb3712924826ba283152fc459ee21f6e/src/autora/theorist/bsr/regressor.py#L18",
   "pythonName": "BSRRegressor",
   "importPath": "autora.theorist.bsr.regressor",
-  "pipInstall": "autora-theorist-bsr",
+  "pipInstall": "autora-theorist-bsr==1.0.0",
   "parameters": {
     "__init__": [
       {
@@ -114,7 +114,9 @@
           "maxOccurs": 1,
           "unique": true
         },
-        "validValues": ["Uniform"],
+        "validValues": [
+          "Uniform"
+        ],
         "default": "Uniform"
       }
     ]

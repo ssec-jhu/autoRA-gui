@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/grid.py#L107",
   "pythonName": "grid_pool",
   "importPath": "autora.experimentalist.grid",
-  "pipInstall": "autora-experimentalist-grid",
+  "pipInstall": "autora-experimentalist-grid==1.0.0",
   "parameters": {
     "grid_pool": []
   },

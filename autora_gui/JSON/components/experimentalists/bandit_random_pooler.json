@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-bandit-random/blob/main/src/autora/experimentalist/bandit_random/__init__.py#L215",
   "pythonName": "bandit_random_pool",
   "importPath": "autora.experimentalist.bandit_random",
-  "pipInstall": "autora-experimentalist-bandit-random",
+  "pipInstall": "autora-experimentalist-bandit-random==1.0.0",
   "parameters": {
     "bandit_random_pool": [
       {

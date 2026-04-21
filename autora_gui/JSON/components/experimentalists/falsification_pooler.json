@@ -6,118 +6,118 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L447",
   "pythonName": "falsification_pooler",
   "importPath": "autora.experimentalist.falsification",
-  "pipInstall": "autora-experimentalist-falsification",
+  "pipInstall": "autora-experimentalist-falsification==1.0.0",
   "parameters": {
     "falsification_pooler": [
       {
-      "name": "metadata",
-      "description": "VariableCollection with meta-data about the dependent and independent variables.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+        "name": "metadata",
+        "description": "VariableCollection with meta-data about the dependent and independent variables.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
-    },
-    {
-      "name": "num_samples",
-      "description": "Number of high-falsification-potential samples to select.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "num_samples",
+        "description": "Number of high-falsification-potential samples to select.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 100
       },
-      "validValues": null,
-      "default": 100
-    },
-    {
-      "name": "training_epochs",
-      "description": "Number of epochs to train the internal falsification network.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "training_epochs",
+        "description": "Number of epochs to train the internal falsification network.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1000
       },
-      "validValues": null,
-      "default": 1000
-    },
-    {
-      "name": "optimization_epochs",
-      "description": "Number of epochs to train the internal falsification network.",
-      "datatype": "integer",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "optimization_epochs",
+        "description": "Number of epochs to train the internal falsification network.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1000
       },
-      "validValues": null,
-      "default": 1000
-    },
-    {
-      "name": "training_lr",
-      "description": "Learning rate for training the falsification network.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "training_lr",
+        "description": "Learning rate for training the falsification network.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.001
       },
-      "validValues": null,
-      "default": 0.001
-    },
-    {
-      "name": "optimization_lr",
-      "description": "Learning rate for training the falsification network.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "optimization_lr",
+        "description": "Learning rate for training the falsification network.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.001
       },
-      "validValues": null,
-      "default": 0.001
-    },
-    {
-      "name": "limit_offset",
-      "description": "Offset for limiting the number of high-falsification-potential samples.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 0,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "limit_offset",
+        "description": "Offset for limiting the number of high-falsification-potential samples.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0
       },
-      "validValues": null,
-      "default": 0
-    },
-    {
-      "name": "limit_repulsion",
-      "description": "Repulsion for limiting the number of high-falsification-potential samples.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 0,
-        "maxOccurs": 1,
-        "unique": true
+      {
+        "name": "limit_repulsion",
+        "description": "Repulsion for limiting the number of high-falsification-potential samples.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0
       },
-      "validValues": null,
-      "default": 0
-    },
-    {
-      "name": "plot",
-      "description": "Whether to display network predictions and training loss visualization.",
-      "datatype": "boolean",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": false
-    }
-  ]
+      {
+        "name": "plot",
+        "description": "Whether to display network predictions and training loss visualization.",
+        "datatype": "boolean",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": false
+      }
+    ]
   },
   "inputDataType": [
     {

@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-leverage/blob/main/src/autora/experimentalist/leverage/__init__.py#L148",
   "pythonName": "leverage_sample",
   "importPath": "autora.experimentalist.leverage",
-  "pipInstall": "autora-experimentalist-leverage",
+  "pipInstall": "autora-experimentalist-leverage==1.0.0",
   "parameters": {
     "leverage_sample": [
       {
@@ -30,7 +30,11 @@
           "maxOccurs": 1,
           "unique": true
         },
-        "validValues": ["both", "increase", "decrease"],
+        "validValues": [
+          "both",
+          "increase",
+          "decrease"
+        ],
         "default": "both"
       },
       {

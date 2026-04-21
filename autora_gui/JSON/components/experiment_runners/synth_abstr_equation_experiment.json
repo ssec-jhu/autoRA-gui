@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic-abstract-equation/blob/main/src/autora/experiment_runner/synthetic/abstract/equation/__init__.py#L14",
   "pythonName": "equation_experiment",
   "importPath": "autora.experiment_runner.synthetic.abstract.equation",
-  "pipInstall": "autora-synthetic-abstract-equation",
+  "pipInstall": "autora-synthetic-abstract-equation==1.0.0",
   "parameters": {
     "equation_experiment": [
       {

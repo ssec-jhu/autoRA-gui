@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-model-disagreement/blob/main/src/autora/experimentalist/model_disagreement/__init__.py#L310",
   "pythonName": "model_disagreement_sampler",
   "importPath": "autora.experimentalist.model_disagreement",
-  "pipInstall": "autora-experimentalist-model-disagreement",
+  "pipInstall": "autora-experimentalist-model-disagreement==1.0.0",
   "parameters": {
     "model_disagreement_sampler": [
       {
