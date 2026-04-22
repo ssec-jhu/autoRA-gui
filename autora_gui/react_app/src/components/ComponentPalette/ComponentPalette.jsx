@@ -25,6 +25,14 @@ const controlNodes = [
     description: 'Ending point of the workflow',
     isControlNode: true,
     icon: '⏹'
+  },
+  {
+    uuid: 'filter-node',
+    protocolType: 'filter_point',
+    name: 'Filter',
+    description: 'Filter/decision point in the workflow',
+    isControlNode: true,
+    icon: '◆'
   }
 ]
 

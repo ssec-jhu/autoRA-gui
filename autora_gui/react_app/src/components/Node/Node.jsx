@@ -7,7 +7,7 @@ const typeConfig = {
   experiment_runner: { color: 'var(--node-experiment-runners)', icon: '⚡' },
   start_point: { color: 'var(--node-controls)', icon: '▶' },
   end_point: { color: 'var(--node-controls)', icon: '⏹' },
-  filter_point: { color: 'var(--node-controls)', icon: '🔁' }
+  filter_point: { color: 'var(--node-controls)', icon: '◆' }
 }
 
 const NODE_WIDTH = 160
@@ -98,10 +98,13 @@ function Node({ node, isSelected, isConnecting, onSelect, onDelete, onPositionCh
     }
   }, [isDragging, handleMouseMove, handleMouseUp])
 
+  const isDiamond = node.type === 'filter_point'
+  const isControlNode = node.type === 'start_point' || node.type === 'end_point'
+
   return (
     <div
       ref={nodeRef}
-      className={`node ${isSelected ? 'selected' : ''} ${isDragging ? 'dragging' : ''} ${isConnecting ? 'connecting' : ''}`}
+      className={`node ${isSelected ? 'selected' : ''} ${isDragging ? 'dragging' : ''} ${isConnecting ? 'connecting' : ''} ${isDiamond ? 'diamond' : ''} ${isControlNode ? 'control-node' : ''}`}
       style={{
         left: node.x,
         top: node.y,
@@ -110,25 +113,51 @@ function Node({ node, isSelected, isConnecting, onSelect, onDelete, onPositionCh
       onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
     >
-      <div className="node-header" style={{ backgroundColor: config.color }}>
-        <span className="node-icon">{config.icon}</span>
-        <span className="node-title">{node.name}</span>
-        <button
-          className="node-delete"
-          onClick={(e) => {
-            e.stopPropagation()
-            onDelete(node.id)
-          }}
-          title="Delete node"
-        >
-          ×
-        </button>
-      </div>
-      <div className="node-body">
-        <div className="node-content">
-          <span className="node-type">{node.type.replace('_', ' ')}</span>
-        </div>
-      </div>
+      {isDiamond ? (
+        <>
+          <div className="diamond-inner">
+            <div className="diamond-header" style={{ backgroundColor: config.color }}>
+              <span className="node-icon">{config.icon}</span>
+              <span className="node-title">{node.name}</span>
+            </div>
+            <div className="diamond-body">
+              <span className="node-type">filter point</span>
+            </div>
+          </div>
+          <button
+            className="node-delete"
+            onClick={(e) => {
+              e.stopPropagation()
+              onDelete(node.id)
+            }}
+            title="Delete node"
+          >
+            ×
+          </button>
+        </>
+      ) : (
+        <>
+          <div className="node-header" style={{ backgroundColor: config.color }}>
+            <span className="node-icon">{config.icon}</span>
+            <span className="node-title">{node.name}</span>
+            <button
+              className="node-delete"
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete(node.id)
+              }}
+              title="Delete node"
+            >
+              ×
+            </button>
+          </div>
+          <div className="node-body">
+            <div className="node-content">
+              <span className="node-type">{node.type.replace('_', ' ')}</span>
+            </div>
+          </div>
+        </>
+      )}
       <div className="connection-hint">Alt+Click or Right-Click to connect</div>
     </div>
   )

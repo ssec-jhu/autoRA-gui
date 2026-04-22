@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
 
-const CONTROL_NODE_TYPES = ['start_point', 'end_point']
+const CONTROL_NODE_TYPES = ['start_point', 'end_point', 'filter_point']
 
 export function serializeWorkflow(state) {
   const startNode = state.nodes.find(n => n.type === 'start_point')

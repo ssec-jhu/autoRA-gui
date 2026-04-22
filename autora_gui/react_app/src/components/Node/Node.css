@@ -131,3 +131,145 @@
   0%, 100% { opacity: 0.5; }
   50% { opacity: 1; }
 }
+
+/* Square shape for start/end control nodes */
+.node.control-node {
+  width: 100px;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+}
+
+.node.control-node .node-header {
+  border-radius: 6px 6px 0 0;
+  padding: 0 8px;
+  height: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  position: relative;
+}
+
+.node.control-node .node-header .node-title {
+  flex: none;
+}
+
+.node.control-node .node-header .node-delete {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+
+.node.control-node .node-body {
+  padding: 0;
+  min-height: auto;
+  height: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.node.control-node .node-type {
+  font-size: 9px;
+}
+
+/* Diamond shape for filter nodes */
+.node.diamond {
+  width: 90px;
+  height: 90px;
+  transform: rotate(45deg);
+  border-radius: 4px;
+  background: linear-gradient(135deg, var(--node-controls) 50%, var(--bg-panel) 50%);
+  overflow: hidden;
+}
+
+.node.diamond .diamond-inner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: rotate(-45deg) translate(-50%, -50%);
+  transform-origin: 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+  height: 90px;
+}
+
+.node.diamond .diamond-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: white;
+  flex: 1;
+  padding-bottom: 4px;
+}
+
+.node.diamond .diamond-header .node-icon {
+  font-size: 12px;
+}
+
+.node.diamond .diamond-header .node-title {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.node.diamond .diamond-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding-top: 4px;
+}
+
+.node.diamond .diamond-body .node-type {
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+
+.node.diamond .node-delete {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  transform: rotate(-45deg);
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.node.diamond:hover .node-delete {
+  opacity: 1;
+}
+
+.node.diamond .node-delete:hover {
+  background: rgba(239, 68, 68, 0.6);
+}
+
+.node.diamond .connection-hint {
+  position: absolute;
+  bottom: -35px;
+  left: 50%;
+  transform: rotate(-45deg) translateX(-50%);
+}
+
+.node.diamond.selected {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+}
+
+.node.diamond.connecting::after {
+  border-radius: 4px;
+}
