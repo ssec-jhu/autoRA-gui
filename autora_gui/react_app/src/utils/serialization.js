@@ -5,6 +5,7 @@ const CONTROL_NODE_TYPES = ['start_point', 'end_point', 'filter_point']
 export function serializeWorkflow(state) {
   const startNode = state.nodes.find(n => n.type === 'start_point')
   const endNode = state.nodes.find(n => n.type === 'end_point')
+  const filterNodes = state.nodes.filter(n => n.type === 'filter_point')
   const protocolNodes = state.nodes.filter(n => !CONTROL_NODE_TYPES.includes(n.type))
 
   // Debug logging
@@ -12,6 +13,7 @@ export function serializeWorkflow(state) {
   console.log('  All nodes:', state.nodes.map(n => ({ id: n.id, type: n.type, name: n.name })))
   console.log('  startNode:', startNode ? { id: startNode.id, type: startNode.type } : null)
   console.log('  endNode:', endNode ? { id: endNode.id, type: endNode.type } : null)
+  console.log('  filterNodes:', filterNodes.map(n => ({ id: n.id, type: n.type })))
 
   return {
     name: 'AutoRA Workflow',
@@ -30,6 +32,13 @@ export function serializeWorkflow(state) {
         y: Math.round(endNode.y)
       }
     } : null,
+    filters: filterNodes.map(node => ({
+      uuid: node.id,
+      canvasLocation: {
+        x: Math.round(node.x),
+        y: Math.round(node.y)
+      }
+    })),
     components: protocolNodes.map(node => ({
       uuid: node.id,
       protocolUuid: node.protocolUuid,
@@ -87,6 +96,21 @@ export function deserializeWorkflow(workflow, componentsMap) {
       parameters: {}
     })
   }
+
+  // Add filter nodes if present
+  ;(workflow.filters || []).forEach(filter => {
+    nodes.push({
+      id: filter.uuid,
+      protocolUuid: 'filter-node',
+      type: 'filter_point',
+      name: 'Filter',
+      description: 'Filter/decision point in the workflow',
+      x: filter.canvasLocation?.x ?? 100,
+      y: filter.canvasLocation?.y ?? 100,
+      componentData: { uuid: 'filter-node', protocolType: 'filter_point', name: 'Filter', isControlNode: true },
+      parameters: {}
+    })
+  })
 
   // Add protocol components
   ;(workflow.components || []).forEach(comp => {

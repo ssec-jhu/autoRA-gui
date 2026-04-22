@@ -106,6 +106,7 @@ class Workflow(BaseModel):
     description: str | None = None
     start: ControlComponent | None = None
     end: ControlComponent | None = None
+    filters: list[ControlComponent] = []
     components: list[WorkflowComponent] = []
     links: list[WorkflowLink] = []
 
@@ -152,14 +153,17 @@ def validate_workflow(workflow: Workflow) -> dict:
 
     protocol_uuids = {p["uuid"] for p in all_protocols}
 
-    # Collect all node uuids (components + start + end)
+    # Collect all node uuids (components + start + end + filters)
     node_uuids = {c.uuid for c in workflow.components}
     if workflow.start:
         node_uuids.add(workflow.start.uuid)
     if workflow.end:
         node_uuids.add(workflow.end.uuid)
+    for f in workflow.filters:
+        node_uuids.add(f.uuid)
 
     print(f"DEBUG: node_uuids={node_uuids}")
+    print(f"DEBUG: filters count={len(workflow.filters)}")
 
     errors = []
 

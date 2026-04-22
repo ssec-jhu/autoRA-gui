@@ -120,6 +120,50 @@
       "title": "EndComponent",
       "type": "object"
     },
+    "FilterComponent": {
+      "description": "A filter component model for AutoRA GUI.\n\nServes as a decision/filter point in the workflow.",
+      "properties": {
+        "uuid": {
+          "format": "uuid",
+          "title": "Uuid",
+          "type": "string"
+        },
+        "canvasLocation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CanvasLocation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "maxCounter": {
+          "default": 1,
+          "title": "Maxcounter",
+          "type": "integer"
+        },
+        "altTarget": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alttarget"
+        }
+      },
+      "required": [
+        "uuid",
+        "canvasLocation"
+      ],
+      "title": "FilterComponent",
+      "type": "object"
+    },
     "Link": {
       "description": "A link (connection) model for Autora gui.\n\nIncludes output and input nodes being connected by the given link.",
       "properties": {
@@ -340,6 +384,21 @@
         }
       ],
       "default": null
+    },
+    "filters": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/FilterComponent"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Filters"
     },
     "independentVariables": {
       "anyOf": [
