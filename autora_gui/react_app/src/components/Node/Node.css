@@ -233,9 +233,10 @@
 
 .node.diamond .node-delete {
   position: absolute;
-  top: -8px;
-  right: -8px;
-  transform: rotate(-45deg);
+  top: 50%;
+  left: 50%;
+  transform: rotate(-45deg) translate(-50%, -50%);
+  transform-origin: 0 0;
   width: 18px;
   height: 18px;
   display: flex;
@@ -272,4 +273,61 @@
 
 .node.diamond.connecting::after {
   border-radius: 4px;
+}
+
+/* Connection ports */
+.node-port {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--bg-panel);
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  cursor: crosshair;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, border-color 0.15s, transform 0.15s;
+  z-index: 10;
+}
+
+.node:hover .node-port,
+.node.connecting .node-port {
+  opacity: 1;
+}
+
+.node-port:hover,
+.node-port.hovered {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  transform: translate(-50%, -50%) scale(1.3);
+}
+
+.node.selected .node-port {
+  border-color: var(--accent-danger);
+}
+
+.node.selected .node-port:hover {
+  background: var(--accent-danger);
+  border-color: var(--accent-danger);
+}
+
+/* Diamond ports container - inside the diamond, rotates with it */
+.diamond-ports-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.diamond-ports-container .node-port {
+  pointer-events: auto;
+  /* Counter-rotate so port circles appear upright */
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.diamond-ports-container .node-port:hover,
+.diamond-ports-container .node-port.hovered {
+  transform: translate(-50%, -50%) rotate(-45deg) scale(1.3);
 }

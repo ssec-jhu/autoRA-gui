@@ -1,14 +1,19 @@
 import React, { memo } from 'react'
-
-const NODE_WIDTH = 160
-const NODE_HEIGHT = 80
+import { getNodePorts } from '../Node/Node'
 
 function Connection({ connection, sourceNode, targetNode, isSelected, onSelect }) {
-  // Use stored connection points if available, otherwise calculate defaults
-  const x1 = connection.sourcePoint?.x ?? (sourceNode.x + NODE_WIDTH)
-  const y1 = connection.sourcePoint?.y ?? (sourceNode.y + NODE_HEIGHT / 2)
-  const x2 = connection.targetPoint?.x ?? targetNode.x
-  const y2 = connection.targetPoint?.y ?? (targetNode.y + NODE_HEIGHT / 2)
+  // Use stored connection points if available, otherwise use default ports
+  const sourcePorts = getNodePorts(sourceNode)
+  const targetPorts = getNodePorts(targetNode)
+
+  // Default to right port for source and left port for target
+  const defaultSourcePort = sourcePorts.find(p => p.id === 'right') || sourcePorts[0]
+  const defaultTargetPort = targetPorts.find(p => p.id === 'left') || targetPorts[0]
+
+  const x1 = connection.sourcePoint?.x ?? defaultSourcePort.x
+  const y1 = connection.sourcePoint?.y ?? defaultSourcePort.y
+  const x2 = connection.targetPoint?.x ?? defaultTargetPort.x
+  const y2 = connection.targetPoint?.y ?? defaultTargetPort.y
 
   // Calculate parabolic curve with direction-based curvature
   const dx = x2 - x1

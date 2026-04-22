@@ -223,7 +223,7 @@ function Canvas() {
         <span>Zoom: {Math.round(state.zoom * 100)}%</span>
         <span>Nodes: {state.nodes.length}</span>
         <span>Connections: {state.connections.length}</span>
-        {connectingFrom && <span className="connecting-hint">Click another node to connect</span>}
+        {connectingFrom && <span className="connecting-hint">Click a port on another node to connect</span>}
       </div>
     </div>
   )

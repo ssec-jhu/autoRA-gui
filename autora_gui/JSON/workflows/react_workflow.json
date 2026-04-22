@@ -5,24 +5,24 @@
     "uuid": "15225916-a1e6-464b-a4d7-e8309221070a",
     "canvasLocation": {
       "x": 128,
-      "y": 11
+      "y": 23
     }
   },
   "end": {
     "uuid": "0cffc571-833e-4791-8c62-d81cf1dc1962",
     "canvasLocation": {
-      "x": 256,
-      "y": 786
+      "x": 578,
+      "y": 672
     }
   },
   "filters": [
     {
-      "uuid": "df68ffc6-542f-470d-86c0-179e18459de6",
-      "maxCounter": 5,
-      "altTarget": "0cffc571-833e-4791-8c62-d81cf1dc1962",
+      "uuid": "371ff9ac-a894-4684-a8e9-9ebd1613a9d3",
+      "maxCounter": 1,
+      "altTarget": null,
       "canvasLocation": {
-        "x": 248,
-        "y": 373
+        "x": 577,
+        "y": 265
       }
     }
   ],
@@ -32,31 +32,31 @@
       "protocolUuid": "d6e7f8a9-b0c1-4d2e-3f4a-5b6c7d8e9f0a",
       "parameterSetting": [
         {
-          "uuid": "fac9a0de-43c1-476d-8240-e85db11248b4",
+          "uuid": "07b5abaf-2343-4702-a1d7-ed2af1674eb3",
           "name": "sleep_time",
           "value": 30
         },
         {
-          "uuid": "7b51429d-6b21-4e31-88a1-9c23dc16c05a",
+          "uuid": "035682a4-1200-4715-8125-dfe09cf24e69",
           "name": "study_completion_time",
           "value": 10
         },
         {
-          "uuid": "b4beb8ba-8a3a-4481-b746-31b583fe0330",
+          "uuid": "0b963ef4-9b4b-48ef-87b4-a29272a4faf9",
           "name": "exclude_studies",
           "value": [
             "default"
           ]
         },
         {
-          "uuid": "7e6f2ad9-f774-469c-86e4-11f368c7de82",
+          "uuid": "860d3845-6638-4e88-8836-9fbf4bc5ca8c",
           "name": "approve_no_code",
           "value": true
         }
       ],
       "canvasLocation": {
-        "x": 260,
-        "y": 182
+        "x": 533,
+        "y": 19
       }
     },
     {
@@ -64,19 +64,19 @@
       "protocolUuid": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       "parameterSetting": [
         {
-          "uuid": "8df8573b-13be-4094-a028-49d9ae682ac9",
+          "uuid": "c4698bef-22c5-44cd-8ffb-ab554e5c9242",
           "name": "epochs",
           "value": 1500
         },
         {
-          "uuid": "906ac2a9-dd0d-4d00-960d-746886780a12",
+          "uuid": "0ba6688e-3e28-4093-9710-62421b3c21ce",
           "name": "num_param",
           "value": 1
         }
       ],
       "canvasLocation": {
-        "x": 473,
-        "y": 506
+        "x": 946,
+        "y": 256
       }
     },
     {
@@ -84,14 +84,14 @@
       "protocolUuid": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b",
       "parameterSetting": [
         {
-          "uuid": "8daa18d8-2a2e-459c-ac55-2b2fcd512352",
+          "uuid": "73057af7-a550-4132-8863-fa6c58aac3e7",
           "name": "num_samples",
           "value": 2
         }
       ],
       "canvasLocation": {
-        "x": 612,
-        "y": 312
+        "x": 934,
+        "y": 26
       }
     }
   ],
@@ -100,72 +100,72 @@
       "source": "15225916-a1e6-464b-a4d7-e8309221070a",
       "target": "2200dcbb-9c36-4814-9990-4a9ac626107c",
       "sourcePoint": {
-        "x": 226,
-        "y": 91
+        "x": 228,
+        "y": 63
       },
       "targetPoint": {
-        "x": 328,
-        "y": 182
-      }
-    },
-    {
-      "source": "2200dcbb-9c36-4814-9990-4a9ac626107c",
-      "target": "e731ce86-8528-4dd4-a8e9-09865e7f68e4",
-      "sourcePoint": {
-        "x": 420,
-        "y": 221.5
-      },
-      "targetPoint": {
-        "x": 693,
-        "y": 311.5
+        "x": 533,
+        "y": 59
       }
     },
     {
       "source": "e731ce86-8528-4dd4-a8e9-09865e7f68e4",
       "target": "c2ab6e86-9c8c-4979-8445-ac481e6e42fb",
       "sourcePoint": {
-        "x": 720,
-        "y": 391.5
+        "x": 1014,
+        "y": 106
       },
       "targetPoint": {
-        "x": 633,
-        "y": 539.5
+        "x": 1026,
+        "y": 256
+      }
+    },
+    {
+      "source": "2200dcbb-9c36-4814-9990-4a9ac626107c",
+      "target": "e731ce86-8528-4dd4-a8e9-09865e7f68e4",
+      "sourcePoint": {
+        "x": 693,
+        "y": 59
+      },
+      "targetPoint": {
+        "x": 934,
+        "y": 66
+      }
+    },
+    {
+      "source": "371ff9ac-a894-4684-a8e9-9ebd1613a9d3",
+      "target": "2200dcbb-9c36-4814-9990-4a9ac626107c",
+      "sourcePoint": {
+        "x": 622,
+        "y": 257.17409819219546
+      },
+      "targetPoint": {
+        "x": 613,
+        "y": 99
+      }
+    },
+    {
+      "source": "371ff9ac-a894-4684-a8e9-9ebd1613a9d3",
+      "target": "0cffc571-833e-4791-8c62-d81cf1dc1962",
+      "sourcePoint": {
+        "x": 622,
+        "y": 361.8259018078045
+      },
+      "targetPoint": {
+        "x": 628,
+        "y": 672
       }
     },
     {
       "source": "c2ab6e86-9c8c-4979-8445-ac481e6e42fb",
-      "target": "df68ffc6-542f-470d-86c0-179e18459de6",
+      "target": "371ff9ac-a894-4684-a8e9-9ebd1613a9d3",
       "sourcePoint": {
-        "x": 473,
-        "y": 559.5
+        "x": 946,
+        "y": 296
       },
       "targetPoint": {
-        "x": 338.6396484375,
-        "y": 452.5
-      }
-    },
-    {
-      "source": "df68ffc6-542f-470d-86c0-179e18459de6",
-      "target": "2200dcbb-9c36-4814-9990-4a9ac626107c",
-      "sourcePoint": {
-        "x": 248,
-        "y": 412.1396179199219
-      },
-      "targetPoint": {
-        "x": 294,
-        "y": 262
-      }
-    },
-    {
-      "source": "df68ffc6-542f-470d-86c0-179e18459de6",
-      "target": "0cffc571-833e-4791-8c62-d81cf1dc1962",
-      "sourcePoint": {
-        "x": 306.6396484375,
-        "y": 452.5
-      },
-      "targetPoint": {
-        "x": 300,
-        "y": 786
+        "x": 674.3259018078045,
+        "y": 309.5
       }
     }
   ]
