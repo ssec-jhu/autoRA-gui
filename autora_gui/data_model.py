@@ -103,6 +103,16 @@ class Link(BaseModel):
     target: uuid.UUID
 
 
+class Filter(Link):
+    """A filter link model for AutoRA GUI.
+
+    A specialized link with counter and alternative target.
+    """
+
+    maxCounter: int = 1
+    altTarget: uuid.UUID | None = None
+
+
 class ParameterSetting(AutoraBaseModel):
     """A class for parameter setting.
 

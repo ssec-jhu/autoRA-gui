@@ -102,6 +102,22 @@ function PropertiesPanel() {
   }
 
   const parameters = Object.values(selectedNode.componentData?.parameters || {}).flat()
+  const isFilterNode = selectedNode.type === 'filter_point'
+
+  // Get other nodes for altTarget dropdown (exclude current node and start node)
+  const availableTargets = state.nodes.filter(n =>
+    n.id !== selectedNode.id && n.type !== 'start_point'
+  )
+
+  const handleFilterParameterChange = (paramName, value) => {
+    dispatch({
+      type: 'UPDATE_NODE',
+      payload: {
+        id: selectedNode.id,
+        filterParams: { ...selectedNode.filterParams, [paramName]: value }
+      }
+    })
+  }
 
   return (
     <aside className="properties-panel">
@@ -118,6 +134,56 @@ function PropertiesPanel() {
             <p className="node-description">{selectedNode.description}</p>
           )}
         </div>
+
+        {isFilterNode && (
+          <div className="property-section">
+            <h4 className="section-title">Filter Settings</h4>
+            <div className="parameters-list">
+              <div className="parameter-row">
+                <label className="parameter-label">
+                  Max Counter
+                  <span className="parameter-hint" title="Maximum number of loop iterations before taking the alternative path">?</span>
+                </label>
+                <div className="parameter-input">
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={selectedNode.filterParams?.maxCounter ?? ''}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      handleFilterParameterChange('maxCounter', val === '' ? '' : parseInt(val, 10))
+                    }}
+                    onBlur={(e) => {
+                      const val = parseInt(e.target.value, 10)
+                      if (!val || val < 1) {
+                        handleFilterParameterChange('maxCounter', 1)
+                      }
+                    }}
+                  />
+                </div>
+                <span className="parameter-default">Default: 1</span>
+              </div>
+              <div className="parameter-row">
+                <label className="parameter-label">
+                  Alt Target
+                  <span className="parameter-hint" title="Alternative target node when max counter is reached">?</span>
+                </label>
+                <div className="parameter-input">
+                  <select
+                    value={selectedNode.filterParams?.altTarget ?? ''}
+                    onChange={(e) => handleFilterParameterChange('altTarget', e.target.value || null)}
+                  >
+                    <option value="">None</option>
+                    {availableTargets.map(node => (
+                      <option key={node.id} value={node.id}>{node.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {parameters.length > 0 && (
           <div className="property-section">

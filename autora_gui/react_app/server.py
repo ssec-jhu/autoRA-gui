@@ -96,6 +96,13 @@ class ControlComponent(BaseModel):
     canvasLocation: CanvasLocation
 
 
+class FilterComponent(BaseModel):
+    uuid: str
+    maxCounter: int = 1
+    altTarget: str | None = None
+    canvasLocation: CanvasLocation
+
+
 class WorkflowLink(BaseModel):
     source: str
     target: str
@@ -106,7 +113,7 @@ class Workflow(BaseModel):
     description: str | None = None
     start: ControlComponent | None = None
     end: ControlComponent | None = None
-    filters: list[ControlComponent] = []
+    filters: list[FilterComponent] = []
     components: list[WorkflowComponent] = []
     links: list[WorkflowLink] = []
 

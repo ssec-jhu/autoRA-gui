@@ -34,6 +34,8 @@ export function serializeWorkflow(state) {
     } : null,
     filters: filterNodes.map(node => ({
       uuid: node.id,
+      maxCounter: node.filterParams?.maxCounter ?? 1,
+      altTarget: node.filterParams?.altTarget ?? null,
       canvasLocation: {
         x: Math.round(node.x),
         y: Math.round(node.y)
@@ -108,7 +110,11 @@ export function deserializeWorkflow(workflow, componentsMap) {
       x: filter.canvasLocation?.x ?? 100,
       y: filter.canvasLocation?.y ?? 100,
       componentData: { uuid: 'filter-node', protocolType: 'filter_point', name: 'Filter', isControlNode: true },
-      parameters: {}
+      parameters: {},
+      filterParams: {
+        maxCounter: filter.maxCounter ?? 1,
+        altTarget: filter.altTarget ?? null
+      }
     })
   })
 

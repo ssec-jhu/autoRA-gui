@@ -18,6 +18,8 @@
   "filters": [
     {
       "uuid": "df68ffc6-542f-470d-86c0-179e18459de6",
+      "maxCounter": 5,
+      "altTarget": "0cffc571-833e-4791-8c62-d81cf1dc1962",
       "canvasLocation": {
         "x": 248,
         "y": 373
@@ -30,24 +32,24 @@
       "protocolUuid": "d6e7f8a9-b0c1-4d2e-3f4a-5b6c7d8e9f0a",
       "parameterSetting": [
         {
-          "uuid": "f762b3eb-32ff-401d-b061-98de639c55f9",
+          "uuid": "fac9a0de-43c1-476d-8240-e85db11248b4",
           "name": "sleep_time",
           "value": 30
         },
         {
-          "uuid": "1c088d82-c720-431c-b634-b63546fcd065",
+          "uuid": "7b51429d-6b21-4e31-88a1-9c23dc16c05a",
           "name": "study_completion_time",
           "value": 10
         },
         {
-          "uuid": "f0547d84-bc9e-41e5-ad6c-bace499f91ea",
+          "uuid": "b4beb8ba-8a3a-4481-b746-31b583fe0330",
           "name": "exclude_studies",
           "value": [
             "default"
           ]
         },
         {
-          "uuid": "f94b4b5f-c06c-46ad-9f92-71c2fe881506",
+          "uuid": "7e6f2ad9-f774-469c-86e4-11f368c7de82",
           "name": "approve_no_code",
           "value": true
         }
@@ -62,12 +64,12 @@
       "protocolUuid": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       "parameterSetting": [
         {
-          "uuid": "d5a87773-54dd-4a83-8147-9cff5cd8d2b9",
+          "uuid": "8df8573b-13be-4094-a028-49d9ae682ac9",
           "name": "epochs",
           "value": 1500
         },
         {
-          "uuid": "f22ca246-63f2-4103-93d2-2bee4b4e368b",
+          "uuid": "906ac2a9-dd0d-4d00-960d-746886780a12",
           "name": "num_param",
           "value": 1
         }
@@ -82,9 +84,9 @@
       "protocolUuid": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b",
       "parameterSetting": [
         {
-          "uuid": "152d9a17-c67e-4f58-8bad-2dfd84ae675d",
+          "uuid": "8daa18d8-2a2e-459c-ac55-2b2fcd512352",
           "name": "num_samples",
-          "value": 1
+          "value": 2
         }
       ],
       "canvasLocation": {

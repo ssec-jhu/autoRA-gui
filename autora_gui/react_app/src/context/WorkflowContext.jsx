@@ -22,6 +22,7 @@ function workflowReducer(state, action) {
 
     case 'ADD_NODE': {
       const { componentData, x, y } = action.payload
+      const isFilter = componentData.protocolType === 'filter_point'
       const newNode = {
         id: uuidv4(),
         protocolUuid: componentData.uuid,
@@ -34,7 +35,8 @@ function workflowReducer(state, action) {
         parameters: Object.values(componentData.parameters || {}).flat().reduce((acc, param) => {
           acc[param.name] = param.default !== undefined ? param.default : null
           return acc
-        }, {})
+        }, {}),
+        ...(isFilter && { filterParams: { maxCounter: 1, altTarget: null } })
       }
       return { ...state, nodes: [...state.nodes, newNode], selectedNodeId: newNode.id }
     }
