@@ -104,11 +104,6 @@ function PropertiesPanel() {
   const parameters = Object.values(selectedNode.componentData?.parameters || {}).flat()
   const isFilterNode = selectedNode.type === 'filter_point'
 
-  // Get other nodes for altTarget dropdown (exclude current node and start node)
-  const availableTargets = state.nodes.filter(n =>
-    n.id !== selectedNode.id && n.type !== 'start_point'
-  )
-
   const handleFilterParameterChange = (paramName, value) => {
     dispatch({
       type: 'UPDATE_NODE',
@@ -163,23 +158,6 @@ function PropertiesPanel() {
                   />
                 </div>
                 <span className="parameter-default">Default: 1</span>
-              </div>
-              <div className="parameter-row">
-                <label className="parameter-label">
-                  Alt Target
-                  <span className="parameter-hint" title="Alternative target node when max counter is reached">?</span>
-                </label>
-                <div className="parameter-input">
-                  <select
-                    value={selectedNode.filterParams?.altTarget ?? ''}
-                    onChange={(e) => handleFilterParameterChange('altTarget', e.target.value || null)}
-                  >
-                    <option value="">None</option>
-                    {availableTargets.map(node => (
-                      <option key={node.id} value={node.id}>{node.name}</option>
-                    ))}
-                  </select>
-                </div>
               </div>
             </div>
           </div>

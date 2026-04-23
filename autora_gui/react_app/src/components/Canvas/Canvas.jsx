@@ -7,7 +7,6 @@ import './Canvas.css'
 function Canvas() {
   const canvasRef = useRef(null)
   const { state, dispatch } = useWorkflow()
-  const [tempLine, setTempLine] = useState(null)
   const [isPanning, setIsPanning] = useState(false)
   const [panStart, setPanStart] = useState({ x: 0, y: 0 })
   const [connectingFrom, setConnectingFrom] = useState(null) // { nodeId, point: {x, y} }
@@ -44,7 +43,6 @@ function Canvas() {
     if (e.target === canvasRef.current || e.target.classList.contains('canvas-inner')) {
       dispatch({ type: 'DESELECT_ALL' })
       setConnectingFrom(null)
-      setTempLine(null)
     }
   }
 
@@ -73,17 +71,7 @@ function Canvas() {
         }
       })
     }
-
-    if (connectingFrom) {
-      const { x, y } = screenToCanvas(e.clientX, e.clientY)
-      setTempLine({
-        x1: connectingFrom.point.x,
-        y1: connectingFrom.point.y,
-        x2: x,
-        y2: y
-      })
-    }
-  }, [isPanning, panStart, state.zoom, connectingFrom, screenToCanvas, dispatch])
+  }, [isPanning, panStart, state.zoom, dispatch])
 
   const handleMouseUp = () => {
     setIsPanning(false)
@@ -113,30 +101,8 @@ function Canvas() {
         }
       })
       setConnectingFrom(null)
-      setTempLine(null)
     }
   }, [connectingFrom, dispatch])
-
-  // Calculate parabolic curve for temp line
-  const getTempLinePath = () => {
-    if (!tempLine) return ''
-    const { x1, y1, x2, y2 } = tempLine
-    const dx = x2 - x1
-    const dist = Math.sqrt(dx * dx + (y2 - y1) ** 2)
-    const curveOffset = Math.min(dist * 0.3, 60)
-
-    // Midpoint
-    const midX = (x1 + x2) / 2
-    const midY = (y1 + y2) / 2
-
-    // Left-to-right: negative curvature (curve goes up/above)
-    // Right-to-left: positive curvature (curve goes down/below)
-    const direction = dx >= 0 ? -1 : 1
-    const cpx = midX
-    const cpy = midY + curveOffset * direction
-
-    return `M ${x1} ${y1} Q ${cpx} ${cpy}, ${x2} ${y2}`
-  }
 
   return (
     <div
@@ -194,16 +160,6 @@ function Canvas() {
               />
             )
           })}
-          {tempLine && (
-            <path
-              className="temp-connection"
-              d={getTempLinePath()}
-              stroke="var(--accent-primary)"
-              strokeWidth="2"
-              strokeDasharray="5,5"
-              fill="none"
-            />
-          )}
         </svg>
         {state.nodes.map(node => (
           <Node
