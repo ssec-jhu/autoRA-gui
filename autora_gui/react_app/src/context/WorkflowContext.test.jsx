@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
-import { workflowReducer, initialState } from './WorkflowContext'
+import { render, screen, act } from '@testing-library/react'
+import { renderHook } from '@testing-library/react'
+import { workflowReducer, initialState, WorkflowProvider, useWorkflow } from './WorkflowContext'
 
 // Mock uuid
 vi.mock('uuid', () => ({
@@ -414,5 +416,136 @@ describe('workflowReducer', () => {
       const result = workflowReducer(initialState, { type: 'UNKNOWN' })
       expect(result).toBe(initialState)
     })
+  })
+})
+
+describe('WorkflowProvider', () => {
+  it('renders children', () => {
+    render(
+      <WorkflowProvider>
+        <div data-testid="child">Test Child</div>
+      </WorkflowProvider>
+    )
+
+    expect(screen.getByTestId('child')).toBeInTheDocument()
+    expect(screen.getByText('Test Child')).toBeInTheDocument()
+  })
+
+  it('provides state and dispatch to children', () => {
+    function TestConsumer() {
+      const { state, dispatch } = useWorkflow()
+      return (
+        <div>
+          <span data-testid="zoom">{state.zoom}</span>
+          <span data-testid="nodes-count">{state.nodes.length}</span>
+        </div>
+      )
+    }
+
+    render(
+      <WorkflowProvider>
+        <TestConsumer />
+      </WorkflowProvider>
+    )
+
+    expect(screen.getByTestId('zoom')).toHaveTextContent('1')
+    expect(screen.getByTestId('nodes-count')).toHaveTextContent('0')
+  })
+
+  it('allows dispatching actions through context', () => {
+    function TestConsumer() {
+      const { state, dispatch } = useWorkflow()
+      return (
+        <div>
+          <span data-testid="zoom">{state.zoom}</span>
+          <button onClick={() => dispatch({ type: 'SET_ZOOM', payload: 1.5 })}>
+            Set Zoom
+          </button>
+        </div>
+      )
+    }
+
+    render(
+      <WorkflowProvider>
+        <TestConsumer />
+      </WorkflowProvider>
+    )
+
+    expect(screen.getByTestId('zoom')).toHaveTextContent('1')
+
+    act(() => {
+      screen.getByText('Set Zoom').click()
+    })
+
+    expect(screen.getByTestId('zoom')).toHaveTextContent('1.5')
+  })
+})
+
+describe('useWorkflow', () => {
+  it('throws error when used outside WorkflowProvider', () => {
+    // Suppress console.error for this test
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    expect(() => {
+      renderHook(() => useWorkflow())
+    }).toThrow('useWorkflow must be used within a WorkflowProvider')
+
+    consoleSpy.mockRestore()
+  })
+
+  it('returns state and dispatch when used inside WorkflowProvider', () => {
+    const wrapper = ({ children }) => (
+      <WorkflowProvider>{children}</WorkflowProvider>
+    )
+
+    const { result } = renderHook(() => useWorkflow(), { wrapper })
+
+    expect(result.current.state).toBeDefined()
+    expect(result.current.dispatch).toBeDefined()
+    expect(typeof result.current.dispatch).toBe('function')
+  })
+
+  it('returns initial state values', () => {
+    const wrapper = ({ children }) => (
+      <WorkflowProvider>{children}</WorkflowProvider>
+    )
+
+    const { result } = renderHook(() => useWorkflow(), { wrapper })
+
+    expect(result.current.state.nodes).toEqual([])
+    expect(result.current.state.connections).toEqual([])
+    expect(result.current.state.selectedNodeId).toBeNull()
+    expect(result.current.state.zoom).toBe(1)
+    expect(result.current.state.pan).toEqual({ x: 0, y: 0 })
+  })
+
+  it('updates state when dispatch is called', () => {
+    const wrapper = ({ children }) => (
+      <WorkflowProvider>{children}</WorkflowProvider>
+    )
+
+    const { result } = renderHook(() => useWorkflow(), { wrapper })
+
+    act(() => {
+      result.current.dispatch({ type: 'SET_ZOOM', payload: 0.5 })
+    })
+
+    expect(result.current.state.zoom).toBe(0.5)
+  })
+
+  it('can dispatch multiple actions', () => {
+    const wrapper = ({ children }) => (
+      <WorkflowProvider>{children}</WorkflowProvider>
+    )
+
+    const { result } = renderHook(() => useWorkflow(), { wrapper })
+
+    act(() => {
+      result.current.dispatch({ type: 'SET_ZOOM', payload: 1.5 })
+      result.current.dispatch({ type: 'SET_PAN', payload: { x: 100, y: 200 } })
+    })
+
+    expect(result.current.state.zoom).toBe(1.5)
+    expect(result.current.state.pan).toEqual({ x: 100, y: 200 })
   })
 })

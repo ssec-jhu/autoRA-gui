@@ -1,6 +1,10 @@
 """Tests for build_standalone.py"""
 
+import tempfile
+from pathlib import Path
+
 from autora_gui.react_app.build_standalone import (
+    create_single_html,
     generate_components_js,
     load_components,
 )
@@ -60,3 +64,186 @@ def test_generate_components_js_empty_input():
 
     assert "export const EMBEDDED_COMPONENTS" in js_code
     assert "0 components from 0 categories" in js_code
+
+
+def test_generate_components_js_multiple_categories():
+    """Test generate_components_js with multiple categories."""
+    test_components = {
+        "theorists": [{"uuid": "t1"}, {"uuid": "t2"}],
+        "experimentalists": [{"uuid": "e1"}],
+        "experiment_runners": [{"uuid": "r1"}, {"uuid": "r2"}, {"uuid": "r3"}],
+    }
+    js_code = generate_components_js(test_components)
+
+    assert "6 components from 3 categories" in js_code
+
+
+def test_generate_components_js_special_characters():
+    """Test that special characters are properly escaped in JSON."""
+    test_components = {
+        "category": [{"name": 'Test "quoted" & <special>'}],
+    }
+    js_code = generate_components_js(test_components)
+
+    # JSON should escape quotes
+    assert '\\"quoted\\"' in js_code or '"quoted"' in js_code
+
+
+def test_load_components_adds_file_field():
+    """Test that load_components adds the 'file' field to each component."""
+    components = load_components()
+
+    for category, items in components.items():
+        for item in items:
+            assert "file" in item, f"Missing 'file' field in {category}/{item.get('name', 'unknown')}"
+            assert item["file"].endswith(".json")
+
+
+def test_load_components_sorts_files():
+    """Test that components within each category are loaded in sorted order."""
+    components = load_components()
+
+    for category, items in components.items():
+        if len(items) > 1:
+            file_names = [item["file"] for item in items]
+            assert file_names == sorted(file_names), f"Components in {category} are not sorted"
+
+
+class TestCreateSingleHtml:
+    """Tests for create_single_html function."""
+
+    def test_returns_false_if_index_not_found(self):
+        """Test that create_single_html returns False if index.html doesn't exist."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            dist_dir = Path(tmpdir) / "dist"
+            dist_dir.mkdir()
+            output_file = Path(tmpdir) / "output.html"
+
+            result = create_single_html(dist_dir, output_file)
+
+            assert result is False
+            assert not output_file.exists()
+
+    def test_inlines_css_with_crossorigin(self):
+        """Test that CSS files are inlined correctly with crossorigin attribute."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            dist_dir = Path(tmpdir) / "dist"
+            assets_dir = dist_dir / "assets"
+            assets_dir.mkdir(parents=True)
+
+            # Create index.html with CSS link
+            index_html = dist_dir / "index.html"
+            index_html.write_text(
+                '<html><head><link rel="stylesheet" crossorigin href="./assets/style.css"></head></html>'
+            )
+
+            # Create CSS file
+            css_file = assets_dir / "style.css"
+            css_file.write_text("body { color: red; }")
+
+            output_file = Path(tmpdir) / "output.html"
+            result = create_single_html(dist_dir, output_file)
+
+            assert result is True
+            content = output_file.read_text()
+            assert "<style>body { color: red; }</style>" in content
+            assert "href=" not in content
+
+    def test_inlines_css_without_crossorigin(self):
+        """Test that CSS files are inlined correctly without crossorigin attribute."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            dist_dir = Path(tmpdir) / "dist"
+            assets_dir = dist_dir / "assets"
+            assets_dir.mkdir(parents=True)
+
+            index_html = dist_dir / "index.html"
+            index_html.write_text(
+                '<html><head><link rel="stylesheet" href="./assets/style.css"></head></html>'
+            )
+
+            css_file = assets_dir / "style.css"
+            css_file.write_text(".test { margin: 0; }")
+
+            output_file = Path(tmpdir) / "output.html"
+            result = create_single_html(dist_dir, output_file)
+
+            assert result is True
+            content = output_file.read_text()
+            assert "<style>.test { margin: 0; }</style>" in content
+
+    def test_inlines_js_with_crossorigin(self):
+        """Test that JS files are inlined correctly with crossorigin attribute."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            dist_dir = Path(tmpdir) / "dist"
+            assets_dir = dist_dir / "assets"
+            assets_dir.mkdir(parents=True)
+
+            index_html = dist_dir / "index.html"
+            index_html.write_text(
+                '<html><body><script type="module" crossorigin src="./assets/main.js"></script></body></html>'
+            )
+
+            js_file = assets_dir / "main.js"
+            js_file.write_text('console.log("hello");')
+
+            output_file = Path(tmpdir) / "output.html"
+            result = create_single_html(dist_dir, output_file)
+
+            assert result is True
+            content = output_file.read_text()
+            assert '<script type="module">console.log("hello");</script>' in content
+            assert "src=" not in content
+
+    def test_inlines_js_without_crossorigin(self):
+        """Test that JS files are inlined correctly without crossorigin attribute."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            dist_dir = Path(tmpdir) / "dist"
+            assets_dir = dist_dir / "assets"
+            assets_dir.mkdir(parents=True)
+
+            index_html = dist_dir / "index.html"
+            index_html.write_text(
+                '<html><body><script type="module" src="./assets/app.js"></script></body></html>'
+            )
+
+            js_file = assets_dir / "app.js"
+            js_file.write_text("const x = 1;")
+
+            output_file = Path(tmpdir) / "output.html"
+            result = create_single_html(dist_dir, output_file)
+
+            assert result is True
+            content = output_file.read_text()
+            assert '<script type="module">const x = 1;</script>' in content
+
+    def test_inlines_multiple_assets(self):
+        """Test that multiple CSS and JS files are all inlined."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            dist_dir = Path(tmpdir) / "dist"
+            assets_dir = dist_dir / "assets"
+            assets_dir.mkdir(parents=True)
+
+            index_html = dist_dir / "index.html"
+            index_html.write_text(
+                '<html>'
+                '<head><link rel="stylesheet" crossorigin href="./assets/a.css">'
+                '<link rel="stylesheet" crossorigin href="./assets/b.css"></head>'
+                '<body><script type="module" crossorigin src="./assets/x.js"></script>'
+                '<script type="module" crossorigin src="./assets/y.js"></script></body>'
+                '</html>'
+            )
+
+            (assets_dir / "a.css").write_text(".a {}")
+            (assets_dir / "b.css").write_text(".b {}")
+            (assets_dir / "x.js").write_text("let x;")
+            (assets_dir / "y.js").write_text("let y;")
+
+            output_file = Path(tmpdir) / "output.html"
+            result = create_single_html(dist_dir, output_file)
+
+            assert result is True
+            content = output_file.read_text()
+            assert "<style>.a {}</style>" in content
+            assert "<style>.b {}</style>" in content
+            assert '<script type="module">let x;</script>' in content
+            assert '<script type="module">let y;</script>' in content
