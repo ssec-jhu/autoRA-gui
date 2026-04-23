@@ -48,7 +48,8 @@
         "integer",
         "boolean",
         "string",
-        "categorical"
+        "categorical",
+        "any"
       ],
       "title": "Datatype",
       "type": "string"
@@ -57,8 +58,15 @@
       "description": "A model for dictionary variables in the workflow.",
       "properties": {
         "name": {
-          "title": "Name",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
         },
         "description": {
           "anyOf": [
@@ -76,6 +84,9 @@
             "anyOf": [
               {
                 "$ref": "#/$defs/PrimitiveVariableType"
+              },
+              {
+                "$ref": "#/$defs/ListVariableType"
               },
               {
                 "$ref": "#/$defs/DictVariableType"
@@ -141,6 +152,54 @@
       "title": "Link",
       "type": "object"
     },
+    "ListVariableType": {
+      "description": "A model for list variables in the workflow.",
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "variable": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrimitiveVariableType"
+            },
+            {
+              "$ref": "#/$defs/ListVariableType"
+            },
+            {
+              "$ref": "#/$defs/DictVariableType"
+            }
+          ],
+          "title": "Variable"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "variable"
+      ],
+      "title": "ListVariableType",
+      "type": "object"
+    },
     "ParameterSetting": {
       "description": "A class for parameter setting.\n\nIncludes the description.",
       "properties": {
@@ -165,8 +224,15 @@
       "description": "Primitive variable type model for the workflow.",
       "properties": {
         "name": {
-          "title": "Name",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
         },
         "description": {
           "anyOf": [
@@ -347,6 +413,9 @@
           "$ref": "#/$defs/PrimitiveVariableType"
         },
         {
+          "$ref": "#/$defs/ListVariableType"
+        },
+        {
           "$ref": "#/$defs/DictVariableType"
         }
       ],
@@ -356,6 +425,9 @@
       "anyOf": [
         {
           "$ref": "#/$defs/PrimitiveVariableType"
+        },
+        {
+          "$ref": "#/$defs/ListVariableType"
         },
         {
           "$ref": "#/$defs/DictVariableType"
