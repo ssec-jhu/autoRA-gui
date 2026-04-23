@@ -354,34 +354,38 @@ class TestMain:
         """Test that main calls load_components, generate_components_js, and run_npm_build."""
         from autora_gui.react_app.build_standalone import main
 
-        with (
-            patch(
-                "autora_gui.react_app.build_standalone.load_components",
-                return_value={"theorists": []},
-            ) as mock_load,
-            patch("autora_gui.react_app.build_standalone.run_npm_build", return_value=True) as mock_npm,
-            patch(
-                "autora_gui.react_app.build_standalone.create_single_html",
-                return_value=True,
-            ) as mock_html,
-            tempfile.TemporaryDirectory() as tmpdir,
-            patch("autora_gui.react_app.build_standalone.Path") as mock_path,
-        ):
-            mock_react_dir = Path(tmpdir)
-            mock_path.return_value.parent = mock_react_dir
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmppath = Path(tmpdir)
 
-            # Create required directories and files
-            data_dir = mock_react_dir / "src" / "data"
+            # Create directory structure: tmpdir/repo/autora_gui/react_app
+            react_app_dir = tmppath / "repo" / "autora_gui" / "react_app"
+            data_dir = react_app_dir / "src" / "data"
             data_dir.mkdir(parents=True, exist_ok=True)
 
-            # Create mock output file for stat()
-            root_dir = mock_react_dir.parent.parent
-            root_dir.mkdir(parents=True, exist_ok=True)
+            # root_dir will be tmpdir/repo (react_app_dir.parent.parent)
+            root_dir = react_app_dir.parent.parent
             output_file = root_dir / "index.html"
-            output_file.write_text("<html></html>")
 
-            main()
+            with (
+                patch(
+                    "autora_gui.react_app.build_standalone.load_components",
+                    return_value={"theorists": []},
+                ) as mock_load,
+                patch("autora_gui.react_app.build_standalone.run_npm_build", return_value=True) as mock_npm,
+                patch(
+                    "autora_gui.react_app.build_standalone.create_single_html",
+                    return_value=True,
+                ) as mock_html,
+                patch("autora_gui.react_app.build_standalone.Path") as mock_path,
+            ):
+                # Mock Path(__file__).parent to return our test react_app_dir
+                mock_path.return_value.parent = react_app_dir
 
-            mock_load.assert_called_once()
-            mock_npm.assert_called_once()
-            mock_html.assert_called_once()
+                # Pre-create output file for stat() call
+                output_file.write_text("<html></html>")
+
+                main()
+
+                mock_load.assert_called_once()
+                mock_npm.assert_called_once()
+                mock_html.assert_called_once()
