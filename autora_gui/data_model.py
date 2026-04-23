@@ -26,6 +26,7 @@ class Datatype(str, Enum):
     BOOLEAN = "boolean"
     STRING = "string"
     CATEGORICAL = "categorical"
+    ANY = "any"
 
 
 class ProtocolType(str, Enum):
@@ -39,7 +40,7 @@ class ProtocolType(str, Enum):
 class VariableType(BaseModel):
     """Variable type model for the workflow."""
 
-    name: str
+    name: str | None
     description: str | None
 
 
@@ -60,14 +61,21 @@ class PrimitiveVariableType(VariableType):
     default: Any | None = None
 
 
+class ListVariableType(VariableType):
+    """A model for list variables in the workflow."""
+
+    variable: "VariableTypes"
+
+
 class DictVariableType(VariableType):
     """A model for dictionary variables in the workflow."""
 
     variables: list["VariableTypes"]
 
 
-VariableTypes = PrimitiveVariableType | DictVariableType
+VariableTypes = PrimitiveVariableType | ListVariableType | DictVariableType
 
+ListVariableType.model_rebuild()
 DictVariableType.model_rebuild()
 
 
