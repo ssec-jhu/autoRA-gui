@@ -4,7 +4,7 @@ import { EMBEDDED_COMPONENTS } from '../data/components.js'
 
 const WorkflowContext = createContext(null)
 
-const initialState = {
+export const initialState = {
   components: {},
   nodes: [],
   connections: [],
@@ -15,7 +15,7 @@ const initialState = {
   pan: { x: 0, y: 0 }
 }
 
-function workflowReducer(state, action) {
+export function workflowReducer(state, action) {
   switch (action.type) {
     case 'SET_COMPONENTS':
       return { ...state, components: action.payload }
