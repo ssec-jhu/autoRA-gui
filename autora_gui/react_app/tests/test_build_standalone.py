@@ -157,9 +157,7 @@ class TestCreateSingleHtml:
             assets_dir.mkdir(parents=True)
 
             index_html = dist_dir / "index.html"
-            index_html.write_text(
-                '<html><head><link rel="stylesheet" href="./assets/style.css"></head></html>'
-            )
+            index_html.write_text('<html><head><link rel="stylesheet" href="./assets/style.css"></head></html>')
 
             css_file = assets_dir / "style.css"
             css_file.write_text(".test { margin: 0; }")
@@ -202,9 +200,7 @@ class TestCreateSingleHtml:
             assets_dir.mkdir(parents=True)
 
             index_html = dist_dir / "index.html"
-            index_html.write_text(
-                '<html><body><script type="module" src="./assets/app.js"></script></body></html>'
-            )
+            index_html.write_text('<html><body><script type="module" src="./assets/app.js"></script></body></html>')
 
             js_file = assets_dir / "app.js"
             js_file.write_text("const x = 1;")
@@ -225,12 +221,12 @@ class TestCreateSingleHtml:
 
             index_html = dist_dir / "index.html"
             index_html.write_text(
-                '<html>'
+                "<html>"
                 '<head><link rel="stylesheet" crossorigin href="./assets/a.css">'
                 '<link rel="stylesheet" crossorigin href="./assets/b.css"></head>'
                 '<body><script type="module" crossorigin src="./assets/x.js"></script>'
                 '<script type="module" crossorigin src="./assets/y.js"></script></body>'
-                '</html>'
+                "</html>"
             )
 
             (assets_dir / "a.css").write_text(".a {}")
