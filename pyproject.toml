@@ -109,6 +109,8 @@ convention = "google"
     "ARG001",  # https://docs.astral.sh/ruff/rules/unused-function-argument/
     "INP",  # https://docs.astral.sh/ruff/rules/#flake8-no-pep420-inp
     "ANN",  # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
+    "PLR2004",  # https://docs.astral.sh/ruff/rules/magic-value-comparison/
+    "PLC0415",  # https://docs.astral.sh/ruff/rules/import-outside-top-level/
 ]
 
 [tool.ruff.lint.flake8-quotes]

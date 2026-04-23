@@ -2,11 +2,15 @@
 
 import tempfile
 from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 from autora_gui.react_app.build_standalone import (
     create_single_html,
     generate_components_js,
     load_components,
+    run_npm_build,
 )
 
 
@@ -243,3 +247,141 @@ class TestCreateSingleHtml:
             assert "<style>.b {}</style>" in content
             assert '<script type="module">let x;</script>' in content
             assert '<script type="module">let y;</script>' in content
+
+
+class TestRunNpmBuild:
+    """Tests for run_npm_build function."""
+
+    @patch("autora_gui.react_app.build_standalone.subprocess.run")
+    def test_returns_true_on_success(self, mock_run):
+        """Test that run_npm_build returns True when both commands succeed."""
+        mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+
+        result = run_npm_build(Path("/fake/path"))
+
+        assert result is True
+        assert mock_run.call_count == 2
+
+    @patch("autora_gui.react_app.build_standalone.subprocess.run")
+    def test_returns_false_when_npm_install_fails(self, mock_run):
+        """Test that run_npm_build returns False when npm install fails."""
+        mock_run.return_value = MagicMock(returncode=1, stdout="", stderr="npm install error")
+
+        result = run_npm_build(Path("/fake/path"))
+
+        assert result is False
+        assert mock_run.call_count == 1  # Should stop after first failure
+
+    @patch("autora_gui.react_app.build_standalone.subprocess.run")
+    def test_returns_false_when_npm_build_fails(self, mock_run):
+        """Test that run_npm_build returns False when npm build fails."""
+        # First call (npm install) succeeds, second call (npm build) fails
+        mock_run.side_effect = [
+            MagicMock(returncode=0, stdout="", stderr=""),
+            MagicMock(returncode=1, stdout="build output", stderr="build error"),
+        ]
+
+        result = run_npm_build(Path("/fake/path"))
+
+        assert result is False
+        assert mock_run.call_count == 2
+
+    @patch("autora_gui.react_app.build_standalone.subprocess.run")
+    def test_calls_npm_install_first(self, mock_run):
+        """Test that npm install is called before npm build."""
+        mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+        test_path = Path("/test/react/app")
+
+        run_npm_build(test_path)
+
+        calls = mock_run.call_args_list
+        assert calls[0][0][0] == ["npm", "install"]
+        assert calls[0][1]["cwd"] == test_path
+
+    @patch("autora_gui.react_app.build_standalone.subprocess.run")
+    def test_calls_npm_run_build_second(self, mock_run):
+        """Test that npm run build is called after npm install."""
+        mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+        test_path = Path("/test/react/app")
+
+        run_npm_build(test_path)
+
+        calls = mock_run.call_args_list
+        assert calls[1][0][0] == ["npm", "run", "build"]
+        assert calls[1][1]["cwd"] == test_path
+
+    @patch("autora_gui.react_app.build_standalone.subprocess.run")
+    def test_captures_output(self, mock_run):
+        """Test that subprocess output is captured."""
+        mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+
+        run_npm_build(Path("/fake/path"))
+
+        for call in mock_run.call_args_list:
+            assert call[1]["capture_output"] is True
+            assert call[1]["text"] is True
+
+
+class TestMain:
+    """Tests for main function."""
+
+    def test_main_exits_on_build_failure(self):
+        """Test that main exits with code 1 when build fails."""
+        from autora_gui.react_app.build_standalone import main
+
+        with (
+            patch(
+                "autora_gui.react_app.build_standalone.load_components",
+                return_value={"theorists": []},
+            ),
+            patch("autora_gui.react_app.build_standalone.run_npm_build", return_value=False),
+            tempfile.TemporaryDirectory() as tmpdir,
+            patch("autora_gui.react_app.build_standalone.Path") as mock_path,
+        ):
+            mock_react_dir = Path(tmpdir)
+            mock_path.return_value.parent = mock_react_dir
+
+            # Create required directories
+            data_dir = mock_react_dir / "src" / "data"
+            data_dir.mkdir(parents=True, exist_ok=True)
+
+            with pytest.raises(SystemExit) as exc_info:
+                main()
+
+            assert exc_info.value.code == 1
+
+    def test_main_calls_all_build_steps(self):
+        """Test that main calls load_components, generate_components_js, and run_npm_build."""
+        from autora_gui.react_app.build_standalone import main
+
+        with (
+            patch(
+                "autora_gui.react_app.build_standalone.load_components",
+                return_value={"theorists": []},
+            ) as mock_load,
+            patch("autora_gui.react_app.build_standalone.run_npm_build", return_value=True) as mock_npm,
+            patch(
+                "autora_gui.react_app.build_standalone.create_single_html",
+                return_value=True,
+            ) as mock_html,
+            tempfile.TemporaryDirectory() as tmpdir,
+            patch("autora_gui.react_app.build_standalone.Path") as mock_path,
+        ):
+            mock_react_dir = Path(tmpdir)
+            mock_path.return_value.parent = mock_react_dir
+
+            # Create required directories and files
+            data_dir = mock_react_dir / "src" / "data"
+            data_dir.mkdir(parents=True, exist_ok=True)
+
+            # Create mock output file for stat()
+            root_dir = mock_react_dir.parent.parent
+            root_dir.mkdir(parents=True, exist_ok=True)
+            output_file = root_dir / "index.html"
+            output_file.write_text("<html></html>")
+
+            main()
+
+            mock_load.assert_called_once()
+            mock_npm.assert_called_once()
+            mock_html.assert_called_once()
