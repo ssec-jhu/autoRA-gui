@@ -60,6 +60,11 @@ function Toolbar() {
     }
   }
 
+  const handleGeneratePython = () => {
+    // TODO: Implement Python code generation
+    alert('Python code generation coming soon!')
+  }
+
   const handleZoomIn = () => {
     dispatch({ type: 'SET_ZOOM', payload: state.zoom + 0.1 })
   }
@@ -100,6 +105,10 @@ function Toolbar() {
           <button className="toolbar-btn danger" onClick={handleClear} title="Clear canvas">
             <span className="btn-icon">🗑</span>
             <span className="btn-text">Clear</span>
+          </button>
+          <button className="toolbar-btn" onClick={handleGeneratePython} title="Generate Python code">
+            <span className="btn-icon">🐍</span>
+            <span className="btn-text">Generate Python</span>
           </button>
         </div>
 
