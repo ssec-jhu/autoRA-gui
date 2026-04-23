@@ -1,15 +1,3 @@
-export function calculateBezierPath(x1, y1, x2, y2) {
-  const dx = x2 - x1
-  const cpOffset = Math.min(Math.abs(dx) * 0.5, 100)
-
-  const cp1x = x1 + cpOffset
-  const cp1y = y1
-  const cp2x = x2 - cpOffset
-  const cp2y = y2
-
-  return `M ${x1} ${y1} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x2} ${y2}`
-}
-
 export function getPortPosition(node, portType, nodeWidth = 160, nodeHeight = 80) {
   if (portType === 'output') {
     return {

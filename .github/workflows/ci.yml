@@ -82,6 +82,37 @@ jobs:
         name: codecov-umbrella
         verbose: true
 
+  test-js:
+    name: JS/React tests on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    env:
+      OS: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: autora_gui/react_app/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+        working-directory: autora_gui/react_app
+      - name: Run Vitest with coverage
+        run: npm run test:coverage
+        working-directory: autora_gui/react_app
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: autora_gui/react_app/coverage/lcov.info
+          flags: javascript
+          env_vars: OS
+          fail_ci_if_error: false
+
   docs:
     name: Build docs with Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest

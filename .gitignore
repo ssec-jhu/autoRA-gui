@@ -179,3 +179,4 @@ node_modules
 # React files
 .vite
 dist
+coverage
