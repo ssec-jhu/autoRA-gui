@@ -53,19 +53,20 @@ jobs:
           cp ../../index.html ../../../deploy/react/index.html
         continue-on-error: true
 
-      # Build JS version from gui_poc_js branch
-      - name: Checkout JS branch
+      # Build Sphinx docs from main branch
+      - name: Checkout main branch for docs
         uses: actions/checkout@v4
         with:
-          ref: gui_poc_js
-          path: js-branch
+          ref: main
+          path: main-branch
 
-      - name: Build JS standalone
+      - name: Build Sphinx docs
         run: |
-          cd js-branch
-          python -m autora_gui.js_app.build_standalone
-          mkdir -p ../deploy/js
-          cp index.html ../deploy/js/index.html
+          cd main-branch
+          pip install tox
+          tox -e build-docs
+          mkdir -p ../deploy/docs
+          cp -r docs/_build/html/* ../deploy/docs/
         continue-on-error: true
 
       # Create landing page as main index
@@ -94,7 +95,7 @@ jobs:
           <h1>AutoRA Workflow Editor</h1>
           <div class="versions">
           <a href="./react/" class="version-card"><h2>React Version</h2><p>Modern React-based implementation</p></a>
-          <a href="./js/" class="version-card"><h2>Vanilla JS Version</h2><p>Lightweight vanilla JavaScript</p></a>
+          <a href="./docs/" class="version-card"><h2>Documentation</h2><p>API reference and guides</p></a>
           </div>
           </div>
           </body>
