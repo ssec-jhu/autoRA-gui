@@ -14,10 +14,18 @@ older version.
 ## Reporting a Vulnerability
 
 Please report suspected vulnerabilities privately. If GitHub Private
-Vulnerability Reporting is enabled for this repository, use that feature to
-submit the report. Otherwise, contact the project maintainers through a
-private channel and include a clear description of the issue, reproduction
-steps, impact, and any suggested remediation.
+Vulnerability Reporting is enabled for this repository, submit the report at:
+
+https://github.com/OWNER/REPOSITORY/security/advisories/new
+
+If you cannot use GitHub Private Vulnerability Reporting, email the
+maintainers at:
+
+security@example.com
+
+Please include a clear description of the issue, reproduction steps, impact,
+and any suggested remediation. Do not open a public GitHub issue for security
+reports.
 
 Please do not disclose security issues publicly until the maintainers have had
 an opportunity to investigate and release a fix. We will acknowledge receipt
