@@ -94,7 +94,7 @@ jobs:
           <div class="container">
           <h1>AutoRA Workflow Editor and Documentation</h1>
           <div class="versions">
-          <a href="./react/" class="version-card"><h2>Workflow Editor (React Version)</h2><p>Modern React-based implementation</p></a>
+          <a href="./react/" class="version-card"><h2>Workflow Editor</h2><p>Modern React-based implementation</p></a>
           <a href="./docs/" class="version-card"><h2>Documentation</h2><p>API reference and guides</p></a>
           </div>
           </div>
