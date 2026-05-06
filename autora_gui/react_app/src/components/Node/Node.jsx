@@ -133,6 +133,8 @@ function Node({ node, isSelected, isConnecting, onSelect, onDelete, onPositionCh
   }, [isDiamond, isControlNode])
 
   const handlePortClick = useCallback((e, port) => {
+    // Only handle left-click for connections
+    if (e.button !== 0) return
     e.stopPropagation()
     e.preventDefault()
     if (onBorderClick) {
@@ -157,6 +159,8 @@ function Node({ node, isSelected, isConnecting, onSelect, onDelete, onPositionCh
   }, [node.id, node.x, node.y, isDiamond, onBorderClick])
 
   const handleMouseDown = useCallback((e) => {
+    // Only handle left-click for dragging
+    if (e.button !== 0) return
     if (e.target.closest('.node-delete') || e.target.closest('.node-port')) return
     e.stopPropagation()
 
