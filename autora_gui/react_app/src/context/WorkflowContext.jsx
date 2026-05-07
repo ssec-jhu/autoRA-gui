@@ -11,6 +11,7 @@ export const initialState = {
   selectedNodeId: null,
   selectedConnectionId: null,
   connectingFrom: null,
+  previewedComponent: null,
   zoom: 1,
   pan: { x: 0, y: 0 }
 }
@@ -105,6 +106,15 @@ export function workflowReducer(state, action) {
       return {
         ...state,
         selectedNodeId: action.payload,
+        selectedConnectionId: null,
+        previewedComponent: null
+      }
+
+    case 'SET_PREVIEWED_COMPONENT':
+      return {
+        ...state,
+        previewedComponent: action.payload,
+        selectedNodeId: null,
         selectedConnectionId: null
       }
 
@@ -179,7 +189,8 @@ export function workflowReducer(state, action) {
         ...state,
         selectedNodeId: null,
         selectedConnectionId: null,
-        connectingFrom: null
+        connectingFrom: null,
+        previewedComponent: null
       }
 
     default:

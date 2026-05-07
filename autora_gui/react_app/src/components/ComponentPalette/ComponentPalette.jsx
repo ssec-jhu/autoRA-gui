@@ -37,7 +37,7 @@ const controlNodes = [
 ]
 
 function ComponentPalette() {
-  const { state } = useWorkflow()
+  const { state, dispatch } = useWorkflow()
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedSections, setExpandedSections] = useState({
     controls: true,
@@ -46,9 +46,9 @@ function ComponentPalette() {
     experiment_runners: false
   })
 
-  // Get the selected node's component UUID
+  // Get the selected/previewed component UUID
   const selectedNode = state.nodes.find(n => n.id === state.selectedNodeId)
-  const selectedComponentUuid = selectedNode?.protocolUuid
+  const selectedComponentUuid = selectedNode?.protocolUuid || state.previewedComponent?.uuid
 
   // Auto-expand section containing the selected component, collapse others
   useEffect(() => {
@@ -124,6 +124,10 @@ function ComponentPalette() {
     e.dataTransfer.effectAllowed = 'copy'
   }
 
+  const handleComponentClick = (component) => {
+    dispatch({ type: 'SET_PREVIEWED_COMPONENT', payload: component })
+  }
+
   return (
     <aside className="component-palette">
       <div className="palette-header">
@@ -161,6 +165,7 @@ function ComponentPalette() {
                       key={component.uuid}
                       className={`component-item ${selectedComponentUuid === component.uuid ? 'selected' : ''}`}
                       draggable
+                      onClick={() => handleComponentClick(component)}
                       onDragStart={(e) => handleDragStart(e, component)}
                       title={component.description}
                     >
