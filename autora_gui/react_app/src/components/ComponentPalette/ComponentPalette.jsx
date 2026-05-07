@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useWorkflow } from '../../context/WorkflowContext'
 import './ComponentPalette.css'
 
@@ -45,6 +45,42 @@ function ComponentPalette() {
     experimentalists: false,
     experiment_runners: false
   })
+
+  // Get the selected node's component UUID
+  const selectedNode = state.nodes.find(n => n.id === state.selectedNodeId)
+  const selectedComponentUuid = selectedNode?.protocolUuid
+
+  // Auto-expand section containing the selected component, collapse others
+  useEffect(() => {
+    if (!selectedComponentUuid) return
+
+    // Check control nodes first
+    if (controlNodes.some(c => c.uuid === selectedComponentUuid)) {
+      setExpandedSections({
+        controls: true,
+        theorists: false,
+        experimentalists: false,
+        experiment_runners: false
+      })
+      return
+    }
+
+    // Check other component types
+    if (state.components) {
+      for (const [type, components] of Object.entries(state.components)) {
+        if (Array.isArray(components) && components.some(c => c.uuid === selectedComponentUuid)) {
+          setExpandedSections({
+            controls: false,
+            theorists: false,
+            experimentalists: false,
+            experiment_runners: false,
+            [type]: true
+          })
+          break
+        }
+      }
+    }
+  }, [selectedComponentUuid, state.components])
 
   const filteredComponents = useMemo(() => {
     const result = {}
@@ -123,7 +159,7 @@ function ComponentPalette() {
                   {components.map(component => (
                     <div
                       key={component.uuid}
-                      className="component-item"
+                      className={`component-item ${selectedComponentUuid === component.uuid ? 'selected' : ''}`}
                       draggable
                       onDragStart={(e) => handleDragStart(e, component)}
                       title={component.description}
