@@ -210,6 +210,12 @@ function PropertiesPanel() {
           {selectedNode.description && (
             <p className="node-description">{selectedNode.description}</p>
           )}
+          <button
+            className="delete-node-btn"
+            onClick={() => dispatch({ type: 'DELETE_NODE', payload: selectedNode.id })}
+          >
+            Delete Node
+          </button>
         </div>
 
         {isFilterNode && (

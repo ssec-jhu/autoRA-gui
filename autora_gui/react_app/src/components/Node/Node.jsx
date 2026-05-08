@@ -16,6 +16,56 @@ const CONTROL_NODE_WIDTH = 100
 const CONTROL_NODE_HEIGHT = 80
 const DIAMOND_SIZE = 90
 
+// Determine if a port is input or output based on node type and port position
+export function getPortType(nodeType, portId) {
+  if (nodeType === 'filter_point') {
+    // Filter: top/left = input, bottom/right = output
+    return (portId === 'top' || portId === 'left') ? 'input' : 'output'
+  }
+  if (nodeType === 'start_point') {
+    // Start node: all ports are outputs (data flows out)
+    return 'output'
+  }
+  if (nodeType === 'end_point') {
+    // End node: all ports are inputs (data flows in)
+    return 'input'
+  }
+  // Regular nodes: top/left = input, bottom/right = output
+  return (portId === 'top' || portId === 'left') ? 'input' : 'output'
+}
+
+// Check if a port has a connection and return the connection role
+// Returns: 'output' if port is source, 'input' if port is target, null if not connected
+function getPortConnectionRole(nodeId, portId, connections, portPositions) {
+  if (!connections || connections.length === 0) return null
+
+  // Get the actual port position for this port
+  const portPos = portPositions.find(p => p.id === portId)
+  if (!portPos) return null
+
+  const threshold = 20 // Distance threshold for matching
+
+  for (const conn of connections) {
+    // Check if this node is the source (output) and port matches
+    if (conn.sourceId === nodeId && conn.sourcePoint) {
+      const dist = Math.sqrt(
+        Math.pow(conn.sourcePoint.x - portPos.x, 2) +
+        Math.pow(conn.sourcePoint.y - portPos.y, 2)
+      )
+      if (dist < threshold) return 'output'
+    }
+    // Check if this node is the target (input) and port matches
+    if (conn.targetId === nodeId && conn.targetPoint) {
+      const dist = Math.sqrt(
+        Math.pow(conn.targetPoint.x - portPos.x, 2) +
+        Math.pow(conn.targetPoint.y - portPos.y, 2)
+      )
+      if (dist < threshold) return 'input'
+    }
+  }
+  return null
+}
+
 // Get port positions for a node based on its type (visual/connection coordinates)
 export function getNodePorts(node) {
   const isDiamond = node.type === 'filter_point'
@@ -87,7 +137,7 @@ export function findClosestPort(node, point) {
   return closest
 }
 
-function Node({ node, isSelected, isConnecting, onSelect, onDelete, onPositionChange, onBorderClick, zoom }) {
+function Node({ node, isSelected, isConnecting, connections, onSelect, onPositionChange, onBorderClick, zoom }) {
   const nodeRef = useRef(null)
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
@@ -211,42 +261,20 @@ function Node({ node, isSelected, isConnecting, onSelect, onDelete, onPositionCh
       onContextMenu={handleContextMenu}
     >
       {isDiamond ? (
-        <>
-          <div className="diamond-inner">
-            <div className="diamond-header" style={{ backgroundColor: config.color }}>
-              <span className="node-icon">{config.icon}</span>
-              <span className="node-title">{node.name}</span>
-            </div>
-            <div className="diamond-body">
-              <span className="node-type">filter point</span>
-            </div>
+        <div className="diamond-inner">
+          <div className="diamond-header" style={{ backgroundColor: config.color }}>
+            <span className="node-icon">{config.icon}</span>
+            <span className="node-title">{node.name}</span>
           </div>
-          <button
-            className="node-delete"
-            onClick={(e) => {
-              e.stopPropagation()
-              onDelete(node.id)
-            }}
-            title="Delete node"
-          >
-            ×
-          </button>
-        </>
+          <div className="diamond-body">
+            <span className="node-type">filter point</span>
+          </div>
+        </div>
       ) : (
         <>
           <div className="node-header" style={{ backgroundColor: config.color }}>
             <span className="node-icon">{config.icon}</span>
             <span className="node-title">{node.name}</span>
-            <button
-              className="node-delete"
-              onClick={(e) => {
-                e.stopPropagation()
-                onDelete(node.id)
-              }}
-              title="Delete node"
-            >
-              ×
-            </button>
           </div>
           <div className="node-body">
             <div className="node-content">
@@ -258,10 +286,47 @@ function Node({ node, isSelected, isConnecting, onSelect, onDelete, onPositionCh
       {/* Connection ports - rendered in a non-rotating container for diamond */}
       {isDiamond ? (
         <div className="diamond-ports-container">
-          {ports.map(port => (
+          {ports.map(port => {
+            const portType = getPortType(node.type, port.id)
+            const absolutePorts = getNodePorts(node)
+            const connectionRole = getPortConnectionRole(node.id, port.id, connections, absolutePorts)
+            // Filter bottom port is always output colored, others colored by connection role
+            const isFilterBottom = node.type === 'filter_point' && port.id === 'bottom'
+            const colorClass = isFilterBottom ? 'port-output' : (connectionRole ? `port-${connectionRole}` : 'port-neutral')
+            return (
+              <div
+                key={port.id}
+                className={`node-port node-port-${port.id} ${colorClass} ${hoveredPort === port.id ? 'hovered' : ''}`}
+                style={{
+                  left: port.x,
+                  top: port.y
+                }}
+                onMouseDown={(e) => handlePortClick(e, port)}
+                onMouseEnter={() => setHoveredPort(port.id)}
+                onMouseLeave={() => setHoveredPort(null)}
+                title={`${portType === 'input' ? 'Input' : 'Output'} - Click to connect`}
+              />
+            )
+          })}
+        </div>
+      ) : (
+        ports.map(port => {
+          const portType = getPortType(node.type, port.id)
+          const absolutePorts = getNodePorts(node)
+          const connectionRole = getPortConnectionRole(node.id, port.id, connections, absolutePorts)
+          // Start node: always output (coral), End node: always input (green), others: colored by connection role
+          let colorClass
+          if (node.type === 'start_point') {
+            colorClass = 'port-output'
+          } else if (node.type === 'end_point') {
+            colorClass = 'port-input'
+          } else {
+            colorClass = connectionRole ? `port-${connectionRole}` : 'port-neutral'
+          }
+          return (
             <div
               key={port.id}
-              className={`node-port node-port-${port.id} ${hoveredPort === port.id ? 'hovered' : ''}`}
+              className={`node-port node-port-${port.id} ${colorClass} ${hoveredPort === port.id ? 'hovered' : ''}`}
               style={{
                 left: port.x,
                 top: port.y
@@ -269,25 +334,10 @@ function Node({ node, isSelected, isConnecting, onSelect, onDelete, onPositionCh
               onMouseDown={(e) => handlePortClick(e, port)}
               onMouseEnter={() => setHoveredPort(port.id)}
               onMouseLeave={() => setHoveredPort(null)}
-              title="Click to connect"
+              title={`${portType === 'input' ? 'Input' : 'Output'} - Click to connect`}
             />
-          ))}
-        </div>
-      ) : (
-        ports.map(port => (
-          <div
-            key={port.id}
-            className={`node-port node-port-${port.id} ${hoveredPort === port.id ? 'hovered' : ''}`}
-            style={{
-              left: port.x,
-              top: port.y
-            }}
-            onMouseDown={(e) => handlePortClick(e, port)}
-            onMouseEnter={() => setHoveredPort(port.id)}
-            onMouseLeave={() => setHoveredPort(null)}
-            title="Click to connect"
-          />
-        ))
+          )
+        })
       )}
       <div className="connection-hint">Click a port to connect</div>
     </div>

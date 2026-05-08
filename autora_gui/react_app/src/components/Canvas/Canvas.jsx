@@ -167,8 +167,8 @@ function Canvas() {
             node={node}
             isSelected={state.selectedNodeId === node.id}
             isConnecting={connectingFrom?.nodeId === node.id}
+            connections={state.connections}
             onSelect={(id) => dispatch({ type: 'SELECT_NODE', payload: id })}
-            onDelete={(id) => dispatch({ type: 'DELETE_NODE', payload: id })}
             onPositionChange={(id, x, y) => dispatch({ type: 'UPDATE_NODE_POSITION', payload: { id, x, y } })}
             onBorderClick={handleBorderClick}
             zoom={state.zoom}
