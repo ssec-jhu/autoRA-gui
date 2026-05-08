@@ -145,6 +145,16 @@ export function workflowReducer(state, action) {
         selectedConnectionId: state.selectedConnectionId === action.payload ? null : state.selectedConnectionId
       }
 
+    case 'UPDATE_CONNECTION_PORTS': {
+      const { id, sourcePoint, targetPoint } = action.payload
+      return {
+        ...state,
+        connections: state.connections.map(conn =>
+          conn.id === id ? { ...conn, sourcePoint, targetPoint } : conn
+        )
+      }
+    }
+
     case 'SELECT_CONNECTION':
       return {
         ...state,

@@ -1,7 +1,17 @@
-import React, { useRef } from 'react'
+import React, { useRef, useCallback } from 'react'
 import { useWorkflow } from '../../context/WorkflowContext'
 import { serializeWorkflow, deserializeWorkflow } from '../../utils/serialization'
 import './Toolbar.css'
+
+// Canvas dimensions (should match the actual canvas size)
+const getCanvasCenter = () => {
+  const canvas = document.querySelector('.canvas')
+  if (canvas) {
+    const rect = canvas.getBoundingClientRect()
+    return { width: rect.width, height: rect.height }
+  }
+  return { width: 800, height: 600 } // fallback
+}
 
 function Toolbar() {
   const { state, dispatch } = useWorkflow()
@@ -60,12 +70,36 @@ function Toolbar() {
     }
   }
 
+  // Zoom relative to canvas center
+  const zoomToCenter = useCallback((newZoom) => {
+    // Clamp the new zoom value
+    const clampedZoom = Math.max(0.25, Math.min(2, newZoom))
+    if (clampedZoom === state.zoom) return
+
+    // Get canvas dimensions
+    const { width, height } = getCanvasCenter()
+
+    // Calculate the canvas center point in canvas coordinates (before zoom)
+    // The center of the viewport in screen coords is (width/2, height/2)
+    // In canvas coords: centerX = (width/2) / oldZoom - pan.x
+    const centerX = (width / 2) / state.zoom - state.pan.x
+    const centerY = (height / 2) / state.zoom - state.pan.y
+
+    // After zoom, we want the same canvas point to be at the viewport center
+    // newPan.x = (width/2) / newZoom - centerX
+    const newPanX = (width / 2) / clampedZoom - centerX
+    const newPanY = (height / 2) / clampedZoom - centerY
+
+    dispatch({ type: 'SET_ZOOM', payload: clampedZoom })
+    dispatch({ type: 'SET_PAN', payload: { x: newPanX, y: newPanY } })
+  }, [state.zoom, state.pan, dispatch])
+
   const handleZoomIn = () => {
-    dispatch({ type: 'SET_ZOOM', payload: state.zoom + 0.1 })
+    zoomToCenter(state.zoom + 0.1)
   }
 
   const handleZoomOut = () => {
-    dispatch({ type: 'SET_ZOOM', payload: state.zoom - 0.1 })
+    zoomToCenter(state.zoom - 0.1)
   }
 
   const handleZoomReset = () => {
