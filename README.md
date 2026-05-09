@@ -1,7 +1,8 @@
 # SSEC-JHU autora_gui
 
 [![CI](https://github.com/ssec-jhu/autoRA-gui/actions/workflows/ci.yml/badge.svg)](https://github.com/ssec-jhu/autoRA-gui/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/ssec-jhu/autoRA-gui/branch/main/graph/badge.svg?token=0KPNKHRC2V)](https://codecov.io/gh/ssec-jhu/autoRA-gui)
+[![Docs](https://github.com/ssec-jhu/autoRA-gui/actions/workflows/deploy-pages.yml/badge.svg)](https://ssec-jhu.github.io/autoRA-gui)
+[![codecov](https://codecov.io/gh/ssec-jhu/autoRA-gui/branch/main/graph/badge.svg?token=Ry6ZXSfGa3)](https://codecov.io/gh/ssec-jhu/autoRA-gui)
 [![Security](https://github.com/ssec-jhu/autoRA-gui/actions/workflows/security.yml/badge.svg)](https://github.com/ssec-jhu/autoRA-gui/actions/workflows/security.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14052740.svg)](https://doi.org/10.5281/zenodo.14052740)
 
