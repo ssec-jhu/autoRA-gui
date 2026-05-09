@@ -5,6 +5,7 @@ on:
     branches:
       - gui_poc_js
       - gui_poc_react
+      - desiderata_pi
       - main
   workflow_dispatch:  # Allow manual trigger
 
@@ -53,6 +54,22 @@ jobs:
           cp ../../index.html ../../../deploy/react/index.html
         continue-on-error: true
 
+      # Build improved React version from desiderata_pi branch
+      - name: Checkout desiderata_pi branch
+        uses: actions/checkout@v4
+        with:
+          ref: desiderata_pi
+          path: desiderata-branch
+
+      - name: Build improved React standalone
+        run: |
+          cd desiderata-branch/autora_gui/react_app
+          npm install
+          python build_standalone.py
+          mkdir -p ../../../deploy/improved
+          cp ../../index.html ../../../deploy/improved/index.html
+        continue-on-error: true
+
       # Build Sphinx docs from main branch
       - name: Checkout main branch for docs
         uses: actions/checkout@v4
@@ -95,6 +112,7 @@ jobs:
           <h1>AutoRA Workflow Editor and Documentation</h1>
           <div class="versions">
           <a href="./react/" class="version-card"><h2>Workflow Editor</h2><p>Modern React-based implementation</p></a>
+          <a href="./improved/" class="version-card"><h2>Improved Workflow Editor</h2><p>Updated React-based implementation</p></a>
           <a href="./docs/" class="version-card"><h2>Documentation</h2><p>API reference and guides</p></a>
           </div>
           </div>
