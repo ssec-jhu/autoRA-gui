@@ -9,8 +9,7 @@ function Canvas() {
   const { state, dispatch } = useWorkflow()
   const [isPanning, setIsPanning] = useState(false)
   const [panStart, setPanStart] = useState({ x: 0, y: 0 })
-  const [hasDragged, setHasDragged] = useState(false) // Track if user dragged during pan
-  const [connectingFrom, setConnectingFrom] = useState(null) // { nodeId, point: {x, y} }
+  const { connectingFrom } = state
 
   const screenToCanvas = useCallback((screenX, screenY) => {
     if (!canvasRef.current) return { x: 0, y: 0 }
@@ -44,7 +43,6 @@ function Canvas() {
     // Only deselect if user didn't drag (was a real click)
     if (!hasDragged && (e.target === canvasRef.current || e.target.classList.contains('canvas-inner'))) {
       dispatch({ type: 'DESELECT_ALL' })
-      setConnectingFrom(null)
     }
   }
 
@@ -109,9 +107,9 @@ function Canvas() {
   const handleBorderClick = useCallback((nodeId, point) => {
     if (!connectingFrom) {
       // Start new connection
-      setConnectingFrom({ nodeId, point })
+      dispatch({ type: 'START_CONNECTING', payload: { nodeId, point } })
     } else if (connectingFrom.nodeId !== nodeId) {
-      // Complete connection to different node
+      // Complete connection to different node (ADD_CONNECTION clears connectingFrom)
       dispatch({
         type: 'ADD_CONNECTION',
         payload: {
@@ -121,7 +119,6 @@ function Canvas() {
           targetPoint: point
         }
       })
-      setConnectingFrom(null)
     }
   }, [connectingFrom, dispatch])
 
