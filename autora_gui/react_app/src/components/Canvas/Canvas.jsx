@@ -68,9 +68,10 @@ function Canvas() {
   }, [state.zoom, state.pan, dispatch])
 
   const handleMouseDown = (e) => {
-    // Left click on empty canvas or middle mouse button - start panning
+    // Left click on empty canvas, middle mouse button, or Alt + left click - start panning
     const isCanvasClick = e.target === canvasRef.current || e.target.classList.contains('canvas-inner')
-    if (e.button === 1 || (e.button === 0 && isCanvasClick)) {
+    if (e.button === 1 || (e.button === 0 && (isCanvasClick || e.altKey))) {
+      e.preventDefault()
       setIsPanning(true)
       setHasDragged(false)
       setPanStart({ x: e.clientX - state.pan.x * state.zoom, y: e.clientY - state.pan.y * state.zoom })
