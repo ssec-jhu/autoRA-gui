@@ -204,6 +204,52 @@ describe('workflowReducer', () => {
       expect(result.selectedNodeId).toBe('node-1')
       expect(result.selectedConnectionId).toBeNull()
     })
+
+    it('clears previewedComponent when selecting node', () => {
+      const state = {
+        ...initialState,
+        previewedComponent: { name: 'Test' }
+      }
+      const result = workflowReducer(state, {
+        type: 'SELECT_NODE',
+        payload: 'node-1'
+      })
+
+      expect(result.selectedNodeId).toBe('node-1')
+      expect(result.previewedComponent).toBeNull()
+    })
+  })
+
+  describe('SET_PREVIEWED_COMPONENT', () => {
+    it('sets previewed component and clears selections', () => {
+      const state = {
+        ...initialState,
+        selectedNodeId: 'node-1',
+        selectedConnectionId: 'conn-1'
+      }
+      const component = { name: 'Test Component', uuid: 'test-1' }
+      const result = workflowReducer(state, {
+        type: 'SET_PREVIEWED_COMPONENT',
+        payload: component
+      })
+
+      expect(result.previewedComponent).toEqual(component)
+      expect(result.selectedNodeId).toBeNull()
+      expect(result.selectedConnectionId).toBeNull()
+    })
+
+    it('clears previewed component when payload is null', () => {
+      const state = {
+        ...initialState,
+        previewedComponent: { name: 'Test' }
+      }
+      const result = workflowReducer(state, {
+        type: 'SET_PREVIEWED_COMPONENT',
+        payload: null
+      })
+
+      expect(result.previewedComponent).toBeNull()
+    })
   })
 
   describe('ADD_CONNECTION', () => {
@@ -277,6 +323,53 @@ describe('workflowReducer', () => {
       })
 
       expect(result.selectedConnectionId).toBeNull()
+    })
+  })
+
+  describe('UPDATE_CONNECTION_PORTS', () => {
+    it('updates connection source and target points', () => {
+      const state = {
+        ...initialState,
+        connections: [{
+          id: 'conn-1',
+          sourceId: 'node-1',
+          targetId: 'node-2',
+          sourcePoint: { x: 100, y: 50 },
+          targetPoint: { x: 200, y: 50 }
+        }]
+      }
+      const result = workflowReducer(state, {
+        type: 'UPDATE_CONNECTION_PORTS',
+        payload: {
+          id: 'conn-1',
+          sourcePoint: { x: 110, y: 60 },
+          targetPoint: { x: 210, y: 60 }
+        }
+      })
+
+      expect(result.connections[0].sourcePoint).toEqual({ x: 110, y: 60 })
+      expect(result.connections[0].targetPoint).toEqual({ x: 210, y: 60 })
+    })
+
+    it('does not modify other connections', () => {
+      const state = {
+        ...initialState,
+        connections: [
+          { id: 'conn-1', sourcePoint: { x: 100, y: 50 }, targetPoint: { x: 200, y: 50 } },
+          { id: 'conn-2', sourcePoint: { x: 300, y: 50 }, targetPoint: { x: 400, y: 50 } }
+        ]
+      }
+      const result = workflowReducer(state, {
+        type: 'UPDATE_CONNECTION_PORTS',
+        payload: {
+          id: 'conn-1',
+          sourcePoint: { x: 110, y: 60 },
+          targetPoint: { x: 210, y: 60 }
+        }
+      })
+
+      expect(result.connections[1].sourcePoint).toEqual({ x: 300, y: 50 })
+      expect(result.connections[1].targetPoint).toEqual({ x: 400, y: 50 })
     })
   })
 
@@ -396,18 +489,20 @@ describe('workflowReducer', () => {
   })
 
   describe('DESELECT_ALL', () => {
-    it('clears all selection states', () => {
+    it('clears all selection states including previewedComponent', () => {
       const state = {
         ...initialState,
         selectedNodeId: 'node-1',
         selectedConnectionId: 'conn-1',
-        connectingFrom: { nodeId: 'node-2' }
+        connectingFrom: { nodeId: 'node-2' },
+        previewedComponent: { name: 'Test' }
       }
       const result = workflowReducer(state, { type: 'DESELECT_ALL' })
 
       expect(result.selectedNodeId).toBeNull()
       expect(result.selectedConnectionId).toBeNull()
       expect(result.connectingFrom).toBeNull()
+      expect(result.previewedComponent).toBeNull()
     })
   })
 
