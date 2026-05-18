@@ -1,6 +1,7 @@
 import React, { useRef } from 'react'
 import { useWorkflow } from '../../context/WorkflowContext'
 import { serializeWorkflow, deserializeWorkflow } from '../../utils/serialization'
+import { generatePythonCode, generatePipInstalls } from '../../utils/pythonGenerator'
 import './Toolbar.css'
 
 function Toolbar() {
@@ -61,8 +62,22 @@ function Toolbar() {
   }
 
   const handleGeneratePython = () => {
-    // TODO: Implement Python code generation
-    alert('Python code generation coming soon!')
+    try {
+      const pythonCode = generatePythonCode(state)
+      const pipInstalls = generatePipInstalls(state)
+
+      // Create downloadable Python file
+      const fullCode = `# ${pipInstalls}\n\n${pythonCode}`
+      const blob = new Blob([fullCode], { type: 'text/x-python' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `workflow_${new Date().toISOString().slice(0, 10)}.py`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      alert(`Failed to generate Python code: ${err.message}`)
+    }
   }
 
   const handleZoomIn = () => {
