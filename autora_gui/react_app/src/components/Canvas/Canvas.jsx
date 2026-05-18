@@ -54,7 +54,9 @@ function Canvas() {
   }, [state.zoom, dispatch])
 
   const handleMouseDown = (e) => {
-    if (e.button === 1) {
+    // Middle mouse button or Alt + left click for panning
+    if (e.button === 1 || (e.button === 0 && e.altKey)) {
+      e.preventDefault()
       setIsPanning(true)
       setPanStart({ x: e.clientX - state.pan.x * state.zoom, y: e.clientY - state.pan.y * state.zoom })
     }
