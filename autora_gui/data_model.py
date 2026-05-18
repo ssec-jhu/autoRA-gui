@@ -112,13 +112,13 @@ class Link(BaseModel):
 
 
 class Filter(Link):
-    """An exit criteria from the potential loop in the workflow.
+    """A filter link model for AutoRA GUI.
 
-    Includes the loop counter parameter and alternative target.
+    A specialized link with counter and alternative target.
     """
 
     maxCounter: int = 1
-    altTarget: uuid.UUID | None
+    altTarget: uuid.UUID | None = None
 
 
 class ParameterSetting(AutoraBaseModel):
@@ -173,6 +173,16 @@ class EndComponent(Component):
     """
 
 
+class FilterComponent(Component):
+    """A filter component model for AutoRA GUI.
+
+    Serves as a decision/filter point in the workflow.
+    """
+
+    maxCounter: int = 1
+    altTarget: uuid.UUID | None = None
+
+
 class Workflow(BaseModel):
     """A workflow model for AutoRA GUI.
 
@@ -183,6 +193,7 @@ class Workflow(BaseModel):
     description: str | None = None
     start: StartComponent | None = None
     end: EndComponent | None = None
+    filters: list[FilterComponent] | None = None
     independentVariables: VariableTypes
     dependentVariables: VariableTypes
     components: list[ProtocolComponent]

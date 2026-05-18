@@ -1,0 +1,124 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - gui_poc_js
+      - gui_poc_react
+      - main
+  workflow_dispatch:  # Allow manual trigger
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Create deployment directory
+        run: mkdir -p deploy
+
+      # Build React version from gui_poc_react branch
+      - name: Checkout React branch
+        uses: actions/checkout@v4
+        with:
+          ref: gui_poc_react
+          path: react-branch
+
+      - name: Build React standalone
+        run: |
+          cd react-branch/autora_gui/react_app
+          npm install
+          python build_standalone.py
+          mkdir -p ../../../deploy/react
+          cp ../../index.html ../../../deploy/react/index.html
+        continue-on-error: true
+
+      # Build Sphinx docs from main branch
+      - name: Checkout main branch for docs
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main-branch
+
+      - name: Build Sphinx docs
+        run: |
+          cd main-branch
+          pip install tox
+          tox -e build-docs
+          mkdir -p ../deploy/docs
+          cp -r docs/_build/html/* ../deploy/docs/
+        continue-on-error: true
+
+      # Create landing page as main index
+      - name: Create landing page
+        run: |
+          cat > deploy/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>AutoRA Workflow Editor and Documentation</title>
+          <style>
+          body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a2e;color:#e8e8e8;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0}
+          .container{text-align:center;padding:40px}
+          h1{color:#4a90d9;margin-bottom:40px}
+          .versions{display:flex;gap:30px;justify-content:center;flex-wrap:wrap}
+          .version-card{background:#16213e;border:2px solid #2a2a4a;border-radius:12px;padding:30px 40px;text-decoration:none;color:#e8e8e8;transition:all 0.3s}
+          .version-card:hover{border-color:#4a90d9;transform:translateY(-5px)}
+          .version-card h2{margin:0 0 10px 0;color:#4a90d9}
+          .version-card p{margin:0;color:#808080;font-size:14px}
+          </style>
+          </head>
+          <body>
+          <div class="container">
+          <h1>AutoRA Workflow Editor and Documentation</h1>
+          <div class="versions">
+          <a href="./react/" class="version-card"><h2>Workflow Editor</h2><p>Modern React-based implementation</p></a>
+          <a href="./docs/" class="version-card"><h2>Documentation</h2><p>API reference and guides</p></a>
+          </div>
+          </div>
+          </body>
+          </html>
+          EOF
+
+      - name: List deployment contents
+        run: |
+          echo "Deployment directory contents:"
+          find deploy -type f
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: deploy
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

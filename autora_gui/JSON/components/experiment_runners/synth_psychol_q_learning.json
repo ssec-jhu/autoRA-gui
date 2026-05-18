@@ -1,7 +1,7 @@
 {
   "uuid": "d8e9f0a1-b2c3-4d4e-5f6a-7b8c9d0e1f2a",
   "protocolType": "experiment_runner",
-  "name": "Q-Learning (Synthetic)",
+  "name": "Q-Learning (Synthetic, Psychology)",
   "description": "Synthetic experiment runner implementing Q-learning for n-armed bandit tasks. Simulates agent decision-making behavior with configurable learning parameters.",
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychology/q_learning.py#L114",
   "pythonName": "q_learning",
