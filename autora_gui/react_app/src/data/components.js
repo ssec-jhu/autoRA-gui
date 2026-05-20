@@ -1587,7 +1587,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "theorist",
       "name": "BMS Regressor",
       "description": "Bayesian Machine Scientist that discovers symbolic equations using MCMC sampling with informed priors over mathematical expressions.",
-      "githubCommit": "https://github.com/AutoResearch/autora-theorist-bms/blob/ce3d7edf707c54a12108700076d841c138086be1/src/autora/theorist/bms/regressor.py#L23",
+      "githubCommit": "https://github.com/AutoResearch/autora-theorist-bms/blob/main/src/autora/theorist/bms/regressor.py#L24",
       "pythonName": "BMSRegressor",
       "importPath": "autora.theorist.bms.regressor",
       "pipInstall": "autora-theorist-bms==1.0.0",
@@ -1636,21 +1636,25 @@ export const EMBEDDED_COMPONENTS = {
       "inputDataType": [
         {
           "name": "X",
-          "description": "Input features as a 2D array.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": true
-          },
-          "validValues": null,
-          "default": null
+          "description": "Input features as a 2D array",
+          "variable": {
+            "name": null,
+            "description": "Column of independent variable values",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
         }
       ],
       "outputDataType": [
         {
           "name": "y",
-          "description": "Predicted target values.",
+          "description": "Predicted target values",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
@@ -1668,7 +1672,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "theorist",
       "name": "BSR Regressor",
       "description": "Bayesian Symbolic Regression that discovers mathematical expressions using MCMC sampling to build up equations from basic functions.",
-      "githubCommit": "https://github.com/AutoResearch/autora-theorist-bsr/blob/cdbf04f2fb3712924826ba283152fc459ee21f6e/src/autora/theorist/bsr/regressor.py#L18",
+      "githubCommit": "https://github.com/AutoResearch/autora-theorist-bsr/blob/main/src/autora/theorist/bsr/regressor.py#L19",
       "pythonName": "BSRRegressor",
       "importPath": "autora.theorist.bsr.regressor",
       "pipInstall": "autora-theorist-bsr==1.0.0",
@@ -1789,7 +1793,7 @@ export const EMBEDDED_COMPONENTS = {
       "inputDataType": [
         {
           "name": "X",
-          "description": "Input features as a 2D array.",
+          "description": "Input features as a 2D array",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
@@ -1803,7 +1807,7 @@ export const EMBEDDED_COMPONENTS = {
       "outputDataType": [
         {
           "name": "y",
-          "description": "Predicted target values.",
+          "description": "Predicted target values",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
@@ -1821,7 +1825,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "theorist",
       "name": "DARTS Regressor",
       "description": "Finds a composition of functions and coefficients to minimize a loss function using Differentiable Architecture Search (DARTS).",
-      "githubCommit": "https://github.com/AutoResearch/autora-theorist-darts/blob/60e30ebd3fb10a3dd901de4183664c7b6bea9990/src/autora/theorist/darts/regressor.py#L436",
+      "githubCommit": "https://github.com/AutoResearch/autora-theorist-darts/blob/main/src/autora/theorist/darts/regressor.py#L437",
       "pythonName": "DARTSRegressor",
       "importPath": "autora.theorist.darts.regressor",
       "pipInstall": "autora-theorist-darts==1.1.0",
@@ -2168,7 +2172,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "experiment_runner",
       "name": "Firebase Prolific Runner",
       "description": "Experiment runner for conducting human behavioral experiments with participant recruitment via Prolific and experiment hosting on Firebase.",
-      "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/main/src/autora/experiment_runner/firebase_prolific/__init__.py#L205",
+      "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/main/src/autora/experiment_runner/firebase_prolific/__init__.py#L267",
       "pythonName": "firebase_prolific_runner",
       "importPath": "autora.experiment_runner.firebase_prolific",
       "pipInstall": "autora-experiment-runner-firebase-prolific==1.0.0",
@@ -2196,7 +2200,7 @@ export const EMBEDDED_COMPONENTS = {
               "unique": true
             },
             "validValues": null,
-            "default": null
+            "default": 30
           },
           {
             "name": "study_name",
@@ -2304,11 +2308,11 @@ export const EMBEDDED_COMPONENTS = {
         {
           "name": "conditions",
           "description": "Experimental conditions to present to participants.",
-          "datatype": "real",
+          "datatype": "any",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -2318,11 +2322,11 @@ export const EMBEDDED_COMPONENTS = {
         {
           "name": "observations",
           "description": "Participant responses collected from the experiment.",
-          "datatype": "real",
+          "datatype": "any",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -2335,7 +2339,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "experiment_runner",
       "name": "Firebase Runner",
       "description": "Experiment runner for hosting web-based experiments on Firebase and collecting participant responses via Firestore.",
-      "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/main/src/autora/experiment_runner/firebase_prolific/__init__.py#L229",
+      "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/main/src/autora/experiment_runner/firebase_prolific/__init__.py#L291",
       "pythonName": "firebase_runner",
       "importPath": "autora.experiment_runner.firebase_prolific",
       "pipInstall": "autora-experiment-runner-firebase-prolific==1.0.0",
@@ -2382,12 +2386,12 @@ export const EMBEDDED_COMPONENTS = {
       "inputDataType": [
         {
           "name": "conditions",
-          "description": "Experimental conditions to present to participants.",
-          "datatype": "real",
+          "description": "Experimental conditions to present to participants",
+          "datatype": "any",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -2396,12 +2400,12 @@ export const EMBEDDED_COMPONENTS = {
       "outputDataType": [
         {
           "name": "observations",
-          "description": "Participant responses collected from the experiment.",
-          "datatype": "real",
+          "description": "Participant responses collected from the experiment",
+          "datatype": "any",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -2486,27 +2490,31 @@ export const EMBEDDED_COMPONENTS = {
       },
       "inputDataType": [
         {
-          "name": "conditions",
-          "description": "List of independent variable definitions.",
-          "datatype": "string",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": 1,
-            "unique": true
-          },
-          "validValues": null,
-          "default": null
+          "name": "X",
+          "description": "Each column matches a symbol in the expression",
+          "variable": {
+            "name": null,
+            "description": "Column of independent variable values",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
         }
       ],
       "outputDataType": [
         {
-          "name": "observations",
-          "description": "Dependent variable definition.",
-          "datatype": "string",
+          "name": "y",
+          "description": "Computed from the expression with added Gaussian noise",
+          "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
-            "maxOccurs": 1,
-            "unique": true
+            "maxOccurs": -1,
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -2577,27 +2585,31 @@ export const EMBEDDED_COMPONENTS = {
       },
       "inputDataType": [
         {
-          "name": "conditions",
-          "description": "Experimental conditions specifying independent variable values.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": true
-          },
-          "validValues": null,
-          "default": null
+          "name": "X",
+          "description": "Column names determined by formula",
+          "variable": {
+            "name": null,
+            "description": "Column of independent variable values",
+            "datatype": "any",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
         }
       ],
       "outputDataType": [
         {
-          "name": "observations",
-          "description": "Simulated dependent variable values from the linear mixed model.",
+          "name": "y",
+          "description": "Determined by formula",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -2610,7 +2622,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "experiment_runner",
       "name": "Expected Value Theory (Synthetic, Economics)",
       "description": "Synthetic experiment runner modeling decision-making between options based on expected utilities calculated as value multiplied by probability.",
-      "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/economics/expected_value_theory.py#L71",
+      "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/economics/expected_value_theory.py#L71",
       "pythonName": "expected_value_theory",
       "importPath": "autora.experiment_runner.synthetic.economics.expected_value_theory",
       "pipInstall": "autora-synthetic==1.0.0",
@@ -2680,13 +2692,49 @@ export const EMBEDDED_COMPONENTS = {
       },
       "inputDataType": [
         {
-          "name": "conditions",
-          "description": "Option values and probabilities for choices.",
+          "name": "v_a",
+          "description": "Value of Option A (in dollars).",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "v_b",
+          "description": "Value of Option B (in dollars).",
+          "datatype": "real",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "p_a",
+          "description": "Probability of Option A (0 to 1).",
+          "datatype": "real",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "p_b",
+          "description": "Probability of Option B (0 to 1).",
+          "datatype": "real",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -2694,13 +2742,13 @@ export const EMBEDDED_COMPONENTS = {
       ],
       "outputDataType": [
         {
-          "name": "observations",
-          "description": "Choice probabilities between options.",
+          "name": "choose_A",
+          "description": "Probability of choosing Option A (0 to 1).",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -2857,13 +2905,49 @@ export const EMBEDDED_COMPONENTS = {
       },
       "inputDataType": [
         {
-          "name": "conditions",
-          "description": "Gamble options with values and probabilities.",
+          "name": "V_A",
+          "description": "Value of Option A (in dollars).",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "P_A",
+          "description": "Probability of Option A (0 to 1).",
+          "datatype": "real",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "V_B",
+          "description": "Value of Option B (in dollars).",
+          "datatype": "real",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "P_B",
+          "description": "Probability of Option B (0 to 1).",
+          "datatype": "real",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -2871,13 +2955,13 @@ export const EMBEDDED_COMPONENTS = {
       ],
       "outputDataType": [
         {
-          "name": "observations",
-          "description": "Choice probabilities reflecting prospect theory predictions.",
+          "name": "choose_A",
+          "description": "Probability of choosing Option A (0 to 1).",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -2986,13 +3070,37 @@ export const EMBEDDED_COMPONENTS = {
       },
       "inputDataType": [
         {
-          "name": "conditions",
-          "description": "Experimental conditions specifying current task strength, alternative task strength, and is_switch.",
+          "name": "cur_task_strength",
+          "description": "Strength of the current task.",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "alt_task_strength",
+          "description": "Strength of the alternative task.",
+          "datatype": "real",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "is_switch",
+          "description": "Binary indicator of whether a task switch occurs (0 or 1).",
+          "datatype": "integer",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -3000,13 +3108,13 @@ export const EMBEDDED_COMPONENTS = {
       ],
       "outputDataType": [
         {
-          "name": "observations",
-          "description": "Simulated current task performance accuracy.",
+          "name": "cur_task_performance",
+          "description": "Accuracy of the current task performance.",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -3127,13 +3235,25 @@ export const EMBEDDED_COMPONENTS = {
       },
       "inputDataType": [
         {
-          "name": "conditions",
-          "description": "Experimental conditions specifying trial parameters.",
+          "name": "P_asymptotic",
+          "description": "Asymptotic performance value.",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "trial",
+          "description": "Trial number.",
+          "datatype": "integer",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -3141,13 +3261,13 @@ export const EMBEDDED_COMPONENTS = {
       ],
       "outputDataType": [
         {
-          "name": "observations",
-          "description": "Simulated learning performance over trials.",
+          "name": "performance",
+          "description": "Learning performance measurement.",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -3232,13 +3352,49 @@ export const EMBEDDED_COMPONENTS = {
       },
       "inputDataType": [
         {
-          "name": "conditions",
-          "description": "Similarity ratings to categories (A1, A2, B1, B2).",
+          "name": "similarity_category_A1",
+          "description": "Similarity rating to category A1.",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "similarity_category_A2",
+          "description": "Similarity rating to category A2.",
+          "datatype": "real",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "similarity_category_B1",
+          "description": "Similarity rating to category B1.",
+          "datatype": "real",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "similarity_category_B2",
+          "description": "Similarity rating to category B2.",
+          "datatype": "real",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -3246,13 +3402,13 @@ export const EMBEDDED_COMPONENTS = {
       ],
       "outputDataType": [
         {
-          "name": "observations",
+          "name": "choose_A1",
           "description": "Probability of selecting category A1.",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -3373,13 +3529,13 @@ export const EMBEDDED_COMPONENTS = {
       },
       "inputDataType": [
         {
-          "name": "conditions",
-          "description": "Experimental conditions specifying trial parameters.",
-          "datatype": "real",
+          "name": "reward array",
+          "description": "Reward sequence provided as input for each trial.",
+          "datatype": "boolean",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -3387,13 +3543,13 @@ export const EMBEDDED_COMPONENTS = {
       ],
       "outputDataType": [
         {
-          "name": "observations",
-          "description": "Simulated agent choices and rewards.",
+          "name": "choice array",
+          "description": "Action sequence generated by the Q-learning agent.",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -3490,13 +3646,13 @@ export const EMBEDDED_COMPONENTS = {
       },
       "inputDataType": [
         {
-          "name": "conditions",
-          "description": "Physical stimulus intensity values.",
+          "name": "S",
+          "description": "Stimulus intensity",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -3504,13 +3660,13 @@ export const EMBEDDED_COMPONENTS = {
       ],
       "outputDataType": [
         {
-          "name": "observations",
-          "description": "Perceived stimulus intensity.",
+          "name": "perceived_intensity",
+          "description": "Perceived intensity",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -3595,13 +3751,25 @@ export const EMBEDDED_COMPONENTS = {
       },
       "inputDataType": [
         {
-          "name": "conditions",
-          "description": "Physical stimulus intensity values.",
+          "name": "S1",
+          "description": "Stimulus 1 intensity.",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
+        },
+        {
+          "name": "S2",
+          "description": "Stimulus 2 intensity.",
+          "datatype": "real",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
           },
           "validValues": null,
           "default": null
@@ -3609,13 +3777,13 @@ export const EMBEDDED_COMPONENTS = {
       ],
       "outputDataType": [
         {
-          "name": "observations",
-          "description": "Perceived stimulus intensity.",
+          "name": "difference_detected",
+          "description": "Sensation",
           "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
-            "unique": true
+            "unique": false
           },
           "validValues": null,
           "default": null
