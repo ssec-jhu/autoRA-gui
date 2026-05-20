@@ -147,13 +147,49 @@
   },
   "inputDataType": [
     {
-      "name": "conditions",
-      "description": "Gamble options with values and probabilities.",
+      "name": "V_A",
+      "description": "Value of Option A (in dollars).",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
         "maxOccurs": -1,
-        "unique": true
+        "unique": false
+      },
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "P_A",
+      "description": "Probability of Option A (0 to 1).",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": false
+      },
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "V_B",
+      "description": "Value of Option B (in dollars).",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": false
+      },
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "P_B",
+      "description": "Probability of Option B (0 to 1).",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": false
       },
       "validValues": null,
       "default": null
@@ -161,13 +197,13 @@
   ],
   "outputDataType": [
     {
-      "name": "observations",
-      "description": "Choice probabilities reflecting prospect theory predictions.",
+      "name": "choose_A",
+      "description": "Probability of choosing Option A (0 to 1).",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
         "maxOccurs": -1,
-        "unique": true
+        "unique": false
       },
       "validValues": null,
       "default": null

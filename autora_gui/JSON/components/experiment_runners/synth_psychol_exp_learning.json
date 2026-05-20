@@ -111,13 +111,25 @@
   },
   "inputDataType": [
     {
-      "name": "conditions",
-      "description": "Experimental conditions specifying trial parameters.",
+      "name": "P_asymptotic",
+      "description": "Asymptotic performance value.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
         "maxOccurs": -1,
-        "unique": true
+        "unique": false
+      },
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "trial",
+      "description": "Trial number.",
+      "datatype": "integer",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": false
       },
       "validValues": null,
       "default": null
@@ -125,13 +137,13 @@
   ],
   "outputDataType": [
     {
-      "name": "observations",
-      "description": "Simulated learning performance over trials.",
+      "name": "performance",
+      "description": "Learning performance measurement.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
         "maxOccurs": -1,
-        "unique": true
+        "unique": false
       },
       "validValues": null,
       "default": null

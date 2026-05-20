@@ -3,7 +3,7 @@
   "protocolType": "experiment_runner",
   "name": "Firebase Runner",
   "description": "Experiment runner for hosting web-based experiments on Firebase and collecting participant responses via Firestore.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/main/src/autora/experiment_runner/firebase_prolific/__init__.py#L229",
+  "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/main/src/autora/experiment_runner/firebase_prolific/__init__.py#L291",
   "pythonName": "firebase_runner",
   "importPath": "autora.experiment_runner.firebase_prolific",
   "pipInstall": "autora-experiment-runner-firebase-prolific==1.0.0",
@@ -50,12 +50,12 @@
   "inputDataType": [
     {
       "name": "conditions",
-      "description": "Experimental conditions to present to participants.",
-      "datatype": "real",
+      "description": "Experimental conditions to present to participants",
+      "datatype": "any",
       "cardinality": {
         "minOccurs": 1,
         "maxOccurs": -1,
-        "unique": true
+        "unique": false
       },
       "validValues": null,
       "default": null
@@ -64,12 +64,12 @@
   "outputDataType": [
     {
       "name": "observations",
-      "description": "Participant responses collected from the experiment.",
-      "datatype": "real",
+      "description": "Participant responses collected from the experiment",
+      "datatype": "any",
       "cardinality": {
         "minOccurs": 1,
         "maxOccurs": -1,
-        "unique": true
+        "unique": false
       },
       "validValues": null,
       "default": null
