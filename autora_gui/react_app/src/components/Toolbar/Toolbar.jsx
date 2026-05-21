@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react'
+import React, { useRef, useCallback, useEffect } from 'react'
 import { useWorkflow } from '../../context/WorkflowContext'
 import { serializeWorkflow, deserializeWorkflow } from '../../utils/serialization'
 import './Toolbar.css'
@@ -65,10 +65,41 @@ function Toolbar() {
 
   const handleClear = () => {
     if (state.nodes.length === 0 && state.connections.length === 0) return
-    if (confirm('Clear the entire canvas? This cannot be undone.')) {
+    if (confirm('Clear the entire canvas?')) {
       dispatch({ type: 'CLEAR_CANVAS' })
     }
   }
+
+  const handleUndo = () => {
+    dispatch({ type: 'UNDO' })
+  }
+
+  const handleRedo = () => {
+    dispatch({ type: 'REDO' })
+  }
+
+  const canUndo = state.past?.length > 0
+  const canRedo = state.future?.length > 0
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't trigger if user is typing in an input
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        if (canUndo) handleUndo()
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault()
+        if (canRedo) handleRedo()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [canUndo, canRedo])
 
   // Zoom relative to canvas center
   const zoomToCenter = useCallback((newZoom) => {
@@ -134,6 +165,24 @@ function Toolbar() {
           <button className="toolbar-btn danger" onClick={handleClear} title="Clear canvas">
             <span className="btn-icon">🗑</span>
             <span className="btn-text">Clear</span>
+          </button>
+          <button
+            className="toolbar-btn"
+            onClick={handleUndo}
+            disabled={!canUndo}
+            title="Undo (Ctrl+Z)"
+          >
+            <span className="btn-icon">↩</span>
+            <span className="btn-text">Undo</span>
+          </button>
+          <button
+            className="toolbar-btn"
+            onClick={handleRedo}
+            disabled={!canRedo}
+            title="Redo (Ctrl+Y)"
+          >
+            <span className="btn-icon">↪</span>
+            <span className="btn-text">Redo</span>
           </button>
         </div>
 
