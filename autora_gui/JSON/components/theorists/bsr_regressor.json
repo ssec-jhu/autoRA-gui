@@ -3,7 +3,7 @@
   "protocolType": "theorist",
   "name": "BSR Regressor",
   "description": "Bayesian Symbolic Regression that discovers mathematical expressions using MCMC sampling to build up equations from basic functions.",
-  "githubCommit": "https://github.com/AutoResearch/autora-theorist-bsr/blob/cdbf04f2fb3712924826ba283152fc459ee21f6e/src/autora/theorist/bsr/regressor.py#L18",
+  "githubCommit": "https://github.com/AutoResearch/autora-theorist-bsr/blob/main/src/autora/theorist/bsr/regressor.py#L19",
   "pythonName": "BSRRegressor",
   "importPath": "autora.theorist.bsr.regressor",
   "pipInstall": "autora-theorist-bsr==1.0.0",
@@ -124,7 +124,7 @@
   "inputDataType": [
     {
       "name": "X",
-      "description": "Input features as a 2D array.",
+      "description": "Input features as a 2D array",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
@@ -138,7 +138,7 @@
   "outputDataType": [
     {
       "name": "y",
-      "description": "Predicted target values.",
+      "description": "Predicted target values",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,

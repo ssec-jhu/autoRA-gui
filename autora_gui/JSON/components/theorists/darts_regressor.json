@@ -3,7 +3,7 @@
   "protocolType": "theorist",
   "name": "DARTS Regressor",
   "description": "Finds a composition of functions and coefficients to minimize a loss function using Differentiable Architecture Search (DARTS).",
-  "githubCommit": "https://github.com/AutoResearch/autora-theorist-darts/blob/60e30ebd3fb10a3dd901de4183664c7b6bea9990/src/autora/theorist/darts/regressor.py#L436",
+  "githubCommit": "https://github.com/AutoResearch/autora-theorist-darts/blob/main/src/autora/theorist/darts/regressor.py#L437",
   "pythonName": "DARTSRegressor",
   "importPath": "autora.theorist.darts.regressor",
   "pipInstall": "autora-theorist-darts==1.1.0",
