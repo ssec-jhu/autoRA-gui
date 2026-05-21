@@ -644,3 +644,286 @@ describe('useWorkflow', () => {
     expect(result.current.state.pan).toEqual({ x: 100, y: 200 })
   })
 })
+
+describe('UNDO action', () => {
+  it('restores previous state from history', () => {
+    const state = {
+      ...initialState,
+      nodes: [{ id: 'node-2', name: 'Current' }],
+      connections: [],
+      past: [{ nodes: [{ id: 'node-1', name: 'Previous' }], connections: [] }],
+      future: []
+    }
+    const result = workflowReducer(state, { type: 'UNDO' })
+
+    expect(result.nodes).toEqual([{ id: 'node-1', name: 'Previous' }])
+    expect(result.past).toHaveLength(0)
+    expect(result.future).toHaveLength(1)
+    expect(result.future[0].nodes).toEqual([{ id: 'node-2', name: 'Current' }])
+  })
+
+  it('returns state unchanged when past is empty', () => {
+    const state = {
+      ...initialState,
+      nodes: [{ id: 'node-1' }],
+      past: [],
+      future: []
+    }
+    const result = workflowReducer(state, { type: 'UNDO' })
+
+    expect(result).toBe(state)
+  })
+
+  it('clears selection on undo', () => {
+    const state = {
+      ...initialState,
+      nodes: [{ id: 'node-2' }],
+      selectedNodeId: 'node-2',
+      selectedConnectionId: 'conn-1',
+      past: [{ nodes: [{ id: 'node-1' }], connections: [] }],
+      future: []
+    }
+    const result = workflowReducer(state, { type: 'UNDO' })
+
+    expect(result.selectedNodeId).toBeNull()
+    expect(result.selectedConnectionId).toBeNull()
+  })
+
+  it('can undo multiple times through history', () => {
+    const state = {
+      ...initialState,
+      nodes: [{ id: 'node-3' }],
+      connections: [],
+      past: [
+        { nodes: [{ id: 'node-1' }], connections: [] },
+        { nodes: [{ id: 'node-2' }], connections: [] }
+      ],
+      future: []
+    }
+
+    // First undo
+    let result = workflowReducer(state, { type: 'UNDO' })
+    expect(result.nodes).toEqual([{ id: 'node-2' }])
+    expect(result.past).toHaveLength(1)
+    expect(result.future).toHaveLength(1)
+
+    // Second undo
+    result = workflowReducer(result, { type: 'UNDO' })
+    expect(result.nodes).toEqual([{ id: 'node-1' }])
+    expect(result.past).toHaveLength(0)
+    expect(result.future).toHaveLength(2)
+  })
+})
+
+describe('REDO action', () => {
+  it('restores next state from future', () => {
+    const state = {
+      ...initialState,
+      nodes: [{ id: 'node-1', name: 'Current' }],
+      connections: [],
+      past: [],
+      future: [{ nodes: [{ id: 'node-2', name: 'Next' }], connections: [] }]
+    }
+    const result = workflowReducer(state, { type: 'REDO' })
+
+    expect(result.nodes).toEqual([{ id: 'node-2', name: 'Next' }])
+    expect(result.future).toHaveLength(0)
+    expect(result.past).toHaveLength(1)
+    expect(result.past[0].nodes).toEqual([{ id: 'node-1', name: 'Current' }])
+  })
+
+  it('returns state unchanged when future is empty', () => {
+    const state = {
+      ...initialState,
+      nodes: [{ id: 'node-1' }],
+      past: [],
+      future: []
+    }
+    const result = workflowReducer(state, { type: 'REDO' })
+
+    expect(result).toBe(state)
+  })
+
+  it('clears selection on redo', () => {
+    const state = {
+      ...initialState,
+      nodes: [{ id: 'node-1' }],
+      selectedNodeId: 'node-1',
+      selectedConnectionId: 'conn-1',
+      past: [],
+      future: [{ nodes: [{ id: 'node-2' }], connections: [] }]
+    }
+    const result = workflowReducer(state, { type: 'REDO' })
+
+    expect(result.selectedNodeId).toBeNull()
+    expect(result.selectedConnectionId).toBeNull()
+  })
+
+  it('can redo multiple times through future', () => {
+    const state = {
+      ...initialState,
+      nodes: [{ id: 'node-1' }],
+      connections: [],
+      past: [],
+      future: [
+        { nodes: [{ id: 'node-2' }], connections: [] },
+        { nodes: [{ id: 'node-3' }], connections: [] }
+      ]
+    }
+
+    // First redo
+    let result = workflowReducer(state, { type: 'REDO' })
+    expect(result.nodes).toEqual([{ id: 'node-2' }])
+    expect(result.past).toHaveLength(1)
+    expect(result.future).toHaveLength(1)
+
+    // Second redo
+    result = workflowReducer(result, { type: 'REDO' })
+    expect(result.nodes).toEqual([{ id: 'node-3' }])
+    expect(result.past).toHaveLength(2)
+    expect(result.future).toHaveLength(0)
+  })
+})
+
+describe('Undo/Redo integration with WorkflowProvider', () => {
+  it('tracks history for undoable actions', () => {
+    const wrapper = ({ children }) => (
+      <WorkflowProvider>{children}</WorkflowProvider>
+    )
+
+    const { result } = renderHook(() => useWorkflow(), { wrapper })
+
+    // Initial state has empty history
+    expect(result.current.state.past).toEqual([])
+    expect(result.current.state.future).toEqual([])
+
+    // Add a node (undoable action)
+    act(() => {
+      result.current.dispatch({
+        type: 'ADD_NODE',
+        payload: {
+          componentData: {
+            uuid: 'proto-1',
+            protocolType: 'theorist',
+            name: 'Test',
+            parameters: {}
+          },
+          x: 100,
+          y: 100
+        }
+      })
+    })
+
+    // History should have previous state
+    expect(result.current.state.past).toHaveLength(1)
+    expect(result.current.state.past[0].nodes).toEqual([])
+    expect(result.current.state.nodes).toHaveLength(1)
+  })
+
+  it('clears future on new undoable action', () => {
+    const wrapper = ({ children }) => (
+      <WorkflowProvider>{children}</WorkflowProvider>
+    )
+
+    const { result } = renderHook(() => useWorkflow(), { wrapper })
+
+    // Add a node
+    act(() => {
+      result.current.dispatch({
+        type: 'ADD_NODE',
+        payload: {
+          componentData: { uuid: 'proto-1', protocolType: 'theorist', name: 'Test', parameters: {} },
+          x: 100, y: 100
+        }
+      })
+    })
+
+    // Undo
+    act(() => {
+      result.current.dispatch({ type: 'UNDO' })
+    })
+
+    expect(result.current.state.future).toHaveLength(1)
+
+    // New action should clear future
+    act(() => {
+      result.current.dispatch({
+        type: 'ADD_NODE',
+        payload: {
+          componentData: { uuid: 'proto-2', protocolType: 'theorist', name: 'Test 2', parameters: {} },
+          x: 200, y: 200
+        }
+      })
+    })
+
+    expect(result.current.state.future).toEqual([])
+  })
+
+  it('does not track non-undoable actions in history', () => {
+    const wrapper = ({ children }) => (
+      <WorkflowProvider>{children}</WorkflowProvider>
+    )
+
+    const { result } = renderHook(() => useWorkflow(), { wrapper })
+
+    // SET_ZOOM is not undoable
+    act(() => {
+      result.current.dispatch({ type: 'SET_ZOOM', payload: 1.5 })
+    })
+
+    expect(result.current.state.past).toEqual([])
+
+    // SET_PAN is not undoable
+    act(() => {
+      result.current.dispatch({ type: 'SET_PAN', payload: { x: 100, y: 100 } })
+    })
+
+    expect(result.current.state.past).toEqual([])
+
+    // SELECT_NODE is not undoable
+    act(() => {
+      result.current.dispatch({ type: 'SELECT_NODE', payload: 'node-1' })
+    })
+
+    expect(result.current.state.past).toEqual([])
+  })
+
+  it('supports full undo/redo cycle', () => {
+    const wrapper = ({ children }) => (
+      <WorkflowProvider>{children}</WorkflowProvider>
+    )
+
+    const { result } = renderHook(() => useWorkflow(), { wrapper })
+
+    // Add first node
+    act(() => {
+      result.current.dispatch({
+        type: 'ADD_NODE',
+        payload: {
+          componentData: { uuid: 'proto-1', protocolType: 'theorist', name: 'Node 1', parameters: {} },
+          x: 100, y: 100
+        }
+      })
+    })
+
+    expect(result.current.state.nodes).toHaveLength(1)
+    expect(result.current.state.nodes[0].name).toBe('Node 1')
+
+    // Undo - should remove node
+    act(() => {
+      result.current.dispatch({ type: 'UNDO' })
+    })
+
+    expect(result.current.state.nodes).toHaveLength(0)
+    expect(result.current.state.future).toHaveLength(1)
+
+    // Redo - should restore node
+    act(() => {
+      result.current.dispatch({ type: 'REDO' })
+    })
+
+    expect(result.current.state.nodes).toHaveLength(1)
+    expect(result.current.state.nodes[0].name).toBe('Node 1')
+    expect(result.current.state.future).toHaveLength(0)
+  })
+})
