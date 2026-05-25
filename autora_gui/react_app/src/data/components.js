@@ -92,27 +92,15 @@ export const EMBEDDED_COMPONENTS = {
       "outputDataType": [
         {
           "name": "conditions",
-          "description": "Sequences of vectors with elements between 0 and 1",
-          "variable": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "variable": {
-              "name": null,
-              "description": "Column of independent variable values",
-              "variable": {
-                "name": null,
-                "description": "Column of independent variable values",
-                "datatype": "real",
-                "cardinality": {
-                  "minOccurs": 1,
-                  "maxOccurs": -1,
-                  "unique": false
-                },
-                "validValues": null,
-                "default": null
-              }
-            }
-          }
+          "description": "Generated binary reward sequences for bandit tasks.",
+          "datatype": "real",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": true
+          },
+          "validValues": null,
+          "default": null
         }
       ],
       "file": "bandit_random_pooler.json"

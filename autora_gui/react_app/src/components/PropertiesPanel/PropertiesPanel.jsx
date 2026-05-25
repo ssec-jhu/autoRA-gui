@@ -2,29 +2,6 @@ import React from 'react'
 import { useWorkflow } from '../../context/WorkflowContext'
 import './PropertiesPanel.css'
 
-// Helper to get display type for variable types (handles PrimitiveVariableType, ListVariableType, DictVariableType)
-const getDisplayType = (varType) => {
-  if (!varType) return 'unknown'
-
-  // ListVariableType: has 'variable' field
-  if (varType.variable) {
-    const innerType = getDisplayType(varType.variable)
-    return `List<${innerType}>`
-  }
-
-  // DictVariableType: has 'variables' field (array)
-  if (varType.variables) {
-    return 'Dict'
-  }
-
-  // PrimitiveVariableType: has direct 'datatype' field
-  if (varType.datatype) {
-    return varType.datatype
-  }
-
-  return 'unknown'
-}
-
 function PropertiesPanel() {
   const { state, dispatch } = useWorkflow()
   const selectedNode = state.nodes.find(n => n.id === state.selectedNodeId)
@@ -219,7 +196,7 @@ function PropertiesPanel() {
               {selectedNode.componentData.inputDataType.map((input, idx) => (
                 <div key={idx} className="data-type-item">
                   <span className="data-type-name">{input.name}</span>
-                  <span className="data-type-type">{getDisplayType(input)}</span>
+                  <span className="data-type-type">{input.datatype}</span>
                 </div>
               ))}
             </div>
@@ -233,7 +210,7 @@ function PropertiesPanel() {
               {selectedNode.componentData.outputDataType.map((output, idx) => (
                 <div key={idx} className="data-type-item">
                   <span className="data-type-name">{output.name}</span>
-                  <span className="data-type-type">{getDisplayType(output)}</span>
+                  <span className="data-type-type">{output.datatype}</span>
                 </div>
               ))}
             </div>
