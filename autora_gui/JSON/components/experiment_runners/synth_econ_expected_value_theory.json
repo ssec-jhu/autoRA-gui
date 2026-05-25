@@ -69,6 +69,32 @@
         "validValues": null,
         "default": 1
       }
+    ],
+    "run": [
+      {
+        "name": "added_noise",
+        "description": "Standard deviation of Gaussian noise added to the simulated observations.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": 0.01
+      },
+      {
+        "name": "random_state",
+        "description": "Seed for random number generation to ensure reproducibility of the simulated data.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
     ]
   },
   "inputDataType": [
@@ -85,8 +111,8 @@
       "default": null
     },
     {
-      "name": "v_b",
-      "description": "Value of Option B (in dollars).",
+      "name": "p_a",
+      "description": "Probability of Option A (0 to 1).",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
@@ -97,8 +123,8 @@
       "default": null
     },
     {
-      "name": "p_a",
-      "description": "Probability of Option A (0 to 1).",
+      "name": "v_b",
+      "description": "Value of Option B (in dollars).",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,

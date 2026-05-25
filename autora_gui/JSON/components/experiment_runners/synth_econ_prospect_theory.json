@@ -147,7 +147,7 @@
   },
   "inputDataType": [
     {
-      "name": "V_A",
+      "name": "v_a",
       "description": "Value of Option A (in dollars).",
       "datatype": "real",
       "cardinality": {
@@ -159,7 +159,7 @@
       "default": null
     },
     {
-      "name": "P_A",
+      "name": "p_a",
       "description": "Probability of Option A (0 to 1).",
       "datatype": "real",
       "cardinality": {
@@ -171,7 +171,7 @@
       "default": null
     },
     {
-      "name": "V_B",
+      "name": "v_b",
       "description": "Value of Option B (in dollars).",
       "datatype": "real",
       "cardinality": {
@@ -183,7 +183,7 @@
       "default": null
     },
     {
-      "name": "P_B",
+      "name": "p_b",
       "description": "Probability of Option B (0 to 1).",
       "datatype": "real",
       "cardinality": {
