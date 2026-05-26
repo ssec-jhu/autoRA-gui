@@ -9,6 +9,7 @@ function Canvas() {
   const { state, dispatch } = useWorkflow()
   const [isPanning, setIsPanning] = useState(false)
   const [panStart, setPanStart] = useState({ x: 0, y: 0 })
+  const [hasDragged, setHasDragged] = useState(false)
   const { connectingFrom } = state
 
   const screenToCanvas = useCallback((screenX, screenY) => {
