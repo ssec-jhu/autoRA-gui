@@ -99,7 +99,7 @@
   },
   "inputDataType": [
     {
-      "name": "cur_task_strength",
+      "name": "current_task_strength",
       "description": "Strength of the current task.",
       "datatype": "real",
       "cardinality": {
@@ -125,13 +125,13 @@
     {
       "name": "is_switch",
       "description": "Binary indicator of whether a task switch occurs (0 or 1).",
-      "datatype": "integer",
+      "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
         "maxOccurs": -1,
         "unique": false
       },
-      "validValues": null,
+      "validValues": [0,1],
       "default": null
     }
   ],

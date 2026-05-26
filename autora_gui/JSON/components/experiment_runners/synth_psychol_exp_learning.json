@@ -125,7 +125,7 @@
     {
       "name": "trial",
       "description": "Trial number.",
-      "datatype": "integer",
+      "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
         "maxOccurs": -1,

@@ -2,6 +2,21 @@ import React from 'react'
 import { useWorkflow } from '../../context/WorkflowContext'
 import './PropertiesPanel.css'
 
+// Helper to determine datatype from variable type structure
+const getDataType = (varType) => {
+  if (!varType) return 'unknown'
+  // PrimitiveVariableType: has 'datatype' directly
+  if (varType.datatype) return varType.datatype
+  // DictVariableType: has 'variables' (object or array)
+  if (varType.variables) {
+    const innerType = varType.variables.datatype || 'unknown'
+    return `dict[${innerType}]`
+  }
+  // ListVariableType: has 'variable' (singular)
+  if (varType.variable) return `list[${getDataType(varType.variable)}]`
+  return 'unknown'
+}
+
 function PropertiesPanel() {
   const { state, dispatch } = useWorkflow()
   const selectedNode = state.nodes.find(n => n.id === state.selectedNodeId)
@@ -196,7 +211,7 @@ function PropertiesPanel() {
               {selectedNode.componentData.inputDataType.map((input, idx) => (
                 <div key={idx} className="data-type-item">
                   <span className="data-type-name">{input.name}</span>
-                  <span className="data-type-type">{input.datatype}</span>
+                  <span className="data-type-type">{getDataType(input)}</span>
                 </div>
               ))}
             </div>
@@ -210,7 +225,7 @@ function PropertiesPanel() {
               {selectedNode.componentData.outputDataType.map((output, idx) => (
                 <div key={idx} className="data-type-item">
                   <span className="data-type-name">{output.name}</span>
-                  <span className="data-type-type">{output.datatype}</span>
+                  <span className="data-type-type">{getDataType(output)}</span>
                 </div>
               ))}
             </div>

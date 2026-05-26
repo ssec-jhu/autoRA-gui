@@ -95,14 +95,18 @@
     {
       "name": "y",
       "description": "Computed from the expression with added Gaussian noise",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": false
-      },
-      "validValues": null,
-      "default": null
+      "variable": {
+        "name": null,
+        "description": "Column of dependent variable values",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
     }
   ]
 }

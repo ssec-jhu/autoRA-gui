@@ -2304,11 +2304,17 @@ export const EMBEDDED_COMPONENTS = {
         {
           "name": "conditions",
           "description": "Experimental conditions to present to participants.",
-          "datatype": "any",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
+          "variables": {
+            "name": null,
+            "description": "Independent variable values",
+            "datatype": "any",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
           },
           "validValues": null,
           "default": null
@@ -2318,14 +2324,18 @@ export const EMBEDDED_COMPONENTS = {
         {
           "name": "observations",
           "description": "Participant responses collected from the experiment.",
-          "datatype": "any",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
+          "variables": {
+            "name": null,
+            "description": "Dependent variable values",
+            "datatype": "any",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
         }
       ],
       "file": "firebase_prolific_runner.json"
@@ -2383,28 +2393,36 @@ export const EMBEDDED_COMPONENTS = {
         {
           "name": "conditions",
           "description": "Experimental conditions to present to participants",
-          "datatype": "any",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
+          "variables": {
+            "name": null,
+            "description": "Independent variable values",
+            "datatype": "any",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
         }
       ],
       "outputDataType": [
         {
           "name": "observations",
           "description": "Participant responses collected from the experiment",
-          "datatype": "any",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
+          "variables": {
+            "name": null,
+            "description": "Dependent variable values",
+            "datatype": "any",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
         }
       ],
       "file": "firebase_runner.json"
@@ -2506,14 +2524,18 @@ export const EMBEDDED_COMPONENTS = {
         {
           "name": "y",
           "description": "Computed from the expression with added Gaussian noise",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
+          "variable": {
+            "name": null,
+            "description": "Column of dependent variable values",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
         }
       ],
       "file": "synth_abstr_equation_experiment.json"
@@ -2601,14 +2623,18 @@ export const EMBEDDED_COMPONENTS = {
         {
           "name": "y",
           "description": "Determined by formula",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
+          "variable": {
+            "name": null,
+            "description": "Column of dependent variable values",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
         }
       ],
       "file": "synth_abstr_lmm_experiment.json"
@@ -3092,7 +3118,7 @@ export const EMBEDDED_COMPONENTS = {
       },
       "inputDataType": [
         {
-          "name": "cur_task_strength",
+          "name": "current_task_strength",
           "description": "Strength of the current task.",
           "datatype": "real",
           "cardinality": {
@@ -3118,13 +3144,16 @@ export const EMBEDDED_COMPONENTS = {
         {
           "name": "is_switch",
           "description": "Binary indicator of whether a task switch occurs (0 or 1).",
-          "datatype": "integer",
+          "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
             "unique": false
           },
-          "validValues": null,
+          "validValues": [
+            0,
+            1
+          ],
           "default": null
         }
       ],
@@ -3271,7 +3300,7 @@ export const EMBEDDED_COMPONENTS = {
         {
           "name": "trial",
           "description": "Trial number.",
-          "datatype": "integer",
+          "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
             "maxOccurs": -1,
