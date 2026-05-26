@@ -131,7 +131,7 @@
         "maxOccurs": -1,
         "unique": false
       },
-      "validValues": [0,1],
+      "validValues": ["0", "1"],
       "default": null
     }
   ],

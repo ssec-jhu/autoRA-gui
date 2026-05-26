@@ -2304,38 +2304,40 @@ export const EMBEDDED_COMPONENTS = {
         {
           "name": "conditions",
           "description": "Experimental conditions to present to participants.",
-          "variables": {
-            "name": null,
-            "description": "Independent variable values",
-            "datatype": "any",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          },
-          "validValues": null,
-          "default": null
+          "variables": [
+            {
+              "name": null,
+              "description": "Independent variable values",
+              "datatype": "any",
+              "cardinality": {
+                "minOccurs": 1,
+                "maxOccurs": -1,
+                "unique": false
+              },
+              "validValues": null,
+              "default": null
+            }
+          ]
         }
       ],
       "outputDataType": [
         {
           "name": "observations",
           "description": "Participant responses collected from the experiment.",
-          "variables": {
-            "name": null,
-            "description": "Dependent variable values",
-            "datatype": "any",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
+          "variables": [
+            {
+              "name": null,
+              "description": "Dependent variable values",
+              "datatype": "any",
+              "cardinality": {
+                "minOccurs": 1,
+                "maxOccurs": -1,
+                "unique": false
+              },
+              "validValues": null,
+              "default": null
+            }
+          ]
         }
       ],
       "file": "firebase_prolific_runner.json"
@@ -2393,36 +2395,40 @@ export const EMBEDDED_COMPONENTS = {
         {
           "name": "conditions",
           "description": "Experimental conditions to present to participants",
-          "variables": {
-            "name": null,
-            "description": "Independent variable values",
-            "datatype": "any",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
+          "variables": [
+            {
+              "name": null,
+              "description": "Independent variable values",
+              "datatype": "any",
+              "cardinality": {
+                "minOccurs": 1,
+                "maxOccurs": -1,
+                "unique": false
+              },
+              "validValues": null,
+              "default": null
+            }
+          ]
         }
       ],
       "outputDataType": [
         {
           "name": "observations",
           "description": "Participant responses collected from the experiment",
-          "variables": {
-            "name": null,
-            "description": "Dependent variable values",
-            "datatype": "any",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
+          "variables": [
+            {
+              "name": null,
+              "description": "Dependent variable values",
+              "datatype": "any",
+              "cardinality": {
+                "minOccurs": 1,
+                "maxOccurs": -1,
+                "unique": false
+              },
+              "validValues": null,
+              "default": null
+            }
+          ]
         }
       ],
       "file": "firebase_runner.json"
@@ -3151,8 +3157,8 @@ export const EMBEDDED_COMPONENTS = {
             "unique": false
           },
           "validValues": [
-            0,
-            1
+            "0",
+            "1"
           ],
           "default": null
         }

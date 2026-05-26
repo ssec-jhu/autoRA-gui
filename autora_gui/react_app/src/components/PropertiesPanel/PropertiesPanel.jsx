@@ -7,10 +7,11 @@ const getDataType = (varType) => {
   if (!varType) return 'unknown'
   // PrimitiveVariableType: has 'datatype' directly
   if (varType.datatype) return varType.datatype
-  // DictVariableType: has 'variables' (object or array)
-  if (varType.variables) {
-    const innerType = varType.variables.datatype || 'unknown'
-    return `dict[${innerType}]`
+  // DictVariableType: has 'variables' (array of variable types)
+  if (varType.variables && Array.isArray(varType.variables)) {
+    const innerTypes = varType.variables.map(v => v.datatype || 'unknown')
+    const uniqueTypes = [...new Set(innerTypes)]
+    return `dict[${uniqueTypes.join(', ')}]`
   }
   // ListVariableType: has 'variable' (singular)
   if (varType.variable) return `list[${getDataType(varType.variable)}]`
