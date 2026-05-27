@@ -137,7 +137,7 @@ export function findClosestPort(node, point) {
   return closest
 }
 
-function Node({ node, isSelected, isConnecting, connections, onSelect, onPositionChange, onBorderClick, zoom }) {
+function Node({ node, isSelected, isConnecting, connections, onSelect, onPositionChange, onBorderClick, onDragStart, onDragEnd, zoom }) {
   const nodeRef = useRef(null)
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
@@ -220,7 +220,8 @@ function Node({ node, isSelected, isConnecting, connections, onSelect, onPositio
       y: e.clientY / zoom - node.y
     })
     onSelect(node.id)
-  }, [node.id, node.x, node.y, zoom, onSelect])
+    if (onDragStart) onDragStart()
+  }, [node.id, node.x, node.y, zoom, onSelect, onDragStart])
 
   const handleContextMenu = useCallback((e) => {
     e.preventDefault()
@@ -234,8 +235,9 @@ function Node({ node, isSelected, isConnecting, connections, onSelect, onPositio
   }, [isDragging, dragOffset, zoom, node.id, onPositionChange])
 
   const handleMouseUp = useCallback(() => {
+    if (isDragging && onDragEnd) onDragEnd()
     setIsDragging(false)
-  }, [])
+  }, [isDragging, onDragEnd])
 
   React.useEffect(() => {
     if (isDragging) {

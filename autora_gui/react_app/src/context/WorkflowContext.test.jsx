@@ -506,6 +506,67 @@ describe('workflowReducer', () => {
     })
   })
 
+  describe('START_DRAG', () => {
+    it('saves current nodes and connections to dragStartState', () => {
+      const state = {
+        ...initialState,
+        nodes: [{ id: 'node-1', x: 100, y: 100 }],
+        connections: [{ id: 'conn-1', sourceId: 'node-1', targetId: 'node-2' }]
+      }
+      const result = workflowReducer(state, { type: 'START_DRAG' })
+
+      expect(result.dragStartState).toEqual({
+        nodes: state.nodes,
+        connections: state.connections
+      })
+    })
+
+    it('preserves other state properties', () => {
+      const state = {
+        ...initialState,
+        nodes: [{ id: 'node-1', x: 100, y: 100 }],
+        selectedNodeId: 'node-1',
+        zoom: 1.5
+      }
+      const result = workflowReducer(state, { type: 'START_DRAG' })
+
+      expect(result.selectedNodeId).toBe('node-1')
+      expect(result.zoom).toBe(1.5)
+    })
+  })
+
+  describe('END_DRAG', () => {
+    it('clears dragStartState', () => {
+      const state = {
+        ...initialState,
+        nodes: [{ id: 'node-1', x: 200, y: 200 }],
+        dragStartState: {
+          nodes: [{ id: 'node-1', x: 100, y: 100 }],
+          connections: []
+        }
+      }
+      const result = workflowReducer(state, { type: 'END_DRAG' })
+
+      expect(result.dragStartState).toBeNull()
+    })
+
+    it('preserves current nodes and connections', () => {
+      const state = {
+        ...initialState,
+        nodes: [{ id: 'node-1', x: 200, y: 200 }],
+        connections: [{ id: 'conn-1' }],
+        dragStartState: {
+          nodes: [{ id: 'node-1', x: 100, y: 100 }],
+          connections: []
+        }
+      }
+      const result = workflowReducer(state, { type: 'END_DRAG' })
+
+      expect(result.nodes).toEqual([{ id: 'node-1', x: 200, y: 200 }])
+      expect(result.connections).toEqual([{ id: 'conn-1' }])
+    })
+  })
+
   describe('unknown action', () => {
     it('returns state unchanged', () => {
       const result = workflowReducer(initialState, { type: 'UNKNOWN' })
@@ -612,6 +673,7 @@ describe('useWorkflow', () => {
     expect(result.current.state.selectedNodeId).toBeNull()
     expect(result.current.state.zoom).toBe(1)
     expect(result.current.state.pan).toEqual({ x: 0, y: 0 })
+    expect(result.current.state.dragStartState).toBeNull()
   })
 
   it('updates state when dispatch is called', () => {
@@ -925,5 +987,90 @@ describe('Undo/Redo integration with WorkflowProvider', () => {
     expect(result.current.state.nodes).toHaveLength(1)
     expect(result.current.state.nodes[0].name).toBe('Node 1')
     expect(result.current.state.future).toHaveLength(0)
+  })
+
+  it('batches drag operations into single undo step', () => {
+    const wrapper = ({ children }) => (
+      <WorkflowProvider>{children}</WorkflowProvider>
+    )
+
+    const { result } = renderHook(() => useWorkflow(), { wrapper })
+
+    // Add a node first
+    act(() => {
+      result.current.dispatch({
+        type: 'ADD_NODE',
+        payload: {
+          componentData: { uuid: 'proto-1', protocolType: 'theorist', name: 'Node 1', parameters: {} },
+          x: 100, y: 100
+        }
+      })
+    })
+
+    const nodeId = result.current.state.nodes[0].id
+    const historyLengthAfterAdd = result.current.state.past.length
+
+    // Simulate drag: START_DRAG, multiple UPDATE_NODE_POSITION, END_DRAG
+    act(() => {
+      result.current.dispatch({ type: 'START_DRAG' })
+    })
+
+    // Multiple position updates during drag
+    act(() => {
+      result.current.dispatch({ type: 'UPDATE_NODE_POSITION', payload: { id: nodeId, x: 150, y: 150 } })
+      result.current.dispatch({ type: 'UPDATE_NODE_POSITION', payload: { id: nodeId, x: 200, y: 200 } })
+      result.current.dispatch({ type: 'UPDATE_NODE_POSITION', payload: { id: nodeId, x: 250, y: 250 } })
+    })
+
+    // Position updates should NOT add to history
+    expect(result.current.state.past.length).toBe(historyLengthAfterAdd)
+
+    // End drag
+    act(() => {
+      result.current.dispatch({ type: 'END_DRAG' })
+    })
+
+    // Only one history entry should be added for the entire drag
+    expect(result.current.state.past.length).toBe(historyLengthAfterAdd + 1)
+    expect(result.current.state.nodes[0].x).toBe(250)
+    expect(result.current.state.nodes[0].y).toBe(250)
+
+    // Undo should restore to position before drag started
+    act(() => {
+      result.current.dispatch({ type: 'UNDO' })
+    })
+
+    expect(result.current.state.nodes[0].x).toBe(100)
+    expect(result.current.state.nodes[0].y).toBe(100)
+  })
+
+  it('does not add history entry for drag with no position change', () => {
+    const wrapper = ({ children }) => (
+      <WorkflowProvider>{children}</WorkflowProvider>
+    )
+
+    const { result } = renderHook(() => useWorkflow(), { wrapper })
+
+    // Add a node first
+    act(() => {
+      result.current.dispatch({
+        type: 'ADD_NODE',
+        payload: {
+          componentData: { uuid: 'proto-1', protocolType: 'theorist', name: 'Node 1', parameters: {} },
+          x: 100, y: 100
+        }
+      })
+    })
+
+    const historyLengthAfterAdd = result.current.state.past.length
+
+    // Start and end drag without any position changes
+    act(() => {
+      result.current.dispatch({ type: 'START_DRAG' })
+      result.current.dispatch({ type: 'END_DRAG' })
+    })
+
+    // No new history entry should be added
+    expect(result.current.state.past.length).toBe(historyLengthAfterAdd)
   })
 })

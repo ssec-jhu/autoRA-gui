@@ -8,13 +8,12 @@ const WorkflowContext = createContext(null)
 const UNDOABLE_ACTIONS = [
   'ADD_NODE',
   'DELETE_NODE',
-  'UPDATE_NODE_POSITION',
   'UPDATE_NODE',
   'ADD_CONNECTION',
   'DELETE_CONNECTION',
-  'UPDATE_CONNECTION_PORTS',
   'LOAD_WORKFLOW',
-  'CLEAR_CANVAS'
+  'CLEAR_CANVAS',
+  'END_DRAG'  // Commits drag as single undo step
 ]
 
 const MAX_HISTORY_SIZE = 50
@@ -31,7 +30,9 @@ export const initialState = {
   pan: { x: 0, y: 0 },
   // Undo/Redo history
   past: [],
-  future: []
+  future: [],
+  // Drag state for batching position updates
+  dragStartState: null
 }
 
 export function workflowReducer(state, action) {
@@ -221,6 +222,17 @@ export function workflowReducer(state, action) {
         previewedComponent: null
       }
 
+    case 'START_DRAG':
+      // Save current state before drag begins (for undo)
+      return {
+        ...state,
+        dragStartState: { nodes: state.nodes, connections: state.connections }
+      }
+
+    case 'END_DRAG':
+      // Clear drag state - history entry is added by undoableReducer
+      return { ...state, dragStartState: null }
+
     case 'UNDO': {
       if (state.past.length === 0) return state
       const previous = state.past[state.past.length - 1]
@@ -263,7 +275,29 @@ function undoableReducer(state, action) {
     return workflowReducer(state, action)
   }
 
-  // For undoable actions, save current state to history before applying
+  // Special handling for END_DRAG - use saved dragStartState for history
+  if (action.type === 'END_DRAG') {
+    const newState = workflowReducer(state, action)
+
+    // Only add to history if we have a saved drag start state and something changed
+    if (state.dragStartState) {
+      const nodesChanged = state.nodes !== state.dragStartState.nodes
+      const connectionsChanged = state.connections !== state.dragStartState.connections
+
+      if (nodesChanged || connectionsChanged) {
+        const pastEntry = state.dragStartState
+        const newPast = [...state.past, pastEntry].slice(-MAX_HISTORY_SIZE)
+        return {
+          ...newState,
+          past: newPast,
+          future: [] // Clear future on new action
+        }
+      }
+    }
+    return newState
+  }
+
+  // For other undoable actions, save current state to history before applying
   if (UNDOABLE_ACTIONS.includes(action.type)) {
     const newState = workflowReducer(state, action)
 

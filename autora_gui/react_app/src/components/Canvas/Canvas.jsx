@@ -201,6 +201,8 @@ function Canvas() {
             onSelect={(id) => dispatch({ type: 'SELECT_NODE', payload: id })}
             onPositionChange={(id, x, y) => dispatch({ type: 'UPDATE_NODE_POSITION', payload: { id, x, y } })}
             onBorderClick={handleBorderClick}
+            onDragStart={() => dispatch({ type: 'START_DRAG' })}
+            onDragEnd={() => dispatch({ type: 'END_DRAG' })}
             zoom={state.zoom}
           />
         ))}
