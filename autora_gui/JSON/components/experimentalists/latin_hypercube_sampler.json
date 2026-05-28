@@ -51,40 +51,52 @@
     {
       "name": "conditions",
       "description": "Pool of candidate experimental conditions to sample from.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
+      "variables": {
+        "name": null,
+        "description": "Column of independent variable values",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
     },
     {
       "name": "reference_conditions",
       "description": "Pre-existing conditions used to exclude occupied hypercubes from sampling.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 0,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
+      "variables": {
+        "name": null,
+        "description": "Column of independent variable values",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
     }
   ],
   "outputDataType": [
     {
-      "name": "conditions",
+      "name": "res",
       "description": "Selected experimental conditions using Latin Hypercube Sampling.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
+      "variables": {
+        "name": null,
+        "description": "Column of dependent variable values",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
     }
   ]
 }

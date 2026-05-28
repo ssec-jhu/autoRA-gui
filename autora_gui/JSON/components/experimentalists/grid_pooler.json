@@ -12,30 +12,38 @@
   },
   "inputDataType": [
     {
-      "name": "variables",
+      "name": "ivs",
       "description": "Variable collection with allowed_values for each independent variable.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
+      "variables": {
+        "name": null,
+        "description": "Column of independent variable values",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
     }
   ],
   "outputDataType": [
     {
       "name": "conditions",
       "description": "Complete grid of experimental conditions.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
+      "variables": {
+        "name": null,
+        "description": "Column of dependent variable values",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
     }
   ]
 }

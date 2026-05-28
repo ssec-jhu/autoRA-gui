@@ -40,8 +40,8 @@ class ProtocolType(str, Enum):
 class VariableType(BaseModel):
     """Variable type model for the workflow."""
 
-    name: str | None
-    description: str | None
+    name: str | None = None
+    description: str | None = None
 
 
 class Cardinality(BaseModel):
@@ -70,7 +70,7 @@ class ListVariableType(VariableType):
 class DictVariableType(VariableType):
     """A model for dictionary variables in the workflow."""
 
-    variables: list["VariableTypes"]
+    variables: "VariableTypes | list[VariableTypes]"
 
 
 VariableTypes = PrimitiveVariableType | ListVariableType | DictVariableType

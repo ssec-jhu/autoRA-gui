@@ -87,9 +87,15 @@ class TestVariableType:
         assert var.name == "test_var"
         assert var.description is None
 
-    def test_missing_name_raises_error(self):
-        with pytest.raises(ValidationError):
-            VariableType(description="Missing name")
+    def test_name_defaults_to_none(self):
+        var = VariableType(description="Has description only")
+        assert var.name is None
+        assert var.description == "Has description only"
+
+    def test_all_fields_default_to_none(self):
+        var = VariableType()
+        assert var.name is None
+        assert var.description is None
 
 
 class TestCardinality:

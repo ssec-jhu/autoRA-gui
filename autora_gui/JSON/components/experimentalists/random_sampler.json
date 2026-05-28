@@ -1,7 +1,7 @@
 {
   "uuid": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
   "protocolType": "experimentalist",
-  "name": "Random Sample",
+  "name": "Random Sampler",
   "description": "Randomly selects a subset of experimental conditions from a given pool.",
   "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/random.py#L186",
   "pythonName": "random_sample",
@@ -51,28 +51,36 @@
     {
       "name": "conditions",
       "description": "Pool of experimental conditions to sample from.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
+      "variables": {
+        "name": null,
+        "description": "Column of independent variable values",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
     }
   ],
   "outputDataType": [
     {
-      "name": "conditions",
+      "name": "conditions_",
       "description": "Randomly selected subset of experimental conditions.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
+      "variables": {
+        "name": null,
+        "description": "Column of dependent variable values",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
     }
   ]
 }

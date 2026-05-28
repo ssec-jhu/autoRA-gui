@@ -24,26 +24,34 @@
       {
         "name": "samplers",
         "description": "List of tuples containing sampler functions, their names, and weights for the mixture.",
-        "datatype": "string",
-        "cardinality": {
-          "minOccurs": 1,
-          "maxOccurs": -1,
-          "unique": true
-        },
-        "validValues": null,
-        "default": null
+        "variables": {
+          "name": null,
+          "description": null,
+          "datatype": "any",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
+        }
       },
       {
         "name": "params",
         "description": "Nested dictionary mapping sampler names to their argument dictionaries.",
-        "datatype": "string",
-        "cardinality": {
-          "minOccurs": 1,
-          "maxOccurs": 1,
-          "unique": true
-        },
-        "validValues": null,
-        "default": null
+        "variables": {
+          "name": null,
+          "description": null,
+          "datatype": "real",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
+        }
       },
       {
         "name": "num_samples",
@@ -63,28 +71,36 @@
     {
       "name": "conditions",
       "description": "Pool of candidate experimental conditions to evaluate and sample from.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
+      "variables": {
+        "name": null,
+        "description": "Column of independent variable values",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
     }
   ],
   "outputDataType": [
     {
-      "name": "conditions",
+      "name": "conditions_",
       "description": "Selected experimental conditions with attached scores from the mixture sampling.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
+      "variables": {
+        "name": null,
+        "description": "Column of dependent variable values",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
     }
   ]
 }

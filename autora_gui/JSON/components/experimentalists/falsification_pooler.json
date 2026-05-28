@@ -135,40 +135,52 @@
     {
       "name": "reference_conditions",
       "description": "Training conditions for the model.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
+      "variables": {
+        "name": null,
+        "description": "Column of independent variable values",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
     },
     {
       "name": "reference_observations",
       "description": "Training observations for the model.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
+      "variables": {
+        "name": null,
+        "description": "Column of independent variable values",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
     }
   ],
   "outputDataType": [
     {
-      "name": "conditions",
+      "name": "new_conditions",
       "description": "DataFrame of conditions with highest falsification potential.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
+      "variables": {
+        "name": null,
+        "description": "Column of dependent variable values",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
     }
   ]
 }

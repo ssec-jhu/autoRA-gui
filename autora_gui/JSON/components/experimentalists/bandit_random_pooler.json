@@ -86,16 +86,28 @@
   "inputDataType": [],
   "outputDataType": [
     {
-      "name": "conditions",
+      "name": "probability_sequence_lst",
       "description": "Generated binary reward sequences for bandit tasks.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
+      "variable": {
+        "name": null,
+        "description": "Column of dependent variable values",
+        "variable": {
+          "name": null,
+          "description": "Column of dependent variable values",
+          "variable": {
+            "name": null,
+            "description": "Column of dependent variable values",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
+        }
+      }
     }
   ]
 }
