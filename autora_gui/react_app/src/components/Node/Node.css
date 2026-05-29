@@ -181,7 +181,7 @@
   transform: rotate(45deg);
   border-radius: 4px;
   background: linear-gradient(135deg, var(--node-controls) 50%, var(--bg-panel) 50%);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .node.diamond .diamond-inner {
@@ -194,8 +194,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 90px;
-  height: 90px;
+  width: 64px;
+  height: 64px;
 }
 
 .node.diamond .diamond-header {
@@ -278,37 +278,82 @@
 /* Connection ports */
 .node-port {
   position: absolute;
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   background: var(--bg-panel);
   border: 2px solid var(--border-color);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   cursor: crosshair;
-  opacity: 0;
-  transition: opacity 0.15s, background 0.15s, border-color 0.15s, transform 0.15s;
+  opacity: 1;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s, box-shadow 0.15s;
   z-index: 10;
 }
 
-.node:hover .node-port,
-.node.connecting .node-port {
-  opacity: 1;
+/* Invisible hit area expansion for easier targeting */
+.node-port::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  border-radius: 50%;
 }
 
-.node-port:hover,
-.node-port.hovered {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  transform: translate(-50%, -50%) scale(1.3);
+/* Neutral ports - Yellow (default/unconnected) */
+.node-port.port-neutral {
+  border-color: var(--port-neutral);
 }
 
-.node.selected .node-port {
-  border-color: var(--accent-danger);
+.node-port.port-neutral:hover,
+.node-port.port-neutral.hovered {
+  background: var(--port-neutral);
+  border-color: var(--port-neutral);
+  transform: translate(-50%, -50%) scale(1.25);
+  box-shadow: 0 0 8px var(--port-neutral);
 }
 
-.node.selected .node-port:hover {
-  background: var(--accent-danger);
-  border-color: var(--accent-danger);
+/* Input ports - Green (connected) */
+.node-port.port-input {
+  border-color: var(--port-input);
+}
+
+.node-port.port-input:hover,
+.node-port.port-input.hovered {
+  background: var(--port-input);
+  border-color: var(--port-input);
+  transform: translate(-50%, -50%) scale(1.25);
+  box-shadow: 0 0 8px var(--port-input);
+}
+
+/* Output ports - Coral (connected or filter bottom) */
+.node-port.port-output {
+  border-color: var(--port-output);
+}
+
+.node-port.port-output:hover,
+.node-port.port-output.hovered {
+  background: var(--port-output);
+  border-color: var(--port-output);
+  transform: translate(-50%, -50%) scale(1.25);
+  box-shadow: 0 0 8px var(--port-output);
+}
+
+/* Selected node ports */
+.node.selected .node-port.port-neutral {
+  border-color: var(--port-neutral);
+  box-shadow: 0 0 6px var(--port-neutral);
+}
+
+.node.selected .node-port.port-input {
+  border-color: var(--port-input);
+  box-shadow: 0 0 6px var(--port-input);
+}
+
+.node.selected .node-port.port-output {
+  border-color: var(--port-output);
+  box-shadow: 0 0 6px var(--port-output);
 }
 
 /* Diamond ports container - inside the diamond, rotates with it */
@@ -327,7 +372,26 @@
   transform: translate(-50%, -50%) rotate(-45deg);
 }
 
-.diamond-ports-container .node-port:hover,
-.diamond-ports-container .node-port.hovered {
-  transform: translate(-50%, -50%) rotate(-45deg) scale(1.3);
+.diamond-ports-container .node-port.port-neutral:hover,
+.diamond-ports-container .node-port.port-neutral.hovered {
+  background: var(--port-neutral);
+  border-color: var(--port-neutral);
+  transform: translate(-50%, -50%) rotate(-45deg) scale(1.25);
+  box-shadow: 0 0 8px var(--port-neutral);
+}
+
+.diamond-ports-container .node-port.port-input:hover,
+.diamond-ports-container .node-port.port-input.hovered {
+  background: var(--port-input);
+  border-color: var(--port-input);
+  transform: translate(-50%, -50%) rotate(-45deg) scale(1.25);
+  box-shadow: 0 0 8px var(--port-input);
+}
+
+.diamond-ports-container .node-port.port-output:hover,
+.diamond-ports-container .node-port.port-output.hovered {
+  background: var(--port-output);
+  border-color: var(--port-output);
+  transform: translate(-50%, -50%) rotate(-45deg) scale(1.25);
+  box-shadow: 0 0 8px var(--port-output);
 }

@@ -21,6 +21,7 @@ const getDataType = (varType) => {
 function PropertiesPanel() {
   const { state, dispatch } = useWorkflow()
   const selectedNode = state.nodes.find(n => n.id === state.selectedNodeId)
+  const previewedComponent = state.previewedComponent
 
   const handleParameterChange = (paramName, value) => {
     dispatch({
@@ -105,13 +106,94 @@ function PropertiesPanel() {
     }
   }
 
+  // Show previewed component when no node is selected
+  if (!selectedNode && previewedComponent) {
+    const previewParams = Object.values(previewedComponent.parameters || {}).flat()
+    return (
+      <aside className="properties-panel">
+        <div className="properties-header">
+          <h2>Component Preview</h2>
+        </div>
+        <div className="properties-content">
+          <div className="property-section">
+            <div className="node-info">
+              <h3 className="node-info-name">{previewedComponent.name}</h3>
+              <span className="node-info-type">{previewedComponent.protocolType?.replace('_', ' ')}</span>
+            </div>
+            {previewedComponent.description && (
+              <p className="node-description">{previewedComponent.description}</p>
+            )}
+          </div>
+
+          {previewParams.length > 0 && (
+            <div className="property-section">
+              <h4 className="section-title">Parameters</h4>
+              <div className="parameters-list">
+                {previewParams.map(param => (
+                  <div key={param.name} className="parameter-row preview-only">
+                    <label className="parameter-label">
+                      {param.name}
+                      {param.description && (
+                        <span className="parameter-hint" title={param.description}>?</span>
+                      )}
+                    </label>
+                    <div className="parameter-value">
+                      <span className="parameter-datatype">{param.datatype}</span>
+                    </div>
+                    {param.default !== undefined && param.default !== null && (
+                      <span className="parameter-default">
+                        Default: {param.default.toString()}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {previewedComponent.inputDataType && (
+            <div className="property-section">
+              <h4 className="section-title">Inputs</h4>
+              <div className="data-types">
+                {previewedComponent.inputDataType.map((input, idx) => (
+                  <div key={idx} className="data-type-item">
+                    <span className="data-type-name">{input.name}</span>
+                    <span className="data-type-type">{input.datatype}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {previewedComponent.outputDataType && (
+            <div className="property-section">
+              <h4 className="section-title">Outputs</h4>
+              <div className="data-types">
+                {previewedComponent.outputDataType.map((output, idx) => (
+                  <div key={idx} className="data-type-item">
+                    <span className="data-type-name">{output.name}</span>
+                    <span className="data-type-type">{output.datatype}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="preview-hint">
+            <p>Drag this component to the canvas to use it</p>
+          </div>
+        </div>
+      </aside>
+    )
+  }
+
   if (!selectedNode) {
     return (
       <aside className="properties-panel">
         <div className="properties-empty">
           <div className="empty-icon">📋</div>
           <h3>No Selection</h3>
-          <p>Select a node to view and edit its properties</p>
+          <p>Select a node or click a component to view its properties</p>
         </div>
       </aside>
     )
@@ -144,6 +226,12 @@ function PropertiesPanel() {
           {selectedNode.description && (
             <p className="node-description">{selectedNode.description}</p>
           )}
+          <button
+            className="delete-node-btn"
+            onClick={() => dispatch({ type: 'DELETE_NODE', payload: selectedNode.id })}
+          >
+            Delete Node
+          </button>
         </div>
 
         {isFilterNode && (
