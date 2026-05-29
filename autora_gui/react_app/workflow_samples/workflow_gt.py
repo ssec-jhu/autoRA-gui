@@ -32,37 +32,43 @@ import numpy as np
 
 @on_state()
 def pool_on_state(variables: VariableCollection) -> Delta:
-    return Delta(conditions=pool(variables, 10_000)) # <- add parameters here
+    return Delta(conditions=pool(variables, 10_000))  # <- add parameters here
+
 
 @on_state()
 def sample_on_state(conditions: pd.DataFrame, num_samples: int = 1) -> Delta:
-    return Delta(conditions=sample(conditions=conditions, num_samples=num_samples)) # <- add parameters here
+    return Delta(conditions=sample(conditions=conditions, num_samples=num_samples))  # <- add parameters here
+
 
 @on_state()
 def runner_on_state(conditions: pd.DataFrame) -> Delta:
-    runner = expected_value_theory() # <- add parameters here
+    runner = expected_value_theory()  # <- add parameters here
     assert runner.run is not None
     return Delta(experiment_data=runner.run(conditions=conditions))
 
 
-theorist_on_state = estimator_on_state(BMSRegressor()) # <- add parameters here
+theorist_on_state = estimator_on_state(BMSRegressor())  # <- add parameters here
+
 
 def main():
     runner = expected_value_theory()
-    assert runner.variables is not None # <- here the variables are created and governed by the runner. I think we should make the variables (input/output) "read-only"
+    assert (
+        runner.variables is not None
+    )  # <- here the variables are created and governed by the runner. I think we should make the variables (input/output) "read-only"
     variables = runner.variables
     state = StandardState(variables=variables)
 
-    for i in range(10): # <- filter for max cycles here
-        print(f'Cycle {i}')
-        print('creating pool')
+    for i in range(10):  # <- filter for max cycles here
+        print(f"Cycle {i}")
+        print("creating pool")
         state = pool_on_state(state)
-        print('sampling')
+        print("sampling")
         state = sample_on_state(state, num_samples=10)
-        print('running')
+        print("running")
         state = runner_on_state(state)
-        print('analysing data')
+        print("analysing data")
         state = theorist_on_state(state)
-        
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     main()
