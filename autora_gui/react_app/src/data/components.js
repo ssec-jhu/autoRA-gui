@@ -1770,7 +1770,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "theorist",
       "name": "BMS Regressor",
       "description": "Bayesian Machine Scientist that discovers symbolic equations using MCMC sampling with informed priors over mathematical expressions.",
-      "githubCommit": "https://github.com/AutoResearch/autora-theorist-bms/blob/ce3d7edf707c54a12108700076d841c138086be1/src/autora/theorist/bms/regressor.py#L23",
+      "githubCommit": "https://github.com/AutoResearch/autora-theorist-bms/blob/ce3d7edf707c54a12108700076d841c138086be1/src/autora/theorist/bms/regressor.py#L24",
       "pythonName": "BMSRegressor",
       "importPath": "autora.theorist.bms.regressor",
       "pipInstall": "autora-theorist-bms==1.0.0",
@@ -1820,28 +1820,36 @@ export const EMBEDDED_COMPONENTS = {
         {
           "name": "X",
           "description": "Input features as a 2D array.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": true
-          },
-          "validValues": null,
-          "default": null
+          "variables": {
+            "name": null,
+            "description": "Column of independent variable values",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
         }
       ],
       "outputDataType": [
         {
           "name": "y",
           "description": "Predicted target values.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": true
-          },
-          "validValues": null,
-          "default": null
+          "variables": {
+            "name": null,
+            "description": "Column of dependent variable values",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
         }
       ],
       "file": "bms_regressor.json"
@@ -1851,7 +1859,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "theorist",
       "name": "BSR Regressor",
       "description": "Bayesian Symbolic Regression that discovers mathematical expressions using MCMC sampling to build up equations from basic functions.",
-      "githubCommit": "https://github.com/AutoResearch/autora-theorist-bsr/blob/cdbf04f2fb3712924826ba283152fc459ee21f6e/src/autora/theorist/bsr/regressor.py#L18",
+      "githubCommit": "https://github.com/AutoResearch/autora-theorist-bsr/blob/cdbf04f2fb3712924826ba283152fc459ee21f6e/src/autora/theorist/bsr/regressor.py#L19",
       "pythonName": "BSRRegressor",
       "importPath": "autora.theorist.bsr.regressor",
       "pipInstall": "autora-theorist-bsr==1.0.0",
@@ -1973,28 +1981,36 @@ export const EMBEDDED_COMPONENTS = {
         {
           "name": "X",
           "description": "Input features as a 2D array.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": true
-          },
-          "validValues": null,
-          "default": null
+          "variables": {
+            "name": null,
+            "description": "Column of independent variable values",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
         }
       ],
       "outputDataType": [
         {
           "name": "y",
           "description": "Predicted target values.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": true
-          },
-          "validValues": null,
-          "default": null
+          "variables": {
+            "name": null,
+            "description": "Column of dependent variable values",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
         }
       ],
       "file": "bsr_regressor.json"
@@ -2004,7 +2020,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "theorist",
       "name": "DARTS Regressor",
       "description": "Finds a composition of functions and coefficients to minimize a loss function using Differentiable Architecture Search (DARTS).",
-      "githubCommit": "https://github.com/AutoResearch/autora-theorist-darts/blob/60e30ebd3fb10a3dd901de4183664c7b6bea9990/src/autora/theorist/darts/regressor.py#L436",
+      "githubCommit": "https://github.com/AutoResearch/autora-theorist-darts/blob/60e30ebd3fb10a3dd901de4183664c7b6bea9990/src/autora/theorist/darts/regressor.py#L437",
       "pythonName": "DARTSRegressor",
       "importPath": "autora.theorist.darts.regressor",
       "pipInstall": "autora-theorist-darts==1.1.0",
@@ -2318,28 +2334,36 @@ export const EMBEDDED_COMPONENTS = {
         {
           "name": "X",
           "description": "Input features as a 2D array.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": true
-          },
-          "validValues": null,
-          "default": null
+          "variables": {
+            "name": null,
+            "description": "Column of independent variable values",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
         }
       ],
       "outputDataType": [
         {
           "name": "y",
           "description": "Predicted target values.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": true
-          },
-          "validValues": null,
-          "default": null
+          "variables": {
+            "name": null,
+            "description": "Column of dependent variable values",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
         }
       ],
       "file": "darts_regressor.json"
