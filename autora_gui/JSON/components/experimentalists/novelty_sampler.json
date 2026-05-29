@@ -1,45 +1,75 @@
 {
-  "uuid": "novelty-sampler-001",
+  "uuid": "f2a3b4c5-d6e7-4f8a-9b0c-1d2e3f4a5b6c",
   "protocolType": "experimentalist",
   "name": "Novelty Sampler",
   "description": "Selects experimental conditions that are most novel (dissimilar) with respect to existing reference conditions using pairwise distance metrics.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/d1931c5409bac262559e343eb3c25fef12180bcb/src/autora/experimentalist/novelty/__init__.py#L36",
-  "parameters": [
-    {
-      "name": "num_samples",
-      "description": "Number of novel samples to select from the condition pool.",
-      "datatype": "integer",
-      "minOccurs": 0,
-      "maxOccurs": 1,
-      "validValues": null,
-      "default": null
-    },
-    {
-      "name": "metric",
-      "description": "Distance metric for measuring dissimilarity between conditions.",
-      "datatype": "categorical",
-      "minOccurs": 1,
-      "maxOccurs": 1,
-      "validValues": ["euclidean", "manhattan", "chebyshev", "minkowski", "cosine", "correlation"],
-      "default": "euclidean"
-    },
-    {
-      "name": "integration",
-      "description": "Method for combining pairwise distances into overall dissimilarity score.",
-      "datatype": "categorical",
-      "minOccurs": 1,
-      "maxOccurs": 1,
-      "validValues": ["min", "sum", "prod", "mean", "max"],
-      "default": "min"
-    }
-  ],
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L148",
+  "pythonName": "novelty_sampler",
+  "importPath": "autora.experimentalist.novelty",
+  "pipInstall": "autora-experimentalist-novelty==1.0.0",
+  "parameters": {
+    "novelty_sampler": [
+      {
+        "name": "num_samples",
+        "description": "Number of novel samples to select from the condition pool.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "metric",
+        "description": "Distance metric for measuring dissimilarity between conditions.",
+        "datatype": "categorical",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": [
+          "euclidean",
+          "manhattan",
+          "chebyshev",
+          "minkowski",
+          "cosine",
+          "correlation"
+        ],
+        "default": "euclidean"
+      },
+      {
+        "name": "integration",
+        "description": "Method for combining pairwise distances into overall dissimilarity score.",
+        "datatype": "categorical",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": [
+          "min",
+          "sum",
+          "prod",
+          "mean",
+          "max"
+        ],
+        "default": "min"
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "conditions",
       "description": "Pool of candidate experimental conditions to evaluate.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     },
@@ -47,8 +77,11 @@
       "name": "reference_conditions",
       "description": "Existing experimental conditions to compare against.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
@@ -58,8 +91,11 @@
       "name": "conditions",
       "description": "Selected novel experimental conditions.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }

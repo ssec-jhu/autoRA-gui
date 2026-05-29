@@ -1,0 +1,78 @@
+{
+  "uuid": "e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",
+  "protocolType": "experimentalist",
+  "name": "Random Pooler",
+  "description": "Generates a pool of experimental conditions by randomly sampling from the defined variable space.",
+  "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/random.py#L133",
+  "pythonName": "random_pool",
+  "importPath": "autora.experimentalist.random",
+  "pipInstall": "autora-experimentalist-random==1.0.0",
+  "parameters": {
+    "random_pool": [
+      {
+        "name": "num_samples",
+        "description": "Number of random samples to generate from the variable space.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 5
+      },
+      {
+        "name": "random_state",
+        "description": "Seed for random number generator to ensure reproducibility.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "replace",
+        "description": "If true, allow repeated values in sampling.",
+        "datatype": "boolean",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": true
+      }
+    ]
+  },
+  "inputDataType": [
+    {
+      "name": "variables",
+      "description": "Variable collection defining the experimental space.",
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "conditions",
+      "description": "Generated pool of experimental conditions.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ]
+}

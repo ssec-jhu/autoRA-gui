@@ -19,32 +19,99 @@
       "title": "CanvasLocation",
       "type": "object"
     },
-    "Component": {
-      "description": "A component model for Autora gui.\n\nIncludes node parameters and canvas location.",
+    "Cardinality": {
+      "description": "A model for cardinality in the workflow.",
       "properties": {
-        "uuid": {
-          "format": "uuid",
-          "title": "Uuid",
-          "type": "string"
+        "minOccurs": {
+          "default": 0,
+          "title": "Minoccurs",
+          "type": "integer"
         },
-        "protocolUuid": {
-          "format": "uuid",
-          "title": "Protocoluuid",
-          "type": "string"
+        "maxOccurs": {
+          "default": 1,
+          "title": "Maxoccurs",
+          "type": "integer"
         },
-        "parameterSetting": {
+        "unique": {
+          "default": true,
+          "title": "Unique",
+          "type": "boolean"
+        }
+      },
+      "title": "Cardinality",
+      "type": "object"
+    },
+    "Datatype": {
+      "description": "Datatype model for the workflow.",
+      "enum": [
+        "real",
+        "integer",
+        "boolean",
+        "string",
+        "categorical",
+        "any"
+      ],
+      "title": "Datatype",
+      "type": "string"
+    },
+    "DictVariableType": {
+      "description": "A model for dictionary variables in the workflow.",
+      "properties": {
+        "name": {
           "anyOf": [
             {
-              "items": {
-                "$ref": "#/$defs/ParameterSetting"
-              },
-              "type": "array"
+              "type": "string"
             },
             {
               "type": "null"
             }
           ],
-          "title": "Parametersetting"
+          "title": "Name"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "variables": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PrimitiveVariableType"
+              },
+              {
+                "$ref": "#/$defs/ListVariableType"
+              },
+              {
+                "$ref": "#/$defs/DictVariableType"
+              }
+            ]
+          },
+          "title": "Variables",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "variables"
+      ],
+      "title": "DictVariableType",
+      "type": "object"
+    },
+    "EndComponent": {
+      "description": "An end component model for AutoRA GUI.\n\nServes as the ending point of the workflow.",
+      "properties": {
+        "uuid": {
+          "format": "uuid",
+          "title": "Uuid",
+          "type": "string"
         },
         "canvasLocation": {
           "anyOf": [
@@ -59,24 +126,54 @@
       },
       "required": [
         "uuid",
-        "protocolUuid",
-        "parameterSetting",
         "canvasLocation"
       ],
-      "title": "Component",
+      "title": "EndComponent",
       "type": "object"
     },
-    "Datatype": {
-      "description": "Datatype model for the workflow.",
-      "enum": [
-        "real",
-        "integer",
-        "boolean",
-        "string",
-        "categorical"
+    "FilterComponent": {
+      "description": "A filter component model for AutoRA GUI.\n\nServes as a decision/filter point in the workflow.",
+      "properties": {
+        "uuid": {
+          "format": "uuid",
+          "title": "Uuid",
+          "type": "string"
+        },
+        "canvasLocation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CanvasLocation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "maxCounter": {
+          "default": 1,
+          "title": "Maxcounter",
+          "type": "integer"
+        },
+        "altTarget": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alttarget"
+        }
+      },
+      "required": [
+        "uuid",
+        "canvasLocation"
       ],
-      "title": "Datatype",
-      "type": "string"
+      "title": "FilterComponent",
+      "type": "object"
     },
     "Link": {
       "description": "A link (connection) model for Autora gui.\n\nIncludes output and input nodes being connected by the given link.",
@@ -97,6 +194,54 @@
         "target"
       ],
       "title": "Link",
+      "type": "object"
+    },
+    "ListVariableType": {
+      "description": "A model for list variables in the workflow.",
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "variable": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrimitiveVariableType"
+            },
+            {
+              "$ref": "#/$defs/ListVariableType"
+            },
+            {
+              "$ref": "#/$defs/DictVariableType"
+            }
+          ],
+          "title": "Variable"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "variable"
+      ],
+      "title": "ListVariableType",
       "type": "object"
     },
     "ParameterSetting": {
@@ -123,8 +268,15 @@
       "description": "Primitive variable type model for the workflow.",
       "properties": {
         "name": {
-          "title": "Name",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
         },
         "description": {
           "anyOf": [
@@ -140,29 +292,16 @@
         "datatype": {
           "$ref": "#/$defs/Datatype"
         },
-        "minOccurs": {
+        "cardinality": {
           "anyOf": [
             {
-              "type": "integer"
+              "$ref": "#/$defs/Cardinality"
             },
             {
               "type": "null"
             }
           ],
-          "default": 1,
-          "title": "Minoccurs"
-        },
-        "maxOccurs": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": -1,
-          "title": "Maxoccurs"
+          "default": null
         },
         "validValues": {
           "anyOf": [
@@ -198,68 +337,81 @@
       "title": "PrimitiveVariableType",
       "type": "object"
     },
-    "TupleVariableType": {
-      "description": "A model for tuple variables in the workflow.",
+    "ProtocolComponent": {
+      "description": "A protocol component model for AutoRA GUI.\n\nIncludes node parameters.",
       "properties": {
-        "name": {
-          "title": "Name",
+        "uuid": {
+          "format": "uuid",
+          "title": "Uuid",
           "type": "string"
         },
-        "description": {
+        "canvasLocation": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/CanvasLocation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "protocolUuid": {
+          "format": "uuid",
+          "title": "Protocoluuid",
+          "type": "string"
+        },
+        "parameterSetting": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ParameterSetting"
+              },
+              "type": "array"
             },
             {
               "type": "null"
             }
           ],
-          "title": "Description"
-        },
-        "variables": {
-          "items": {
-            "$ref": "#/$defs/VariableType"
-          },
-          "title": "Variables",
-          "type": "array"
+          "title": "Parametersetting"
         }
       },
       "required": [
-        "name",
-        "description",
-        "variables"
+        "uuid",
+        "canvasLocation",
+        "protocolUuid",
+        "parameterSetting"
       ],
-      "title": "TupleVariableType",
+      "title": "ProtocolComponent",
       "type": "object"
     },
-    "VariableType": {
-      "description": "Variable type model for the workflow.",
+    "StartComponent": {
+      "description": "A start component model for AutoRA GUI.\n\nServes as the starting point of the workflow.",
       "properties": {
-        "name": {
-          "title": "Name",
+        "uuid": {
+          "format": "uuid",
+          "title": "Uuid",
           "type": "string"
         },
-        "description": {
+        "canvasLocation": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/CanvasLocation"
             },
             {
               "type": "null"
             }
-          ],
-          "title": "Description"
+          ]
         }
       },
       "required": [
-        "name",
-        "description"
+        "uuid",
+        "canvasLocation"
       ],
-      "title": "VariableType",
+      "title": "StartComponent",
       "type": "object"
     }
   },
-  "description": "A workflow model for Autora gui.\n\nIncludes all possible elements like nodes and links.",
+  "description": "A workflow model for AutoRA GUI.\n\nIncludes all possible elements like nodes and links.",
   "properties": {
     "name": {
       "title": "Name",
@@ -277,13 +429,53 @@
       "default": null,
       "title": "Description"
     },
+    "start": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/StartComponent"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "end": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EndComponent"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "filters": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/FilterComponent"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Filters"
+    },
     "independentVariables": {
       "anyOf": [
         {
           "$ref": "#/$defs/PrimitiveVariableType"
         },
         {
-          "$ref": "#/$defs/TupleVariableType"
+          "$ref": "#/$defs/ListVariableType"
+        },
+        {
+          "$ref": "#/$defs/DictVariableType"
         }
       ],
       "title": "Independentvariables"
@@ -294,14 +486,17 @@
           "$ref": "#/$defs/PrimitiveVariableType"
         },
         {
-          "$ref": "#/$defs/TupleVariableType"
+          "$ref": "#/$defs/ListVariableType"
+        },
+        {
+          "$ref": "#/$defs/DictVariableType"
         }
       ],
       "title": "Dependentvariables"
     },
     "components": {
       "items": {
-        "$ref": "#/$defs/Component"
+        "$ref": "#/$defs/ProtocolComponent"
       },
       "title": "Components",
       "type": "array"

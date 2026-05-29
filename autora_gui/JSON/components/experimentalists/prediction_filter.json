@@ -1,0 +1,66 @@
+{
+  "uuid": "d0e1f2a3-b4c5-4d6e-9f7a-8b9c0d1e2f3a",
+  "protocolType": "experimentalist",
+  "name": "Prediction Filter",
+  "description": "Filters candidate conditions through model predictions. Applies a custom filter function to predicted outcomes and returns only those conditions meeting specified criteria.",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-prediction-filter/blob/main/src/autora/experimentalist/prediction_filter/__init__.py#L86",
+  "pythonName": "prediction_filter",
+  "importPath": "autora.experimentalist.prediction_filter",
+  "pipInstall": "autora-experimentalist-prediction-filter==1.0.0",
+  "parameters": {
+    "prediction_filter": [
+      {
+        "name": "filter_function",
+        "description": "Callable that evaluates model predictions and returns boolean values indicating which conditions to keep.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "Pool of candidate experimental conditions to filter.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "model",
+      "description": "Sklearn-compatible estimator with a predict method to generate predictions for filtering.",
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "conditions",
+      "description": "Filtered experimental conditions whose model predictions satisfy the filter function criteria.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 0,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ]
+}

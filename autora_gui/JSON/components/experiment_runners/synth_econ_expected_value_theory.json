@@ -1,0 +1,102 @@
+{
+  "uuid": "a5b6c7d8-e9f0-4a1b-2c3d-4e5f6a7b8c9d",
+  "protocolType": "experiment_runner",
+  "name": "Expected Value Theory (Synthetic, Economics)",
+  "description": "Synthetic experiment runner modeling decision-making between options based on expected utilities calculated as value multiplied by probability.",
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/d04b4391444f000d9f3fb6038d8d2b9c7953a270/src/autora/experiment_runner/synthetic/economics/expected_value_theory.py#L71",
+  "pythonName": "expected_value_theory",
+  "importPath": "autora.experiment_runner.synthetic.economics.expected_value_theory",
+  "pipInstall": "autora-synthetic==1.0.0",
+  "parameters": {
+    "expected_value_theory": [
+      {
+        "name": "choice_temperature",
+        "description": "Softmax temperature controlling choice stochasticity.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.1
+      },
+      {
+        "name": "value_lambda",
+        "description": "Scaling factor applied to option values.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.5
+      },
+      {
+        "name": "resolution",
+        "description": "Number of discrete points in variable ranges.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 10
+      },
+      {
+        "name": "minimum_value",
+        "description": "Lower bound for value variables.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": -1
+      },
+      {
+        "name": "maximum_value",
+        "description": "Upper bound for value variables.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1
+      }
+    ]
+  },
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "Option values and probabilities for choices.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "observations",
+      "description": "Choice probabilities between options.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ]
+}

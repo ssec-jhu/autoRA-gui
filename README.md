@@ -1,8 +1,8 @@
 # SSEC-JHU autora_gui
 
 [![CI](https://github.com/ssec-jhu/autoRA-gui/actions/workflows/ci.yml/badge.svg)](https://github.com/ssec-jhu/autoRA-gui/actions/workflows/ci.yml)
-[![Documentation Status](https://readthedocs.org/projects/autoRA-gui/badge/?version=latest)](https://autoRA-gui.readthedocs.io/en/latest/?badge=latest)
-[![codecov](https://codecov.io/gh/ssec-jhu/autoRA-gui/branch/main/graph/badge.svg?token=0KPNKHRC2V)](https://codecov.io/gh/ssec-jhu/autoRA-gui)
+[![Docs](https://github.com/ssec-jhu/autoRA-gui/actions/workflows/deploy-pages.yml/badge.svg)](https://ssec-jhu.github.io/autoRA-gui)
+[![codecov](https://codecov.io/gh/ssec-jhu/autoRA-gui/branch/main/graph/badge.svg?token=Ry6ZXSfGa3)](https://codecov.io/gh/ssec-jhu/autoRA-gui)
 [![Security](https://github.com/ssec-jhu/autoRA-gui/actions/workflows/security.yml/badge.svg)](https://github.com/ssec-jhu/autoRA-gui/actions/workflows/security.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14052740.svg)](https://doi.org/10.5281/zenodo.14052740)
 
@@ -17,9 +17,10 @@ Things to do when using this template:
  * Uncomment above DOI in README.md and correct ``<insert_ID_number>``.
  * Correct "description" field in .zenodo.json to reflect description of child repo.
  * Correct the ``CI Status`` badge with the correct token in the URL.
- * Import package into https://readthedocs.org/.
- * Update [zenodo.json](zenodo.json). For more details see [zenodo.json docs](https://developers.zenodo.org/#representation) and [zenodo docs on contributors vs creators](https://help.zenodo.org/docs/deposit/describe-records/contributors/).
+ * Update [zenodo.json](.zenodo.json). For more details see [zenodo.json docs](https://developers.zenodo.org/#representation) and [zenodo docs on contributors vs creators](https://help.zenodo.org/docs/deposit/describe-records/contributors/).
  * Update quickstart guide below.
+ * Go to https://github.com/ssec-jhu/autoRA-gui/settings/pages and set the "source"
+   field for "Build and deployment" to "GitHub Actions".
 
 What's included in this template:
 
@@ -31,6 +32,7 @@ What's included in this template:
  * Dockerfile.
  * Pytest example(s).
  * Githooks.
+ * Docs that build and deploy to https://ssec-jhu.github.io/autoRA-gui
 
 # Quickstart Guide
 

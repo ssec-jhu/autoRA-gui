@@ -1,0 +1,174 @@
+{
+  "uuid": "a7b8c9d0-e1f2-4a3b-4c5d-6e7f8a9b0c1d",
+  "protocolType": "experimentalist",
+  "name": "Falsification Pooler",
+  "description": "Selects experimental conditions most likely to falsify the current model by identifying regions where the model predictions may deviate from ground truth.",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L447",
+  "pythonName": "falsification_pooler",
+  "importPath": "autora.experimentalist.falsification",
+  "pipInstall": "autora-experimentalist-falsification==1.0.0",
+  "parameters": {
+    "falsification_pooler": [
+      {
+        "name": "metadata",
+        "description": "VariableCollection with meta-data about the dependent and independent variables.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "num_samples",
+        "description": "Number of high-falsification-potential samples to select.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 100
+      },
+      {
+        "name": "training_epochs",
+        "description": "Number of epochs to train the internal falsification network.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1000
+      },
+      {
+        "name": "optimization_epochs",
+        "description": "Number of epochs to train the internal falsification network.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1000
+      },
+      {
+        "name": "training_lr",
+        "description": "Learning rate for training the falsification network.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.001
+      },
+      {
+        "name": "optimization_lr",
+        "description": "Learning rate for training the falsification network.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.001
+      },
+      {
+        "name": "limit_offset",
+        "description": "Offset for limiting the number of high-falsification-potential samples.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0
+      },
+      {
+        "name": "limit_repulsion",
+        "description": "Repulsion for limiting the number of high-falsification-potential samples.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0
+      },
+      {
+        "name": "plot",
+        "description": "Whether to display network predictions and training loss visualization.",
+        "datatype": "boolean",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": false
+      }
+    ]
+  },
+  "inputDataType": [
+    {
+      "name": "model",
+      "description": "Fitted model to attempt to falsify.",
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "reference_conditions",
+      "description": "Training conditions for the model.",
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "reference_observations",
+      "description": "Training observations for the model.",
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "conditions",
+      "description": "DataFrame of conditions with highest falsification potential.",
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ]
+}

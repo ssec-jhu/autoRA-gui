@@ -1,0 +1,90 @@
+{
+  "uuid": "02bd365a-bbb8-4eee-98fc-11243f1f4e8e",
+  "protocolType": "experiment_runner",
+  "name": "Linear Mixed Model Experiment (Synthetic, Abstract)",
+  "description": "Synthetic experiment runner implementing a linear mixed model with fixed and random effects. Supports R-style formula notation (e.g., 'y ~ x1 + (1|group)') for specifying random intercepts, random slopes, and multiple grouping variables.",
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/abstract/lmm.py#L164",
+  "pythonName": "lmm_experiment",
+  "importPath": "autora.experiment_runner.synthetic.abstract.lmm",
+  "pipInstall": "autora-synthetic==1.0.0",
+  "parameters": {
+    "lmm_experiment": [
+      {
+        "name": "formula",
+        "description": "Model specification using R-style notation (e.g., 'y ~ x1 + (1|group)').",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "fixed_effects",
+        "description": "Dictionary mapping effect names to coefficients.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "random_effects",
+        "description": "Nested dictionary specifying random intercepts/slopes as standard deviations.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "random_state",
+        "description": "Seed for random number generator to ensure reproducibility.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "Experimental conditions specifying independent variable values.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "observations",
+      "description": "Simulated dependent variable values from the linear mixed model.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ]
+}

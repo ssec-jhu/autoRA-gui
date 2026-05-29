@@ -1,36 +1,64 @@
 {
-  "uuid": "bms-regressor-001",
+  "uuid": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
   "protocolType": "theorist",
   "name": "BMS Regressor",
   "description": "Bayesian Machine Scientist that discovers symbolic equations using MCMC sampling with informed priors over mathematical expressions.",
   "githubCommit": "https://github.com/AutoResearch/autora-theorist-bms/blob/ce3d7edf707c54a12108700076d841c138086be1/src/autora/theorist/bms/regressor.py#L23",
-  "parameters": [
-    {
-      "name": "epochs",
-      "description": "Number of MCMC iterations for equation sampling.",
-      "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": 1,
-      "validValues": null,
-      "default": 1500
-    },
-    {
-      "name": "prior_name",
-      "description": "Name of the prior distribution to use for operations.",
-      "datatype": "categorical",
-      "minOccurs": 1,
-      "maxOccurs": 1,
-      "validValues": ["Guimera2020", "GuimeraTest2020"],
-      "default": "Guimera2020"
-    }
-  ],
+  "pythonName": "BMSRegressor",
+  "importPath": "autora.theorist.bms.regressor",
+  "pipInstall": "autora-theorist-bms==1.0.0",
+  "parameters": {
+    "__init__": [
+      {
+        "name": "epochs",
+        "description": "Number of MCMC iterations for equation sampling.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1500
+      },
+      {
+        "name": "ts",
+        "description": "List of temperatures for parallel tempering MCMC sampling.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 20,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      }
+    ],
+    "fit": [
+      {
+        "name": "num_param",
+        "description": "Number of parameters to fit.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "X",
       "description": "Input features as a 2D array.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
@@ -40,8 +68,11 @@
       "name": "y",
       "description": "Predicted target values.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }

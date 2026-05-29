@@ -1,0 +1,128 @@
+{
+  "uuid": "17f22b12-3eb6-4396-b311-e72fa2e248f1",
+  "protocolType": "experiment_runner",
+  "name": "Task Switching (Synthetic, Neuroscience)",
+  "description": "Synthetic experiment runner implementing a cognitive model of task-switching behavior. Performance depends on current task strength, alternative task strength, and whether a task switch occurs.",
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/neuroscience/task_switching.py#L11",
+  "pythonName": "task_switching",
+  "importPath": "autora.experiment_runner.synthetic.neuroscience.task_switching",
+  "pipInstall": "autora-synthetic==1.0.0",
+  "parameters": {
+    "task_switching": [
+      {
+        "name": "resolution",
+        "description": "Number of stimulus value options.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 50
+      },
+      {
+        "name": "priming_default",
+        "description": "Task priming baseline value.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.3
+      },
+      {
+        "name": "temperature",
+        "description": "Softmax parameter for current task performance.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.2
+      },
+      {
+        "name": "minimum_task_control",
+        "description": "Lower bound for task control.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.15
+      },
+      {
+        "name": "constant",
+        "description": "Task activation exponential constant.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1.5
+      }
+    ],
+    "run": [
+      {
+        "name": "added_noise",
+        "description": "Standard deviation of Gaussian noise added to the simulated observations.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": 0.01
+      },
+      {
+        "name": "random_state",
+        "description": "Seed for random number generation to ensure reproducibility of the simulated data.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "Experimental conditions specifying current task strength, alternative task strength, and is_switch.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "observations",
+      "description": "Simulated current task performance accuracy.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ]
+}

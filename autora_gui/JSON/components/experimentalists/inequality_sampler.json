@@ -1,0 +1,100 @@
+{
+  "uuid": "288afff6-e124-49ef-9697-4fd106f95a9b",
+  "protocolType": "experimentalist",
+  "name": "Summed Inequality Sampler",
+  "description": "Selects experimental conditions based on inequality relative to a reference pool.",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-inequality/blob/main/src/autora/experimentalist/inequality/__init__.py#L165",
+  "pythonName": "summed_inequality_sampler",
+  "importPath": "autora.experimentalist.inequality",
+  "pipInstall": "autora-experimentalist-inequality==1.0.0",
+  "parameters": {
+    "summed_inequality_sampler": [
+      {
+        "name": "num_samples",
+        "description": "Number of samples to select from the condition pool.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1
+      },
+      {
+        "name": "equality_distance",
+        "description": "Distance threshold for considering two data points as equal. Points closer than this threshold are treated as identical.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0
+      },
+      {
+        "name": "metric",
+        "description": "Distance metric for measuring dissimilarity between conditions.",
+        "datatype": "categorical",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": [
+          "euclidean",
+          "manhattan",
+          "chebyshev",
+          "minkowski",
+          "cosine",
+          "correlation",
+          "mahalanobis",
+          "hamming",
+          "jaccard"
+        ],
+        "default": "euclidean"
+      }
+    ]
+  },
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "Pool of candidate experimental conditions to evaluate.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "reference_conditions",
+      "description": "Reference pool of existing experimental conditions to compare against.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "conditions",
+      "description": "Selected experimental conditions with highest inequality scores.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ]
+}
