@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - desiderata_pi
+      - generate_code
   workflow_dispatch:  # Allow manual trigger
 
 permissions:
@@ -41,31 +41,31 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
-          path: react-branch
+          path: main-branch
 
-      - name: Build React standalone
+      - name: Build main standalone version
         run: |
-          cd react-branch/autora_gui/react_app
+          cd main-branch/autora_gui/react_app
           npm install
           python build_standalone.py
-          mkdir -p ../../../deploy/react
-          cp ../../index.html ../../../deploy/react/index.html
+          mkdir -p ../../../deploy/main
+          cp ../../index.html ../../../deploy/main/index.html
         continue-on-error: true
 
-      # Build improved React version from desiderata_pi branch
-      - name: Checkout desiderata_pi branch
+      # Build Python code generation version from generate_code branch
+      - name: Checkout generate_code branch
         uses: actions/checkout@v4
         with:
-          ref: desiderata_pi
-          path: desiderata-branch
+          ref: generate_code
+          path: generate_code-branch
 
-      - name: Build improved React standalone
+      - name: Build Python code generation standalone version
         run: |
-          cd desiderata-branch/autora_gui/react_app
+          cd generate_code-branch/autora_gui/react_app
           npm install
           python build_standalone.py
-          mkdir -p ../../../deploy/improved
-          cp ../../index.html ../../../deploy/improved/index.html
+          mkdir -p ../../../deploy/generate_code
+          cp ../../index.html ../../../deploy/generate_code/index.html
         continue-on-error: true
 
       # Build Sphinx docs from main branch
@@ -109,8 +109,8 @@ jobs:
           <div class="container">
           <h1>AutoRA Workflow Editor and Documentation</h1>
           <div class="versions">
-          <a href="./react/" class="version-card"><h2>Workflow Editor</h2><p>React-based implementation</p></a>
-          <a href="./improved/" class="version-card"><h2>Improved Workflow Editor</h2><p>Improved React-based implementation</p></a>
+          <a href="./main/" class="version-card"><h2>Workflow Editor</h2><p>React-based GUI</p></a>
+          <a href="./generate_code/" class="version-card"><h2>Improved Workflow Editor</h2><p>React-based GUI with code generation</p></a>
           <a href="./docs/" class="version-card"><h2>Documentation</h2><p>API reference and guides</p></a>
           </div>
           </div>
