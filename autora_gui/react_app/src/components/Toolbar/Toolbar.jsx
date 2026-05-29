@@ -186,10 +186,6 @@ function Toolbar() {
             <span className="btn-icon">🗑</span>
             <span className="btn-text">Clear</span>
           </button>
-          <button className="toolbar-btn" onClick={handleGeneratePython} title="Generate Python code">
-            <span className="btn-icon">🐍</span>
-            <span className="btn-text">Generate Python</span>
-          </button>
           <button
             className="toolbar-btn"
             onClick={handleUndo}
@@ -207,6 +203,10 @@ function Toolbar() {
           >
             <span className="btn-icon">↪</span>
             <span className="btn-text">Redo</span>
+          </button>
+          <button className="toolbar-btn" onClick={handleGeneratePython} title="Generate Python code">
+            <span className="btn-icon">🐍</span>
+            <span className="btn-text">Generate Python</span>
           </button>
         </div>
 
