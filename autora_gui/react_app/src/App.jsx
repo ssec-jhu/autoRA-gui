@@ -17,7 +17,10 @@ function App() {
 
   const handleKeyDown = useCallback((e) => {
     if (e.key === 'Delete' || e.key === 'Backspace') {
-      if (document.activeElement.tagName === 'INPUT') return
+      const tag = document.activeElement.tagName
+      const isEditable = ['INPUT', 'TEXTAREA', 'SELECT'].includes(tag) ||
+                         document.activeElement.isContentEditable
+      if (isEditable) return
       if (state.selectedNodeId) {
         dispatch({ type: 'DELETE_NODE', payload: state.selectedNodeId })
       }

@@ -9,7 +9,7 @@ function Canvas() {
   const { state, dispatch } = useWorkflow()
   const [isPanning, setIsPanning] = useState(false)
   const [panStart, setPanStart] = useState({ x: 0, y: 0 })
-  const [connectingFrom, setConnectingFrom] = useState(null) // { nodeId, point: {x, y} }
+  const { connectingFrom } = state
 
   const screenToCanvas = useCallback((screenX, screenY) => {
     if (!canvasRef.current) return { x: 0, y: 0 }
@@ -42,7 +42,6 @@ function Canvas() {
   const handleCanvasClick = (e) => {
     if (e.target === canvasRef.current || e.target.classList.contains('canvas-inner')) {
       dispatch({ type: 'DESELECT_ALL' })
-      setConnectingFrom(null)
     }
   }
 
@@ -55,7 +54,9 @@ function Canvas() {
   }, [state.zoom, dispatch])
 
   const handleMouseDown = (e) => {
-    if (e.button === 1) {
+    // Middle mouse button or Alt + left click for panning
+    if (e.button === 1 || (e.button === 0 && e.altKey)) {
+      e.preventDefault()
       setIsPanning(true)
       setPanStart({ x: e.clientX - state.pan.x * state.zoom, y: e.clientY - state.pan.y * state.zoom })
     }
@@ -88,9 +89,9 @@ function Canvas() {
   const handleBorderClick = useCallback((nodeId, point) => {
     if (!connectingFrom) {
       // Start new connection
-      setConnectingFrom({ nodeId, point })
+      dispatch({ type: 'START_CONNECTING', payload: { nodeId, point } })
     } else if (connectingFrom.nodeId !== nodeId) {
-      // Complete connection to different node
+      // Complete connection to different node (ADD_CONNECTION clears connectingFrom)
       dispatch({
         type: 'ADD_CONNECTION',
         payload: {
@@ -100,7 +101,6 @@ function Canvas() {
           targetPoint: point
         }
       })
-      setConnectingFrom(null)
     }
   }, [connectingFrom, dispatch])
 
