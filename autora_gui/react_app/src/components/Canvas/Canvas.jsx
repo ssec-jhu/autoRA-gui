@@ -9,6 +9,7 @@ function Canvas() {
   const { state, dispatch } = useWorkflow()
   const [isPanning, setIsPanning] = useState(false)
   const [panStart, setPanStart] = useState({ x: 0, y: 0 })
+  const [hasDragged, setHasDragged] = useState(false)
   const { connectingFrom } = state
 
   const screenToCanvas = useCallback((screenX, screenY) => {
@@ -40,30 +41,47 @@ function Canvas() {
   }, [screenToCanvas, dispatch])
 
   const handleCanvasClick = (e) => {
-    if (e.target === canvasRef.current || e.target.classList.contains('canvas-inner')) {
+    // Only deselect if user didn't drag (was a real click)
+    if (!hasDragged && (e.target === canvasRef.current || e.target.classList.contains('canvas-inner'))) {
       dispatch({ type: 'DESELECT_ALL' })
     }
   }
 
   const handleWheel = useCallback((e) => {
-    if (e.ctrlKey || e.metaKey) {
-      e.preventDefault()
-      const delta = e.deltaY > 0 ? -0.1 : 0.1
-      dispatch({ type: 'SET_ZOOM', payload: state.zoom + delta })
-    }
-  }, [state.zoom, dispatch])
+    e.preventDefault()
+    const delta = e.deltaY > 0 ? -0.1 : 0.1
+    const newZoom = Math.max(0.25, Math.min(2, state.zoom + delta))
+    if (newZoom === state.zoom) return
+
+    // Get canvas rect for calculations
+    const rect = canvasRef.current.getBoundingClientRect()
+
+    // Calculate the point under the mouse in canvas coordinates (before zoom)
+    const mouseX = (e.clientX - rect.left) / state.zoom - state.pan.x
+    const mouseY = (e.clientY - rect.top) / state.zoom - state.pan.y
+
+    // After zoom, adjust pan so the same canvas point stays under the mouse
+    const newPanX = (e.clientX - rect.left) / newZoom - mouseX
+    const newPanY = (e.clientY - rect.top) / newZoom - mouseY
+
+    dispatch({ type: 'SET_ZOOM', payload: newZoom })
+    dispatch({ type: 'SET_PAN', payload: { x: newPanX, y: newPanY } })
+  }, [state.zoom, state.pan, dispatch])
 
   const handleMouseDown = (e) => {
-    // Middle mouse button or Alt + left click for panning
-    if (e.button === 1 || (e.button === 0 && e.altKey)) {
+    // Left click on empty canvas, middle mouse button, or Alt + left click - start panning
+    const isCanvasClick = e.target === canvasRef.current || e.target.classList.contains('canvas-inner')
+    if (e.button === 1 || (e.button === 0 && (isCanvasClick || e.altKey))) {
       e.preventDefault()
       setIsPanning(true)
+      setHasDragged(false)
       setPanStart({ x: e.clientX - state.pan.x * state.zoom, y: e.clientY - state.pan.y * state.zoom })
     }
   }
 
   const handleMouseMove = useCallback((e) => {
     if (isPanning) {
+      setHasDragged(true)
       dispatch({
         type: 'SET_PAN',
         payload: {
@@ -76,6 +94,8 @@ function Canvas() {
 
   const handleMouseUp = () => {
     setIsPanning(false)
+    // Reset hasDragged after a short delay to allow click handler to check it
+    setTimeout(() => setHasDragged(false), 0)
   }
 
   useEffect(() => {
@@ -103,6 +123,13 @@ function Canvas() {
       })
     }
   }, [connectingFrom, dispatch])
+
+  const handlePortsChanged = useCallback((connectionId, sourcePoint, targetPoint) => {
+    dispatch({
+      type: 'UPDATE_CONNECTION_PORTS',
+      payload: { id: connectionId, sourcePoint, targetPoint }
+    })
+  }, [dispatch])
 
   return (
     <div
@@ -155,8 +182,11 @@ function Canvas() {
                 connection={connection}
                 sourceNode={sourceNode}
                 targetNode={targetNode}
+                allNodes={state.nodes}
+                allConnections={state.connections}
                 isSelected={state.selectedConnectionId === connection.id}
                 onSelect={(id) => dispatch({ type: 'SELECT_CONNECTION', payload: id })}
+                onPortsChanged={handlePortsChanged}
               />
             )
           })}
@@ -167,10 +197,12 @@ function Canvas() {
             node={node}
             isSelected={state.selectedNodeId === node.id}
             isConnecting={connectingFrom?.nodeId === node.id}
+            connections={state.connections}
             onSelect={(id) => dispatch({ type: 'SELECT_NODE', payload: id })}
-            onDelete={(id) => dispatch({ type: 'DELETE_NODE', payload: id })}
             onPositionChange={(id, x, y) => dispatch({ type: 'UPDATE_NODE_POSITION', payload: { id, x, y } })}
             onBorderClick={handleBorderClick}
+            onDragStart={() => dispatch({ type: 'START_DRAG' })}
+            onDragEnd={() => dispatch({ type: 'END_DRAG' })}
             zoom={state.zoom}
           />
         ))}

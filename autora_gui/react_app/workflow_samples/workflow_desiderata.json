@@ -21,8 +21,8 @@
       "maxCounter": 1,
       "altTarget": null,
       "canvasLocation": {
-        "x": 577,
-        "y": 265
+        "x": 317,
+        "y": 392
       }
     }
   ],
@@ -32,31 +32,31 @@
       "protocolUuid": "d6e7f8a9-b0c1-4d2e-3f4a-5b6c7d8e9f0a",
       "parameterSetting": [
         {
-          "uuid": "07b5abaf-2343-4702-a1d7-ed2af1674eb3",
+          "uuid": "3ab2b866-7111-4cfb-b999-fc86946379d6",
           "name": "sleep_time",
           "value": 30
         },
         {
-          "uuid": "035682a4-1200-4715-8125-dfe09cf24e69",
+          "uuid": "c496d1c2-a37f-4d84-9f7e-ff8d177b4c47",
           "name": "study_completion_time",
           "value": 10
         },
         {
-          "uuid": "0b963ef4-9b4b-48ef-87b4-a29272a4faf9",
+          "uuid": "f7f3ba88-7758-4a9f-be51-039fb9826bd7",
           "name": "exclude_studies",
           "value": [
             "default"
           ]
         },
         {
-          "uuid": "860d3845-6638-4e88-8836-9fbf4bc5ca8c",
+          "uuid": "a20b24c5-f819-4052-bcc4-8be5a8aedb0b",
           "name": "approve_no_code",
           "value": true
         }
       ],
       "canvasLocation": {
-        "x": 533,
-        "y": 19
+        "x": 448,
+        "y": 101
       }
     },
     {
@@ -64,19 +64,19 @@
       "protocolUuid": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       "parameterSetting": [
         {
-          "uuid": "c4698bef-22c5-44cd-8ffb-ab554e5c9242",
+          "uuid": "3607b904-fdcc-4e13-a6e5-78b1cee86dd1",
           "name": "epochs",
           "value": 1500
         },
         {
-          "uuid": "0ba6688e-3e28-4093-9710-62421b3c21ce",
+          "uuid": "8e95d4d2-009b-462a-a05d-e9fbd1bf41b9",
           "name": "num_param",
           "value": 1
         }
       ],
       "canvasLocation": {
-        "x": 946,
-        "y": 256
+        "x": 865,
+        "y": 464
       }
     },
     {
@@ -84,14 +84,14 @@
       "protocolUuid": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b",
       "parameterSetting": [
         {
-          "uuid": "73057af7-a550-4132-8863-fa6c58aac3e7",
+          "uuid": "aba0e1bd-cea0-42dc-b92e-b527f7771af0",
           "name": "num_samples",
           "value": 2
         }
       ],
       "canvasLocation": {
-        "x": 934,
-        "y": 26
+        "x": 814,
+        "y": 152
       }
     }
   ],
@@ -104,52 +104,52 @@
         "y": 63
       },
       "targetPoint": {
-        "x": 533,
-        "y": 59
+        "x": 448,
+        "y": 141
       }
     },
     {
       "source": "e731ce86-8528-4dd4-a8e9-09865e7f68e4",
       "target": "c2ab6e86-9c8c-4979-8445-ac481e6e42fb",
       "sourcePoint": {
-        "x": 1014,
-        "y": 106
+        "x": 894,
+        "y": 232
       },
       "targetPoint": {
-        "x": 1026,
-        "y": 256
+        "x": 945,
+        "y": 464
       }
     },
     {
       "source": "2200dcbb-9c36-4814-9990-4a9ac626107c",
       "target": "e731ce86-8528-4dd4-a8e9-09865e7f68e4",
       "sourcePoint": {
-        "x": 693,
-        "y": 59
+        "x": 608,
+        "y": 141
       },
       "targetPoint": {
-        "x": 934,
-        "y": 66
+        "x": 814,
+        "y": 192
       }
     },
     {
       "source": "371ff9ac-a894-4684-a8e9-9ebd1613a9d3",
       "target": "2200dcbb-9c36-4814-9990-4a9ac626107c",
       "sourcePoint": {
-        "x": 622,
-        "y": 257.17409819219546
+        "x": 362,
+        "y": 384.17409819219546
       },
       "targetPoint": {
-        "x": 613,
-        "y": 99
+        "x": 528,
+        "y": 181
       }
     },
     {
       "source": "371ff9ac-a894-4684-a8e9-9ebd1613a9d3",
       "target": "0cffc571-833e-4791-8c62-d81cf1dc1962",
       "sourcePoint": {
-        "x": 622,
-        "y": 361.8259018078045
+        "x": 362,
+        "y": 488.8259018078045
       },
       "targetPoint": {
         "x": 628,
@@ -160,12 +160,12 @@
       "source": "c2ab6e86-9c8c-4979-8445-ac481e6e42fb",
       "target": "371ff9ac-a894-4684-a8e9-9ebd1613a9d3",
       "sourcePoint": {
-        "x": 946,
-        "y": 296
+        "x": 865,
+        "y": 504
       },
       "targetPoint": {
-        "x": 674.3259018078045,
-        "y": 309.5
+        "x": 414.3259018078045,
+        "y": 436.5
       }
     }
   ]
