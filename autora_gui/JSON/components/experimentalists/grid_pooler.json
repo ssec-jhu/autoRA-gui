@@ -1,0 +1,41 @@
+{
+  "uuid": "f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c",
+  "protocolType": "experimentalist",
+  "name": "Grid Pooler",
+  "description": "Generates a pool of experimental conditions as a complete grid of all combinations from the allowed values of independent variables.",
+  "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/grid.py#L107",
+  "pythonName": "grid_pool",
+  "importPath": "autora.experimentalist.grid",
+  "pipInstall": "autora-experimentalist-grid==1.0.0",
+  "parameters": {
+    "grid_pool": []
+  },
+  "inputDataType": [
+    {
+      "name": "variables",
+      "description": "Variable collection with allowed_values for each independent variable.",
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "conditions",
+      "description": "Complete grid of experimental conditions.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ]
+}

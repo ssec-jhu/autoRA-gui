@@ -1,0 +1,104 @@
+{
+  "uuid": "ca7cf533-08c4-4486-bfbf-ba48c8bdc578",
+  "protocolType": "experiment_runner",
+  "name": "Equation Experiment (Synthetic, Abstract)",
+  "description": "Creates synthetic experiments using SymPy mathematical expressions as ground truth models. Converts symbolic equations into executable experiment runners that simulate noisy observations while supporting perfect ground-truth outputs.",
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic-abstract-equation/blob/main/src/autora/experiment_runner/synthetic/abstract/equation/__init__.py#L14",
+  "pythonName": "equation_experiment",
+  "importPath": "autora.experiment_runner.synthetic.abstract.equation",
+  "pipInstall": "autora-synthetic-abstract-equation==1.0.0",
+  "parameters": {
+    "equation_experiment": [
+      {
+        "name": "expression",
+        "description": "SymPy mathematical expression serving as ground truth model.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "rename_output_columns",
+        "description": "Whether to rename output columns based on expression variable names.",
+        "datatype": "boolean",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": true
+      },
+      {
+        "name": "random_state",
+        "description": "Seed for random number generator to ensure reproducibility.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      }
+    ],
+    "run": [
+      {
+        "name": "added_noise",
+        "description": "Standard deviation of Gaussian noise added to the simulated observations.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": 0.01
+      },
+      {
+        "name": "random_state",
+        "description": "Seed for random number generation to ensure reproducibility of the simulated data.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "List of independent variable definitions.",
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "observations",
+      "description": "Dependent variable definition.",
+      "datatype": "string",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": 1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ]
+}

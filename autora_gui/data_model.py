@@ -26,6 +26,7 @@ class Datatype(str, Enum):
     BOOLEAN = "boolean"
     STRING = "string"
     CATEGORICAL = "categorical"
+    ANY = "any"
 
 
 class ProtocolType(str, Enum):
@@ -39,27 +40,43 @@ class ProtocolType(str, Enum):
 class VariableType(BaseModel):
     """Variable type model for the workflow."""
 
-    name: str
+    name: str | None
     description: str | None
+
+
+class Cardinality(BaseModel):
+    """A model for cardinality in the workflow."""
+
+    minOccurs: int = 0
+    maxOccurs: int = 1
+    unique: bool = True
 
 
 class PrimitiveVariableType(VariableType):
     """Primitive variable type model for the workflow."""
 
     datatype: Datatype
-    minOccurs: int | None = 1
-    maxOccurs: int | None = -1
+    cardinality: Cardinality | None = None
     validValues: list[str] | None = None
     default: Any | None = None
 
 
-class TupleVariableType(VariableType):
-    """A model for tuple variables in the workflow."""
+class ListVariableType(VariableType):
+    """A model for list variables in the workflow."""
 
-    variables: list[VariableType]
+    variable: "VariableTypes"
 
 
-VariableTypes = PrimitiveVariableType | TupleVariableType
+class DictVariableType(VariableType):
+    """A model for dictionary variables in the workflow."""
+
+    variables: list["VariableTypes"]
+
+
+VariableTypes = PrimitiveVariableType | ListVariableType | DictVariableType
+
+ListVariableType.model_rebuild()
+DictVariableType.model_rebuild()
 
 
 class Protocol(AutoraBaseModel):
@@ -70,9 +87,12 @@ class Protocol(AutoraBaseModel):
 
     protocolType: ProtocolType
     name: str
-    description: str | None = None
+    description: str
     githubCommit: str
-    parameters: list[VariableTypes] | None
+    pythonName: str
+    importPath: str
+    pipInstall: str
+    parameters: dict[str, list[VariableTypes]] | None
     inputDataType: list[VariableTypes] | None  # could be a bunch of allowed datatypes
     outputDataType: list[VariableTypes] | None  # could be a bunch of allowed datatypes
 
@@ -92,13 +112,13 @@ class Link(BaseModel):
 
 
 class Filter(Link):
-    """An exit criteria from the potential loop in the workflow.
+    """A filter link model for AutoRA GUI.
 
-    Includes the loop counter parameter and alternative target.
+    A specialized link with counter and alternative target.
     """
 
     maxCounter: int = 1
-    altTarget: uuid.UUID | None
+    altTarget: uuid.UUID | None = None
 
 
 class ParameterSetting(AutoraBaseModel):
@@ -121,39 +141,86 @@ class CanvasLocation(BaseModel):
 
 
 class Component(AutoraBaseModel):
-    """A component model for Autora gui.
+    """A component model for AutoRA GUI.
 
-    Includes node parameters and canvas location.
+    Includes canvas location.
+    """
+
+    canvasLocation: CanvasLocation | None
+
+
+class ProtocolComponent(Component):
+    """A protocol component model for AutoRA GUI.
+
+    Includes node parameters.
     """
 
     protocolUuid: uuid.UUID  # uuid of the Protocol
     parameterSetting: list[ParameterSetting] | None
-    canvasLocation: CanvasLocation | None
+
+
+class StartComponent(Component):
+    """A start component model for AutoRA GUI.
+
+    Serves as the starting point of the workflow.
+    """
+
+
+class EndComponent(Component):
+    """An end component model for AutoRA GUI.
+
+    Serves as the ending point of the workflow.
+    """
+
+
+class FilterComponent(Component):
+    """A filter component model for AutoRA GUI.
+
+    Serves as a decision/filter point in the workflow.
+    """
+
+    maxCounter: int = 1
+    altTarget: uuid.UUID | None = None
 
 
 class Workflow(BaseModel):
-    """A workflow model for Autora gui.
+    """A workflow model for AutoRA GUI.
 
     Includes all possible elements like nodes and links.
     """
 
     name: str
     description: str | None = None
+    start: StartComponent | None = None
+    end: EndComponent | None = None
+    filters: list[FilterComponent] | None = None
     independentVariables: VariableTypes
     dependentVariables: VariableTypes
-    components: list[Component]
+    components: list[ProtocolComponent]
     links: list[Link]
 
 
 # Create and save schemas
 ####################################
-if __name__ == "__main__":
+
+
+def generate_schemas(output_dir: Path | str = "autora_gui/JSON/schemas") -> None:
+    """Generate JSON schemas from Pydantic models.
+
+    Args:
+        output_dir: Directory to write schema files. Defaults to autora_gui/JSON/schemas.
+    """
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     workflow_model_schema = Workflow.model_json_schema()
-    schema_path = "autora_gui/JSON/schemas/workflow_model.json"
-    with Path(schema_path).open("w", encoding="utf-8") as f:
+    with (output_dir / "workflow_model.json").open("w", encoding="utf-8") as f:
         f.write(json.dumps(workflow_model_schema, indent=2, ensure_ascii=False))
 
     protocol_model_schema = Protocol.model_json_schema()
-    schema_path = "autora_gui/JSON/schemas/protocol_model.json"
-    with Path(schema_path).open("w", encoding="utf-8") as f:
+    with (output_dir / "protocol_model.json").open("w", encoding="utf-8") as f:
         f.write(json.dumps(protocol_model_schema, indent=2, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    generate_schemas()

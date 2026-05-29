@@ -1,0 +1,116 @@
+{
+  "uuid": "e9f0a1b2-c3d4-4e5f-6a7b-8c9d0e1f2a3b",
+  "protocolType": "experiment_runner",
+  "name": "Stevens Power Law (Synthetic, Psychophysics)",
+  "description": "Synthetic experiment runner implementing Stevens' Power Law, which models perceived intensity as a power function of physical stimulus intensity.",
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychophysics/stevens_power_law.py#L11",
+  "pythonName": "stevens_power_law",
+  "importPath": "autora.experiment_runner.synthetic.psychophysics.stevens_power_law",
+  "pipInstall": "autora-synthetic==1.0.0",
+  "parameters": {
+    "stevens_power_law": [
+      {
+        "name": "resolution",
+        "description": "Number of allowed stimulus values.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 100
+      },
+      {
+        "name": "proportionality_constant",
+        "description": "Constant multiplier in the power law equation.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1.0
+      },
+      {
+        "name": "modality_constant",
+        "description": "Exponent/power constant specific to sensory modality.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.8
+      },
+      {
+        "name": "maximum_stimulus_intensity",
+        "description": "Upper bound for stimulus values.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 5.0
+      }
+    ],
+    "run": [
+      {
+        "name": "added_noise",
+        "description": "Standard deviation of Gaussian noise added to the simulated observations.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": 0.01
+      },
+      {
+        "name": "random_state",
+        "description": "Seed for random number generation to ensure reproducibility of the simulated data.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "Physical stimulus intensity values.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "observations",
+      "description": "Perceived stimulus intensity.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ]
+}

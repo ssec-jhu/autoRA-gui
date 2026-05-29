@@ -1,0 +1,344 @@
+{
+  "uuid": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f",
+  "protocolType": "theorist",
+  "name": "DARTS Regressor",
+  "description": "Finds a composition of functions and coefficients to minimize a loss function using Differentiable Architecture Search (DARTS).",
+  "githubCommit": "https://github.com/AutoResearch/autora-theorist-darts/blob/60e30ebd3fb10a3dd901de4183664c7b6bea9990/src/autora/theorist/darts/regressor.py#L436",
+  "pythonName": "DARTSRegressor",
+  "importPath": "autora.theorist.darts.regressor",
+  "pipInstall": "autora-theorist-darts==1.1.0",
+  "parameters": {
+    "__init__": [
+      {
+        "name": "batch_size",
+        "description": "Batch size for the data loader.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 64
+      },
+      {
+        "name": "num_graph_nodes",
+        "description": "Number of nodes in the computation graph.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 2
+      },
+      {
+        "name": "output_type",
+        "description": "Output transformation function type.",
+        "datatype": "categorical",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": [
+          "real",
+          "sigmoid",
+          "probability",
+          "probability_sample",
+          "probability_distribution"
+        ],
+        "default": "real"
+      },
+      {
+        "name": "classifier_weight_decay",
+        "description": "Weight decay for classifier.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.01
+      },
+      {
+        "name": "darts_type",
+        "description": "Type of DARTS algorithm to use ('original' or 'fair').",
+        "datatype": "categorical",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": [
+          "original",
+          "fair"
+        ],
+        "default": "original"
+      },
+      {
+        "name": "param_updates_per_epoch",
+        "description": "Number of operation parameter updates per epoch.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 10
+      },
+      {
+        "name": "param_updates_for_sampled_model",
+        "description": "Number of parameter updates for final sampled model.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 100
+      },
+      {
+        "name": "param_learning_rate_max",
+        "description": "Initial learning rate for operation parameters.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.025
+      },
+      {
+        "name": "param_learning_rate_min",
+        "description": "Final learning rate for operation parameters.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.01
+      },
+      {
+        "name": "param_momentum",
+        "description": "Momentum coefficient for parameter optimization.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.9
+      },
+      {
+        "name": "arch_updates_per_epoch",
+        "description": "Number of architecture weight updates per epoch.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1
+      },
+      {
+        "name": "arch_learning_rate_max",
+        "description": "Initial learning rate for architecture weights.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.003
+      },
+      {
+        "name": "arch_weight_decay",
+        "description": "Weight decay for architecture weights.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.0001
+      },
+      {
+        "name": "arch_weight_decay_df",
+        "description": "Scaled weight decay based on number of parameters per operation.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.0003
+      },
+      {
+        "name": "arch_weight_decay_base",
+        "description": "Base weight decay added to scaled decay.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.0
+      },
+      {
+        "name": "arch_momentum",
+        "description": "Momentum coefficient for architecture weight optimization.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.9
+      },
+      {
+        "name": "fair_darts_loss_weight",
+        "description": "Loss weight forcing architecture weights toward 0 or 1.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1
+      },
+      {
+        "name": "max_epochs",
+        "description": "Maximum number of training epochs.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 10
+      },
+      {
+        "name": "grad_clip",
+        "description": "Gradient clipping value.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 5.0
+      },
+      {
+        "name": "primitives",
+        "description": "List of primitive operations to choose from.",
+        "datatype": "categorical",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 6,
+          "unique": true
+        },
+        "validValues": [
+          "none",
+          "add",
+          "subtract",
+          "linear",
+          "linear_logistic",
+          "linear_relu"
+        ],
+        "default": [
+          "none",
+          "add",
+          "subtract",
+          "linear",
+          "linear_logistic",
+          "linear_relu"
+        ]
+      },
+      {
+        "name": "train_classifier_coefficients",
+        "description": "Whether to train edge contribution coefficients.",
+        "datatype": "boolean",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": false
+      },
+      {
+        "name": "train_classifier_bias",
+        "description": "Whether to train classifier bias term.",
+        "datatype": "boolean",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": false
+      },
+      {
+        "name": "sampling_strategy",
+        "description": "Strategy for selecting operations from the graph.",
+        "datatype": "categorical",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": [
+          "max",
+          "sample"
+        ],
+        "default": "max"
+      }
+    ]
+  },
+  "inputDataType": [
+    {
+      "name": "X",
+      "description": "Input features as a 2D array.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "y",
+      "description": "Predicted target values.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ]
+}

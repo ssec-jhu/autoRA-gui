@@ -109,9 +109,15 @@ convention = "google"
     "ARG001",  # https://docs.astral.sh/ruff/rules/unused-function-argument/
     "INP",  # https://docs.astral.sh/ruff/rules/#flake8-no-pep420-inp
     "ANN",  # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
+    "PLR2004",  # https://docs.astral.sh/ruff/rules/magic-value-comparison/
+    "PLC0415",  # https://docs.astral.sh/ruff/rules/import-outside-top-level/
 ]
 
 [tool.ruff.lint.flake8-quotes]
 docstring-quotes = "double"  # https://docs.astral.sh/ruff/settings/#lint_flake8-quotes_docstring-quotes
 inline-quotes = "double"  # https://docs.astral.sh/ruff/settings/#lint_flake8-quotes_inline-quotes
 multiline-quotes = "double"  # https://docs.astral.sh/ruff/settings/#lint_flake8-quotes_multiline-quotes
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["autora_gui/tests", "autora_gui/js_app/tests", "autora_gui/react_app/tests"]

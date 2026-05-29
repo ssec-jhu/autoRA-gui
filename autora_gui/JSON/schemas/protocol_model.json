@@ -1,5 +1,27 @@
 {
   "$defs": {
+    "Cardinality": {
+      "description": "A model for cardinality in the workflow.",
+      "properties": {
+        "minOccurs": {
+          "default": 0,
+          "title": "Minoccurs",
+          "type": "integer"
+        },
+        "maxOccurs": {
+          "default": 1,
+          "title": "Maxoccurs",
+          "type": "integer"
+        },
+        "unique": {
+          "default": true,
+          "title": "Unique",
+          "type": "boolean"
+        }
+      },
+      "title": "Cardinality",
+      "type": "object"
+    },
     "Datatype": {
       "description": "Datatype model for the workflow.",
       "enum": [
@@ -7,17 +29,124 @@
         "integer",
         "boolean",
         "string",
-        "categorical"
+        "categorical",
+        "any"
       ],
       "title": "Datatype",
       "type": "string"
+    },
+    "DictVariableType": {
+      "description": "A model for dictionary variables in the workflow.",
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "variables": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PrimitiveVariableType"
+              },
+              {
+                "$ref": "#/$defs/ListVariableType"
+              },
+              {
+                "$ref": "#/$defs/DictVariableType"
+              }
+            ]
+          },
+          "title": "Variables",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "variables"
+      ],
+      "title": "DictVariableType",
+      "type": "object"
+    },
+    "ListVariableType": {
+      "description": "A model for list variables in the workflow.",
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "variable": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrimitiveVariableType"
+            },
+            {
+              "$ref": "#/$defs/ListVariableType"
+            },
+            {
+              "$ref": "#/$defs/DictVariableType"
+            }
+          ],
+          "title": "Variable"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "variable"
+      ],
+      "title": "ListVariableType",
+      "type": "object"
     },
     "PrimitiveVariableType": {
       "description": "Primitive variable type model for the workflow.",
       "properties": {
         "name": {
-          "title": "Name",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
         },
         "description": {
           "anyOf": [
@@ -33,29 +162,16 @@
         "datatype": {
           "$ref": "#/$defs/Datatype"
         },
-        "minOccurs": {
+        "cardinality": {
           "anyOf": [
             {
-              "type": "integer"
+              "$ref": "#/$defs/Cardinality"
             },
             {
               "type": "null"
             }
           ],
-          "default": 1,
-          "title": "Minoccurs"
-        },
-        "maxOccurs": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": -1,
-          "title": "Maxoccurs"
+          "default": null
         },
         "validValues": {
           "anyOf": [
@@ -100,66 +216,6 @@
       ],
       "title": "ProtocolType",
       "type": "string"
-    },
-    "TupleVariableType": {
-      "description": "A model for tuple variables in the workflow.",
-      "properties": {
-        "name": {
-          "title": "Name",
-          "type": "string"
-        },
-        "description": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "Description"
-        },
-        "variables": {
-          "items": {
-            "$ref": "#/$defs/VariableType"
-          },
-          "title": "Variables",
-          "type": "array"
-        }
-      },
-      "required": [
-        "name",
-        "description",
-        "variables"
-      ],
-      "title": "TupleVariableType",
-      "type": "object"
-    },
-    "VariableType": {
-      "description": "Variable type model for the workflow.",
-      "properties": {
-        "name": {
-          "title": "Name",
-          "type": "string"
-        },
-        "description": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "Description"
-        }
-      },
-      "required": [
-        "name",
-        "description"
-      ],
-      "title": "VariableType",
-      "type": "object"
     }
   },
   "description": "A protocol model for the workflow.\n\nPresents basic model for components and links.",
@@ -177,35 +233,45 @@
       "type": "string"
     },
     "description": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Description"
+      "title": "Description",
+      "type": "string"
     },
     "githubCommit": {
       "title": "Githubcommit",
       "type": "string"
     },
+    "pythonName": {
+      "title": "Pythonname",
+      "type": "string"
+    },
+    "importPath": {
+      "title": "Importpath",
+      "type": "string"
+    },
+    "pipInstall": {
+      "title": "Pipinstall",
+      "type": "string"
+    },
     "parameters": {
       "anyOf": [
         {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/PrimitiveVariableType"
-              },
-              {
-                "$ref": "#/$defs/TupleVariableType"
-              }
-            ]
+          "additionalProperties": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/PrimitiveVariableType"
+                },
+                {
+                  "$ref": "#/$defs/ListVariableType"
+                },
+                {
+                  "$ref": "#/$defs/DictVariableType"
+                }
+              ]
+            },
+            "type": "array"
           },
-          "type": "array"
+          "type": "object"
         },
         {
           "type": "null"
@@ -222,7 +288,10 @@
                 "$ref": "#/$defs/PrimitiveVariableType"
               },
               {
-                "$ref": "#/$defs/TupleVariableType"
+                "$ref": "#/$defs/ListVariableType"
+              },
+              {
+                "$ref": "#/$defs/DictVariableType"
               }
             ]
           },
@@ -243,7 +312,10 @@
                 "$ref": "#/$defs/PrimitiveVariableType"
               },
               {
-                "$ref": "#/$defs/TupleVariableType"
+                "$ref": "#/$defs/ListVariableType"
+              },
+              {
+                "$ref": "#/$defs/DictVariableType"
               }
             ]
           },
@@ -260,7 +332,11 @@
     "uuid",
     "protocolType",
     "name",
+    "description",
     "githubCommit",
+    "pythonName",
+    "importPath",
+    "pipInstall",
     "parameters",
     "inputDataType",
     "outputDataType"

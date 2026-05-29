@@ -1,0 +1,103 @@
+{
+  "uuid": "f2a3b4c5-d6e7-4f8a-9b0c-1d2e3f4a5b6c",
+  "protocolType": "experimentalist",
+  "name": "Novelty Sampler",
+  "description": "Selects experimental conditions that are most novel (dissimilar) with respect to existing reference conditions using pairwise distance metrics.",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L148",
+  "pythonName": "novelty_sampler",
+  "importPath": "autora.experimentalist.novelty",
+  "pipInstall": "autora-experimentalist-novelty==1.0.0",
+  "parameters": {
+    "novelty_sampler": [
+      {
+        "name": "num_samples",
+        "description": "Number of novel samples to select from the condition pool.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "metric",
+        "description": "Distance metric for measuring dissimilarity between conditions.",
+        "datatype": "categorical",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": [
+          "euclidean",
+          "manhattan",
+          "chebyshev",
+          "minkowski",
+          "cosine",
+          "correlation"
+        ],
+        "default": "euclidean"
+      },
+      {
+        "name": "integration",
+        "description": "Method for combining pairwise distances into overall dissimilarity score.",
+        "datatype": "categorical",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": [
+          "min",
+          "sum",
+          "prod",
+          "mean",
+          "max"
+        ],
+        "default": "min"
+      }
+    ]
+  },
+  "inputDataType": [
+    {
+      "name": "conditions",
+      "description": "Pool of candidate experimental conditions to evaluate.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "reference_conditions",
+      "description": "Existing experimental conditions to compare against.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ],
+  "outputDataType": [
+    {
+      "name": "conditions",
+      "description": "Selected novel experimental conditions.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
+      "validValues": null,
+      "default": null
+    }
+  ]
+}
