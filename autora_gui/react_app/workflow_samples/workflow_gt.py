@@ -44,7 +44,7 @@ theorist_on_state = estimator_on_state(BMSRegressor())  # <- add parameters here
 def main():
     runner = expected_value_theory()
     assert runner.variables is not None  # <- here the variables are created and governed by the runner.
-    #  I think we should make the variables (input/output) "read-only"
+    # I think we should make the variables (input/output) "read-only"
     variables = runner.variables
     state = StandardState(variables=variables)
 
