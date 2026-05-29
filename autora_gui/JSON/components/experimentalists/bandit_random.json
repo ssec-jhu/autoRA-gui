@@ -3,84 +3,96 @@
   "protocolType": "experimentalist",
   "name": "Bandit Random Experimentalist",
   "description": "Returns Sampled pool of experimental conditions.",
-  "githubCommit": "",
-  "parameters": [
-    {
-      "name": "num_rewards",
-      "description": "The number of rewards / dimension of each element of the sequence.",
-      "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": -1,
-      "validValues": [
-        "int"
-      ],
-      "default": "required"
-    },
-    {
-      "name": "sequence_length",
-      "description": "TThe length of the sequence.",
-      "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": -1,
-      "validValues": [
-        "int"
-      ],
-      "default": "required"
-    },
-    {
-      "name": "initial_probabilities",
-      "description": "A list of initial reward-probabilities.",
-      "datatype": "list",
-      "minOccurs": 1,
-      "maxOccurs": -1,
-      "validValues": [
-        "float",
-        "Iterable"
-      ],
-      "default": "none"
-    },
-    {
-      "name": "sigmas",
-      "description": "A list of constant drift rate for each element of the probabilites.",
-      "datatype": "list",
-      "minOccurs": 1,
-      "maxOccurs": -1,
-      "validValues": [
-        "float",
-        "Iterable"
-      ],
-      "default": "none"
-    },
-    {
-      "name": "num_samples",
-      "description": "The number of experimental conditions to select",
-      "datatype": "integer",
-      "minOccurs": 1,
-      "maxOccurs": -1,
-      "validValues": [
-        "int"
-      ],
-      "default": 1
-    },
-    {
-      "name": "random_state",
-      "description": "A seed value for the random number generator.",
-      "datatype": "list",
-      "minOccurs": 1,
-      "maxOccurs": -1,
-      "validValues": [
-        "optional int"
-      ],
-      "default": "none"
-    }
-  ],
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-bandit-random/blob/main/src/autora/experimentalist/bandit_random/__init__.py#L215",
+  "pythonName": "bandit_random",
+  "importPath": "autora.experimentalist.bandit_random",
+  "pipInstall": "autora-experimentalist-bandit-random==1.0.0",
+  "parameters": {
+    "bandit_random": [
+      {
+        "name": "num_rewards",
+        "description": "The number of rewards / dimension of each element of the sequence.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "sequence_length",
+        "description": "The length of the sequence.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "initial_probabilities",
+        "description": "A list of initial reward-probabilities.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "sigmas",
+        "description": "A list of constant drift rates for each probability.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "num_samples",
+        "description": "The number of experimental conditions to select.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1
+      },
+      {
+        "name": "random_state",
+        "description": "A seed value for the random number generator.",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "X",
       "description": "Input features.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
@@ -90,8 +102,11 @@
       "name": "y",
       "description": "Predicted target.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }

@@ -3,34 +3,48 @@
   "protocolType": "experiment_runner",
   "name": "Linear Mixed Model",
   "description": "A synthetic experiment that runs a linear mixed model.",
-  "githubCommit": "",
-  "parameters": [
-    {
-      "name": "formula",
-      "description": "Formula used in the experiment runner.",
-      "datatype": "string",
-      "minOccurs": 1,
-      "maxOccurs": -1,
-      "validValues": null,
-      "default": 64
-    },
-    {
-      "name": "fixed_effects",
-      "description": "Type of DARTS algorithm to use.",
-      "datatype": "dict",
-      "minOccurs": 1,
-      "maxOccurs": -1,
-      "validValues": null,
-      "default": null
-    }
-  ],
+  "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/abstract/lmm.py#L164",
+  "pythonName": "lmm_experiment",
+  "importPath": "autora.experiment_runner.synthetic.abstract.lmm",
+  "pipInstall": "autora-synthetic==1.0.0",
+  "parameters": {
+    "lmm_experiment": [
+      {
+        "name": "formula",
+        "description": "Formula used in the experiment runner.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "fixed_effects",
+        "description": "Fixed effects used by the linear mixed model.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
   "inputDataType": [
     {
       "name": "X",
       "description": "Input features.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
@@ -40,8 +54,11 @@
       "name": "y",
       "description": "Predicted target.",
       "datatype": "real",
-      "minOccurs": 1,
-      "maxOccurs": -1,
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": true
+      },
       "validValues": null,
       "default": null
     }
