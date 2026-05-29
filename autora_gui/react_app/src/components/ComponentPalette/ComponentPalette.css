@@ -120,6 +120,12 @@
   transform: translateX(2px);
 }
 
+.component-item.selected {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: var(--accent-danger);
+  box-shadow: 0 0 0 1px var(--accent-danger);
+}
+
 .component-item:active {
   cursor: grabbing;
   transform: scale(0.98);
