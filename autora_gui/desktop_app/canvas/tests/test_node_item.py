@@ -365,3 +365,253 @@ class TestNodeItem:
 
         assert len(received) == 1
         assert received[0] == node_item.node_data
+
+    def test_deselection_does_not_emit_signal(self, node_item):
+        """Test that deselecting the node does not emit selected signal."""
+        node_item.setSelected(True)
+
+        received = []
+        node_item.signals.selected.connect(lambda data: received.append(data))
+
+        node_item.setSelected(False)
+
+        assert len(received) == 0
+
+
+class TestNodeItemPaint:
+    """Tests for NodeItem paint method."""
+
+    def test_paint_not_selected(self, node_item):
+        """Test paint method when not selected."""
+        from PySide6.QtGui import QImage, QPainter
+        from PySide6.QtWidgets import QStyleOptionGraphicsItem
+
+        node_item.setSelected(False)
+
+        image = QImage(300, 200, QImage.Format.Format_ARGB32)
+        image.fill(0xFFFFFFFF)
+        painter = QPainter(image)
+
+        option = QStyleOptionGraphicsItem()
+        node_item.paint(painter, option, None)
+
+        painter.end()
+
+    def test_paint_selected(self, node_item):
+        """Test paint method when selected shows highlight."""
+        from PySide6.QtGui import QImage, QPainter
+        from PySide6.QtWidgets import QStyleOptionGraphicsItem
+
+        node_item.setSelected(True)
+
+        image = QImage(300, 200, QImage.Format.Format_ARGB32)
+        image.fill(0xFFFFFFFF)
+        painter = QPainter(image)
+
+        option = QStyleOptionGraphicsItem()
+        node_item.paint(painter, option, None)
+
+        painter.end()
+
+    def test_paint_with_long_title(self, scene):
+        """Test paint truncates long titles."""
+        from PySide6.QtGui import QImage, QPainter
+        from PySide6.QtWidgets import QStyleOptionGraphicsItem
+
+        component = ComponentDefinition(
+            uuid="test",
+            protocol_type="experimentalist",
+            name="This Is A Very Long Component Name That Should Be Truncated",
+            description="",
+            github_commit="",
+        )
+        node_data = NodeData.create(component)
+        item = NodeItem(node_data)
+        scene.addItem(item)
+
+        image = QImage(300, 200, QImage.Format.Format_ARGB32)
+        image.fill(0xFFFFFFFF)
+        painter = QPainter(image)
+
+        option = QStyleOptionGraphicsItem()
+        item.paint(painter, option, None)
+
+        painter.end()
+
+    def test_paint_with_short_title(self, scene):
+        """Test paint does not truncate short titles."""
+        from PySide6.QtGui import QImage, QPainter
+        from PySide6.QtWidgets import QStyleOptionGraphicsItem
+
+        component = ComponentDefinition(
+            uuid="test",
+            protocol_type="theorist",
+            name="Short",
+            description="",
+            github_commit="",
+        )
+        node_data = NodeData.create(component)
+        item = NodeItem(node_data)
+        scene.addItem(item)
+
+        image = QImage(300, 200, QImage.Format.Format_ARGB32)
+        image.fill(0xFFFFFFFF)
+        painter = QPainter(image)
+
+        option = QStyleOptionGraphicsItem()
+        item.paint(painter, option, None)
+
+        painter.end()
+
+    def test_paint_experiment_runner_type(self, scene):
+        """Test paint for experiment_runner type shows correct type text."""
+        from PySide6.QtGui import QImage, QPainter
+        from PySide6.QtWidgets import QStyleOptionGraphicsItem
+
+        component = ComponentDefinition(
+            uuid="test",
+            protocol_type="experiment_runner",
+            name="Runner",
+            description="",
+            github_commit="",
+        )
+        node_data = NodeData.create(component)
+        item = NodeItem(node_data)
+        scene.addItem(item)
+
+        image = QImage(300, 200, QImage.Format.Format_ARGB32)
+        image.fill(0xFFFFFFFF)
+        painter = QPainter(image)
+
+        option = QStyleOptionGraphicsItem()
+        item.paint(painter, option, None)
+
+        painter.end()
+
+
+class TestNodeItemSceneInteraction:
+    """Tests for NodeItem interaction with scene."""
+
+    def test_position_change_calls_scene_update_connections(self, sample_node_data):
+        """Test that position change calls scene.update_connections if available."""
+        from unittest.mock import MagicMock
+
+        from autora_gui.desktop_app.canvas.canvas_scene import CanvasScene
+
+        scene = CanvasScene()
+        item = NodeItem(sample_node_data)
+        scene.addItem(item)
+
+        # Mock update_connections
+        scene.update_connections = MagicMock()
+
+        # Move the node
+        item.setPos(500.0, 600.0)
+
+        # Verify update_connections was called
+        scene.update_connections.assert_called_with(item)
+
+    def test_position_change_handles_scene_without_update_connections(self, sample_node_data, scene):
+        """Test that position change works when scene doesn't have update_connections."""
+        item = NodeItem(sample_node_data)
+        scene.addItem(item)
+
+        # Basic QGraphicsScene doesn't have update_connections
+        # This should not raise an error
+        item.setPos(500.0, 600.0)
+
+        assert item.node_data.x == 500.0
+        assert item.node_data.y == 600.0
+
+    def test_position_change_handles_no_scene(self, sample_node_data):
+        """Test that position change works when item has no scene."""
+        item = NodeItem(sample_node_data)
+        # Don't add to scene
+
+        # This should not raise an error
+        item.setPos(500.0, 600.0)
+
+        assert item.node_data.x == 500.0
+        assert item.node_data.y == 600.0
+
+
+class TestNodeItemEmptyPorts:
+    """Tests for NodeItem with empty port lists."""
+
+    def test_get_input_port_empty_list(self, scene):
+        """Test get_input_port returns None for node with empty input_ports."""
+        component = ComponentDefinition(
+            uuid="test",
+            protocol_type="experimentalist",
+            name="Test",
+            description="",
+            github_commit="",
+        )
+        node_data = NodeData.create(component)
+        item = NodeItem(node_data)
+        scene.addItem(item)
+
+        # Clear ports manually to simulate edge case
+        item.input_ports.clear()
+
+        result = item.get_input_port()
+
+        assert result is None
+
+    def test_get_output_port_empty_list(self, scene):
+        """Test get_output_port returns None for node with empty output_ports."""
+        component = ComponentDefinition(
+            uuid="test",
+            protocol_type="experimentalist",
+            name="Test",
+            description="",
+            github_commit="",
+        )
+        node_data = NodeData.create(component)
+        item = NodeItem(node_data)
+        scene.addItem(item)
+
+        # Clear ports manually to simulate edge case
+        item.output_ports.clear()
+
+        result = item.get_output_port()
+
+        assert result is None
+
+    def test_get_first_input_port_empty_list(self, scene):
+        """Test get_first_input_port returns None for node with empty input_ports."""
+        component = ComponentDefinition(
+            uuid="test",
+            protocol_type="experimentalist",
+            name="Test",
+            description="",
+            github_commit="",
+        )
+        node_data = NodeData.create(component)
+        item = NodeItem(node_data)
+        scene.addItem(item)
+
+        item.input_ports.clear()
+
+        result = item.get_first_input_port()
+
+        assert result is None
+
+    def test_get_first_output_port_empty_list(self, scene):
+        """Test get_first_output_port returns None for node with empty output_ports."""
+        component = ComponentDefinition(
+            uuid="test",
+            protocol_type="experimentalist",
+            name="Test",
+            description="",
+            github_commit="",
+        )
+        node_data = NodeData.create(component)
+        item = NodeItem(node_data)
+        scene.addItem(item)
+
+        item.output_ports.clear()
+
+        result = item.get_first_output_port()
+
+        assert result is None

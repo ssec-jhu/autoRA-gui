@@ -1,7 +1,7 @@
 """Unit tests for CanvasScene class."""
 
 import pytest
-from PySide6.QtCore import QPointF
+from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QApplication
 
@@ -576,3 +576,327 @@ class TestCanvasSceneSignals:
         # The handler just emits whatever is passed
         assert len(received) == 1
         assert received[0] is None
+
+
+class TestCanvasSceneFinishConnection:
+    """Tests for finish_connection method."""
+
+    def test_finish_connection(self, scene, sample_component, workflow):
+        """Test finish_connection delegates to finish_connection_with_sides."""
+        scene.set_workflow(workflow)
+        node1 = scene.add_node(sample_component, 0, 0)
+        node2 = scene.add_node(sample_component, 200, 100)
+        output_port = node1.get_first_output_port()
+        input_port = node2.get_first_input_port()
+        scene.start_connection(node1, output_port)
+
+        result = scene.finish_connection(node2, input_port)
+
+        assert result is True
+        assert len(scene._connection_items) == 1
+
+
+class TestCanvasSceneCreateConnectionItemWithSides:
+    """Tests for _create_connection_item_with_sides method."""
+
+    def test_missing_source_node(self, scene, sample_component, workflow):
+        """Test _create_connection_item_with_sides with missing source."""
+        scene.set_workflow(workflow)
+        node = scene.add_node(sample_component, 0, 0)
+        connection = Connection.create("nonexistent", node.node_data.uuid, "right", "left")
+
+        result = scene._create_connection_item_with_sides(connection, "right", "left")
+
+        assert result is None
+
+    def test_missing_target_node(self, scene, sample_component, workflow):
+        """Test _create_connection_item_with_sides with missing target."""
+        scene.set_workflow(workflow)
+        node = scene.add_node(sample_component, 0, 0)
+        connection = Connection.create(node.node_data.uuid, "nonexistent", "right", "left")
+
+        result = scene._create_connection_item_with_sides(connection, "right", "left")
+
+        assert result is None
+
+    def test_valid_connection(self, scene, sample_component, workflow):
+        """Test _create_connection_item_with_sides with valid nodes."""
+        scene.set_workflow(workflow)
+        node1 = scene.add_node(sample_component, 0, 0)
+        node2 = scene.add_node(sample_component, 200, 100)
+        connection = Connection.create(node1.node_data.uuid, node2.node_data.uuid, "right", "left")
+
+        result = scene._create_connection_item_with_sides(connection, "right", "left")
+
+        assert result is not None
+        assert isinstance(result, ConnectionItem)
+
+
+class TestCanvasSceneMouseEvents:
+    """Tests for mouse event handling."""
+
+    def test_mouse_press_on_empty_area(self, scene, workflow):
+        """Test mouse press on empty area emits node_selected with None."""
+        from PySide6.QtWidgets import QGraphicsSceneMouseEvent
+
+        scene.set_workflow(workflow)
+        received = []
+        scene.node_selected.connect(lambda data: received.append(data))
+
+        # Create mouse press event at empty location
+        event = QGraphicsSceneMouseEvent()
+        event.setScenePos(QPointF(-1000, -1000))  # Empty area
+        event.setButton(Qt.LeftButton)
+
+        scene.mousePressEvent(event)
+
+        assert len(received) == 1
+        assert received[0] is None
+
+    def test_mouse_press_near_node_edge_starts_connection(self, scene, sample_component, workflow):
+        """Test mouse press near node edge starts a connection."""
+        from PySide6.QtWidgets import QGraphicsSceneMouseEvent
+
+        scene.set_workflow(workflow)
+        node = scene.add_node(sample_component, 100, 100)
+
+        # Create mouse press event near right edge of node
+        event = QGraphicsSceneMouseEvent()
+        event.setScenePos(QPointF(295, 135))  # Near right edge
+        event.setButton(Qt.LeftButton)
+
+        scene.mousePressEvent(event)
+
+        assert scene._connection_start_node == node
+        assert scene._temp_connection is not None
+
+    def test_mouse_press_in_node_center_allows_move(self, scene, sample_component, workflow):
+        """Test mouse press in node center allows node movement (doesn't start connection)."""
+        from PySide6.QtWidgets import QGraphicsSceneMouseEvent
+
+        scene.set_workflow(workflow)
+
+        # Create mouse press event in center of node
+        event = QGraphicsSceneMouseEvent()
+        event.setScenePos(QPointF(200, 135))  # Center of node
+        event.setButton(Qt.LeftButton)
+
+        scene.mousePressEvent(event)
+
+        # Should not start a connection since we're in the center
+        assert scene._temp_connection is None
+
+    def test_mouse_move_updates_temp_connection(self, scene, sample_component, workflow):
+        """Test mouse move updates temporary connection."""
+        from PySide6.QtWidgets import QGraphicsSceneMouseEvent
+
+        scene.set_workflow(workflow)
+
+        # Start connection
+        press_event = QGraphicsSceneMouseEvent()
+        press_event.setScenePos(QPointF(295, 135))  # Near right edge
+        press_event.setButton(Qt.LeftButton)
+        scene.mousePressEvent(press_event)
+
+        # Move mouse
+        move_event = QGraphicsSceneMouseEvent()
+        move_event.setScenePos(QPointF(400, 200))
+        scene.mouseMoveEvent(move_event)
+
+        assert scene._temp_connection is not None
+        assert scene._temp_connection.end_pos == QPointF(400, 200)
+
+    def test_mouse_move_without_temp_connection(self, scene, workflow):
+        """Test mouse move without temp connection does nothing special."""
+        from PySide6.QtWidgets import QGraphicsSceneMouseEvent
+
+        scene.set_workflow(workflow)
+
+        move_event = QGraphicsSceneMouseEvent()
+        move_event.setScenePos(QPointF(400, 200))
+
+        # Should not raise
+        scene.mouseMoveEvent(move_event)
+
+    def test_mouse_release_completes_connection(self, scene, sample_component, workflow):
+        """Test mouse release on another node completes connection."""
+        from PySide6.QtWidgets import QGraphicsSceneMouseEvent
+
+        scene.set_workflow(workflow)
+
+        # Start connection from node1
+        press_event = QGraphicsSceneMouseEvent()
+        press_event.setScenePos(QPointF(295, 135))  # Near right edge of node1
+        press_event.setButton(Qt.LeftButton)
+        scene.mousePressEvent(press_event)
+
+        assert scene._temp_connection is not None
+
+        # Release on node2
+        release_event = QGraphicsSceneMouseEvent()
+        release_event.setScenePos(QPointF(405, 135))  # On node2
+        release_event.setButton(Qt.LeftButton)
+        scene.mouseReleaseEvent(release_event)
+
+        assert scene._temp_connection is None
+        assert len(scene._connection_items) == 1
+
+    def test_mouse_release_cancels_on_same_node(self, scene, sample_component, workflow):
+        """Test mouse release on same node cancels connection."""
+        from PySide6.QtWidgets import QGraphicsSceneMouseEvent
+
+        scene.set_workflow(workflow)
+
+        # Start connection
+        press_event = QGraphicsSceneMouseEvent()
+        press_event.setScenePos(QPointF(295, 135))  # Near right edge
+        press_event.setButton(Qt.LeftButton)
+        scene.mousePressEvent(press_event)
+
+        # Release on same node (opposite edge)
+        release_event = QGraphicsSceneMouseEvent()
+        release_event.setScenePos(QPointF(105, 135))  # Left edge of same node
+        release_event.setButton(Qt.LeftButton)
+        scene.mouseReleaseEvent(release_event)
+
+        assert scene._temp_connection is None
+        assert len(scene._connection_items) == 0
+
+    def test_mouse_release_cancels_on_empty_area(self, scene, sample_component, workflow):
+        """Test mouse release on empty area cancels connection."""
+        from PySide6.QtWidgets import QGraphicsSceneMouseEvent
+
+        scene.set_workflow(workflow)
+
+        # Start connection
+        press_event = QGraphicsSceneMouseEvent()
+        press_event.setScenePos(QPointF(295, 135))
+        press_event.setButton(Qt.LeftButton)
+        scene.mousePressEvent(press_event)
+
+        # Release on empty area
+        release_event = QGraphicsSceneMouseEvent()
+        release_event.setScenePos(QPointF(-500, -500))
+        release_event.setButton(Qt.LeftButton)
+        scene.mouseReleaseEvent(release_event)
+
+        assert scene._temp_connection is None
+        assert len(scene._connection_items) == 0
+
+    def test_mouse_release_without_temp_connection(self, scene, workflow):
+        """Test mouse release without temp connection does nothing special."""
+        from PySide6.QtWidgets import QGraphicsSceneMouseEvent
+
+        scene.set_workflow(workflow)
+
+        release_event = QGraphicsSceneMouseEvent()
+        release_event.setScenePos(QPointF(100, 100))
+        release_event.setButton(Qt.LeftButton)
+
+        # Should not raise
+        scene.mouseReleaseEvent(release_event)
+
+
+class TestCanvasSceneDoubleClick:
+    """Tests for double-click event handling."""
+
+    def test_double_click_selects_node(self, scene, sample_component, workflow):
+        """Test double-click on node selects it."""
+        from PySide6.QtWidgets import QGraphicsSceneMouseEvent
+
+        scene.set_workflow(workflow)
+        node = scene.add_node(sample_component, 100, 100)
+
+        received = []
+        scene.node_selected.connect(lambda data: received.append(data))
+
+        event = QGraphicsSceneMouseEvent()
+        event.setScenePos(QPointF(200, 135))  # Center of node
+        event.setButton(Qt.LeftButton)
+
+        scene.mouseDoubleClickEvent(event)
+
+        assert node.isSelected()
+        # Signal is emitted for double-click, verify the last emission is the node
+        assert len(received) >= 1
+        assert received[-1] == node.node_data
+
+    def test_double_click_cancels_pending_connection(self, scene, sample_component, workflow):
+        """Test double-click cancels any pending connection."""
+        from PySide6.QtWidgets import QGraphicsSceneMouseEvent
+
+        scene.set_workflow(workflow)
+        node1 = scene.add_node(sample_component, 100, 100)
+
+        # Start a connection
+        output_port = node1.get_first_output_port()
+        scene.start_connection(node1, output_port)
+        assert scene._temp_connection is not None
+
+        # Double-click on node2
+        event = QGraphicsSceneMouseEvent()
+        event.setScenePos(QPointF(500, 135))
+        event.setButton(Qt.LeftButton)
+
+        scene.mouseDoubleClickEvent(event)
+
+        assert scene._temp_connection is None
+
+    def test_double_click_on_empty_area(self, scene, workflow):
+        """Test double-click on empty area."""
+        from PySide6.QtWidgets import QGraphicsSceneMouseEvent
+
+        scene.set_workflow(workflow)
+
+        event = QGraphicsSceneMouseEvent()
+        event.setScenePos(QPointF(-500, -500))
+        event.setButton(Qt.LeftButton)
+
+        # Should not raise
+        scene.mouseDoubleClickEvent(event)
+
+
+class TestCanvasSceneKeyEvents:
+    """Tests for keyboard event handling."""
+
+    def test_delete_key_removes_selected(self, scene, sample_component, workflow):
+        """Test Delete key removes selected items."""
+        from PySide6.QtCore import Qt
+        from PySide6.QtGui import QKeyEvent
+
+        scene.set_workflow(workflow)
+        node = scene.add_node(sample_component, 100, 100)
+        node.setSelected(True)
+
+        event = QKeyEvent(QKeyEvent.Type.KeyPress, Qt.Key_Delete, Qt.NoModifier)
+        scene.keyPressEvent(event)
+
+        assert len(scene._node_items) == 0
+
+    def test_backspace_key_removes_selected(self, scene, sample_component, workflow):
+        """Test Backspace key removes selected items."""
+        from PySide6.QtCore import Qt
+        from PySide6.QtGui import QKeyEvent
+
+        scene.set_workflow(workflow)
+        node = scene.add_node(sample_component, 100, 100)
+        node.setSelected(True)
+
+        event = QKeyEvent(QKeyEvent.Type.KeyPress, Qt.Key_Backspace, Qt.NoModifier)
+        scene.keyPressEvent(event)
+
+        assert len(scene._node_items) == 0
+
+    def test_other_key_does_nothing(self, scene, sample_component, workflow):
+        """Test other keys don't remove items."""
+        from PySide6.QtCore import Qt
+        from PySide6.QtGui import QKeyEvent
+
+        scene.set_workflow(workflow)
+        node = scene.add_node(sample_component, 100, 100)
+        node.setSelected(True)
+
+        event = QKeyEvent(QKeyEvent.Type.KeyPress, Qt.Key_A, Qt.NoModifier)
+        scene.keyPressEvent(event)
+
+        assert len(scene._node_items) == 1

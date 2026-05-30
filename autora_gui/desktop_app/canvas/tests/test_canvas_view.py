@@ -17,7 +17,7 @@ def app():
     app = QApplication.instance()
     if app is None:
         app = QApplication([])
-    yield app
+    return app
 
 
 @pytest.fixture
@@ -224,3 +224,482 @@ class TestCanvasViewMouseEvents:
         view.setCursor(Qt.ArrowCursor)
 
         assert view.cursor().shape() == Qt.ArrowCursor
+
+
+class TestCanvasViewWheelEvent:
+    """Tests for wheel event (zoom) handling."""
+
+    def test_wheel_zoom_in(self, view):
+        """Test zooming in with mouse wheel."""
+        from PySide6.QtCore import QPoint, QPointF
+        from PySide6.QtGui import QWheelEvent
+
+        initial_zoom = view._zoom_factor
+
+        # Create wheel event for zoom in (positive delta)
+        event = QWheelEvent(
+            QPointF(100, 100),  # pos
+            QPointF(100, 100),  # globalPos
+            QPoint(0, 120),  # pixelDelta
+            QPoint(0, 120),  # angleDelta (positive = zoom in)
+            Qt.NoButton,
+            Qt.NoModifier,
+            Qt.ScrollBegin,
+            False,
+        )
+
+        view.wheelEvent(event)
+
+        assert view._zoom_factor > initial_zoom
+
+    def test_wheel_zoom_out(self, view):
+        """Test zooming out with mouse wheel."""
+        from PySide6.QtCore import QPoint, QPointF
+        from PySide6.QtGui import QWheelEvent
+
+        initial_zoom = view._zoom_factor
+
+        # Create wheel event for zoom out (negative delta)
+        event = QWheelEvent(
+            QPointF(100, 100),
+            QPointF(100, 100),
+            QPoint(0, -120),
+            QPoint(0, -120),  # negative = zoom out
+            Qt.NoButton,
+            Qt.NoModifier,
+            Qt.ScrollBegin,
+            False,
+        )
+
+        view.wheelEvent(event)
+
+        assert view._zoom_factor < initial_zoom
+
+    def test_wheel_zoom_respects_max_limit(self, view):
+        """Test that zoom respects maximum limit."""
+        from PySide6.QtCore import QPoint, QPointF
+        from PySide6.QtGui import QWheelEvent
+
+        # Set zoom close to max
+        view._zoom_factor = 2.9
+
+        event = QWheelEvent(
+            QPointF(100, 100),
+            QPointF(100, 100),
+            QPoint(0, 120),
+            QPoint(0, 120),  # zoom in
+            Qt.NoButton,
+            Qt.NoModifier,
+            Qt.ScrollBegin,
+            False,
+        )
+
+        view.wheelEvent(event)
+
+        # Should not exceed max
+        assert view._zoom_factor <= view._zoom_max
+
+    def test_wheel_zoom_respects_min_limit(self, view):
+        """Test that zoom respects minimum limit."""
+        from PySide6.QtCore import QPoint, QPointF
+        from PySide6.QtGui import QWheelEvent
+
+        # Set zoom close to min
+        view._zoom_factor = 0.15
+
+        event = QWheelEvent(
+            QPointF(100, 100),
+            QPointF(100, 100),
+            QPoint(0, -120),
+            QPoint(0, -120),  # zoom out
+            Qt.NoButton,
+            Qt.NoModifier,
+            Qt.ScrollBegin,
+            False,
+        )
+
+        view.wheelEvent(event)
+
+        # Should not go below min
+        assert view._zoom_factor >= view._zoom_min
+
+
+class TestCanvasViewPanning:
+    """Tests for panning with middle mouse button."""
+
+    def test_mouse_press_middle_button_starts_panning(self, view):
+        """Test that middle mouse button starts panning."""
+        from PySide6.QtCore import QPointF
+        from PySide6.QtGui import QMouseEvent
+
+        event = QMouseEvent(
+            QMouseEvent.Type.MouseButtonPress,
+            QPointF(100, 150),
+            Qt.MiddleButton,
+            Qt.MiddleButton,
+            Qt.NoModifier,
+        )
+
+        view.mousePressEvent(event)
+
+        assert view._panning is True
+        assert view._pan_start_x == 100
+        assert view._pan_start_y == 150
+        assert view.cursor().shape() == Qt.ClosedHandCursor
+
+    def test_mouse_press_left_button_does_not_pan(self, view):
+        """Test that left mouse button does not start panning."""
+        from PySide6.QtCore import QPointF
+        from PySide6.QtGui import QMouseEvent
+
+        event = QMouseEvent(
+            QMouseEvent.Type.MouseButtonPress,
+            QPointF(100, 150),
+            Qt.LeftButton,
+            Qt.LeftButton,
+            Qt.NoModifier,
+        )
+
+        view.mousePressEvent(event)
+
+        assert view._panning is False
+
+    def test_mouse_move_while_panning(self, view):
+        """Test mouse move while panning adjusts scroll bars."""
+        from PySide6.QtCore import QPointF
+        from PySide6.QtGui import QMouseEvent
+
+        # Start panning
+        view._panning = True
+        view._pan_start_x = 100
+        view._pan_start_y = 100
+
+        # Move mouse
+        event = QMouseEvent(
+            QMouseEvent.Type.MouseMove,
+            QPointF(150, 120),  # moved 50 right, 20 down
+            Qt.NoButton,
+            Qt.MiddleButton,
+            Qt.NoModifier,
+        )
+
+        view.mouseMoveEvent(event)
+
+        # Pan start should be updated
+        assert view._pan_start_x == 150
+        assert view._pan_start_y == 120
+
+    def test_mouse_move_without_panning(self, view):
+        """Test mouse move without panning does not affect scroll."""
+        from PySide6.QtCore import QPointF
+        from PySide6.QtGui import QMouseEvent
+
+        view._panning = False
+
+        event = QMouseEvent(
+            QMouseEvent.Type.MouseMove,
+            QPointF(150, 120),
+            Qt.NoButton,
+            Qt.NoButton,
+            Qt.NoModifier,
+        )
+
+        # Should not raise error
+        view.mouseMoveEvent(event)
+
+        assert view._panning is False
+
+    def test_mouse_release_middle_button_stops_panning(self, view):
+        """Test that releasing middle button stops panning."""
+        from PySide6.QtCore import QPointF
+        from PySide6.QtGui import QMouseEvent
+
+        # Start panning
+        view._panning = True
+        view.setCursor(Qt.ClosedHandCursor)
+
+        event = QMouseEvent(
+            QMouseEvent.Type.MouseButtonRelease,
+            QPointF(150, 120),
+            Qt.MiddleButton,
+            Qt.NoButton,
+            Qt.NoModifier,
+        )
+
+        view.mouseReleaseEvent(event)
+
+        assert view._panning is False
+        assert view.cursor().shape() == Qt.ArrowCursor
+
+    def test_mouse_release_left_button_while_panning(self, view):
+        """Test that releasing left button doesn't stop panning."""
+        from PySide6.QtCore import QPointF
+        from PySide6.QtGui import QMouseEvent
+
+        view._panning = True
+
+        event = QMouseEvent(
+            QMouseEvent.Type.MouseButtonRelease,
+            QPointF(150, 120),
+            Qt.LeftButton,
+            Qt.NoButton,
+            Qt.NoModifier,
+        )
+
+        view.mouseReleaseEvent(event)
+
+        # Panning should continue
+        assert view._panning is True
+
+    def test_mouse_release_without_panning(self, view):
+        """Test mouse release when not panning."""
+        from PySide6.QtCore import QPointF
+        from PySide6.QtGui import QMouseEvent
+
+        view._panning = False
+
+        event = QMouseEvent(
+            QMouseEvent.Type.MouseButtonRelease,
+            QPointF(150, 120),
+            Qt.MiddleButton,
+            Qt.NoButton,
+            Qt.NoModifier,
+        )
+
+        # Should not raise error
+        view.mouseReleaseEvent(event)
+
+        assert view._panning is False
+
+
+class TestCanvasViewDragEvents:
+    """Tests for drag enter and drag move events."""
+
+    def test_drag_enter_accepts_component_format(self, view):
+        """Test dragEnterEvent accepts component mime format."""
+        from PySide6.QtCore import QPointF
+        from PySide6.QtGui import QDragEnterEvent
+
+        mime_data = QMimeData()
+        mime_data.setData("application/x-component", QByteArray(b"{}"))
+
+        event = QDragEnterEvent(
+            QPointF(100, 100).toPoint(),
+            Qt.CopyAction,
+            mime_data,
+            Qt.LeftButton,
+            Qt.NoModifier,
+        )
+
+        view.dragEnterEvent(event)
+
+        assert event.isAccepted()
+
+    def test_drag_enter_rejects_other_format(self, view):
+        """Test dragEnterEvent rejects non-component mime format."""
+        from PySide6.QtCore import QPointF
+        from PySide6.QtGui import QDragEnterEvent
+
+        mime_data = QMimeData()
+        mime_data.setText("some text")
+
+        event = QDragEnterEvent(
+            QPointF(100, 100).toPoint(),
+            Qt.CopyAction,
+            mime_data,
+            Qt.LeftButton,
+            Qt.NoModifier,
+        )
+
+        view.dragEnterEvent(event)
+
+        assert not event.isAccepted()
+
+    def test_drag_move_accepts_component_format(self, view):
+        """Test dragMoveEvent accepts component mime format."""
+        from PySide6.QtCore import QPointF
+        from PySide6.QtGui import QDragMoveEvent
+
+        mime_data = QMimeData()
+        mime_data.setData("application/x-component", QByteArray(b"{}"))
+
+        event = QDragMoveEvent(
+            QPointF(100, 100).toPoint(),
+            Qt.CopyAction,
+            mime_data,
+            Qt.LeftButton,
+            Qt.NoModifier,
+        )
+
+        view.dragMoveEvent(event)
+
+        assert event.isAccepted()
+
+    def test_drag_move_rejects_other_format(self, view):
+        """Test dragMoveEvent rejects non-component mime format."""
+        from PySide6.QtCore import QPointF
+        from PySide6.QtGui import QDragMoveEvent
+
+        mime_data = QMimeData()
+        mime_data.setText("some text")
+
+        event = QDragMoveEvent(
+            QPointF(100, 100).toPoint(),
+            Qt.CopyAction,
+            mime_data,
+            Qt.LeftButton,
+            Qt.NoModifier,
+        )
+
+        view.dragMoveEvent(event)
+
+        assert not event.isAccepted()
+
+
+class TestCanvasViewDropEvent:
+    """Tests for drop event handling."""
+
+    def test_drop_event_with_valid_component(self, view):
+        """Test dropEvent with valid component data emits signal."""
+        import json
+
+        from PySide6.QtCore import QPointF
+        from PySide6.QtGui import QDropEvent
+
+        # Create component JSON data
+        component_data = {
+            "uuid": "test-uuid",
+            "protocol_type": "experimentalist",
+            "name": "Test Component",
+            "description": "A test component",
+            "github_commit": "abc123",
+            "parameters": [],
+            "input_ports": [],
+            "output_ports": [],
+            "file_path": "/test/path.json",
+        }
+
+        mime_data = QMimeData()
+        mime_data.setData("application/x-component", QByteArray(json.dumps(component_data).encode()))
+
+        received = []
+        view.component_dropped.connect(lambda comp, x, y: received.append((comp, x, y)))
+
+        event = QDropEvent(
+            QPointF(100, 100),
+            Qt.CopyAction,
+            mime_data,
+            Qt.LeftButton,
+            Qt.NoModifier,
+        )
+
+        view.dropEvent(event)
+
+        assert event.isAccepted()
+        assert len(received) == 1
+        assert received[0][0].uuid == "test-uuid"
+        assert received[0][0].name == "Test Component"
+
+    def test_drop_event_with_parameters(self, view):
+        """Test dropEvent with component containing parameters."""
+        import json
+
+        from PySide6.QtCore import QPointF
+        from PySide6.QtGui import QDropEvent
+
+        component_data = {
+            "uuid": "test-uuid",
+            "protocol_type": "theorist",
+            "name": "Param Component",
+            "description": "Has params",
+            "github_commit": "def456",
+            "parameters": [{"name": "alpha", "description": "Alpha param", "datatype": "real", "default": 0.1}],
+            "input_ports": [{"name": "in1", "description": "Input", "datatype": "object"}],
+            "output_ports": [{"name": "out1", "description": "Output", "datatype": "object"}],
+            "file_path": "",
+        }
+
+        mime_data = QMimeData()
+        mime_data.setData("application/x-component", QByteArray(json.dumps(component_data).encode()))
+
+        received = []
+        view.component_dropped.connect(lambda comp, x, y: received.append((comp, x, y)))
+
+        event = QDropEvent(
+            QPointF(200, 300),
+            Qt.CopyAction,
+            mime_data,
+            Qt.LeftButton,
+            Qt.NoModifier,
+        )
+
+        view.dropEvent(event)
+
+        assert len(received) == 1
+        assert received[0][0].protocol_type == "theorist"
+        assert len(received[0][0].parameters) == 1
+        assert received[0][0].parameters[0].name == "alpha"
+        assert len(received[0][0].input_ports) == 1
+        assert len(received[0][0].output_ports) == 1
+
+    def test_drop_event_rejects_other_format(self, view):
+        """Test dropEvent rejects non-component data."""
+        from PySide6.QtCore import QPointF
+        from PySide6.QtGui import QDropEvent
+
+        mime_data = QMimeData()
+        mime_data.setText("some text")
+
+        received = []
+        view.component_dropped.connect(lambda comp, x, y: received.append((comp, x, y)))
+
+        event = QDropEvent(
+            QPointF(100, 100),
+            Qt.CopyAction,
+            mime_data,
+            Qt.LeftButton,
+            Qt.NoModifier,
+        )
+
+        view.dropEvent(event)
+
+        assert not event.isAccepted()
+        assert len(received) == 0
+
+    def test_drop_event_without_file_path(self, view):
+        """Test dropEvent handles missing file_path gracefully."""
+        import json
+
+        from PySide6.QtCore import QPointF
+        from PySide6.QtGui import QDropEvent
+
+        component_data = {
+            "uuid": "test-uuid",
+            "protocol_type": "experimentalist",
+            "name": "No Path Component",
+            "description": "",
+            "github_commit": "",
+            "parameters": [],
+            "input_ports": [],
+            "output_ports": [],
+            # No file_path key
+        }
+
+        mime_data = QMimeData()
+        mime_data.setData("application/x-component", QByteArray(json.dumps(component_data).encode()))
+
+        received = []
+        view.component_dropped.connect(lambda comp, x, y: received.append((comp, x, y)))
+
+        event = QDropEvent(
+            QPointF(100, 100),
+            Qt.CopyAction,
+            mime_data,
+            Qt.LeftButton,
+            Qt.NoModifier,
+        )
+
+        view.dropEvent(event)
+
+        assert len(received) == 1
+        assert received[0][0].file_path == ""

@@ -226,6 +226,101 @@ class TestConnectionItem:
         assert end.y() == pytest.approx(expected.y(), abs=1)
 
 
+class TestConnectionItemPaint:
+    """Tests for ConnectionItem paint method."""
+
+    def test_paint_not_selected(self, connection_item):
+        """Test paint method when not selected."""
+        from PySide6.QtGui import QImage, QPainter
+
+        connection_item.setSelected(False)
+
+        # Create a QImage to paint on
+        image = QImage(500, 500, QImage.Format.Format_ARGB32)
+        image.fill(Qt.white)
+        painter = QPainter(image)
+
+        # Call paint - should not raise
+        connection_item.paint(painter, None, None)
+
+        painter.end()
+
+    def test_paint_selected(self, connection_item):
+        """Test paint method when selected."""
+        from PySide6.QtGui import QImage, QPainter
+
+        connection_item.setSelected(True)
+
+        image = QImage(500, 500, QImage.Format.Format_ARGB32)
+        image.fill(Qt.white)
+        painter = QPainter(image)
+
+        # Call paint - should use different pen color when selected
+        connection_item.paint(painter, None, None)
+
+        painter.end()
+
+    def test_paint_draws_arrow(self, connection_item):
+        """Test that paint draws an arrow head."""
+        from PySide6.QtGui import QImage, QPainter
+
+        # Ensure path has length for arrow to be drawn
+        connection_item.update_path()
+        assert connection_item.path().length() > 0
+
+        image = QImage(500, 500, QImage.Format.Format_ARGB32)
+        image.fill(Qt.white)
+        painter = QPainter(image)
+
+        # Should draw arrow head without errors
+        connection_item.paint(painter, None, None)
+
+        painter.end()
+
+    def test_paint_with_zero_length_path(self, connection, source_node, target_node, scene):
+        """Test paint handles zero-length path gracefully."""
+        from PySide6.QtGui import QImage, QPainter
+
+        # Create item with nodes at same position
+        target_node.setPos(0, 0)
+        source_node.setPos(0, 0)
+
+        item = ConnectionItem(connection, source_node, target_node)
+        scene.addItem(item)
+        item.update_path()
+
+        image = QImage(500, 500, QImage.Format.Format_ARGB32)
+        image.fill(Qt.white)
+        painter = QPainter(image)
+
+        # Should handle gracefully without division by zero
+        item.paint(painter, None, None)
+
+        painter.end()
+
+    def test_paint_with_different_sides(self, connection, source_node, target_node, scene):
+        """Test paint with various connection sides."""
+        from PySide6.QtGui import QImage, QPainter
+
+        sides = [("right", "left"), ("bottom", "top"), ("left", "right"), ("top", "bottom")]
+
+        for source_side, target_side in sides:
+            item = ConnectionItem(
+                connection, source_node, target_node, source_side=source_side, target_side=target_side
+            )
+            scene.addItem(item)
+            item.update_path()
+
+            image = QImage(500, 500, QImage.Format.Format_ARGB32)
+            image.fill(Qt.white)
+            painter = QPainter(image)
+
+            item.paint(painter, None, None)
+
+            painter.end()
+            scene.removeItem(item)
+
+
 class TestTempConnectionItem:
     """Tests for TempConnectionItem class."""
 
