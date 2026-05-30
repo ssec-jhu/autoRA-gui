@@ -1,10 +1,9 @@
 """Tests for ComponentBrowser and DraggableTreeWidget classes."""
 
-import dataclasses
 import json
 
 import pytest
-from PySide6.QtCore import QByteArray, QMimeData, Qt
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QAbstractItemView, QApplication, QTreeWidgetItem
 
 from autora_gui.desktop_app.components.component_browser import (
@@ -23,7 +22,7 @@ def app():
     app = QApplication.instance()
     if app is None:
         app = QApplication([])
-    yield app
+    return app
 
 
 @pytest.fixture

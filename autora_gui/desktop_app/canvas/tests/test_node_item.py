@@ -173,8 +173,7 @@ class TestNodeItem:
     def test_color_experimentalist(self, scene):
         """Test color for experimentalist type."""
         component = ComponentDefinition(
-            uuid="test", protocol_type="experimentalist", name="Test",
-            description="", github_commit=""
+            uuid="test", protocol_type="experimentalist", name="Test", description="", github_commit=""
         )
         node_data = NodeData.create(component)
         item = NodeItem(node_data)
@@ -185,8 +184,7 @@ class TestNodeItem:
     def test_color_theorist(self, scene):
         """Test color for theorist type."""
         component = ComponentDefinition(
-            uuid="test", protocol_type="theorist", name="Test",
-            description="", github_commit=""
+            uuid="test", protocol_type="theorist", name="Test", description="", github_commit=""
         )
         node_data = NodeData.create(component)
         item = NodeItem(node_data)
@@ -197,8 +195,7 @@ class TestNodeItem:
     def test_color_experiment_runner(self, scene):
         """Test color for experiment_runner type."""
         component = ComponentDefinition(
-            uuid="test", protocol_type="experiment_runner", name="Test",
-            description="", github_commit=""
+            uuid="test", protocol_type="experiment_runner", name="Test", description="", github_commit=""
         )
         node_data = NodeData.create(component)
         item = NodeItem(node_data)
@@ -211,8 +208,7 @@ class TestNodeItem:
         from PySide6.QtGui import QColor
 
         component = ComponentDefinition(
-            uuid="test", protocol_type="unknown_type", name="Test",
-            description="", github_commit=""
+            uuid="test", protocol_type="unknown_type", name="Test", description="", github_commit=""
         )
         node_data = NodeData.create(component)
         item = NodeItem(node_data)
@@ -351,9 +347,7 @@ class TestNodeItem:
     def test_position_change_emits_signal(self, node_item):
         """Test that moving the node emits position_changed signal."""
         received = []
-        node_item.signals.position_changed.connect(
-            lambda uuid, x, y: received.append((uuid, x, y))
-        )
+        node_item.signals.position_changed.connect(lambda uuid, x, y: received.append((uuid, x, y)))
 
         node_item.setPos(300.0, 400.0)
 

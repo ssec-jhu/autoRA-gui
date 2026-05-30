@@ -2,7 +2,7 @@
 
 import pytest
 from PySide6.QtCore import QPointF, Qt
-from PySide6.QtGui import QColor, QPen
+from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QApplication, QGraphicsScene
 
 from autora_gui.desktop_app.canvas.connection_item import ConnectionItem, TempConnectionItem
@@ -74,10 +74,7 @@ def connection(source_node, target_node):
 @pytest.fixture
 def connection_item(connection, source_node, target_node, scene):
     """Create a ConnectionItem instance."""
-    item = ConnectionItem(
-        connection, source_node, target_node,
-        source_side="right", target_side="left"
-    )
+    item = ConnectionItem(connection, source_node, target_node, source_side="right", target_side="left")
     scene.addItem(item)
     return item
 
@@ -87,10 +84,7 @@ class TestConnectionItem:
 
     def test_init(self, connection, source_node, target_node, scene):
         """Test ConnectionItem initialization."""
-        item = ConnectionItem(
-            connection, source_node, target_node,
-            source_side="right", target_side="left"
-        )
+        item = ConnectionItem(connection, source_node, target_node, source_side="right", target_side="left")
         scene.addItem(item)
 
         assert item.connection == connection
@@ -109,10 +103,7 @@ class TestConnectionItem:
 
     def test_init_custom_sides(self, connection, source_node, target_node, scene):
         """Test ConnectionItem initialization with custom sides."""
-        item = ConnectionItem(
-            connection, source_node, target_node,
-            source_side="bottom", target_side="top"
-        )
+        item = ConnectionItem(connection, source_node, target_node, source_side="bottom", target_side="top")
         scene.addItem(item)
 
         assert item.source_side == "bottom"

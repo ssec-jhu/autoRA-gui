@@ -1,13 +1,13 @@
 """Unit tests for CanvasScene class."""
 
 import pytest
-from PySide6.QtCore import QPointF, Qt
+from PySide6.QtCore import QPointF
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QApplication
 
 from autora_gui.desktop_app.canvas.canvas_scene import CanvasScene
 from autora_gui.desktop_app.canvas.connection_item import ConnectionItem, TempConnectionItem
-from autora_gui.desktop_app.canvas.node_item import NODE_HEIGHT, NODE_WIDTH, NodeItem, PortItem
+from autora_gui.desktop_app.canvas.node_item import NodeItem
 from autora_gui.desktop_app.models.node import ComponentDefinition, NodeData, PortDef
 from autora_gui.desktop_app.models.workflow import Connection, Workflow
 
@@ -250,9 +250,7 @@ class TestCanvasSceneConnectionOperations:
         scene.set_workflow(workflow)
         node1 = scene.add_node(sample_component, 0, 0)
         node2 = scene.add_node(sample_component, 200, 100)
-        connection = Connection.create(
-            node1.node_data.uuid, node2.node_data.uuid, "right", "left"
-        )
+        connection = Connection.create(node1.node_data.uuid, node2.node_data.uuid, "right", "left")
 
         conn_item = scene._create_connection_item(connection)
 

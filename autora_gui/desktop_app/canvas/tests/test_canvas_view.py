@@ -1,15 +1,13 @@
 """Unit tests for CanvasView class."""
 
-import json
-
 import pytest
-from PySide6.QtCore import QByteArray, QMimeData, QPoint, Qt
+from PySide6.QtCore import QByteArray, QMimeData, Qt
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import QApplication, QGraphicsView
 
 from autora_gui.desktop_app.canvas.canvas_scene import CanvasScene
 from autora_gui.desktop_app.canvas.canvas_view import CanvasView
-from autora_gui.desktop_app.models.node import ComponentDefinition, NodeData, PortDef
+from autora_gui.desktop_app.models.node import ComponentDefinition, PortDef
 from autora_gui.desktop_app.models.workflow import Workflow
 
 
@@ -160,9 +158,7 @@ class TestCanvasViewSignals:
     def test_component_dropped_signal_emission(self, view, sample_component):
         """Test component_dropped signal can be emitted and received."""
         received = []
-        view.component_dropped.connect(
-            lambda comp, x, y: received.append((comp, x, y))
-        )
+        view.component_dropped.connect(lambda comp, x, y: received.append((comp, x, y)))
 
         view.component_dropped.emit(sample_component, 100.0, 200.0)
 

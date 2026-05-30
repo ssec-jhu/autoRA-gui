@@ -6,7 +6,6 @@ from pathlib import Path
 import pytest
 
 from autora_gui.desktop_app.components.component_loader import ComponentLoader, get_default_components_dir
-from autora_gui.desktop_app.models.node import ComponentDefinition
 
 
 @pytest.fixture
