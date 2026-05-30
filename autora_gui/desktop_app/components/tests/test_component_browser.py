@@ -222,6 +222,127 @@ class TestDraggableTreeWidget:
         # Should not raise an error (returns early)
         tree.startDrag(Qt.CopyAction)
 
+    def test_start_drag_with_component(self, app, sample_component):
+        """Test startDrag with valid component creates drag objects."""
+        from unittest.mock import MagicMock, patch
+
+        tree = DraggableTreeWidget()
+
+        # Create item with component data
+        item = QTreeWidgetItem(tree)
+        item.setText(0, sample_component.name)
+        item.setData(0, Qt.UserRole, sample_component)
+        tree.setCurrentItem(item)
+
+        # Mock QDrag to avoid actual drag operation
+        with patch("autora_gui.desktop_app.components.component_browser.QDrag") as mock_drag_class:
+            mock_drag = MagicMock()
+            mock_drag_class.return_value = mock_drag
+
+            tree.startDrag(Qt.CopyAction)
+
+            # Verify QDrag was created and configured
+            mock_drag_class.assert_called_once_with(tree)
+            mock_drag.setMimeData.assert_called_once()
+            mock_drag.setPixmap.assert_called_once()
+            mock_drag.setHotSpot.assert_called_once()
+            mock_drag.exec.assert_called_once_with(Qt.CopyAction)
+
+    def test_start_drag_creates_correct_mime_data(self, app, sample_component):
+        """Test startDrag creates correct mime data for component."""
+        from unittest.mock import MagicMock, patch
+
+        tree = DraggableTreeWidget()
+
+        # Create item with component data
+        item = QTreeWidgetItem(tree)
+        item.setData(0, Qt.UserRole, sample_component)
+        tree.setCurrentItem(item)
+
+        # Capture the mime data passed to setMimeData
+        captured_mime_data = None
+
+        def capture_mime_data(mime_data):
+            nonlocal captured_mime_data
+            captured_mime_data = mime_data
+
+        with patch("autora_gui.desktop_app.components.component_browser.QDrag") as mock_drag_class:
+            mock_drag = MagicMock()
+            mock_drag.setMimeData = capture_mime_data
+            mock_drag_class.return_value = mock_drag
+
+            tree.startDrag(Qt.CopyAction)
+
+        # Verify mime data contains the component
+        assert captured_mime_data is not None
+        assert captured_mime_data.hasFormat("application/x-component")
+        data = bytes(captured_mime_data.data("application/x-component"))
+        component_dict = json.loads(data.decode("utf-8"))
+        assert component_dict["name"] == sample_component.name
+
+    def test_start_drag_creates_pixmap_with_name(self, app, sample_component):
+        """Test startDrag creates pixmap with component name."""
+        from unittest.mock import MagicMock, patch
+
+        from PySide6.QtGui import QPixmap
+
+        tree = DraggableTreeWidget()
+
+        # Create item with component data
+        item = QTreeWidgetItem(tree)
+        item.setData(0, Qt.UserRole, sample_component)
+        tree.setCurrentItem(item)
+
+        # Capture the pixmap passed to setPixmap
+        captured_pixmap = None
+
+        def capture_pixmap(pixmap):
+            nonlocal captured_pixmap
+            captured_pixmap = pixmap
+
+        with patch("autora_gui.desktop_app.components.component_browser.QDrag") as mock_drag_class:
+            mock_drag = MagicMock()
+            mock_drag.setPixmap = capture_pixmap
+            mock_drag_class.return_value = mock_drag
+
+            tree.startDrag(Qt.CopyAction)
+
+        # Verify pixmap was created with correct dimensions
+        assert captured_pixmap is not None
+        assert isinstance(captured_pixmap, QPixmap)
+        assert captured_pixmap.width() == 160
+        assert captured_pixmap.height() == 30
+
+    def test_start_drag_sets_hotspot(self, app, sample_component):
+        """Test startDrag sets hotspot to pixmap center."""
+        from unittest.mock import MagicMock, patch
+
+        tree = DraggableTreeWidget()
+
+        # Create item with component data
+        item = QTreeWidgetItem(tree)
+        item.setData(0, Qt.UserRole, sample_component)
+        tree.setCurrentItem(item)
+
+        # Capture the hotspot
+        captured_hotspot = None
+
+        def capture_hotspot(point):
+            nonlocal captured_hotspot
+            captured_hotspot = point
+
+        with patch("autora_gui.desktop_app.components.component_browser.QDrag") as mock_drag_class:
+            mock_drag = MagicMock()
+            mock_drag.setHotSpot = capture_hotspot
+            mock_drag_class.return_value = mock_drag
+
+            tree.startDrag(Qt.CopyAction)
+
+        # Hotspot should be at center of 160x30 pixmap (79 due to integer center)
+        assert captured_hotspot is not None
+        assert captured_hotspot.x() == 79  # QRect(0,0,160,30).center().x()
+        assert captured_hotspot.y() == 14  # QRect(0,0,160,30).center().y()
+
 
 class TestComponentBrowser:
     """Tests for ComponentBrowser class."""
