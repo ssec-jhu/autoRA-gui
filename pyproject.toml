@@ -121,4 +121,4 @@ multiline-quotes = "double"  # https://docs.astral.sh/ruff/settings/#lint_flake8
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
-testpaths = ["autora_gui/tests", "autora_gui/js_app/tests", "autora_gui/react_app/tests", "autora_gui/desktop_app"]
+testpaths = ["autora_gui/tests", "autora_gui/react_app/tests", "autora_gui/desktop_app/tests"]
