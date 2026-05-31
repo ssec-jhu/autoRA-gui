@@ -675,6 +675,8 @@ class TestCanvasSceneMouseEvents:
         from PySide6.QtWidgets import QGraphicsSceneMouseEvent
 
         scene.set_workflow(workflow)
+        # Add a node at position (100, 100) - node extends to about (300, 170)
+        scene.add_node(sample_component, 100, 100)
 
         # Create mouse press event in center of node
         event = QGraphicsSceneMouseEvent()
@@ -691,8 +693,10 @@ class TestCanvasSceneMouseEvents:
         from PySide6.QtWidgets import QGraphicsSceneMouseEvent
 
         scene.set_workflow(workflow)
+        # Add a node at position (100, 100) - node extends to about (300, 170)
+        scene.add_node(sample_component, 100, 100)
 
-        # Start connection
+        # Start connection by clicking near right edge of the node
         press_event = QGraphicsSceneMouseEvent()
         press_event.setScenePos(QPointF(295, 135))  # Near right edge
         press_event.setButton(Qt.LeftButton)
@@ -723,8 +727,12 @@ class TestCanvasSceneMouseEvents:
         from PySide6.QtWidgets import QGraphicsSceneMouseEvent
 
         scene.set_workflow(workflow)
+        # Add node1 at (100, 100) - extends to about (300, 170)
+        scene.add_node(sample_component, 100, 100)
+        # Add node2 at (400, 100) - extends to about (600, 170)
+        scene.add_node(sample_component, 400, 100)
 
-        # Start connection from node1
+        # Start connection from node1 by clicking near its right edge
         press_event = QGraphicsSceneMouseEvent()
         press_event.setScenePos(QPointF(295, 135))  # Near right edge of node1
         press_event.setButton(Qt.LeftButton)
@@ -732,7 +740,7 @@ class TestCanvasSceneMouseEvents:
 
         assert scene._temp_connection is not None
 
-        # Release on node2
+        # Release on node2 (near its left edge)
         release_event = QGraphicsSceneMouseEvent()
         release_event.setScenePos(QPointF(405, 135))  # On node2
         release_event.setButton(Qt.LeftButton)
@@ -746,6 +754,8 @@ class TestCanvasSceneMouseEvents:
         from PySide6.QtWidgets import QGraphicsSceneMouseEvent
 
         scene.set_workflow(workflow)
+        # Add a node at position (100, 100) - node extends to about (300, 170)
+        scene.add_node(sample_component, 100, 100)
 
         # Start connection
         press_event = QGraphicsSceneMouseEvent()
@@ -767,6 +777,8 @@ class TestCanvasSceneMouseEvents:
         from PySide6.QtWidgets import QGraphicsSceneMouseEvent
 
         scene.set_workflow(workflow)
+        # Add a node at position (100, 100) - node extends to about (300, 170)
+        scene.add_node(sample_component, 100, 100)
 
         # Start connection
         press_event = QGraphicsSceneMouseEvent()
@@ -827,13 +839,15 @@ class TestCanvasSceneDoubleClick:
 
         scene.set_workflow(workflow)
         node1 = scene.add_node(sample_component, 100, 100)
+        # Add node2 at (400, 100) for the double-click target
+        scene.add_node(sample_component, 400, 100)
 
         # Start a connection
         output_port = node1.get_first_output_port()
         scene.start_connection(node1, output_port)
         assert scene._temp_connection is not None
 
-        # Double-click on node2
+        # Double-click on node2 (at 400,100 which extends to about 600,170)
         event = QGraphicsSceneMouseEvent()
         event.setScenePos(QPointF(500, 135))
         event.setButton(Qt.LeftButton)
