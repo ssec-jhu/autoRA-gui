@@ -281,6 +281,34 @@ class TestComponentLoaderCategoryMap:
 class TestComponentLoaderEdgeCases:
     """Tests for edge cases."""
 
+    def test_handles_unexpected_exception_in_load_component(self, tmp_path):
+        """Test that loader handles unexpected exceptions in _load_component gracefully."""
+        from unittest.mock import patch
+
+        (tmp_path / "theorists").mkdir()
+
+        # Create a valid JSON file
+        valid = {"uuid": "valid", "protocolType": "theorist", "name": "Valid"}
+        with open(tmp_path / "theorists" / "valid.json", "w") as f:
+            json.dump(valid, f)
+
+        loader = ComponentLoader(tmp_path)
+
+        # Mock _load_component to raise an unexpected exception (not JSONDecodeError/KeyError)
+        original_load = loader._load_component
+
+        def mock_load(file_path):
+            if "valid.json" in str(file_path):
+                raise RuntimeError("Unexpected error during loading")
+            return original_load(file_path)
+
+        with patch.object(loader, "_load_component", side_effect=mock_load):
+            # Should not raise, should handle gracefully
+            components = loader.load_all()
+
+        # Category should be empty since the only file raised an exception
+        assert "theorists" not in components
+
     def test_empty_directory(self, tmp_path):
         """Test loading from empty directory."""
         loader = ComponentLoader(tmp_path)

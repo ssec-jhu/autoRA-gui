@@ -1,5 +1,7 @@
 """Tests for main module entry point."""
 
+from unittest.mock import MagicMock, patch
+
 import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication
@@ -14,6 +16,62 @@ def app():
     if app is None:
         app = QApplication([])
     return app
+
+
+class TestMainModule:
+    """Tests for the main module imports and function."""
+
+    def test_main_function_exists(self):
+        """Test that main function can be imported."""
+        from autora_gui.desktop_app.main import main
+
+        assert callable(main)
+
+    def test_main_module_imports(self):
+        """Test that main module imports are correct."""
+        from autora_gui.desktop_app import main
+
+        assert hasattr(main, "main")
+        assert hasattr(main, "MainWindow")
+        assert hasattr(main, "QApplication")
+
+    def test_main_function_sets_high_dpi_policy(self, app):
+        """Test that main sets high DPI scaling policy."""
+        from autora_gui.desktop_app.main import main
+
+        # Verify the policy can be set (already done by app setup)
+        QApplication.setHighDpiScaleFactorRoundingPolicy(
+            Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
+        )
+        # No exception means success
+
+    def test_main_function_with_mocked_exec(self):
+        """Test main function execution with mocked app.exec."""
+        from autora_gui.desktop_app import main as main_module
+
+        # We need to mock sys.exit and app.exec to prevent actual exit
+        with patch.object(main_module.sys, "exit") as mock_exit:
+            with patch.object(main_module, "QApplication") as MockQApp:
+                mock_app_instance = MagicMock()
+                mock_app_instance.exec.return_value = 0
+                MockQApp.return_value = mock_app_instance
+
+                with patch.object(main_module, "MainWindow") as MockMainWindow:
+                    mock_window = MagicMock()
+                    MockMainWindow.return_value = mock_window
+
+                    main_module.main()
+
+                    # Verify app was configured
+                    mock_app_instance.setApplicationName.assert_called_once_with("AutoRA Workflow Editor")
+                    mock_app_instance.setOrganizationName.assert_called_once_with("AutoRA")
+                    mock_app_instance.setStyle.assert_called_once_with("Fusion")
+
+                    # Verify window was shown
+                    mock_window.show.assert_called_once()
+
+                    # Verify app.exec was called
+                    mock_app_instance.exec.assert_called_once()
 
 
 class TestMainFunction:

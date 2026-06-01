@@ -331,6 +331,165 @@ class TestNewWorkflow:
 
         assert "Untitled" in main_window.windowTitle()
 
+    def test_new_workflow_cancelled_when_save_fails(self, main_window):
+        """Test that new workflow is cancelled when save fails."""
+        main_window._modified = True
+        main_window._current_file = "/some/file.json"
+        old_workflow = main_window.canvas_scene.get_workflow()
+
+        # Mock: user clicks Save, but save fails
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.Save):
+            with patch.object(main_window, "_save_workflow", return_value=False):
+                main_window._new_workflow()
+
+        # Workflow should NOT have changed since save failed
+        assert main_window._modified is True
+        assert main_window._current_file == "/some/file.json"
+
+    def test_new_workflow_cancelled_on_cancel_button(self, main_window):
+        """Test that new workflow is cancelled when user clicks Cancel."""
+        main_window._modified = True
+        main_window._current_file = "/some/file.json"
+
+        # Mock: user clicks Cancel
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.Cancel):
+            main_window._new_workflow()
+
+        # State should remain unchanged
+        assert main_window._modified is True
+        assert main_window._current_file == "/some/file.json"
+
+    def test_new_workflow_proceeds_after_successful_save(self, main_window, tmp_path):
+        """Test that new workflow proceeds after successful save."""
+        main_window._modified = True
+        main_window._current_file = str(tmp_path / "old.json")
+        workflow = Workflow(name="Old")
+        main_window.canvas_scene.set_workflow(workflow)
+
+        # Mock: user clicks Save, and save succeeds
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.Save):
+            with patch.object(main_window, "_save_workflow", return_value=True):
+                main_window._new_workflow()
+
+        # New workflow should have been created
+        assert main_window._current_file is None
+        assert main_window._modified is False
+
+
+class TestOpenWorkflow:
+    """Tests for _open_workflow method."""
+
+    def test_open_workflow_loads_file(self, main_window, tmp_path, sample_component):
+        """Test that open workflow loads a file."""
+        # Create a test workflow file
+        test_file = tmp_path / "test_workflow.json"
+        workflow = Workflow(name="Test Workflow")
+        workflow.save_to_file(str(test_file))
+
+        main_window._modified = False
+
+        with patch("PySide6.QtWidgets.QFileDialog.getOpenFileName", return_value=(str(test_file), "")):
+            main_window._open_workflow()
+
+        assert main_window._current_file == str(test_file)
+        assert main_window._modified is False
+
+    def test_open_workflow_cancelled_on_empty_path(self, main_window):
+        """Test that open workflow is cancelled when no file selected."""
+        main_window._modified = False
+        main_window._current_file = "/original/file.json"
+
+        with patch("PySide6.QtWidgets.QFileDialog.getOpenFileName", return_value=("", "")):
+            main_window._open_workflow()
+
+        # Current file should remain unchanged
+        assert main_window._current_file == "/original/file.json"
+
+    def test_open_workflow_shows_save_dialog_when_modified(self, main_window, tmp_path):
+        """Test that open workflow shows save dialog when modified."""
+        main_window._modified = True
+
+        # Create a test workflow file
+        test_file = tmp_path / "test_workflow.json"
+        workflow = Workflow(name="Test Workflow")
+        workflow.save_to_file(str(test_file))
+
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.Discard) as mock_question:
+            with patch("PySide6.QtWidgets.QFileDialog.getOpenFileName", return_value=(str(test_file), "")):
+                main_window._open_workflow()
+
+        mock_question.assert_called_once()
+
+    def test_open_workflow_cancelled_when_save_fails(self, main_window):
+        """Test that open workflow is cancelled when save fails."""
+        main_window._modified = True
+        main_window._current_file = "/original/file.json"
+
+        # Mock: user clicks Save, but save fails
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.Save):
+            with patch.object(main_window, "_save_workflow", return_value=False):
+                main_window._open_workflow()
+
+        # Should not proceed - current file unchanged
+        assert main_window._current_file == "/original/file.json"
+
+    def test_open_workflow_cancelled_on_cancel_button(self, main_window):
+        """Test that open workflow is cancelled when user clicks Cancel."""
+        main_window._modified = True
+        main_window._current_file = "/original/file.json"
+
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.Cancel):
+            main_window._open_workflow()
+
+        # Should not proceed - current file unchanged
+        assert main_window._current_file == "/original/file.json"
+
+    def test_open_workflow_shows_error_on_invalid_file(self, main_window, tmp_path):
+        """Test that open workflow shows error for invalid file."""
+        # Create an invalid JSON file
+        test_file = tmp_path / "invalid.json"
+        test_file.write_text("not valid json {{{")
+
+        main_window._modified = False
+
+        with patch("PySide6.QtWidgets.QFileDialog.getOpenFileName", return_value=(str(test_file), "")):
+            with patch.object(QMessageBox, "critical") as mock_critical:
+                main_window._open_workflow()
+
+        mock_critical.assert_called_once()
+        # Current file should not be set on error
+        assert main_window._current_file is None
+
+    def test_open_workflow_updates_title(self, main_window, tmp_path):
+        """Test that open workflow updates window title."""
+        # Create a test workflow file
+        test_file = tmp_path / "my_workflow.json"
+        workflow = Workflow(name="My Workflow")
+        workflow.save_to_file(str(test_file))
+
+        main_window._modified = False
+
+        with patch("PySide6.QtWidgets.QFileDialog.getOpenFileName", return_value=(str(test_file), "")):
+            main_window._open_workflow()
+
+        assert "my_workflow.json" in main_window.windowTitle()
+
+    def test_open_workflow_proceeds_after_save(self, main_window, tmp_path):
+        """Test that open workflow proceeds after successful save."""
+        main_window._modified = True
+
+        # Create a test workflow file
+        test_file = tmp_path / "new_workflow.json"
+        workflow = Workflow(name="New Workflow")
+        workflow.save_to_file(str(test_file))
+
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.Save):
+            with patch.object(main_window, "_save_workflow", return_value=True):
+                with patch("PySide6.QtWidgets.QFileDialog.getOpenFileName", return_value=(str(test_file), "")):
+                    main_window._open_workflow()
+
+        assert main_window._current_file == str(test_file)
+
 
 class TestSaveWorkflow:
     """Tests for _save_workflow method."""
