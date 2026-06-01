@@ -37,12 +37,10 @@ class TestMainModule:
 
     def test_main_function_sets_high_dpi_policy(self, app):
         """Test that main sets high DPI scaling policy."""
-        from autora_gui.desktop_app.main import main
-
+        # Use app fixture to ensure QApplication exists
+        assert app is not None
         # Verify the policy can be set (already done by app setup)
-        QApplication.setHighDpiScaleFactorRoundingPolicy(
-            Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
-        )
+        QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
         # No exception means success
 
     def test_main_function_with_mocked_exec(self):
@@ -50,28 +48,30 @@ class TestMainModule:
         from autora_gui.desktop_app import main as main_module
 
         # We need to mock sys.exit and app.exec to prevent actual exit
-        with patch.object(main_module.sys, "exit") as mock_exit:
-            with patch.object(main_module, "QApplication") as MockQApp:
-                mock_app_instance = MagicMock()
-                mock_app_instance.exec.return_value = 0
-                MockQApp.return_value = mock_app_instance
+        with (
+            patch.object(main_module.sys, "exit"),
+            patch.object(main_module, "QApplication") as mock_qapp,
+            patch.object(main_module, "MainWindow") as mock_main_window,
+        ):
+            mock_app_instance = MagicMock()
+            mock_app_instance.exec.return_value = 0
+            mock_qapp.return_value = mock_app_instance
 
-                with patch.object(main_module, "MainWindow") as MockMainWindow:
-                    mock_window = MagicMock()
-                    MockMainWindow.return_value = mock_window
+            mock_window = MagicMock()
+            mock_main_window.return_value = mock_window
 
-                    main_module.main()
+            main_module.main()
 
-                    # Verify app was configured
-                    mock_app_instance.setApplicationName.assert_called_once_with("AutoRA Workflow Editor")
-                    mock_app_instance.setOrganizationName.assert_called_once_with("AutoRA")
-                    mock_app_instance.setStyle.assert_called_once_with("Fusion")
+            # Verify app was configured
+            mock_app_instance.setApplicationName.assert_called_once_with("AutoRA Workflow Editor")
+            mock_app_instance.setOrganizationName.assert_called_once_with("AutoRA")
+            mock_app_instance.setStyle.assert_called_once_with("Fusion")
 
-                    # Verify window was shown
-                    mock_window.show.assert_called_once()
+            # Verify window was shown
+            mock_window.show.assert_called_once()
 
-                    # Verify app.exec was called
-                    mock_app_instance.exec.assert_called_once()
+            # Verify app.exec was called
+            mock_app_instance.exec.assert_called_once()
 
 
 class TestMainFunction:
@@ -79,10 +79,12 @@ class TestMainFunction:
 
     def test_application_exists(self, app):
         """Test that a QApplication instance exists."""
+        assert app is not None
         assert QApplication.instance() is not None
 
     def test_application_is_qapplication(self, app):
         """Test that the application is a QApplication instance."""
+        assert app is not None
         assert isinstance(QApplication.instance(), QApplication)
 
 
@@ -112,6 +114,7 @@ class TestApplicationStyle:
 
     def test_fusion_style_exists(self, app):
         """Test that Fusion style is available."""
+        assert app is not None
         styles = QApplication.style()
         assert styles is not None
 
@@ -145,6 +148,7 @@ class TestMainWindowCreation:
 
     def test_main_window_can_be_created(self, app):
         """Test that MainWindow can be instantiated."""
+        assert app is not None
         window = MainWindow()
         assert window is not None
         assert isinstance(window, MainWindow)
@@ -153,17 +157,20 @@ class TestMainWindowCreation:
         """Test that MainWindow inherits from QMainWindow."""
         from PySide6.QtWidgets import QMainWindow
 
+        assert app is not None
         window = MainWindow()
         assert isinstance(window, QMainWindow)
 
     def test_main_window_has_correct_title(self, app):
         """Test that MainWindow has correct window title."""
+        assert app is not None
         window = MainWindow()
         # Title should contain "AutoRA Workflow Editor"
         assert "AutoRA Workflow Editor" in window.windowTitle()
 
     def test_main_window_can_be_shown(self, app):
         """Test that MainWindow can be shown."""
+        assert app is not None
         window = MainWindow()
         window.show()
         assert window.isVisible()
@@ -171,6 +178,7 @@ class TestMainWindowCreation:
 
     def test_main_window_can_be_hidden(self, app):
         """Test that MainWindow can be hidden."""
+        assert app is not None
         window = MainWindow()
         window.show()
         window.hide()

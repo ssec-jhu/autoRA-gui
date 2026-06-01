@@ -335,7 +335,6 @@ class TestNewWorkflow:
         """Test that new workflow is cancelled when save fails."""
         main_window._modified = True
         main_window._current_file = "/some/file.json"
-        old_workflow = main_window.canvas_scene.get_workflow()
 
         # Mock: user clicks Save, but save fails
         with patch.object(QMessageBox, "question", return_value=QMessageBox.Save):
@@ -379,7 +378,7 @@ class TestNewWorkflow:
 class TestOpenWorkflow:
     """Tests for _open_workflow method."""
 
-    def test_open_workflow_loads_file(self, main_window, tmp_path, sample_component):
+    def test_open_workflow_loads_file(self, main_window, tmp_path):
         """Test that open workflow loads a file."""
         # Create a test workflow file
         test_file = tmp_path / "test_workflow.json"
