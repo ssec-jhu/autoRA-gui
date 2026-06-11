@@ -158,7 +158,7 @@ function PropertiesPanel() {
                 {previewedComponent.inputDataType.map((input, idx) => (
                   <div key={idx} className="data-type-item">
                     <span className="data-type-name">{input.name}</span>
-                    <span className="data-type-type">{input.datatype}</span>
+                    <span className="data-type-type">{getDataType(input)}</span>
                   </div>
                 ))}
               </div>
@@ -172,7 +172,7 @@ function PropertiesPanel() {
                 {previewedComponent.outputDataType.map((output, idx) => (
                   <div key={idx} className="data-type-item">
                     <span className="data-type-name">{output.name}</span>
-                    <span className="data-type-type">{output.datatype}</span>
+                    <span className="data-type-type">{getDataType(output)}</span>
                   </div>
                 ))}
               </div>
