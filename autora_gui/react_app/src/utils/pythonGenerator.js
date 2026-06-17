@@ -4,10 +4,10 @@
  * Generates executable Python code from workflow graph state.
  */
 
-const CONTROL_NODE_TYPES = ['start_point', 'end_point', 'filter_point']
+export const CONTROL_NODE_TYPES = ['start_point', 'end_point', 'filter_point']
 
 // Python code templates
-const TEMPLATES = {
+export const TEMPLATES = {
   header: (date) => `"""
 AutoRA Workflow
 
@@ -42,7 +42,7 @@ import numpy as np`,
 /**
  * Simple code builder for cleaner Python generation
  */
-class CodeBuilder {
+export class CodeBuilder {
   constructor() {
     this.lines = []
   }
@@ -78,7 +78,7 @@ class CodeBuilder {
 /**
  * Traverse the workflow graph and return nodes in execution order
  */
-function getExecutionOrder(nodes, connections) {
+export function getExecutionOrder(nodes, connections) {
   const startNode = nodes.find(n => n.type === 'start_point')
   const endNode = nodes.find(n => n.type === 'end_point')
   const filterNodes = nodes.filter(n => n.type === 'filter_point')
@@ -167,7 +167,7 @@ function getExecutionOrder(nodes, connections) {
 /**
  * Generate a valid Python variable name from a component name
  */
-function toPythonName(name) {
+export function toPythonName(name) {
   return name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '_')
@@ -263,9 +263,23 @@ function generateExperimentalistWrapper(code, meta) {
 }
 
 /**
- * Generate Python code from workflow state
+ * Dispatch wrapper generation based on the component's protocol type.
  */
-export function generatePythonCode(state) {
+export function generateWrapper(code, meta) {
+  if (meta.protocolType === 'theorist') {
+    generateTheoristWrapper(code, meta)
+  } else if (meta.protocolType === 'experiment_runner') {
+    generateRunnerWrapper(code, meta)
+  } else {
+    generateExperimentalistWrapper(code, meta)
+  }
+}
+
+/**
+ * Collect execution order, imports and per-component metadata from the
+ * workflow state. Shared by the Python file and Jupyter notebook generators.
+ */
+export function prepareWorkflow(state) {
   const { nodes, connections, components } = state
   const allComponents = components ? Object.values(components).flat() : []
   const { mainPath, loopPath, filterInfo } = getExecutionOrder(nodes, connections)
@@ -300,12 +314,13 @@ export function generatePythonCode(state) {
     })
   })
 
-  // Build Python code
-  const code = new CodeBuilder()
+  return { mainPath, loopPath, filterInfo, imports, componentMeta }
+}
 
-  // Header and imports
-  code.multiline(TEMPLATES.header(new Date().toISOString()))
-  code.blank()
+/**
+ * Emit the import block (standard + component + data imports) into a builder.
+ */
+export function generateImports(code, imports) {
   code.multiline(TEMPLATES.standardImports)
 
   imports.forEach((names, importPath) => {
@@ -314,18 +329,25 @@ export function generatePythonCode(state) {
 
   code.blank()
   code.multiline(TEMPLATES.dataImports)
+}
+
+/**
+ * Generate Python code from workflow state
+ */
+export function generatePythonCode(state) {
+  const { mainPath, loopPath, filterInfo, imports, componentMeta } = prepareWorkflow(state)
+
+  // Build Python code
+  const code = new CodeBuilder()
+
+  // Header and imports
+  code.multiline(TEMPLATES.header(new Date().toISOString()))
+  code.blank()
+  generateImports(code, imports)
   code.blank().blank()
 
   // Generate wrapper functions
-  componentMeta.forEach((meta) => {
-    if (meta.protocolType === 'theorist') {
-      generateTheoristWrapper(code, meta)
-    } else if (meta.protocolType === 'experiment_runner') {
-      generateRunnerWrapper(code, meta)
-    } else {
-      generateExperimentalistWrapper(code, meta)
-    }
-  })
+  componentMeta.forEach((meta) => generateWrapper(code, meta))
 
   code.blank()
 
@@ -374,9 +396,9 @@ export function generatePythonCode(state) {
 }
 
 /**
- * Generate pip install commands for all required packages
+ * Collect the set of pip packages required by the workflow's components.
  */
-export function generatePipInstalls(state) {
+export function collectPipPackages(state) {
   const { nodes, components } = state
   const allComponents = components ? Object.values(components).flat() : []
   const pipPackages = new Set()
@@ -387,6 +409,15 @@ export function generatePipInstalls(state) {
     if (protocol?.pipInstall) pipPackages.add(protocol.pipInstall)
   })
 
-  if (pipPackages.size === 0) return '# No additional packages required'
-  return `pip install ${Array.from(pipPackages).join(' ')}`
+  return Array.from(pipPackages)
+}
+
+/**
+ * Generate pip install commands for all required packages
+ */
+export function generatePipInstalls(state) {
+  const pipPackages = collectPipPackages(state)
+
+  if (pipPackages.length === 0) return '# No additional packages required'
+  return `pip install ${pipPackages.join(' ')}`
 }
