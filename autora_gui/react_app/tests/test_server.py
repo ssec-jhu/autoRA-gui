@@ -17,6 +17,18 @@ from autora_gui.react_app.server import (
 client = TestClient(app)
 
 
+class TestLifespan:
+    """Tests for the lifespan startup handler."""
+
+    def test_lifespan_prints_category_counts(self, capsys):
+        """Test that startup prints one line per component category."""
+        with TestClient(app):
+            pass
+        captured = capsys.readouterr()
+        for category in ("controls", "theorists", "experimentalists", "experiment_runners"):
+            assert category in captured.out
+
+
 class TestLoadComponents:
     """Tests for the load_components function."""
 
