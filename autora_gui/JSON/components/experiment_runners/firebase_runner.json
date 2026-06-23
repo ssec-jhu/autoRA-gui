@@ -49,12 +49,10 @@
   },
   "inputDataType": [
     {
-      "name": "conditions",
-      "description": "Experimental conditions to present to participants",
       "variables": [
         {
-          "name": null,
-          "description": "Independent variable values",
+          "name": "conditions",
+          "description": "Experimental conditions to present to participants",
           "datatype": "any",
           "cardinality": {
             "minOccurs": 1,
@@ -69,12 +67,10 @@
   ],
   "outputDataType": [
     {
-      "name": "observations",
-      "description": "Participant responses collected from the experiment",
       "variables": [
         {
-          "name": null,
-          "description": "Dependent variable values",
+          "name": "observations",
+          "description": "Participant responses collected from the experiment",
           "datatype": "any",
           "cardinality": {
             "minOccurs": 1,

@@ -75,11 +75,9 @@
   },
   "inputDataType": [
     {
-      "name": "X",
-      "description": "Each column matches a symbol in the expression",
       "variable": {
-        "name": null,
-        "description": "Column of independent variable values",
+        "name": "X",
+        "description": "Each column matches a symbol in the expression",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
@@ -93,11 +91,9 @@
   ],
   "outputDataType": [
     {
-      "name": "y",
-      "description": "Computed from the expression with added Gaussian noise",
       "variable": {
-        "name": null,
-        "description": "Column of dependent variable values",
+        "name": "y",
+        "description": "Computed from the expression with added Gaussian noise",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
