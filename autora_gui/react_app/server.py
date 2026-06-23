@@ -1,5 +1,4 @@
-"""
-FastAPI backend for AutoRA Workflow Editor.
+"""FastAPI backend for AutoRA Workflow Editor.
 
 Run with: uvicorn server:app --reload --port 8000
 """
@@ -64,7 +63,7 @@ def load_components() -> dict[str, list[dict]]:
                 with open(json_file) as f:
                     component = json.load(f)
                     components[category].append(component)
-            except (json.JSONDecodeError, IOError) as e:
+            except (OSError, json.JSONDecodeError) as e:
                 print(f"Error loading {json_file}: {e}")
 
     for category in components:
@@ -126,7 +125,6 @@ class Workflow(BaseModel):
     filters: list[FilterComponent] = []
     components: list[WorkflowComponent] = []
     links: list[WorkflowLink] = []
-
 
 
 @app.get("/api/components")
