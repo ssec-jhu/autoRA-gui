@@ -75,13 +75,49 @@
   },
   "inputDataType": [
     {
-      "name": "conditions",
-      "description": "Similarity ratings to categories (A1, A2, B1, B2).",
+      "name": "similarity_category_A1",
+      "description": "Similarity rating to category A1.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
         "maxOccurs": -1,
-        "unique": true
+        "unique": false
+      },
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "similarity_category_A2",
+      "description": "Similarity rating to category A2.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": false
+      },
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "similarity_category_B1",
+      "description": "Similarity rating to category B1.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": false
+      },
+      "validValues": null,
+      "default": null
+    },
+    {
+      "name": "similarity_category_B2",
+      "description": "Similarity rating to category B2.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": false
       },
       "validValues": null,
       "default": null
@@ -89,13 +125,13 @@
   ],
   "outputDataType": [
     {
-      "name": "observations",
+      "name": "choose_A1",
       "description": "Probability of selecting category A1.",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
         "maxOccurs": -1,
-        "unique": true
+        "unique": false
       },
       "validValues": null,
       "default": null

@@ -1,10 +1,10 @@
-"""
-FastAPI backend for AutoRA Workflow Editor.
+"""FastAPI backend for AutoRA Workflow Editor.
 
 Run with: uvicorn server:app --reload --port 8000
 """
 
 import json
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
@@ -12,7 +12,16 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-app = FastAPI(title="AutoRA Workflow Editor API")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    components = load_components()
+    for cat, items in components.items():
+        print(f"  {cat}: {len(items)} components")
+    yield
+
+
+app = FastAPI(title="AutoRA Workflow Editor API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -54,7 +63,7 @@ def load_components() -> dict[str, list[dict]]:
                 with open(json_file) as f:
                     component = json.load(f)
                     components[category].append(component)
-            except (json.JSONDecodeError, IOError) as e:
+            except (OSError, json.JSONDecodeError) as e:
                 print(f"Error loading {json_file}: {e}")
 
     for category in components:
@@ -116,13 +125,6 @@ class Workflow(BaseModel):
     filters: list[FilterComponent] = []
     components: list[WorkflowComponent] = []
     links: list[WorkflowLink] = []
-
-
-@app.on_event("startup")
-def startup_event():
-    components = load_components()
-    for cat, items in components.items():
-        print(f"  {cat}: {len(items)} components")
 
 
 @app.get("/api/components")
