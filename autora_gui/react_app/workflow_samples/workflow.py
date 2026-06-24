@@ -9,8 +9,9 @@ Generated on: 2026-05-09T21:40:33.064Z
 
 import numpy as np
 import pandas as pd
-from autora.experiment_runner.synthetic.economics.expected_value_theory import expected_value_theory as expected_value_theory_runner
-from autora.experimentalist.random import sample
+from autora.experiment_runner.synthetic.economics.expected_value_theory import expected_value_theory
+from autora.experimentalist.bandit_random import bandit_random_pool
+from autora.experimentalist.random import random_sample
 from autora.state import Delta, StandardState, estimator_on_state, on_state
 from autora.theorist.bsr.regressor import BSRRegressor
 from autora.variable import Variable, VariableCollection
