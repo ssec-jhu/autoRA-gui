@@ -3,7 +3,7 @@
   "protocolType": "experimentalist",
   "name": "Random Sampler",
   "description": "Randomly selects a subset of experimental conditions from a given pool.",
-  "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/random.py#L186",
+  "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/random.py#L137",
   "pythonName": "random_sample",
   "importPath": "autora.experimentalist.random",
   "pipInstall": "autora-experimentalist-random==1.0.0",
@@ -49,11 +49,9 @@
   },
   "inputDataType": [
     {
-      "name": "conditions",
-      "description": "Pool of experimental conditions to sample from.",
-      "variables": {
-        "name": null,
-        "description": "Column of independent variable values",
+      "variable": {
+        "name": "conditions",
+        "description": "Pool of experimental conditions to sample from.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
@@ -67,11 +65,9 @@
   ],
   "outputDataType": [
     {
-      "name": "conditions_",
-      "description": "Randomly selected subset of experimental conditions.",
-      "variables": {
-        "name": null,
-        "description": "Column of dependent variable values",
+      "variable": {
+        "name": "conditions_",
+        "description": "Randomly selected subset of experimental conditions.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,

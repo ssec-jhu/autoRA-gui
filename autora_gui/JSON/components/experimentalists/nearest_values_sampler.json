@@ -3,7 +3,7 @@
   "protocolType": "experimentalist",
   "name": "Nearest Values Sampler",
   "description": "Returns the nearest values between input samples and reference conditions using Euclidean distance.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-nearest-value/blob/main/src/autora/experimentalist/nearest_value/__init__.py#L66",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-nearest-value/blob/main/src/autora/experimentalist/nearest_value/__init__.py#L9",
   "pythonName": "nearest_values_sampler",
   "importPath": "autora.experimentalist.nearest_value",
   "pipInstall": "autora-experimentalist-nearest_value==1.0.0",
@@ -25,11 +25,9 @@
   },
   "inputDataType": [
     {
-      "name": "conditions",
-      "description": "Pool of candidate experimental condition samples to select from.",
-      "variables": {
-        "name": null,
-        "description": "Column of independent variable values",
+      "variable": {
+        "name": "conditions",
+        "description": "Pool of candidate experimental condition samples to select from.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
@@ -41,11 +39,9 @@
       }
     },
     {
-      "name": "reference_conditions",
-      "description": "Reference conditions used as distance reference points for finding nearest values.",
-      "variables": {
-        "name": null,
-        "description": "Column of independent variable values",
+      "variable": {
+        "name": "reference_conditions",
+        "description": "Reference conditions used as distance reference points for finding nearest values.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
@@ -59,11 +55,9 @@
   ],
   "outputDataType": [
     {
-      "name": "x_new",
-      "description": "Selected nearest experimental conditions.",
-      "variables": {
-        "name": null,
-        "description": "Column of dependent variable values",
+      "variable": {
+        "name": "x_new",
+        "description": "Selected nearest experimental conditions.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,

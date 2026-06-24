@@ -3,7 +3,7 @@
   "protocolType": "experimentalist",
   "name": "Falsification Pooler",
   "description": "Selects experimental conditions most likely to falsify the current model by identifying regions where the model predictions may deviate from ground truth.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L447",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L22",
   "pythonName": "falsification_pooler",
   "importPath": "autora.experimentalist.falsification",
   "pipInstall": "autora-experimentalist-falsification==1.0.0",
@@ -133,11 +133,9 @@
       "default": null
     },
     {
-      "name": "reference_conditions",
-      "description": "Training conditions for the model.",
-      "variables": {
-        "name": null,
-        "description": "Column of independent variable values",
+      "variable": {
+        "name": "reference_conditions",
+        "description": "Training conditions for the model.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
@@ -149,11 +147,9 @@
       }
     },
     {
-      "name": "reference_observations",
-      "description": "Training observations for the model.",
-      "variables": {
-        "name": null,
-        "description": "Column of independent variable values",
+      "variable": {
+        "name": "reference_observations",
+        "description": "Training observations for the model.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
@@ -167,11 +163,9 @@
   ],
   "outputDataType": [
     {
-      "name": "new_conditions",
-      "description": "DataFrame of conditions with highest falsification potential.",
-      "variables": {
-        "name": null,
-        "description": "Column of dependent variable values",
+      "variable": {
+        "name": "new_conditions",
+        "description": "DataFrame of conditions with highest falsification potential.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,

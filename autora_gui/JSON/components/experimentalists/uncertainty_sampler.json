@@ -3,7 +3,7 @@
   "protocolType": "experimentalist",
   "name": "Uncertainty Sampler",
   "description": "Selects experimental conditions where the model has highest prediction uncertainty, enabling active learning to improve model performance.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-uncertainty/blob/main/src/autora/experimentalist/uncertainty/__init__.py#L77",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-uncertainty/blob/main/src/autora/experimentalist/uncertainty/__init__.py#L10",
   "pythonName": "uncertainty_sampler",
   "importPath": "autora.experimentalist.uncertainty",
   "pipInstall": "autora-experimentalist-uncertainty==1.0.0",
@@ -41,11 +41,9 @@
   },
   "inputDataType": [
     {
-      "name": "conditions",
-      "description": "Pool of candidate experimental conditions to evaluate.",
-      "variables": {
-        "name": null,
-        "description": "Column of independent variable values",
+      "variable": {
+        "name": "conditions",
+        "description": "Pool of candidate experimental conditions to evaluate.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
@@ -71,11 +69,9 @@
   ],
   "outputDataType": [
     {
-      "name": "new_conditions",
-      "description": "Selected high-uncertainty experimental conditions.",
-      "variables": {
-        "name": null,
-        "description": "Column of independent variable values",
+      "variable": {
+        "name": "conditions",
+        "description": "Selected high-uncertainty experimental conditions.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,

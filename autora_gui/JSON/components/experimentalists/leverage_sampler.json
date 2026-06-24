@@ -3,7 +3,7 @@
   "protocolType": "experimentalist",
   "name": "Leverage Sampler",
   "description": "Identifies influential datapoints by iteratively refitting models using leave-one-out validation. Computes how much each point affects model performance and selects candidates based on their influence.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-leverage/blob/main/src/autora/experimentalist/leverage/__init__.py#L148",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-leverage/blob/main/src/autora/experimentalist/leverage/__init__.py#L8",
   "pythonName": "leverage_sample",
   "importPath": "autora.experimentalist.leverage",
   "pipInstall": "autora-experimentalist-leverage==1.0.0",
@@ -65,11 +65,9 @@
   },
   "inputDataType": [
     {
-      "name": "conditions",
-      "description": "Pool of candidate experimental conditions (independent variables).",
-      "variables": {
-        "name": null,
-        "description": "Column of independent variable values",
+      "variable": {
+        "name": "conditions",
+        "description": "Pool of candidate experimental conditions (independent variables).",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
@@ -81,11 +79,9 @@
       }
     },
     {
-      "name": "Y",
-      "description": "Pool of dependent variables corresponding to the conditions.",
-      "variables": {
-        "name": null,
-        "description": "Column of independent variable values",
+      "variable": {
+        "name": "Y",
+        "description": "Pool of dependent variables corresponding to the conditions.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
@@ -111,11 +107,9 @@
   ],
   "outputDataType": [
     {
-      "name": "new_conditions",
-      "description": "Selected influential experimental conditions with added Gaussian noise.",
-      "variables": {
-        "name": null,
-        "description": "Column of dependent variable values",
+      "variable": {
+        "name": "new_conditions",
+        "description": "Selected influential experimental conditions with added Gaussian noise.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,

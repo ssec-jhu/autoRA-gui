@@ -3,7 +3,7 @@
   "protocolType": "experimentalist",
   "name": "Mixture Sampler",
   "description": "Implements ensemble sampling across multiple ranking functions. Aggregates scores from various samplers using weighted mixture logic, adjusts probabilities via temperature scaling, then selects conditions proportionally to their adjusted scores.",
-  "githubCommit": "https://github.com/blinodelka/mixture_experimental_strategies/blob/main/src/autora/experimentalist/mixture/__init__.py#L91",
+  "githubCommit": "https://github.com/blinodelka/mixture_experimental_strategies/blob/main/src/autora/experimentalist/mixture/__init__.py#L24",
   "pythonName": "mixture_sample",
   "importPath": "autora.experimentalist.mixture",
   "pipInstall": "experimentalist-sampler-mixture==1.0.0",
@@ -69,11 +69,9 @@
   },
   "inputDataType": [
     {
-      "name": "conditions",
-      "description": "Pool of candidate experimental conditions to evaluate and sample from.",
-      "variables": {
-        "name": null,
-        "description": "Column of independent variable values",
+      "variable": {
+        "name": "conditions",
+        "description": "Pool of candidate experimental conditions to evaluate and sample from.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
@@ -87,11 +85,9 @@
   ],
   "outputDataType": [
     {
-      "name": "conditions_",
-      "description": "Selected experimental conditions with attached scores from the mixture sampling.",
-      "variables": {
-        "name": null,
-        "description": "Column of dependent variable values",
+      "variable": {
+        "name": "conditions_",
+        "description": "Selected experimental conditions with attached scores from the mixture sampling.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,

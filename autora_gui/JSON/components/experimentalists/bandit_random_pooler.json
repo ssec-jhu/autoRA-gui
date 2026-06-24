@@ -3,7 +3,7 @@
   "protocolType": "experimentalist",
   "name": "Bandit Random Pooler",
   "description": "Generates binary reward sequences for multi-armed bandit tasks. Creates sequences based on underlying probability distributions with optional drift dynamics.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-bandit-random/blob/main/src/autora/experimentalist/bandit_random/__init__.py#L215",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-bandit-random/blob/main/src/autora/experimentalist/bandit_random/__init__.py#L137",
   "pythonName": "bandit_random_pool",
   "importPath": "autora.experimentalist.bandit_random",
   "pipInstall": "autora-experimentalist-bandit-random==1.0.0",
@@ -86,26 +86,18 @@
   "inputDataType": [],
   "outputDataType": [
     {
-      "name": "probability_sequence_lst",
-      "description": "Generated binary reward sequences for bandit tasks.",
       "variable": {
-        "name": null,
-        "description": "Column of dependent variable values",
         "variable": {
-          "name": null,
-          "description": "Column of dependent variable values",
-          "variable": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
+          "name": "list_of_rewards",
+          "description": "Generated binary reward sequences for bandit tasks.",
+          "datatype": "real",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
         }
       }
     }

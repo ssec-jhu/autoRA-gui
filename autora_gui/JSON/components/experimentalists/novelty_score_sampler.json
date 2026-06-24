@@ -3,7 +3,7 @@
   "protocolType": "experimentalist",
   "name": "Novelty Score Sampler",
   "description": "Selects experimental conditions based on dissimilarity to reference conditions and returns both the conditions and their dissimilarity scores.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L149",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L81",
   "pythonName": "novelty_score_sampler",
   "importPath": "autora.experimentalist.novelty",
   "pipInstall": "autora-experimentalist-novelty==1.0.0",
@@ -62,11 +62,9 @@
   },
   "inputDataType": [
     {
-      "name": "conditions",
-      "description": "Pool of candidate experimental conditions to evaluate.",
-      "variables": {
-        "name": null,
-        "description": "Column of independent variable values",
+      "variable": {
+        "name": "conditions",
+        "description": "Pool of candidate experimental conditions to evaluate.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
@@ -78,11 +76,9 @@
       }
     },
     {
-      "name": "reference_conditions",
-      "description": "Existing experimental conditions to compare against.",
-      "variables": {
-        "name": null,
-        "description": "Column of independent variable values",
+      "variable": {
+        "name": "reference_conditions",
+        "description": "Existing experimental conditions to compare against.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
@@ -96,11 +92,9 @@
   ],
   "outputDataType": [
     {
-      "name": "conditions",
-      "description": "Selected experimental conditions with dissimilarity scores column included.",
-      "variables": {
-        "name": null,
-        "description": "Column of dependent variable values",
+      "variable": {
+        "name": "conditions",
+        "description": "Selected experimental conditions with dissimilarity scores column included",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,

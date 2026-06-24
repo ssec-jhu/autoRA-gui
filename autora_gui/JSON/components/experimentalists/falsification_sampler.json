@@ -3,7 +3,7 @@
   "protocolType": "experimentalist",
   "name": "Falsification Sampler",
   "description": "Selects experimental conditions that are most likely to falsify the current model by maximizing predicted model error.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L451",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L194",
   "pythonName": "falsification_sample",
   "importPath": "autora.experimentalist.falsification",
   "pipInstall": "autora-experimentalist-falsification==1.0.0",
@@ -73,11 +73,9 @@
   },
   "inputDataType": [
     {
-      "name": "conditions",
-      "description": "Pool of candidate experimental conditions to evaluate.",
-      "variables": {
-        "name": null,
-        "description": "Column of independent variable values",
+      "variable": {
+        "name": "conditions",
+        "description": "Pool of candidate experimental conditions to evaluate.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
@@ -101,11 +99,9 @@
       "default": null
     },
     {
-      "name": "reference_conditions",
+      "variable": {
+        "name": "reference_conditions",
       "description": "Experimental conditions the model was trained on.",
-      "variables": {
-        "name": null,
-        "description": "Column of independent variable values",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
@@ -117,11 +113,9 @@
       }
     },
     {
-      "name": "reference_observations",
-      "description": "Observations the model was trained to predict.",
-      "variables": {
-        "name": null,
-        "description": "Column of independent variable values",
+      "variable": {
+        "name": "reference_observations",
+        "description": "Observations the model was trained to predict.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
@@ -135,11 +129,9 @@
   ],
   "outputDataType": [
     {
-      "name": "new_conditions",
-      "description": "Selected conditions with highest predicted model error.",
-      "variables": {
-        "name": null,
-        "description": "Column of dependent variable values",
+      "variable": {
+        "name": "new_conditions",
+        "description": "Selected conditions with highest predicted model error.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
