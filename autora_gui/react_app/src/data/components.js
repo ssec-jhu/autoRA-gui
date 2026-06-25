@@ -2302,12 +2302,10 @@ export const EMBEDDED_COMPONENTS = {
       },
       "inputDataType": [
         {
-          "name": "conditions",
-          "description": "Experimental conditions to present to participants.",
           "variables": [
             {
-              "name": null,
-              "description": "Independent variable values",
+              "name": "conditions",
+              "description": "Experimental conditions to present to participants.",
               "datatype": "any",
               "cardinality": {
                 "minOccurs": 1,
@@ -2322,12 +2320,10 @@ export const EMBEDDED_COMPONENTS = {
       ],
       "outputDataType": [
         {
-          "name": "observations",
-          "description": "Participant responses collected from the experiment.",
           "variables": [
             {
-              "name": null,
-              "description": "Dependent variable values",
+              "name": "observations",
+              "description": "Participant responses collected from the experiment.",
               "datatype": "any",
               "cardinality": {
                 "minOccurs": 1,
@@ -2393,12 +2389,10 @@ export const EMBEDDED_COMPONENTS = {
       },
       "inputDataType": [
         {
-          "name": "conditions",
-          "description": "Experimental conditions to present to participants",
           "variables": [
             {
-              "name": null,
-              "description": "Independent variable values",
+              "name": "conditions",
+              "description": "Experimental conditions to present to participants",
               "datatype": "any",
               "cardinality": {
                 "minOccurs": 1,
@@ -2413,12 +2407,10 @@ export const EMBEDDED_COMPONENTS = {
       ],
       "outputDataType": [
         {
-          "name": "observations",
-          "description": "Participant responses collected from the experiment",
           "variables": [
             {
-              "name": null,
-              "description": "Dependent variable values",
+              "name": "observations",
+              "description": "Participant responses collected from the experiment",
               "datatype": "any",
               "cardinality": {
                 "minOccurs": 1,
@@ -2510,11 +2502,9 @@ export const EMBEDDED_COMPONENTS = {
       },
       "inputDataType": [
         {
-          "name": "X",
-          "description": "Each column matches a symbol in the expression",
           "variable": {
-            "name": null,
-            "description": "Column of independent variable values",
+            "name": "X",
+            "description": "Each column matches a symbol in the expression",
             "datatype": "real",
             "cardinality": {
               "minOccurs": 1,
@@ -2528,11 +2518,9 @@ export const EMBEDDED_COMPONENTS = {
       ],
       "outputDataType": [
         {
-          "name": "y",
-          "description": "Computed from the expression with added Gaussian noise",
           "variable": {
-            "name": null,
-            "description": "Column of dependent variable values",
+            "name": "y",
+            "description": "Computed from the expression with added Gaussian noise",
             "datatype": "real",
             "cardinality": {
               "minOccurs": 1,
@@ -2609,11 +2597,9 @@ export const EMBEDDED_COMPONENTS = {
       },
       "inputDataType": [
         {
-          "name": "X",
-          "description": "Column names determined by formula",
           "variable": {
-            "name": null,
-            "description": "Column of independent variable values",
+            "name": "X",
+            "description": "Column names determined by formula",
             "datatype": "any",
             "cardinality": {
               "minOccurs": 1,
@@ -2627,11 +2613,9 @@ export const EMBEDDED_COMPONENTS = {
       ],
       "outputDataType": [
         {
-          "name": "y",
-          "description": "Determined by formula",
           "variable": {
-            "name": null,
-            "description": "Column of dependent variable values",
+            "name": "y",
+            "description": "Determined by formula",
             "datatype": "real",
             "cardinality": {
               "minOccurs": 1,
@@ -3586,30 +3570,34 @@ export const EMBEDDED_COMPONENTS = {
       },
       "inputDataType": [
         {
-          "name": "reward array",
-          "description": "Reward sequence provided as input for each trial.",
-          "datatype": "boolean",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
+          "variable": {
+            "name": "reward_array",
+            "description": "Reward sequence provided as input for each trial.",
+            "datatype": "boolean",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
         }
       ],
       "outputDataType": [
         {
-          "name": "choice array",
-          "description": "Action sequence generated by the Q-learning agent.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
+          "variable": {
+            "name": "choice_array",
+            "description": "Action sequence generated by the Q-learning agent.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
         }
       ],
       "file": "synth_psychol_q_learning.json"
