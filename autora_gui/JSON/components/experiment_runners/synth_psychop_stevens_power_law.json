@@ -87,13 +87,13 @@
   },
   "inputDataType": [
     {
-      "name": "conditions",
-      "description": "Physical stimulus intensity values.",
+      "name": "S",
+      "description": "Stimulus intensity",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
         "maxOccurs": -1,
-        "unique": true
+        "unique": false
       },
       "validValues": null,
       "default": null
@@ -101,13 +101,13 @@
   ],
   "outputDataType": [
     {
-      "name": "observations",
-      "description": "Perceived stimulus intensity.",
+      "name": "perceived_intensity",
+      "description": "Perceived intensity",
       "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
         "maxOccurs": -1,
-        "unique": true
+        "unique": false
       },
       "validValues": null,
       "default": null

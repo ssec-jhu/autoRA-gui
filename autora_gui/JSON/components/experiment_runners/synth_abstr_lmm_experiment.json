@@ -61,30 +61,34 @@
   },
   "inputDataType": [
     {
-      "name": "conditions",
-      "description": "Experimental conditions specifying independent variable values.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
+      "variable": {
+        "name": "X",
+        "description": "Column names determined by formula",
+        "datatype": "any",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
     }
   ],
   "outputDataType": [
     {
-      "name": "observations",
-      "description": "Simulated dependent variable values from the linear mixed model.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
+      "variable": {
+        "name": "y",
+        "description": "Determined by formula",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
     }
   ]
 }

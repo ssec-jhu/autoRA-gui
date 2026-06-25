@@ -3,7 +3,7 @@
   "protocolType": "experiment_runner",
   "name": "Firebase Prolific Runner",
   "description": "Experiment runner for conducting human behavioral experiments with participant recruitment via Prolific and experiment hosting on Firebase.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/main/src/autora/experiment_runner/firebase_prolific/__init__.py#L205",
+  "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/main/src/autora/experiment_runner/firebase_prolific/__init__.py#L267",
   "pythonName": "firebase_prolific_runner",
   "importPath": "autora.experiment_runner.firebase_prolific",
   "pipInstall": "autora-experiment-runner-firebase-prolific==1.0.0",
@@ -31,7 +31,7 @@
           "unique": true
         },
         "validValues": null,
-        "default": null
+        "default": 30
       },
       {
         "name": "study_name",
@@ -135,30 +135,38 @@
   },
   "inputDataType": [
     {
-      "name": "conditions",
-      "description": "Experimental conditions to present to participants.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
+      "variables": [
+        {
+          "name": "conditions",
+          "description": "Experimental conditions to present to participants.",
+          "datatype": "any",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
+        }
+      ]
     }
   ],
   "outputDataType": [
     {
-      "name": "observations",
-      "description": "Participant responses collected from the experiment.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
+      "variables": [
+        {
+          "name": "observations",
+          "description": "Participant responses collected from the experiment.",
+          "datatype": "any",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
+        }
+      ]
     }
   ]
 }
