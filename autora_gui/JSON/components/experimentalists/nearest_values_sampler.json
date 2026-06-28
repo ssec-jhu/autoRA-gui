@@ -23,44 +23,44 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "name": "conditions",
-      "description": "Pool of candidate experimental condition samples to select from.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
+  "inputDataType": {
+    "variables": [
+      {
+        "name": "conditions",
+        "description": "Pool of candidate experimental condition samples to select from.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
+      {
+        "name": "reference_conditions",
+        "description": "Reference conditions used as distance reference points for finding nearest values.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
+  "outputDataType": {
+    "name": "conditions",
+    "description": "Selected nearest experimental conditions.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": true
     },
-    {
-      "name": "reference_conditions",
-      "description": "Reference conditions used as distance reference points for finding nearest values.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
-  "outputDataType": [
-    {
-      "name": "conditions",
-      "description": "Selected nearest experimental conditions.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ]
+    "validValues": null,
+    "default": null
+  }
 }
