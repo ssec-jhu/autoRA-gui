@@ -15,7 +15,8 @@ Non-Standard Workflow Components:
 
 import pandas as pd
 from autora.experiment_runner.synthetic.economics.expected_value_theory import expected_value_theory
-from autora.experimentalist.random import pool, sample
+from autora.experimentalist.bandit_random import pool as bandit_random_pool
+from autora.experimentalist.random import sample as random_sample
 from autora.state import Delta, StandardState, estimator_on_state, on_state
 from autora.theorist.bms.regressor import BMSRegressor
 from autora.variable import VariableCollection
@@ -23,12 +24,12 @@ from autora.variable import VariableCollection
 
 @on_state()
 def pool_on_state(variables: VariableCollection) -> Delta:
-    return Delta(conditions=pool(variables, 10_000))  # <- add parameters here
+    return Delta(conditions=bandit_random_pool(variables, 10_000))  # <- add parameters here
 
 
 @on_state()
 def sample_on_state(conditions: pd.DataFrame, num_samples: int = 1) -> Delta:
-    return Delta(conditions=sample(conditions=conditions, num_samples=num_samples))  # <- add parameters here
+    return Delta(conditions=random_sample(conditions=conditions, num_samples=num_samples))  # <- add parameters here
 
 
 @on_state()
