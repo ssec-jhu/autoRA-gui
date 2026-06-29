@@ -59,36 +59,32 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "variable": {
-        "name": "X",
-        "description": "Column names determined by formula",
-        "datatype": "any",
-        "cardinality": {
-          "minOccurs": 1,
-          "maxOccurs": -1,
-          "unique": false
-        },
-        "validValues": null,
-        "default": null
-      }
+  "inputDataType": {
+    "variable": {
+      "name": "X",
+      "description": "Column names determined by formula",
+      "datatype": "any",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": false
+      },
+      "validValues": null,
+      "default": null
     }
-  ],
-  "outputDataType": [
-    {
-      "variable": {
-        "name": "y",
-        "description": "Determined by formula",
-        "datatype": "real",
-        "cardinality": {
-          "minOccurs": 1,
-          "maxOccurs": -1,
-          "unique": false
-        },
-        "validValues": null,
-        "default": null
-      }
+  },
+  "outputDataType": {
+    "variable": {
+      "name": "y",
+      "description": "Determined by formula",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": false
+      },
+      "validValues": null,
+      "default": null
     }
-  ]
+  }
 }
