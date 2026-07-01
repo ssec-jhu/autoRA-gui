@@ -23,9 +23,9 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "variable": {
+  "inputDataType": {
+    "variables": [
+      {
         "name": "conditions",
         "description": "Pool of candidate experimental conditions to evaluate.",
         "datatype": "real",
@@ -36,35 +36,31 @@
         },
         "validValues": null,
         "default": null
-      }
-    },
-    {
-      "name": "models",
-      "description": "List of trained sklearn models to compare predictions.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 2,
-        "maxOccurs": -1,
-        "unique": true
       },
-      "validValues": null,
-      "default": null
-    }
-  ],
-  "outputDataType": [
-    {
-      "variable": {
-        "name": "selected_conditions",
-        "description": "Column of independent variable values",
-        "datatype": "real",
+      {
+        "name": "models",
+        "description": "List of trained sklearn models to compare predictions.",
+        "datatype": "string",
         "cardinality": {
-          "minOccurs": 1,
+          "minOccurs": 2,
           "maxOccurs": -1,
-          "unique": false
+          "unique": true
         },
         "validValues": null,
         "default": null
       }
-    }
-  ]
+    ]
+  },
+  "outputDataType": {
+    "name": "conditions",
+    "description": "Selected conditions with highest model disagreement.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  }
 }

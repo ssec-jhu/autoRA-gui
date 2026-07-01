@@ -35,36 +35,28 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "variable": {
-        "name": "ivs",
-        "description": "Variable collection with minimum and maximum values for each independent variable.",
-        "datatype": "real",
-        "cardinality": {
-          "minOccurs": 1,
-          "maxOccurs": -1,
-          "unique": false
-        },
-        "validValues": null,
-        "default": null
-      }
-    }
-  ],
-  "outputDataType": [
-    {
-      "variable": {
-        "name": "res",
-        "description": "DataFrame of experimental conditions sampled using Latin Hypercube design.",
-        "datatype": "real",
-        "cardinality": {
-          "minOccurs": 1,
-          "maxOccurs": -1,
-          "unique": false
-        },
-        "validValues": null,
-        "default": null
-      }
-    }
-  ]
+  "inputDataType": {
+    "name": "ivs",
+    "description": "Variable collection with minimum and maximum values for each independent variable.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  },
+  "outputDataType": {
+    "name": "res",
+    "description": "DataFrame of experimental conditions sampled using Latin Hypercube design.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  }
 }

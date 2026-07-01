@@ -57,9 +57,9 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "variable": {
+  "inputDataType": {
+    "variables": [
+      {
         "name": "conditions",
         "description": "Pool of candidate experimental conditions to evaluate.",
         "datatype": "real",
@@ -70,10 +70,8 @@
         },
         "validValues": null,
         "default": null
-      }
-    },
-    {
-      "variable": {
+      },
+      {
         "name": "reference_conditions",
         "description": "Reference pool of existing experimental conditions to compare against.",
         "datatype": "real",
@@ -85,22 +83,18 @@
         "validValues": null,
         "default": null
       }
-    }
-  ],
-  "outputDataType": [
-    {
-      "variable": {
-        "name": "conditions",
-        "description": "Selected experimental conditions with highest inequality scores.",
-        "datatype": "real",
-        "cardinality": {
-          "minOccurs": 1,
-          "maxOccurs": -1,
-          "unique": false
-        },
-        "validValues": null,
-        "default": null
-      }
-    }
-  ]
+    ]
+  },
+  "outputDataType": {
+    "name": "conditions",
+    "description": "Selected experimental conditions with highest inequality scores.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  }
 }

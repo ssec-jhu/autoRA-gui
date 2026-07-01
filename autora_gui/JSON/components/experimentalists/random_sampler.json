@@ -47,36 +47,28 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "variable": {
-        "name": "conditions",
-        "description": "Pool of experimental conditions to sample from.",
-        "datatype": "real",
-        "cardinality": {
-          "minOccurs": 1,
-          "maxOccurs": -1,
-          "unique": false
-        },
-        "validValues": null,
-        "default": null
-      }
-    }
-  ],
-  "outputDataType": [
-    {
-      "variable": {
-        "name": "conditions_",
-        "description": "Randomly selected subset of experimental conditions.",
-        "datatype": "real",
-        "cardinality": {
-          "minOccurs": 1,
-          "maxOccurs": -1,
-          "unique": false
-        },
-        "validValues": null,
-        "default": null
-      }
-    }
-  ]
+  "inputDataType": {
+    "name": "conditions",
+    "description": "Pool of experimental conditions to sample from.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  },
+  "outputDataType": {
+    "name": "conditions_",
+    "description": "Randomly selected subset of experimental conditions.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  }
 }

@@ -23,9 +23,9 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "variable": {
+  "inputDataType": {
+    "variables": [
+      {
         "name": "conditions",
         "description": "Pool of candidate experimental condition samples to select from.",
         "datatype": "real",
@@ -36,10 +36,8 @@
         },
         "validValues": null,
         "default": null
-      }
-    },
-    {
-      "variable": {
+      },
+      {
         "name": "reference_conditions",
         "description": "Reference conditions used as distance reference points for finding nearest values.",
         "datatype": "real",
@@ -51,22 +49,18 @@
         "validValues": null,
         "default": null
       }
-    }
-  ],
-  "outputDataType": [
-    {
-      "variable": {
-        "name": "x_new",
-        "description": "Selected nearest experimental conditions.",
-        "datatype": "real",
-        "cardinality": {
-          "minOccurs": 1,
-          "maxOccurs": -1,
-          "unique": false
-        },
-        "validValues": null,
-        "default": null
-      }
-    }
-  ]
+    ]
+  },
+  "outputDataType": {
+    "name": "conditions",
+    "description": "Selected nearest experimental conditions.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  }
 }

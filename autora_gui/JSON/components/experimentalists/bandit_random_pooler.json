@@ -83,23 +83,21 @@
       }
     ]
   },
-  "inputDataType": [],
-  "outputDataType": [
-    {
+  "inputDataType": null,
+  "outputDataType": {
+    "variable": {
       "variable": {
-        "variable": {
-          "name": "list_of_rewards",
-          "description": "Generated binary reward sequences for bandit tasks.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        }
+        "name": "list_of_rewards",
+        "description": "Generated binary reward sequences for bandit tasks.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
       }
     }
-  ]
+  }
 }

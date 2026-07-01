@@ -119,21 +119,21 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "name": "model",
-      "description": "Fitted model to attempt to falsify.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+  "inputDataType": {
+    "variables": [
+      {
+        "name": "model",
+        "description": "Fitted model to attempt to falsify.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
-    },
-    {
-      "variable": {
+      {
         "name": "reference_conditions",
         "description": "Training conditions for the model.",
         "datatype": "real",
@@ -144,10 +144,8 @@
         },
         "validValues": null,
         "default": null
-      }
-    },
-    {
-      "variable": {
+      },
+      {
         "name": "reference_observations",
         "description": "Training observations for the model.",
         "datatype": "real",
@@ -159,22 +157,20 @@
         "validValues": null,
         "default": null
       }
+    ]
+  },
+  "outputDataType": {
+    "variable": {
+      "name": "new_conditions",
+      "description": "DataFrame of conditions with highest falsification potential.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": false
+      },
+      "validValues": null,
+      "default": null
     }
-  ],
-  "outputDataType": [
-    {
-      "variable": {
-        "name": "new_conditions",
-        "description": "DataFrame of conditions with highest falsification potential.",
-        "datatype": "real",
-        "cardinality": {
-          "minOccurs": 1,
-          "maxOccurs": -1,
-          "unique": false
-        },
-        "validValues": null,
-        "default": null
-      }
-    }
-  ]
+  }
 }

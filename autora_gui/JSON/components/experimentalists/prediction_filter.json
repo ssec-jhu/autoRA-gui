@@ -23,9 +23,9 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "variable": {
+  "inputDataType": {
+    "variables": [
+      {
         "name": "conditions",
         "description": "Pool of candidate experimental conditions to filter.",
         "datatype": "real",
@@ -36,35 +36,31 @@
         },
         "validValues": null,
         "default": null
-      }
-    },
-    {
-      "name": "model",
-      "description": "Sklearn-compatible estimator with a predict method to generate predictions for filtering.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
       },
-      "validValues": null,
-      "default": null
-    }
-  ],
-  "outputDataType": [
-    {
-      "variable": {
-        "name": "conditions",
-        "description": "Filtered experimental conditions whose model predictions satisfy the filter function criteria.",
-        "datatype": "real",
+      {
+        "name": "model",
+        "description": "Sklearn-compatible estimator with a predict method to generate predictions for filtering.",
+        "datatype": "string",
         "cardinality": {
           "minOccurs": 1,
-          "maxOccurs": -1,
-          "unique": false
+          "maxOccurs": 1,
+          "unique": true
         },
         "validValues": null,
         "default": null
       }
-    }
-  ]
+    ]
+  },
+  "outputDataType": {
+    "name": "conditions",
+    "description": "Filtered experimental conditions whose model predictions satisfy the filter function criteria.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 0,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  }
 }

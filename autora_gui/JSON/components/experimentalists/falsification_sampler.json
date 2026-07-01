@@ -71,76 +71,68 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "variable": {
+  "inputDataType": {
+    "variables": [
+      {
         "name": "conditions",
         "description": "Pool of candidate experimental conditions to evaluate.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
           "maxOccurs": -1,
-          "unique": false
+          "unique": true
         },
         "validValues": null,
         "default": null
-      }
-    },
-    {
-      "name": "model",
-      "description": "Trained sklearn model to attempt to falsify.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
       },
-      "validValues": null,
-      "default": null
-    },
-    {
-      "variable": {
+      {
+        "name": "model",
+        "description": "Trained sklearn model to attempt to falsify.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
         "name": "reference_conditions",
-      "description": "Experimental conditions the model was trained on.",
+        "description": "Experimental conditions the model was trained on.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
           "maxOccurs": -1,
-          "unique": false
+          "unique": true
         },
         "validValues": null,
         "default": null
-      }
-    },
-    {
-      "variable": {
+      },
+      {
         "name": "reference_observations",
         "description": "Observations the model was trained to predict.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
           "maxOccurs": -1,
-          "unique": false
+          "unique": true
         },
         "validValues": null,
         "default": null
       }
-    }
-  ],
-  "outputDataType": [
-    {
-      "variable": {
-        "name": "new_conditions",
-        "description": "Selected conditions with highest predicted model error.",
-        "datatype": "real",
-        "cardinality": {
-          "minOccurs": 1,
-          "maxOccurs": -1,
-          "unique": false
-        },
-        "validValues": null,
-        "default": null
-      }
-    }
-  ]
+    ]
+  },
+  "outputDataType": {
+    "name": "conditions",
+    "description": "Selected conditions with highest predicted model error.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": true
+    },
+    "validValues": null,
+    "default": null
+  }
 }

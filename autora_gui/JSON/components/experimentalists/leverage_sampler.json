@@ -63,9 +63,9 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "variable": {
+  "inputDataType": {
+    "variables": [
+      {
         "name": "conditions",
         "description": "Pool of candidate experimental conditions (independent variables).",
         "datatype": "real",
@@ -76,10 +76,8 @@
         },
         "validValues": null,
         "default": null
-      }
-    },
-    {
-      "variable": {
+      },
+      {
         "name": "Y",
         "description": "Pool of dependent variables corresponding to the conditions.",
         "datatype": "real",
@@ -90,35 +88,31 @@
         },
         "validValues": null,
         "default": null
-      }
-    },
-    {
-      "name": "models",
-      "description": "Scikit-learn compatible regression or classification model(s) to evaluate leverage.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
       },
-      "validValues": null,
-      "default": null
-    }
-  ],
-  "outputDataType": [
-    {
-      "variable": {
-        "name": "new_conditions",
-        "description": "Selected influential experimental conditions with added Gaussian noise.",
-        "datatype": "real",
+      {
+        "name": "models",
+        "description": "Scikit-learn compatible regression or classification model(s) to evaluate leverage.",
+        "datatype": "string",
         "cardinality": {
           "minOccurs": 1,
           "maxOccurs": -1,
-          "unique": false
+          "unique": true
         },
         "validValues": null,
         "default": null
       }
-    }
-  ]
+    ]
+  },
+  "outputDataType": {
+    "name": "conditions",
+    "description": "Selected influential experimental conditions with added Gaussian noise.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  }
 }
