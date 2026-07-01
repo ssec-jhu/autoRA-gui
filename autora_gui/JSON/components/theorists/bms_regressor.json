@@ -49,36 +49,28 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "variable": {
-        "name": "X",
-        "description": "Input features as a 2D array.",
-        "datatype": "real",
-        "cardinality": {
-          "minOccurs": 1,
-          "maxOccurs": -1,
-          "unique": false
-        },
-        "validValues": null,
-        "default": null
-      }
-    }
-  ],
-  "outputDataType": [
-    {
-      "variable": {
-        "name": "y",
-        "description": "Predicted target values.",
-        "datatype": "real",
-        "cardinality": {
-          "minOccurs": 1,
-          "maxOccurs": -1,
-          "unique": false
-        },
-        "validValues": null,
-        "default": null
-      }
-    }
-  ]
+  "inputDataType": {
+    "name": "X",
+    "description": "Input features as a 2D array.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  },
+  "outputDataType": {
+    "name": "y",
+    "description": "Predicted target values.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  }
 }

@@ -295,20 +295,13 @@
     "inputDataType": {
       "anyOf": [
         {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/PrimitiveVariableType"
-              },
-              {
-                "$ref": "#/$defs/ListVariableType"
-              },
-              {
-                "$ref": "#/$defs/DictVariableType"
-              }
-            ]
-          },
-          "type": "array"
+          "$ref": "#/$defs/PrimitiveVariableType"
+        },
+        {
+          "$ref": "#/$defs/ListVariableType"
+        },
+        {
+          "$ref": "#/$defs/DictVariableType"
         },
         {
           "type": "null"
@@ -319,20 +312,13 @@
     "outputDataType": {
       "anyOf": [
         {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/PrimitiveVariableType"
-              },
-              {
-                "$ref": "#/$defs/ListVariableType"
-              },
-              {
-                "$ref": "#/$defs/DictVariableType"
-              }
-            ]
-          },
-          "type": "array"
+          "$ref": "#/$defs/PrimitiveVariableType"
+        },
+        {
+          "$ref": "#/$defs/ListVariableType"
+        },
+        {
+          "$ref": "#/$defs/DictVariableType"
         },
         {
           "type": "null"

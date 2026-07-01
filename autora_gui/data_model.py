@@ -93,8 +93,8 @@ class Protocol(AutoraBaseModel):
     importPath: str
     pipInstall: str
     parameters: dict[str, list[VariableTypes]] | None
-    inputDataType: list[VariableTypes] | None  # could be a bunch of allowed datatypes
-    outputDataType: list[VariableTypes] | None  # could be a bunch of allowed datatypes
+    inputDataType: VariableTypes | None  # could be a bunch of allowed datatypes
+    outputDataType: VariableTypes | None  # could be a bunch of allowed datatypes
 
 
 # Workflow classes from here

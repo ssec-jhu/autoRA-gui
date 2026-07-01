@@ -3,7 +3,7 @@
   "protocolType": "experimentalist",
   "name": "Falsification Sampler",
   "description": "Selects experimental conditions that are most likely to falsify the current model by maximizing predicted model error.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L451",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L194",
   "pythonName": "falsification_sample",
   "importPath": "autora.experimentalist.falsification",
   "pipInstall": "autora-experimentalist-falsification==1.0.0",
@@ -71,84 +71,68 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "name": "conditions",
-      "description": "Pool of candidate experimental conditions to evaluate.",
-      "variables": {
-        "name": null,
-        "description": "Column of independent variable values",
+  "inputDataType": {
+    "variables": [
+      {
+        "name": "conditions",
+        "description": "Pool of candidate experimental conditions to evaluate.",
         "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
           "maxOccurs": -1,
-          "unique": false
+          "unique": true
         },
         "validValues": null,
         "default": null
-      }
-    },
-    {
-      "name": "model",
-      "description": "Trained sklearn model to attempt to falsify.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
       },
-      "validValues": null,
-      "default": null
+      {
+        "name": "model",
+        "description": "Trained sklearn model to attempt to falsify.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "reference_conditions",
+        "description": "Experimental conditions the model was trained on.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "reference_observations",
+        "description": "Observations the model was trained to predict.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
+  "outputDataType": {
+    "name": "conditions",
+    "description": "Selected conditions with highest predicted model error.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": true
     },
-    {
-      "name": "reference_conditions",
-      "description": "Experimental conditions the model was trained on.",
-      "variables": {
-        "name": null,
-        "description": "Column of independent variable values",
-        "datatype": "real",
-        "cardinality": {
-          "minOccurs": 1,
-          "maxOccurs": -1,
-          "unique": false
-        },
-        "validValues": null,
-        "default": null
-      }
-    },
-    {
-      "name": "reference_observations",
-      "description": "Observations the model was trained to predict.",
-      "variables": {
-        "name": null,
-        "description": "Column of independent variable values",
-        "datatype": "real",
-        "cardinality": {
-          "minOccurs": 1,
-          "maxOccurs": -1,
-          "unique": false
-        },
-        "validValues": null,
-        "default": null
-      }
-    }
-  ],
-  "outputDataType": [
-    {
-      "name": "new_conditions",
-      "description": "Selected conditions with highest predicted model error.",
-      "variables": {
-        "name": null,
-        "description": "Column of dependent variable values",
-        "datatype": "real",
-        "cardinality": {
-          "minOccurs": 1,
-          "maxOccurs": -1,
-          "unique": false
-        },
-        "validValues": null,
-        "default": null
-      }
-    }
-  ]
+    "validValues": null,
+    "default": null
+  }
 }
