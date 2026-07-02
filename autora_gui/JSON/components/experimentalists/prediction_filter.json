@@ -23,44 +23,44 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "name": "conditions",
-      "description": "Pool of candidate experimental conditions to filter.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
+  "inputDataType": {
+    "variables": [
+      {
+        "name": "conditions",
+        "description": "Pool of candidate experimental conditions to filter.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
+      {
+        "name": "model",
+        "description": "Sklearn-compatible estimator with a predict method to generate predictions for filtering.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
+  "outputDataType": {
+    "name": "conditions",
+    "description": "Filtered experimental conditions whose model predictions satisfy the filter function criteria.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 0,
+      "maxOccurs": -1,
+      "unique": true
     },
-    {
-      "name": "model",
-      "description": "Sklearn-compatible estimator with a predict method to generate predictions for filtering.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
-  "outputDataType": [
-    {
-      "name": "conditions",
-      "description": "Filtered experimental conditions whose model predictions satisfy the filter function criteria.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 0,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ]
+    "validValues": null,
+    "default": null
+  }
 }

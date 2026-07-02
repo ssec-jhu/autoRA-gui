@@ -73,32 +73,44 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "name": "conditions",
-      "description": "Physical stimulus intensity values.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
+  "inputDataType": {
+    "variables": [
+      {
+        "name": "S1",
+        "description": "Stimulus 1 intensity.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
-    }
-  ],
-  "outputDataType": [
-    {
-      "name": "observations",
-      "description": "Perceived stimulus intensity.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ]
+      {
+        "name": "S2",
+        "description": "Stimulus 2 intensity.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
+  "outputDataType": {
+    "name": "difference_detected",
+    "description": "Sensation",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  }
 }

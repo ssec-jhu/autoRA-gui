@@ -97,32 +97,59 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "name": "conditions",
-      "description": "Experimental conditions specifying current task strength, alternative task strength, and is_switch.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
+  "inputDataType": {
+    "variables": [
+      {
+        "name": "current_task_strength",
+        "description": "Strength of the current task.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
-    }
-  ],
-  "outputDataType": [
-    {
-      "name": "observations",
-      "description": "Simulated current task performance accuracy.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
+      {
+        "name": "alt_task_strength",
+        "description": "Strength of the alternative task.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
-    }
-  ]
+      {
+        "name": "is_switch",
+        "description": "Binary indicator of whether a task switch occurs (0 or 1).",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": [
+          "0",
+          "1"
+        ],
+        "default": null
+      }
+    ]
+  },
+  "outputDataType": {
+    "name": "cur_task_performance",
+    "description": "Accuracy of the current task performance.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  }
 }

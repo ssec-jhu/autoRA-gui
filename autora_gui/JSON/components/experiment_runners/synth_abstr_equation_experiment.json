@@ -73,32 +73,32 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "name": "conditions",
-      "description": "List of independent variable definitions.",
-      "datatype": "string",
+  "inputDataType": {
+    "variable": {
+      "name": "X",
+      "description": "Each column matches a symbol in the expression",
+      "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+        "maxOccurs": -1,
+        "unique": false
       },
       "validValues": null,
       "default": null
     }
-  ],
-  "outputDataType": [
-    {
-      "name": "observations",
-      "description": "Dependent variable definition.",
-      "datatype": "string",
+  },
+  "outputDataType": {
+    "variable": {
+      "name": "y",
+      "description": "Computed from the expression with added Gaussian noise",
+      "datatype": "real",
       "cardinality": {
         "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
+        "maxOccurs": -1,
+        "unique": false
       },
       "validValues": null,
       "default": null
     }
-  ]
+  }
 }
