@@ -3,7 +3,7 @@
   "protocolType": "experimentalist",
   "name": "Leverage Sampler",
   "description": "Identifies influential datapoints by iteratively refitting models using leave-one-out validation. Computes how much each point affects model performance and selects candidates based on their influence.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-leverage/blob/main/src/autora/experimentalist/leverage/__init__.py#L148",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-leverage/blob/main/src/autora/experimentalist/leverage/__init__.py#L8",
   "pythonName": "leverage_sample",
   "importPath": "autora.experimentalist.leverage",
   "pipInstall": "autora-experimentalist-leverage==1.0.0",
@@ -72,7 +72,7 @@
         "cardinality": {
           "minOccurs": 1,
           "maxOccurs": -1,
-          "unique": true
+          "unique": false
         },
         "validValues": null,
         "default": null
@@ -84,7 +84,7 @@
         "cardinality": {
           "minOccurs": 1,
           "maxOccurs": -1,
-          "unique": true
+          "unique": false
         },
         "validValues": null,
         "default": null
@@ -110,7 +110,7 @@
     "cardinality": {
       "minOccurs": 1,
       "maxOccurs": -1,
-      "unique": true
+      "unique": false
     },
     "validValues": null,
     "default": null

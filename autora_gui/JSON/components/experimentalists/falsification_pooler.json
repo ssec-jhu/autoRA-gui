@@ -3,7 +3,7 @@
   "protocolType": "experimentalist",
   "name": "Falsification Pooler",
   "description": "Selects experimental conditions most likely to falsify the current model by identifying regions where the model predictions may deviate from ground truth.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L447",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L22",
   "pythonName": "falsification_pooler",
   "importPath": "autora.experimentalist.falsification",
   "pipInstall": "autora-experimentalist-falsification==1.0.0",
@@ -136,11 +136,11 @@
       {
         "name": "reference_conditions",
         "description": "Training conditions for the model.",
-        "datatype": "string",
+        "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
-          "maxOccurs": 1,
-          "unique": true
+          "maxOccurs": -1,
+          "unique": false
         },
         "validValues": null,
         "default": null
@@ -148,11 +148,11 @@
       {
         "name": "reference_observations",
         "description": "Training observations for the model.",
-        "datatype": "string",
+        "datatype": "real",
         "cardinality": {
           "minOccurs": 1,
-          "maxOccurs": 1,
-          "unique": true
+          "maxOccurs": -1,
+          "unique": false
         },
         "validValues": null,
         "default": null
@@ -160,15 +160,17 @@
     ]
   },
   "outputDataType": {
-    "name": "conditions",
-    "description": "DataFrame of conditions with highest falsification potential.",
-    "datatype": "string",
-    "cardinality": {
-      "minOccurs": 1,
-      "maxOccurs": 1,
-      "unique": true
-    },
-    "validValues": null,
-    "default": null
+    "variable": {
+      "name": "new_conditions",
+      "description": "DataFrame of conditions with highest falsification potential.",
+      "datatype": "real",
+      "cardinality": {
+        "minOccurs": 1,
+        "maxOccurs": -1,
+        "unique": false
+      },
+      "validValues": null,
+      "default": null
+    }
   }
 }

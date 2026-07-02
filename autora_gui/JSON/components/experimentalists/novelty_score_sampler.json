@@ -3,7 +3,7 @@
   "protocolType": "experimentalist",
   "name": "Novelty Score Sampler",
   "description": "Selects experimental conditions based on dissimilarity to reference conditions and returns both the conditions and their dissimilarity scores.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L148",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L81",
   "pythonName": "novelty_score_sampler",
   "importPath": "autora.experimentalist.novelty",
   "pipInstall": "autora-experimentalist-novelty==1.0.0",
@@ -69,7 +69,7 @@
         "cardinality": {
           "minOccurs": 1,
           "maxOccurs": -1,
-          "unique": true
+          "unique": false
         },
         "validValues": null,
         "default": null
@@ -81,7 +81,7 @@
         "cardinality": {
           "minOccurs": 1,
           "maxOccurs": -1,
-          "unique": true
+          "unique": false
         },
         "validValues": null,
         "default": null
@@ -95,7 +95,7 @@
     "cardinality": {
       "minOccurs": 1,
       "maxOccurs": -1,
-      "unique": true
+      "unique": false
     },
     "validValues": null,
     "default": null
