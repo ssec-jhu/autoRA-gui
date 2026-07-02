@@ -413,8 +413,8 @@ class TestProtocol:
             importPath="some.module.path",
             pipInstall="some-package",
             parameters={"__init__": [param]},
-            inputDataType=[param],
-            outputDataType=[param],
+            inputDataType=param,
+            outputDataType=param,
         )
         assert protocol.pythonName == "FullClass"
         assert protocol.githubCommit == "abc123"

@@ -59,32 +59,28 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "name": "conditions",
-      "description": "Pool of candidate experimental conditions to evaluate and sample from.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
-  "outputDataType": [
-    {
-      "name": "conditions",
-      "description": "Selected experimental conditions with attached scores from the mixture sampling.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ]
+  "inputDataType": {
+    "name": "conditions",
+    "description": "Pool of candidate experimental conditions to evaluate and sample from.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": true
+    },
+    "validValues": null,
+    "default": null
+  },
+  "outputDataType": {
+    "name": "conditions",
+    "description": "Selected experimental conditions with attached scores from the mixture sampling.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": true
+    },
+    "validValues": null,
+    "default": null
+  }
 }

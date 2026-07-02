@@ -109,44 +109,44 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "name": "P_asymptotic",
-      "description": "Asymptotic performance value.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": false
+  "inputDataType": {
+    "variables": [
+      {
+        "name": "P_asymptotic",
+        "description": "Asymptotic performance value.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
+      {
+        "name": "trial",
+        "description": "Trial number.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
+  "outputDataType": {
+    "name": "performance",
+    "description": "Learning performance measurement.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
     },
-    {
-      "name": "trial",
-      "description": "Trial number.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": false
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
-  "outputDataType": [
-    {
-      "name": "performance",
-      "description": "Learning performance measurement.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": false
-      },
-      "validValues": null,
-      "default": null
-    }
-  ]
+    "validValues": null,
+    "default": null
+  }
 }
