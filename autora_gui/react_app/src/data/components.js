@@ -8,7 +8,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "experimentalist",
       "name": "Bandit Random Pooler",
       "description": "Generates binary reward sequences for multi-armed bandit tasks. Creates sequences based on underlying probability distributions with optional drift dynamics.",
-      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-bandit-random/blob/main/src/autora/experimentalist/bandit_random/__init__.py#L215",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-bandit-random/blob/main/src/autora/experimentalist/bandit_random/__init__.py#L137",
       "pythonName": "bandit_random_pool",
       "importPath": "autora.experimentalist.bandit_random",
       "pipInstall": "autora-experimentalist-bandit-random==1.0.0",
@@ -88,33 +88,23 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [],
-      "outputDataType": [
-        {
-          "name": "probability_sequence_lst",
-          "description": "Generated binary reward sequences for bandit tasks.",
+      "inputDataType": null,
+      "outputDataType": {
+        "variable": {
           "variable": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "variable": {
-              "name": null,
-              "description": "Column of dependent variable values",
-              "variable": {
-                "name": null,
-                "description": "Column of dependent variable values",
-                "datatype": "real",
-                "cardinality": {
-                  "minOccurs": 1,
-                  "maxOccurs": -1,
-                  "unique": false
-                },
-                "validValues": null,
-                "default": null
-              }
-            }
+            "name": "list_of_rewards",
+            "description": "Generated binary reward sequences for bandit tasks.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
           }
         }
-      ],
+      },
       "file": "bandit_random_pooler.json"
     },
     {
@@ -122,7 +112,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "experimentalist",
       "name": "Falsification Pooler",
       "description": "Selects experimental conditions most likely to falsify the current model by identifying regions where the model predictions may deviate from ground truth.",
-      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L447",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L22",
       "pythonName": "falsification_pooler",
       "importPath": "autora.experimentalist.falsification",
       "pipInstall": "autora-experimentalist-falsification==1.0.0",
@@ -238,70 +228,60 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "model",
-          "description": "Fitted model to attempt to falsify.",
-          "datatype": "string",
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "model",
+            "description": "Fitted model to attempt to falsify.",
+            "datatype": "string",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": 1,
+              "unique": true
+            },
+            "validValues": null,
+            "default": null
+          },
+          {
+            "name": "reference_conditions",
+            "description": "Training conditions for the model.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          },
+          {
+            "name": "reference_observations",
+            "description": "Training observations for the model.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
+        ]
+      },
+      "outputDataType": {
+        "variable": {
+          "name": "new_conditions",
+          "description": "DataFrame of conditions with highest falsification potential.",
+          "datatype": "real",
           "cardinality": {
             "minOccurs": 1,
-            "maxOccurs": 1,
-            "unique": true
+            "maxOccurs": -1,
+            "unique": false
           },
           "validValues": null,
           "default": null
-        },
-        {
-          "name": "reference_conditions",
-          "description": "Training conditions for the model.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        },
-        {
-          "name": "reference_observations",
-          "description": "Training observations for the model.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
         }
-      ],
-      "outputDataType": [
-        {
-          "name": "new_conditions",
-          "description": "DataFrame of conditions with highest falsification potential.",
-          "variables": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
+      },
       "file": "falsification_pooler.json"
     },
     {
@@ -309,7 +289,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "experimentalist",
       "name": "Falsification Sampler",
       "description": "Selects experimental conditions that are most likely to falsify the current model by maximizing predicted model error.",
-      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L451",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L194",
       "pythonName": "falsification_sample",
       "importPath": "autora.experimentalist.falsification",
       "pipInstall": "autora-experimentalist-falsification==1.0.0",
@@ -377,86 +357,70 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "conditions",
-          "description": "Pool of candidate experimental conditions to evaluate.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "conditions",
+            "description": "Pool of candidate experimental conditions to evaluate.",
             "datatype": "real",
             "cardinality": {
               "minOccurs": 1,
               "maxOccurs": -1,
-              "unique": false
+              "unique": true
             },
             "validValues": null,
             "default": null
-          }
-        },
-        {
-          "name": "model",
-          "description": "Trained sklearn model to attempt to falsify.",
-          "datatype": "string",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": 1,
-            "unique": true
           },
-          "validValues": null,
-          "default": null
+          {
+            "name": "model",
+            "description": "Trained sklearn model to attempt to falsify.",
+            "datatype": "string",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": 1,
+              "unique": true
+            },
+            "validValues": null,
+            "default": null
+          },
+          {
+            "name": "reference_conditions",
+            "description": "Experimental conditions the model was trained on.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": true
+            },
+            "validValues": null,
+            "default": null
+          },
+          {
+            "name": "reference_observations",
+            "description": "Observations the model was trained to predict.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": true
+            },
+            "validValues": null,
+            "default": null
+          }
+        ]
+      },
+      "outputDataType": {
+        "name": "conditions",
+        "description": "Selected conditions with highest predicted model error.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": true
         },
-        {
-          "name": "reference_conditions",
-          "description": "Experimental conditions the model was trained on.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        },
-        {
-          "name": "reference_observations",
-          "description": "Observations the model was trained to predict.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "new_conditions",
-          "description": "Selected conditions with highest predicted model error.",
-          "variables": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
+        "validValues": null,
+        "default": null
+      },
       "file": "falsification_sampler.json"
     },
     {
@@ -464,49 +428,37 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "experimentalist",
       "name": "Grid Pooler",
       "description": "Generates a pool of experimental conditions as a complete grid of all combinations from the allowed values of independent variables.",
-      "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/grid.py#L107",
+      "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/grid.py#L9",
       "pythonName": "grid_pool",
       "importPath": "autora.experimentalist.grid",
       "pipInstall": "autora-experimentalist-grid==1.0.0",
       "parameters": {
         "grid_pool": []
       },
-      "inputDataType": [
-        {
-          "name": "ivs",
-          "description": "Variable collection with allowed_values for each independent variable.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "conditions",
-          "description": "Complete grid of experimental conditions.",
-          "variables": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
+      "inputDataType": {
+        "name": "variables",
+        "description": "Variable collection with allowed_values for each independent variable.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      "outputDataType": {
+        "name": "conditions",
+        "description": "Complete grid of experimental conditions.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
       "file": "grid_pooler.json"
     },
     {
@@ -546,42 +498,30 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "ivs",
-          "description": "Variable collection with minimum and maximum values for each independent variable.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "res",
-          "description": "DataFrame of experimental conditions sampled using Latin Hypercube design.",
-          "variables": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
+      "inputDataType": {
+        "name": "ivs",
+        "description": "Variable collection with minimum and maximum values for each independent variable.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
+      "outputDataType": {
+        "name": "res",
+        "description": "DataFrame of experimental conditions sampled using Latin Hypercube design.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
       "file": "latin_hypercube_pooler.json"
     },
     {
@@ -633,13 +573,23 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "conditions",
-          "description": "Pool of candidate experimental conditions to sample from.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "conditions",
+            "description": "Pool of candidate experimental conditions to sample from.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          },
+          {
+            "name": "reference_conditions",
+            "description": "Pre-existing conditions used to exclude occupied hypercubes from sampling.",
             "datatype": "real",
             "cardinality": {
               "minOccurs": 1,
@@ -649,42 +599,20 @@ export const EMBEDDED_COMPONENTS = {
             "validValues": null,
             "default": null
           }
+        ]
+      },
+      "outputDataType": {
+        "name": "conditions",
+        "description": "Selected experimental conditions using Latin Hypercube Sampling.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": true
         },
-        {
-          "name": "reference_conditions",
-          "description": "Pre-existing conditions used to exclude occupied hypercubes from sampling.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "res",
-          "description": "Selected experimental conditions using Latin Hypercube Sampling.",
-          "variables": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
+        "validValues": null,
+        "default": null
+      },
       "file": "latin_hypercube_sampler.json"
     },
     {
@@ -692,7 +620,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "experimentalist",
       "name": "Leverage Sampler",
       "description": "Identifies influential datapoints by iteratively refitting models using leave-one-out validation. Computes how much each point affects model performance and selects candidates based on their influence.",
-      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-leverage/blob/main/src/autora/experimentalist/leverage/__init__.py#L148",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-leverage/blob/main/src/autora/experimentalist/leverage/__init__.py#L8",
       "pythonName": "leverage_sample",
       "importPath": "autora.experimentalist.leverage",
       "pipInstall": "autora-experimentalist-leverage==1.0.0",
@@ -752,13 +680,11 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "conditions",
-          "description": "Pool of candidate experimental conditions (independent variables).",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "conditions",
+            "description": "Pool of candidate experimental conditions (independent variables).",
             "datatype": "real",
             "cardinality": {
               "minOccurs": 1,
@@ -767,44 +693,10 @@ export const EMBEDDED_COMPONENTS = {
             },
             "validValues": null,
             "default": null
-          }
-        },
-        {
-          "name": "Y",
-          "description": "Pool of dependent variables corresponding to the conditions.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        },
-        {
-          "name": "models",
-          "description": "Scikit-learn compatible regression or classification model(s) to evaluate leverage.",
-          "datatype": "string",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": true
           },
-          "validValues": null,
-          "default": null
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "new_conditions",
-          "description": "Selected influential experimental conditions with added Gaussian noise.",
-          "variables": {
-            "name": null,
-            "description": "Column of dependent variable values",
+          {
+            "name": "Y",
+            "description": "Pool of dependent variables corresponding to the conditions.",
             "datatype": "real",
             "cardinality": {
               "minOccurs": 1,
@@ -813,9 +705,33 @@ export const EMBEDDED_COMPONENTS = {
             },
             "validValues": null,
             "default": null
+          },
+          {
+            "name": "models",
+            "description": "Scikit-learn compatible regression or classification model(s) to evaluate leverage.",
+            "datatype": "string",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": true
+            },
+            "validValues": null,
+            "default": null
           }
-        }
-      ],
+        ]
+      },
+      "outputDataType": {
+        "name": "conditions",
+        "description": "Selected influential experimental conditions with added Gaussian noise.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
       "file": "leverage_sampler.json"
     },
     {
@@ -823,7 +739,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "experimentalist",
       "name": "Mixture Sampler",
       "description": "Implements ensemble sampling across multiple ranking functions. Aggregates scores from various samplers using weighted mixture logic, adjusts probabilities via temperature scaling, then selects conditions proportionally to their adjusted scores.",
-      "githubCommit": "https://github.com/blinodelka/mixture_experimental_strategies/blob/main/src/autora/experimentalist/mixture/__init__.py#L91",
+      "githubCommit": "https://github.com/blinodelka/mixture_experimental_strategies/blob/main/src/autora/experimentalist/mixture/__init__.py#L24",
       "pythonName": "mixture_sample",
       "importPath": "autora.experimentalist.mixture",
       "pipInstall": "experimentalist-sampler-mixture==1.0.0",
@@ -887,42 +803,30 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "conditions",
-          "description": "Pool of candidate experimental conditions to evaluate and sample from.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "conditions_",
-          "description": "Selected experimental conditions with attached scores from the mixture sampling.",
-          "variables": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
+      "inputDataType": {
+        "name": "conditions",
+        "description": "Pool of candidate experimental conditions to evaluate and sample from.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
+      "outputDataType": {
+        "name": "conditions",
+        "description": "Selected experimental conditions with attached scores from the mixture sampling.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
       "file": "mixture_sampler.json"
     },
     {
@@ -930,7 +834,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "experimentalist",
       "name": "Model Disagreement Sampler",
       "description": "Selects experimental conditions where multiple models show the greatest prediction disagreement, useful for identifying informative experiments.",
-      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-model-disagreement/blob/main/src/autora/experimentalist/model_disagreement/__init__.py#L310",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-model-disagreement/blob/main/src/autora/experimentalist/model_disagreement/__init__.py#L287",
       "pythonName": "model_disagreement_sampler",
       "importPath": "autora.experimentalist.model_disagreement",
       "pipInstall": "autora-experimentalist-model-disagreement==1.0.0",
@@ -950,13 +854,11 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "conditions",
-          "description": "Pool of candidate experimental conditions to evaluate.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "conditions",
+            "description": "Pool of candidate experimental conditions to evaluate.",
             "datatype": "real",
             "cardinality": {
               "minOccurs": 1,
@@ -965,38 +867,33 @@ export const EMBEDDED_COMPONENTS = {
             },
             "validValues": null,
             "default": null
-          }
-        },
-        {
-          "name": "models",
-          "description": "List of trained sklearn models to compare predictions.",
-          "datatype": "string",
-          "cardinality": {
-            "minOccurs": 2,
-            "maxOccurs": -1,
-            "unique": true
           },
-          "validValues": null,
-          "default": null
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "selected_conditions",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
+          {
+            "name": "models",
+            "description": "List of trained sklearn models to compare predictions.",
+            "datatype": "string",
             "cardinality": {
-              "minOccurs": 1,
+              "minOccurs": 2,
               "maxOccurs": -1,
-              "unique": false
+              "unique": true
             },
             "validValues": null,
             "default": null
           }
-        }
-      ],
+        ]
+      },
+      "outputDataType": {
+        "name": "conditions",
+        "description": "Selected conditions with highest model disagreement.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
       "file": "model_disagreement_sampler.json"
     },
     {
@@ -1004,7 +901,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "experimentalist",
       "name": "Nearest Values Sampler",
       "description": "Returns the nearest values between input samples and reference conditions using Euclidean distance.",
-      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-nearest-value/blob/main/src/autora/experimentalist/nearest_value/__init__.py#L66",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-nearest-value/blob/main/src/autora/experimentalist/nearest_value/__init__.py#L9",
       "pythonName": "nearest_values_sampler",
       "importPath": "autora.experimentalist.nearest_value",
       "pipInstall": "autora-experimentalist-nearest_value==1.0.0",
@@ -1024,13 +921,23 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "conditions",
-          "description": "Pool of candidate experimental condition samples to select from.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "conditions",
+            "description": "Pool of candidate experimental condition samples to select from.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          },
+          {
+            "name": "reference_conditions",
+            "description": "Reference conditions used as distance reference points for finding nearest values.",
             "datatype": "real",
             "cardinality": {
               "minOccurs": 1,
@@ -1040,42 +947,20 @@ export const EMBEDDED_COMPONENTS = {
             "validValues": null,
             "default": null
           }
+        ]
+      },
+      "outputDataType": {
+        "name": "conditions",
+        "description": "Selected nearest experimental conditions.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
         },
-        {
-          "name": "reference_conditions",
-          "description": "Reference conditions used as distance reference points for finding nearest values.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "x_new",
-          "description": "Selected nearest experimental conditions.",
-          "variables": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
+        "validValues": null,
+        "default": null
+      },
       "file": "nearest_values_sampler.json"
     },
     {
@@ -1083,7 +968,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "experimentalist",
       "name": "Novelty Sampler",
       "description": "Selects experimental conditions that are most novel (dissimilar) with respect to existing reference conditions using pairwise distance metrics.",
-      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L148",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L37",
       "pythonName": "novelty_sampler",
       "importPath": "autora.experimentalist.novelty",
       "pipInstall": "autora-experimentalist-novelty==1.0.0",
@@ -1140,13 +1025,23 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "conditions",
-          "description": "Pool of candidate experimental conditions to evaluate.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "conditions",
+            "description": "Pool of candidate experimental conditions to evaluate.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          },
+          {
+            "name": "reference_conditions",
+            "description": "Existing experimental conditions to compare against.",
             "datatype": "real",
             "cardinality": {
               "minOccurs": 1,
@@ -1156,42 +1051,20 @@ export const EMBEDDED_COMPONENTS = {
             "validValues": null,
             "default": null
           }
+        ]
+      },
+      "outputDataType": {
+        "name": "new_conditions",
+        "description": "Selected novel experimental conditions.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
         },
-        {
-          "name": "reference_conditions",
-          "description": "Existing experimental conditions to compare against.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "new_conditions",
-          "description": "Selected novel experimental conditions.",
-          "variables": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
+        "validValues": null,
+        "default": null
+      },
       "file": "novelty_sampler.json"
     },
     {
@@ -1199,7 +1072,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "experimentalist",
       "name": "Novelty Score Sampler",
       "description": "Selects experimental conditions based on dissimilarity to reference conditions and returns both the conditions and their dissimilarity scores.",
-      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L149",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L81",
       "pythonName": "novelty_score_sampler",
       "importPath": "autora.experimentalist.novelty",
       "pipInstall": "autora-experimentalist-novelty==1.0.0",
@@ -1256,13 +1129,23 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "conditions",
-          "description": "Pool of candidate experimental conditions to evaluate.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "conditions",
+            "description": "Pool of candidate experimental conditions to evaluate.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          },
+          {
+            "name": "reference_conditions",
+            "description": "Existing experimental conditions to compare against.",
             "datatype": "real",
             "cardinality": {
               "minOccurs": 1,
@@ -1272,42 +1155,20 @@ export const EMBEDDED_COMPONENTS = {
             "validValues": null,
             "default": null
           }
+        ]
+      },
+      "outputDataType": {
+        "name": "conditions",
+        "description": "Selected experimental conditions with dissimilarity scores column included.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
         },
-        {
-          "name": "reference_conditions",
-          "description": "Existing experimental conditions to compare against.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "conditions",
-          "description": "Selected experimental conditions with dissimilarity scores column included.",
-          "variables": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
+        "validValues": null,
+        "default": null
+      },
       "file": "novelty_score_sampler.json"
     },
     {
@@ -1315,7 +1176,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "experimentalist",
       "name": "Prediction Filter",
       "description": "Filters candidate conditions through model predictions. Applies a custom filter function to predicted outcomes and returns only those conditions meeting specified criteria.",
-      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-prediction-filter/blob/main/src/autora/experimentalist/prediction_filter/__init__.py#L86",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-prediction-filter/blob/main/src/autora/experimentalist/prediction_filter/__init__.py#L11",
       "pythonName": "prediction_filter",
       "importPath": "autora.experimentalist.prediction_filter",
       "pipInstall": "autora-experimentalist-prediction-filter==1.0.0",
@@ -1335,13 +1196,11 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "conditions",
-          "description": "Pool of candidate experimental conditions to filter.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "conditions",
+            "description": "Pool of candidate experimental conditions to filter.",
             "datatype": "real",
             "cardinality": {
               "minOccurs": 1,
@@ -1350,39 +1209,33 @@ export const EMBEDDED_COMPONENTS = {
             },
             "validValues": null,
             "default": null
-          }
-        },
-        {
-          "name": "model",
-          "description": "Sklearn-compatible estimator with a predict method to generate predictions for filtering.",
-          "datatype": "string",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": 1,
-            "unique": true
           },
-          "validValues": null,
-          "default": null
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "new_conditions",
-          "description": "Filtered experimental conditions whose model predictions satisfy the filter function criteria.",
-          "variables": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
+          {
+            "name": "model",
+            "description": "Sklearn-compatible estimator with a predict method to generate predictions for filtering.",
+            "datatype": "string",
             "cardinality": {
               "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
+              "maxOccurs": 1,
+              "unique": true
             },
             "validValues": null,
             "default": null
           }
-        }
-      ],
+        ]
+      },
+      "outputDataType": {
+        "name": "conditions",
+        "description": "Filtered experimental conditions whose model predictions satisfy the filter function criteria.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
       "file": "prediction_filter.json"
     },
     {
@@ -1390,7 +1243,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "experimentalist",
       "name": "Random Pooler",
       "description": "Generates a pool of experimental conditions by randomly sampling from the defined variable space.",
-      "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/random.py#L133",
+      "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/random.py#L9",
       "pythonName": "random_pool",
       "importPath": "autora.experimentalist.random",
       "pipInstall": "autora-experimentalist-random==1.0.0",
@@ -1434,42 +1287,30 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "iv",
-          "description": "Variable collection defining the experimental space.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "raw_conditions",
-          "description": "Generated pool of experimental conditions.",
-          "variables": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
+      "inputDataType": {
+        "name": "cobditions",
+        "description": "Variable collection defining the experimental space.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
+      "outputDataType": {
+        "name": "raw_conditions",
+        "description": "Generated pool of experimental conditions.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
       "file": "random_pooler.json"
     },
     {
@@ -1477,7 +1318,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "experimentalist",
       "name": "Random Sampler",
       "description": "Randomly selects a subset of experimental conditions from a given pool.",
-      "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/random.py#L186",
+      "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/random.py#L137",
       "pythonName": "random_sample",
       "importPath": "autora.experimentalist.random",
       "pipInstall": "autora-experimentalist-random==1.0.0",
@@ -1521,42 +1362,30 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "conditions",
-          "description": "Pool of experimental conditions to sample from.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "conditions_",
-          "description": "Randomly selected subset of experimental conditions.",
-          "variables": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
+      "inputDataType": {
+        "name": "conditions",
+        "description": "Pool of experimental conditions to sample from.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
+      "outputDataType": {
+        "name": "conditions_",
+        "description": "Randomly selected subset of experimental conditions.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
       "file": "random_sampler.json"
     },
     {
@@ -1564,7 +1393,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "experimentalist",
       "name": "Summed Inequality Sampler",
       "description": "Selects experimental conditions based on inequality relative to a reference pool.",
-      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-inequality/blob/main/src/autora/experimentalist/inequality/__init__.py#L165",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-inequality/blob/main/src/autora/experimentalist/inequality/__init__.py#L33",
       "pythonName": "summed_inequality_sampler",
       "importPath": "autora.experimentalist.inequality",
       "pipInstall": "autora-experimentalist-inequality==1.0.0",
@@ -1618,13 +1447,23 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "conditions",
-          "description": "Pool of candidate experimental conditions to evaluate.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "conditions",
+            "description": "Pool of candidate experimental conditions to evaluate.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          },
+          {
+            "name": "reference_conditions",
+            "description": "Reference pool of existing experimental conditions to compare against.",
             "datatype": "real",
             "cardinality": {
               "minOccurs": 1,
@@ -1634,42 +1473,20 @@ export const EMBEDDED_COMPONENTS = {
             "validValues": null,
             "default": null
           }
+        ]
+      },
+      "outputDataType": {
+        "name": "conditions",
+        "description": "Selected experimental conditions with highest inequality scores.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
         },
-        {
-          "name": "reference_conditions",
-          "description": "Reference pool of existing experimental conditions to compare against.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "new_conditions",
-          "description": "Selected experimental conditions with highest inequality scores.",
-          "variables": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
+        "validValues": null,
+        "default": null
+      },
       "file": "summed_inequality_sampler.json"
     },
     {
@@ -1677,7 +1494,7 @@ export const EMBEDDED_COMPONENTS = {
       "protocolType": "experimentalist",
       "name": "Uncertainty Sampler",
       "description": "Selects experimental conditions where the model has highest prediction uncertainty, enabling active learning to improve model performance.",
-      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-uncertainty/blob/main/src/autora/experimentalist/uncertainty/__init__.py#L77",
+      "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-uncertainty/blob/main/src/autora/experimentalist/uncertainty/__init__.py#L10",
       "pythonName": "uncertainty_sampler",
       "importPath": "autora.experimentalist.uncertainty",
       "pipInstall": "autora-experimentalist-uncertainty==1.0.0",
@@ -1713,13 +1530,11 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "conditions",
-          "description": "Pool of candidate experimental conditions to evaluate.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "conditions",
+            "description": "Pool of candidate experimental conditions to evaluate.",
             "datatype": "real",
             "cardinality": {
               "minOccurs": 1,
@@ -1728,39 +1543,33 @@ export const EMBEDDED_COMPONENTS = {
             },
             "validValues": null,
             "default": null
-          }
-        },
-        {
-          "name": "model",
-          "description": "Trained model with predict_proba method for uncertainty estimation.",
-          "datatype": "string",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": 1,
-            "unique": true
           },
-          "validValues": null,
-          "default": null
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "new_conditions",
-          "description": "Selected high-uncertainty experimental conditions.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
+          {
+            "name": "model",
+            "description": "Trained model with predict_proba method for uncertainty estimation.",
+            "datatype": "string",
             "cardinality": {
               "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
+              "maxOccurs": 1,
+              "unique": true
             },
             "validValues": null,
             "default": null
           }
-        }
-      ],
+        ]
+      },
+      "outputDataType": {
+        "name": "conditions",
+        "description": "Selected high-uncertainty experimental conditions.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
       "file": "uncertainty_sampler.json"
     }
   ],
@@ -1816,42 +1625,30 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "X",
-          "description": "Input features as a 2D array.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "y",
-          "description": "Predicted target values.",
-          "variables": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
+      "inputDataType": {
+        "name": "X",
+        "description": "Input features as a 2D array.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
+      "outputDataType": {
+        "name": "y",
+        "description": "Predicted target values.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
       "file": "bms_regressor.json"
     },
     {
@@ -1977,42 +1774,30 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "X",
-          "description": "Input features as a 2D array.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "y",
-          "description": "Predicted target values.",
-          "variables": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
+      "inputDataType": {
+        "name": "X",
+        "description": "Input features as a 2D array.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
+      "outputDataType": {
+        "name": "y",
+        "description": "Predicted target values.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
       "file": "bsr_regressor.json"
     },
     {
@@ -2330,42 +2115,30 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "X",
-          "description": "Input features as a 2D array.",
-          "variables": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "y",
-          "description": "Predicted target values.",
-          "variables": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
-        }
-      ],
+      "inputDataType": {
+        "name": "X",
+        "description": "Input features as a 2D array.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
+      "outputDataType": {
+        "name": "y",
+        "description": "Predicted target values.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
       "file": "darts_regressor.json"
     }
   ],
@@ -2507,46 +2280,38 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "conditions",
-          "description": "Experimental conditions to present to participants.",
-          "variables": [
-            {
-              "name": null,
-              "description": "Independent variable values",
-              "datatype": "any",
-              "cardinality": {
-                "minOccurs": 1,
-                "maxOccurs": -1,
-                "unique": false
-              },
-              "validValues": null,
-              "default": null
-            }
-          ]
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "observations",
-          "description": "Participant responses collected from the experiment.",
-          "variables": [
-            {
-              "name": null,
-              "description": "Dependent variable values",
-              "datatype": "any",
-              "cardinality": {
-                "minOccurs": 1,
-                "maxOccurs": -1,
-                "unique": false
-              },
-              "validValues": null,
-              "default": null
-            }
-          ]
-        }
-      ],
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "conditions",
+            "description": "Experimental conditions to present to participants.",
+            "datatype": "any",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
+        ]
+      },
+      "outputDataType": {
+        "variables": [
+          {
+            "name": "observations",
+            "description": "Participant responses collected from the experiment.",
+            "datatype": "any",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
+        ]
+      },
       "file": "firebase_prolific_runner.json"
     },
     {
@@ -2598,46 +2363,38 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "conditions",
-          "description": "Experimental conditions to present to participants",
-          "variables": [
-            {
-              "name": null,
-              "description": "Independent variable values",
-              "datatype": "any",
-              "cardinality": {
-                "minOccurs": 1,
-                "maxOccurs": -1,
-                "unique": false
-              },
-              "validValues": null,
-              "default": null
-            }
-          ]
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "observations",
-          "description": "Participant responses collected from the experiment",
-          "variables": [
-            {
-              "name": null,
-              "description": "Dependent variable values",
-              "datatype": "any",
-              "cardinality": {
-                "minOccurs": 1,
-                "maxOccurs": -1,
-                "unique": false
-              },
-              "validValues": null,
-              "default": null
-            }
-          ]
-        }
-      ],
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "conditions",
+            "description": "Experimental conditions to present to participants",
+            "datatype": "any",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
+        ]
+      },
+      "outputDataType": {
+        "variables": [
+          {
+            "name": "observations",
+            "description": "Participant responses collected from the experiment",
+            "datatype": "any",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
+        ]
+      },
       "file": "firebase_runner.json"
     },
     {
@@ -2715,42 +2472,34 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
+      "inputDataType": {
+        "variable": {
           "name": "X",
           "description": "Each column matches a symbol in the expression",
-          "variable": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
+          "datatype": "real",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
         }
-      ],
-      "outputDataType": [
-        {
+      },
+      "outputDataType": {
+        "variable": {
           "name": "y",
           "description": "Computed from the expression with added Gaussian noise",
-          "variable": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
+          "datatype": "real",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
         }
-      ],
+      },
       "file": "synth_abstr_equation_experiment.json"
     },
     {
@@ -2814,42 +2563,34 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
+      "inputDataType": {
+        "variable": {
           "name": "X",
           "description": "Column names determined by formula",
-          "variable": {
-            "name": null,
-            "description": "Column of independent variable values",
-            "datatype": "any",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
+          "datatype": "any",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
         }
-      ],
-      "outputDataType": [
-        {
+      },
+      "outputDataType": {
+        "variable": {
           "name": "y",
           "description": "Determined by formula",
-          "variable": {
-            "name": null,
-            "description": "Column of dependent variable values",
-            "datatype": "real",
-            "cardinality": {
-              "minOccurs": 1,
-              "maxOccurs": -1,
-              "unique": false
-            },
-            "validValues": null,
-            "default": null
-          }
+          "datatype": "real",
+          "cardinality": {
+            "minOccurs": 1,
+            "maxOccurs": -1,
+            "unique": false
+          },
+          "validValues": null,
+          "default": null
         }
-      ],
+      },
       "file": "synth_abstr_lmm_experiment.json"
     },
     {
@@ -2951,70 +2692,70 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "v_a",
-          "description": "Value of Option A (in dollars).",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "v_a",
+            "description": "Value of Option A (in dollars).",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
           },
-          "validValues": null,
-          "default": null
+          {
+            "name": "p_a",
+            "description": "Probability of Option A (0 to 1).",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          },
+          {
+            "name": "v_b",
+            "description": "Value of Option B (in dollars).",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          },
+          {
+            "name": "p_b",
+            "description": "Probability of Option B (0 to 1).",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
+        ]
+      },
+      "outputDataType": {
+        "name": "choose_A",
+        "description": "Probability of choosing Option A (0 to 1).",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
         },
-        {
-          "name": "p_a",
-          "description": "Probability of Option A (0 to 1).",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        },
-        {
-          "name": "v_b",
-          "description": "Value of Option B (in dollars).",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        },
-        {
-          "name": "p_b",
-          "description": "Probability of Option B (0 to 1).",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "choose_A",
-          "description": "Probability of choosing Option A (0 to 1).",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        }
-      ],
+        "validValues": null,
+        "default": null
+      },
       "file": "synth_econ_expected_value_theory.json"
     },
     {
@@ -3164,70 +2905,70 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "v_a",
-          "description": "Value of Option A (in dollars).",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "v_a",
+            "description": "Value of Option A (in dollars).",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
           },
-          "validValues": null,
-          "default": null
+          {
+            "name": "p_a",
+            "description": "Probability of Option A (0 to 1).",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          },
+          {
+            "name": "v_b",
+            "description": "Value of Option B (in dollars).",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          },
+          {
+            "name": "p_b",
+            "description": "Probability of Option B (0 to 1).",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
+        ]
+      },
+      "outputDataType": {
+        "name": "choose_A",
+        "description": "Probability of choosing Option A (0 to 1).",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
         },
-        {
-          "name": "p_a",
-          "description": "Probability of Option A (0 to 1).",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        },
-        {
-          "name": "v_b",
-          "description": "Value of Option B (in dollars).",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        },
-        {
-          "name": "p_b",
-          "description": "Probability of Option B (0 to 1).",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "choose_A",
-          "description": "Probability of choosing Option A (0 to 1).",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        }
-      ],
+        "validValues": null,
+        "default": null
+      },
       "file": "synth_econ_prospect_theory.json"
     },
     {
@@ -3329,61 +3070,61 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "current_task_strength",
-          "description": "Strength of the current task.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "current_task_strength",
+            "description": "Strength of the current task.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
           },
-          "validValues": null,
-          "default": null
+          {
+            "name": "alt_task_strength",
+            "description": "Strength of the alternative task.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          },
+          {
+            "name": "is_switch",
+            "description": "Binary indicator of whether a task switch occurs (0 or 1).",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": [
+              "0",
+              "1"
+            ],
+            "default": null
+          }
+        ]
+      },
+      "outputDataType": {
+        "name": "cur_task_performance",
+        "description": "Accuracy of the current task performance.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
         },
-        {
-          "name": "alt_task_strength",
-          "description": "Strength of the alternative task.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        },
-        {
-          "name": "is_switch",
-          "description": "Binary indicator of whether a task switch occurs (0 or 1).",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": [
-            "0",
-            "1"
-          ],
-          "default": null
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "cur_task_performance",
-          "description": "Accuracy of the current task performance.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        }
-      ],
+        "validValues": null,
+        "default": null
+      },
       "file": "synth_neuro_task_switching.json"
     },
     {
@@ -3497,46 +3238,46 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "P_asymptotic",
-          "description": "Asymptotic performance value.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "P_asymptotic",
+            "description": "Asymptotic performance value.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
           },
-          "validValues": null,
-          "default": null
+          {
+            "name": "trial",
+            "description": "Trial number.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
+        ]
+      },
+      "outputDataType": {
+        "name": "performance",
+        "description": "Learning performance measurement.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
         },
-        {
-          "name": "trial",
-          "description": "Trial number.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "performance",
-          "description": "Learning performance measurement.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        }
-      ],
+        "validValues": null,
+        "default": null
+      },
       "file": "synth_psychol_exp_learning.json"
     },
     {
@@ -3614,70 +3355,70 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "similarity_category_A1",
-          "description": "Similarity rating to category A1.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "similarity_category_A1",
+            "description": "Similarity rating to category A1.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
           },
-          "validValues": null,
-          "default": null
+          {
+            "name": "similarity_category_A2",
+            "description": "Similarity rating to category A2.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          },
+          {
+            "name": "similarity_category_B1",
+            "description": "Similarity rating to category B1.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          },
+          {
+            "name": "similarity_category_B2",
+            "description": "Similarity rating to category B2.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
+        ]
+      },
+      "outputDataType": {
+        "name": "choose_A1",
+        "description": "Probability of selecting category A1.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
         },
-        {
-          "name": "similarity_category_A2",
-          "description": "Similarity rating to category A2.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        },
-        {
-          "name": "similarity_category_B1",
-          "description": "Similarity rating to category B1.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        },
-        {
-          "name": "similarity_category_B2",
-          "description": "Similarity rating to category B2.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "choose_A1",
-          "description": "Probability of selecting category A1.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        }
-      ],
+        "validValues": null,
+        "default": null
+      },
       "file": "synth_psychol_luce_choice_ratio.json"
     },
     {
@@ -3791,9 +3532,9 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "reward array",
+      "inputDataType": {
+        "variable": {
+          "name": "reward_array",
           "description": "Reward sequence provided as input for each trial.",
           "datatype": "boolean",
           "cardinality": {
@@ -3804,10 +3545,10 @@ export const EMBEDDED_COMPONENTS = {
           "validValues": null,
           "default": null
         }
-      ],
-      "outputDataType": [
-        {
-          "name": "choice array",
+      },
+      "outputDataType": {
+        "variable": {
+          "name": "choice_array",
           "description": "Action sequence generated by the Q-learning agent.",
           "datatype": "real",
           "cardinality": {
@@ -3818,7 +3559,7 @@ export const EMBEDDED_COMPONENTS = {
           "validValues": null,
           "default": null
         }
-      ],
+      },
       "file": "synth_psychol_q_learning.json"
     },
     {
@@ -3908,34 +3649,30 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "S",
-          "description": "Stimulus intensity",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "perceived_intensity",
-          "description": "Perceived intensity",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        }
-      ],
+      "inputDataType": {
+        "name": "S",
+        "description": "Stimulus intensity",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
+      "outputDataType": {
+        "name": "perceived_intensity",
+        "description": "Perceived intensity",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
       "file": "synth_psychop_stevens_power_law.json"
     },
     {
@@ -4013,46 +3750,46 @@ export const EMBEDDED_COMPONENTS = {
           }
         ]
       },
-      "inputDataType": [
-        {
-          "name": "S1",
-          "description": "Stimulus 1 intensity.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
+      "inputDataType": {
+        "variables": [
+          {
+            "name": "S1",
+            "description": "Stimulus 1 intensity.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
           },
-          "validValues": null,
-          "default": null
+          {
+            "name": "S2",
+            "description": "Stimulus 2 intensity.",
+            "datatype": "real",
+            "cardinality": {
+              "minOccurs": 1,
+              "maxOccurs": -1,
+              "unique": false
+            },
+            "validValues": null,
+            "default": null
+          }
+        ]
+      },
+      "outputDataType": {
+        "name": "difference_detected",
+        "description": "Sensation",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
         },
-        {
-          "name": "S2",
-          "description": "Stimulus 2 intensity.",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        }
-      ],
-      "outputDataType": [
-        {
-          "name": "difference_detected",
-          "description": "Sensation",
-          "datatype": "real",
-          "cardinality": {
-            "minOccurs": 1,
-            "maxOccurs": -1,
-            "unique": false
-          },
-          "validValues": null,
-          "default": null
-        }
-      ],
+        "validValues": null,
+        "default": null
+      },
       "file": "synth_psychop_weber_fechner_law.json"
     }
   ]
