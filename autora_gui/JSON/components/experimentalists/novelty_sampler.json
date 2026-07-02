@@ -3,7 +3,7 @@
   "protocolType": "experimentalist",
   "name": "Novelty Sampler",
   "description": "Selects experimental conditions that are most novel (dissimilar) with respect to existing reference conditions using pairwise distance metrics.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L148",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L37",
   "pythonName": "novelty_sampler",
   "importPath": "autora.experimentalist.novelty",
   "pipInstall": "autora-experimentalist-novelty==1.0.0",
@@ -69,7 +69,7 @@
         "cardinality": {
           "minOccurs": 1,
           "maxOccurs": -1,
-          "unique": true
+          "unique": false
         },
         "validValues": null,
         "default": null
@@ -81,7 +81,7 @@
         "cardinality": {
           "minOccurs": 1,
           "maxOccurs": -1,
-          "unique": true
+          "unique": false
         },
         "validValues": null,
         "default": null
@@ -89,13 +89,13 @@
     ]
   },
   "outputDataType": {
-    "name": "conditions",
+    "name": "new_conditions",
     "description": "Selected novel experimental conditions.",
     "datatype": "real",
     "cardinality": {
       "minOccurs": 1,
       "maxOccurs": -1,
-      "unique": true
+      "unique": false
     },
     "validValues": null,
     "default": null

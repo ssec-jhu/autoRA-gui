@@ -3,7 +3,7 @@
   "protocolType": "experimentalist",
   "name": "Falsification Sampler",
   "description": "Selects experimental conditions that are most likely to falsify the current model by maximizing predicted model error.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L451",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L194",
   "pythonName": "falsification_sample",
   "importPath": "autora.experimentalist.falsification",
   "pipInstall": "autora-experimentalist-falsification==1.0.0",

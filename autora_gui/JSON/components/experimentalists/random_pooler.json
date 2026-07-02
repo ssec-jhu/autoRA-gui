@@ -3,7 +3,7 @@
   "protocolType": "experimentalist",
   "name": "Random Pooler",
   "description": "Generates a pool of experimental conditions by randomly sampling from the defined variable space.",
-  "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/random.py#L133",
+  "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/random.py#L9",
   "pythonName": "random_pool",
   "importPath": "autora.experimentalist.random",
   "pipInstall": "autora-experimentalist-random==1.0.0",
@@ -48,25 +48,25 @@
     ]
   },
   "inputDataType": {
-    "name": "variables",
+    "name": "cobditions",
     "description": "Variable collection defining the experimental space.",
     "datatype": "string",
     "cardinality": {
       "minOccurs": 1,
       "maxOccurs": 1,
-      "unique": true
+      "unique": false
     },
     "validValues": null,
     "default": null
   },
   "outputDataType": {
-    "name": "conditions",
+    "name": "raw_conditions",
     "description": "Generated pool of experimental conditions.",
     "datatype": "real",
     "cardinality": {
       "minOccurs": 1,
       "maxOccurs": -1,
-      "unique": true
+      "unique": false
     },
     "validValues": null,
     "default": null

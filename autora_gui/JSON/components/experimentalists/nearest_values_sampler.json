@@ -3,7 +3,7 @@
   "protocolType": "experimentalist",
   "name": "Nearest Values Sampler",
   "description": "Returns the nearest values between input samples and reference conditions using Euclidean distance.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-nearest-value/blob/main/src/autora/experimentalist/nearest_value/__init__.py#L66",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-nearest-value/blob/main/src/autora/experimentalist/nearest_value/__init__.py#L9",
   "pythonName": "nearest_values_sampler",
   "importPath": "autora.experimentalist.nearest_value",
   "pipInstall": "autora-experimentalist-nearest_value==1.0.0",
@@ -32,7 +32,7 @@
         "cardinality": {
           "minOccurs": 1,
           "maxOccurs": -1,
-          "unique": true
+          "unique": false
         },
         "validValues": null,
         "default": null
@@ -44,7 +44,7 @@
         "cardinality": {
           "minOccurs": 1,
           "maxOccurs": -1,
-          "unique": true
+          "unique": false
         },
         "validValues": null,
         "default": null
@@ -58,7 +58,7 @@
     "cardinality": {
       "minOccurs": 1,
       "maxOccurs": -1,
-      "unique": true
+      "unique": false
     },
     "validValues": null,
     "default": null
