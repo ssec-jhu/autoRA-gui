@@ -35,32 +35,28 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "name": "X",
-      "description": "Input features.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
-  "outputDataType": [
-    {
-      "name": "y",
-      "description": "Predicted target.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ]
+  "inputDataType": {
+    "name": "X",
+    "description": "Input features.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": true
+    },
+    "validValues": null,
+    "default": null
+  },
+  "outputDataType": {
+    "name": "y",
+    "description": "Predicted target.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": true
+    },
+    "validValues": null,
+    "default": null
+  }
 }
