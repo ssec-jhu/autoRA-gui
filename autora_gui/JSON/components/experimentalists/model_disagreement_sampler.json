@@ -4,7 +4,7 @@
   "name": "Model Disagreement Sampler",
   "description": "Selects experimental conditions where multiple models show the greatest prediction disagreement, useful for identifying informative experiments.",
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-model-disagreement/blob/main/src/autora/experimentalist/model_disagreement/__init__.py#L287",
-  "pythonName": "model_disagreement_sampler",
+  "pythonName": "sample",
   "importPath": "autora.experimentalist.model_disagreement",
   "pipInstall": "autora-experimentalist-model-disagreement==1.0.0",
   "parameters": {

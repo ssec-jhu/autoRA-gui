@@ -300,13 +300,23 @@ export function prepareWorkflow(state) {
       return
     }
 
-    const { importPath, pythonName, protocolType } = protocol
+    const { importPath, pythonName, protocolType, file } = protocol
+
+    // Experimentalist pythonNames are bare function names (pool, sample, ...)
+    // shared across modules, so import them aliased to the JSON file name
+    let alias = null
+    if (protocolType === 'experimentalist' && file) {
+      const fileAlias = toPythonName(file.replace(/\.json$/, ''))
+      if (fileAlias && fileAlias !== pythonName) alias = fileAlias
+    }
+
     if (!imports.has(importPath)) imports.set(importPath, new Set())
-    imports.get(importPath).add(pythonName)
+    imports.get(importPath).add(alias ? `${pythonName} as ${alias}` : pythonName)
 
     componentMeta.set(node.id, {
       importPath,
-      pythonName,
+      // Name as imported into the generated file (alias when aliased)
+      pythonName: alias || pythonName,
       protocolType,
       params: node.parameters || {},
       varName: `${toPythonName(node.name)}_on_state`,

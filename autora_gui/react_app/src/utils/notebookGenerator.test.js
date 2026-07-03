@@ -32,7 +32,8 @@ function buildState() {
         {
           uuid: 'proto-exp',
           importPath: 'autora.experimentalist.random',
-          pythonName: 'random_sample',
+          pythonName: 'sample',
+          file: 'random_sampler.json',
           protocolType: 'experimentalist',
           pipInstall: 'autora-core'
         }
@@ -84,8 +85,18 @@ describe('generateNotebook', () => {
       .filter(c => c.cell_type === 'code')
       .map(c => c.source.join(''))
       .join('\n')
-    expect(allCode).toContain('from autora.experimentalist.random import random_sample')
+    expect(allCode).toContain('from autora.experimentalist.random import sample as random_sampler')
     expect(allCode).toContain('from autora.theorist.bms import BMSRegressor')
+  })
+
+  it('calls experimentalists through the aliased import in wrapper definitions', () => {
+    const nb = generateNotebook(buildState())
+    const allCode = nb.cells
+      .filter(c => c.cell_type === 'code')
+      .map(c => c.source.join(''))
+      .join('\n')
+    expect(allCode).toContain('random_sampler(conditions=conditions, num_samples=num_samples)')
+    expect(allCode).not.toMatch(/=sample\(/)
   })
 
   it('runs the loop at top level and references the sampler num_samples', () => {

@@ -4,7 +4,7 @@
   "name": "Grid Pooler",
   "description": "Generates a pool of experimental conditions as a complete grid of all combinations from the allowed values of independent variables.",
   "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/grid.py#L9",
-  "pythonName": "grid_pool",
+  "pythonName": "pool",
   "importPath": "autora.experimentalist.grid",
   "pipInstall": "autora-experimentalist-grid==1.0.0",
   "parameters": {

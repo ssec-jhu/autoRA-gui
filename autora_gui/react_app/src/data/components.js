@@ -9,7 +9,7 @@ export const EMBEDDED_COMPONENTS = {
       "name": "Bandit Random Pooler",
       "description": "Generates binary reward sequences for multi-armed bandit tasks. Creates sequences based on underlying probability distributions with optional drift dynamics.",
       "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-bandit-random/blob/main/src/autora/experimentalist/bandit_random/__init__.py#L137",
-      "pythonName": "bandit_random_pool",
+      "pythonName": "pool",
       "importPath": "autora.experimentalist.bandit_random",
       "pipInstall": "autora-experimentalist-bandit-random==1.0.0",
       "parameters": {
@@ -113,7 +113,7 @@ export const EMBEDDED_COMPONENTS = {
       "name": "Falsification Pooler",
       "description": "Selects experimental conditions most likely to falsify the current model by identifying regions where the model predictions may deviate from ground truth.",
       "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L22",
-      "pythonName": "falsification_pooler",
+      "pythonName": "pool",
       "importPath": "autora.experimentalist.falsification",
       "pipInstall": "autora-experimentalist-falsification==1.0.0",
       "parameters": {
@@ -290,7 +290,7 @@ export const EMBEDDED_COMPONENTS = {
       "name": "Falsification Sampler",
       "description": "Selects experimental conditions that are most likely to falsify the current model by maximizing predicted model error.",
       "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L194",
-      "pythonName": "falsification_sample",
+      "pythonName": "sample",
       "importPath": "autora.experimentalist.falsification",
       "pipInstall": "autora-experimentalist-falsification==1.0.0",
       "parameters": {
@@ -429,7 +429,7 @@ export const EMBEDDED_COMPONENTS = {
       "name": "Grid Pooler",
       "description": "Generates a pool of experimental conditions as a complete grid of all combinations from the allowed values of independent variables.",
       "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/grid.py#L9",
-      "pythonName": "grid_pool",
+      "pythonName": "pool",
       "importPath": "autora.experimentalist.grid",
       "pipInstall": "autora-experimentalist-grid==1.0.0",
       "parameters": {
@@ -621,7 +621,7 @@ export const EMBEDDED_COMPONENTS = {
       "name": "Leverage Sampler",
       "description": "Identifies influential datapoints by iteratively refitting models using leave-one-out validation. Computes how much each point affects model performance and selects candidates based on their influence.",
       "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-leverage/blob/main/src/autora/experimentalist/leverage/__init__.py#L8",
-      "pythonName": "leverage_sample",
+      "pythonName": "sample",
       "importPath": "autora.experimentalist.leverage",
       "pipInstall": "autora-experimentalist-leverage==1.0.0",
       "parameters": {
@@ -740,7 +740,7 @@ export const EMBEDDED_COMPONENTS = {
       "name": "Mixture Sampler",
       "description": "Implements ensemble sampling across multiple ranking functions. Aggregates scores from various samplers using weighted mixture logic, adjusts probabilities via temperature scaling, then selects conditions proportionally to their adjusted scores.",
       "githubCommit": "https://github.com/blinodelka/mixture_experimental_strategies/blob/main/src/autora/experimentalist/mixture/__init__.py#L24",
-      "pythonName": "mixture_sample",
+      "pythonName": "sample",
       "importPath": "autora.experimentalist.mixture",
       "pipInstall": "experimentalist-sampler-mixture==1.0.0",
       "parameters": {
@@ -835,7 +835,7 @@ export const EMBEDDED_COMPONENTS = {
       "name": "Model Disagreement Sampler",
       "description": "Selects experimental conditions where multiple models show the greatest prediction disagreement, useful for identifying informative experiments.",
       "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-model-disagreement/blob/main/src/autora/experimentalist/model_disagreement/__init__.py#L287",
-      "pythonName": "model_disagreement_sampler",
+      "pythonName": "sample",
       "importPath": "autora.experimentalist.model_disagreement",
       "pipInstall": "autora-experimentalist-model-disagreement==1.0.0",
       "parameters": {
@@ -902,7 +902,7 @@ export const EMBEDDED_COMPONENTS = {
       "name": "Nearest Values Sampler",
       "description": "Returns the nearest values between input samples and reference conditions using Euclidean distance.",
       "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-nearest-value/blob/main/src/autora/experimentalist/nearest_value/__init__.py#L9",
-      "pythonName": "nearest_values_sampler",
+      "pythonName": "sample",
       "importPath": "autora.experimentalist.nearest_value",
       "pipInstall": "autora-experimentalist-nearest_value==1.0.0",
       "parameters": {
@@ -969,7 +969,7 @@ export const EMBEDDED_COMPONENTS = {
       "name": "Novelty Sampler",
       "description": "Selects experimental conditions that are most novel (dissimilar) with respect to existing reference conditions using pairwise distance metrics.",
       "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L37",
-      "pythonName": "novelty_sampler",
+      "pythonName": "sample",
       "importPath": "autora.experimentalist.novelty",
       "pipInstall": "autora-experimentalist-novelty==1.0.0",
       "parameters": {
@@ -1073,7 +1073,7 @@ export const EMBEDDED_COMPONENTS = {
       "name": "Novelty Score Sampler",
       "description": "Selects experimental conditions based on dissimilarity to reference conditions and returns both the conditions and their dissimilarity scores.",
       "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L81",
-      "pythonName": "novelty_score_sampler",
+      "pythonName": "score_sample",
       "importPath": "autora.experimentalist.novelty",
       "pipInstall": "autora-experimentalist-novelty==1.0.0",
       "parameters": {
@@ -1177,7 +1177,7 @@ export const EMBEDDED_COMPONENTS = {
       "name": "Prediction Filter",
       "description": "Filters candidate conditions through model predictions. Applies a custom filter function to predicted outcomes and returns only those conditions meeting specified criteria.",
       "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-prediction-filter/blob/main/src/autora/experimentalist/prediction_filter/__init__.py#L11",
-      "pythonName": "prediction_filter",
+      "pythonName": "filter",
       "importPath": "autora.experimentalist.prediction_filter",
       "pipInstall": "autora-experimentalist-prediction-filter==1.0.0",
       "parameters": {
@@ -1244,7 +1244,7 @@ export const EMBEDDED_COMPONENTS = {
       "name": "Random Pooler",
       "description": "Generates a pool of experimental conditions by randomly sampling from the defined variable space.",
       "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/random.py#L9",
-      "pythonName": "random_pool",
+      "pythonName": "pool",
       "importPath": "autora.experimentalist.random",
       "pipInstall": "autora-experimentalist-random==1.0.0",
       "parameters": {
@@ -1288,7 +1288,7 @@ export const EMBEDDED_COMPONENTS = {
         ]
       },
       "inputDataType": {
-        "name": "cobditions",
+        "name": "conditions",
         "description": "Variable collection defining the experimental space.",
         "datatype": "string",
         "cardinality": {
@@ -1319,7 +1319,7 @@ export const EMBEDDED_COMPONENTS = {
       "name": "Random Sampler",
       "description": "Randomly selects a subset of experimental conditions from a given pool.",
       "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/random.py#L137",
-      "pythonName": "random_sample",
+      "pythonName": "sample",
       "importPath": "autora.experimentalist.random",
       "pipInstall": "autora-experimentalist-random==1.0.0",
       "parameters": {
@@ -1394,7 +1394,7 @@ export const EMBEDDED_COMPONENTS = {
       "name": "Summed Inequality Sampler",
       "description": "Selects experimental conditions based on inequality relative to a reference pool.",
       "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-inequality/blob/main/src/autora/experimentalist/inequality/__init__.py#L33",
-      "pythonName": "summed_inequality_sampler",
+      "pythonName": "sample",
       "importPath": "autora.experimentalist.inequality",
       "pipInstall": "autora-experimentalist-inequality==1.0.0",
       "parameters": {
@@ -1495,7 +1495,7 @@ export const EMBEDDED_COMPONENTS = {
       "name": "Uncertainty Sampler",
       "description": "Selects experimental conditions where the model has highest prediction uncertainty, enabling active learning to improve model performance.",
       "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-uncertainty/blob/main/src/autora/experimentalist/uncertainty/__init__.py#L10",
-      "pythonName": "uncertainty_sampler",
+      "pythonName": "sample",
       "importPath": "autora.experimentalist.uncertainty",
       "pipInstall": "autora-experimentalist-uncertainty==1.0.0",
       "parameters": {
