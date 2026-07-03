@@ -36,25 +36,25 @@
     ]
   },
   "inputDataType": {
-    "name": "variables",
+    "name": "ivs",
     "description": "Variable collection with minimum and maximum values for each independent variable.",
-    "datatype": "string",
+    "datatype": "real",
     "cardinality": {
       "minOccurs": 1,
-      "maxOccurs": 1,
-      "unique": true
+      "maxOccurs": -1,
+      "unique": false
     },
     "validValues": null,
     "default": null
   },
   "outputDataType": {
-    "name": "conditions",
+    "name": "res",
     "description": "DataFrame of experimental conditions sampled using Latin Hypercube design.",
     "datatype": "real",
     "cardinality": {
       "minOccurs": 1,
       "maxOccurs": -1,
-      "unique": true
+      "unique": false
     },
     "validValues": null,
     "default": null

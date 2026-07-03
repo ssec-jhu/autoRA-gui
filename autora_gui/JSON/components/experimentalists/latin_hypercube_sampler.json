@@ -56,7 +56,7 @@
         "cardinality": {
           "minOccurs": 1,
           "maxOccurs": -1,
-          "unique": true
+          "unique": false
         },
         "validValues": null,
         "default": null
@@ -66,9 +66,9 @@
         "description": "Pre-existing conditions used to exclude occupied hypercubes from sampling.",
         "datatype": "real",
         "cardinality": {
-          "minOccurs": 0,
+          "minOccurs": 1,
           "maxOccurs": -1,
-          "unique": true
+          "unique": false
         },
         "validValues": null,
         "default": null
