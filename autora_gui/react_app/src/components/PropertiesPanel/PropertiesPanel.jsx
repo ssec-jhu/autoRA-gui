@@ -24,6 +24,27 @@ const getDataType = (varType) => {
   return 'unknown'
 }
 
+// Find the display name of a variable, descending through list wrappers
+const getVariableName = (varType) => {
+  if (!varType) return 'unknown'
+  if (varType.name) return varType.name
+  if (varType.variable) return getVariableName(varType.variable)
+  return 'unknown'
+}
+
+// Normalize a data type spec (null, single variable, dict {variables},
+// list {variable}, or legacy array) into a list of {name, type} entries
+const getVariableEntries = (dataType) => {
+  if (!dataType) return []
+  if (Array.isArray(dataType)) {
+    return dataType.map(v => ({ name: getVariableName(v), type: getDataType(v) }))
+  }
+  if (Array.isArray(dataType.variables)) {
+    return dataType.variables.map(v => ({ name: getVariableName(v), type: getDataType(v) }))
+  }
+  return [{ name: getVariableName(dataType), type: getDataType(dataType) }]
+}
+
 function PropertiesPanel() {
   const { state, dispatch } = useWorkflow()
   const selectedNode = state.nodes.find(n => n.id === state.selectedNodeId)
@@ -115,6 +136,8 @@ function PropertiesPanel() {
   // Show previewed component when no node is selected
   if (!selectedNode && previewedComponent) {
     const previewParams = Object.values(previewedComponent.parameters || {}).flat()
+    const previewInputs = getVariableEntries(previewedComponent.inputDataType)
+    const previewOutputs = getVariableEntries(previewedComponent.outputDataType)
     return (
       <aside className="properties-panel">
         <div className="properties-header">
@@ -157,28 +180,28 @@ function PropertiesPanel() {
             </div>
           )}
 
-          {previewedComponent.inputDataType && (
+          {previewInputs.length > 0 && (
             <div className="property-section">
               <h4 className="section-title">Inputs</h4>
               <div className="data-types">
-                {previewedComponent.inputDataType.map((input, idx) => (
+                {previewInputs.map((input, idx) => (
                   <div key={idx} className="data-type-item">
                     <span className="data-type-name">{input.name}</span>
-                    <span className="data-type-type">{getDataType(input)}</span>
+                    <span className="data-type-type">{input.type}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {previewedComponent.outputDataType && (
+          {previewOutputs.length > 0 && (
             <div className="property-section">
               <h4 className="section-title">Outputs</h4>
               <div className="data-types">
-                {previewedComponent.outputDataType.map((output, idx) => (
+                {previewOutputs.map((output, idx) => (
                   <div key={idx} className="data-type-item">
                     <span className="data-type-name">{output.name}</span>
-                    <span className="data-type-type">{getDataType(output)}</span>
+                    <span className="data-type-type">{output.type}</span>
                   </div>
                 ))}
               </div>
@@ -206,6 +229,8 @@ function PropertiesPanel() {
   }
 
   const parameters = Object.values(selectedNode.componentData?.parameters || {}).flat()
+  const nodeInputs = getVariableEntries(selectedNode.componentData?.inputDataType)
+  const nodeOutputs = getVariableEntries(selectedNode.componentData?.outputDataType)
   const isFilterNode = selectedNode.type === 'filter_point'
 
   const handleFilterParameterChange = (paramName, value) => {
@@ -299,28 +324,28 @@ function PropertiesPanel() {
           </div>
         )}
 
-        {selectedNode.componentData?.inputDataType && (
+        {nodeInputs.length > 0 && (
           <div className="property-section">
             <h4 className="section-title">Inputs</h4>
             <div className="data-types">
-              {selectedNode.componentData.inputDataType.map((input, idx) => (
+              {nodeInputs.map((input, idx) => (
                 <div key={idx} className="data-type-item">
                   <span className="data-type-name">{input.name}</span>
-                  <span className="data-type-type">{getDataType(input)}</span>
+                  <span className="data-type-type">{input.type}</span>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {selectedNode.componentData?.outputDataType && (
+        {nodeOutputs.length > 0 && (
           <div className="property-section">
             <h4 className="section-title">Outputs</h4>
             <div className="data-types">
-              {selectedNode.componentData.outputDataType.map((output, idx) => (
+              {nodeOutputs.map((output, idx) => (
                 <div key={idx} className="data-type-item">
                   <span className="data-type-name">{output.name}</span>
-                  <span className="data-type-type">{getDataType(output)}</span>
+                  <span className="data-type-type">{output.type}</span>
                 </div>
               ))}
             </div>
