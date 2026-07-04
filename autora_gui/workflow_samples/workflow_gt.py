@@ -18,7 +18,7 @@ from autora.experiment_runner.synthetic.economics.expected_value_theory import e
 from autora.experimentalist.bandit_random import pool as bandit_random_pool
 from autora.experimentalist.random import sample as random_sample
 from autora.state import Delta, StandardState, estimator_on_state, on_state
-from autora.theorist.bms.regressor import BMSRegressor
+from autora.theorist.bsr.regressor import BSRRegressor
 from autora.variable import VariableCollection
 
 
@@ -39,7 +39,7 @@ def runner_on_state(conditions: pd.DataFrame) -> Delta:
     return Delta(experiment_data=runner.run(conditions=conditions))
 
 
-theorist_on_state = estimator_on_state(BMSRegressor())  # <- add parameters here
+theorist_on_state = estimator_on_state(BSRRegressor())  # <- add parameters here
 
 
 def main():
