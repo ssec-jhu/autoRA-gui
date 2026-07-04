@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-nearest-value/blob/main/src/autora/experimentalist/nearest_value/__init__.py#L9",
   "pythonName": "sample",
   "importPath": "autora.experimentalist.nearest_value",
-  "pipInstall": "autora-experimentalist-nearest_value==1.0.0",
+  "pipInstall": "autora-experimentalist-nearest-value==2.2.0",
   "parameters": {
     "nearest_values_sampler": [
       {

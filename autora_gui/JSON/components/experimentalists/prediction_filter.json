@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-prediction-filter/blob/main/src/autora/experimentalist/prediction_filter/__init__.py#L11",
   "pythonName": "filter",
   "importPath": "autora.experimentalist.prediction_filter",
-  "pipInstall": "autora-experimentalist-prediction-filter==1.0.0",
+  "pipInstall": "autora-experimentalist-prediction-filter==1.1.0",
   "parameters": {
     "prediction_filter": [
       {

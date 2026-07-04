@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-uncertainty/blob/main/src/autora/experimentalist/uncertainty/__init__.py#L10",
   "pythonName": "sample",
   "importPath": "autora.experimentalist.uncertainty",
-  "pipInstall": "autora-experimentalist-uncertainty==1.0.0",
+  "pipInstall": "autora-experimentalist-uncertainty==2.1.0",
   "parameters": {
     "uncertainty_sampler": [
       {

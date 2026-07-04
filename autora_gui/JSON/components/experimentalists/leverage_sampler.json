@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-leverage/blob/main/src/autora/experimentalist/leverage/__init__.py#L8",
   "pythonName": "sample",
   "importPath": "autora.experimentalist.leverage",
-  "pipInstall": "autora-experimentalist-leverage==1.0.0",
+  "pipInstall": "autora-experimentalist-leverage==1.10",
   "parameters": {
     "leverage_sample": [
       {

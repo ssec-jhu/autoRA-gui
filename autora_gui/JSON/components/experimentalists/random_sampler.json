@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/random.py#L137",
   "pythonName": "sample",
   "importPath": "autora.experimentalist.random",
-  "pipInstall": "autora-experimentalist-random==1.0.0",
+  "pipInstall": "autora-core==5.0.3",
   "parameters": {
     "random_sample": [
       {

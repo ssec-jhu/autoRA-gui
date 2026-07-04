@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L81",
   "pythonName": "score_sample",
   "importPath": "autora.experimentalist.novelty",
-  "pipInstall": "autora-experimentalist-novelty==1.0.0",
+  "pipInstall": "autora-experimentalist-novelty==2.2.0",
   "parameters": {
     "novelty_score_sampler": [
       {

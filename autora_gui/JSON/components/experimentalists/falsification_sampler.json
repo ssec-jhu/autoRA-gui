@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L194",
   "pythonName": "sample",
   "importPath": "autora.experimentalist.falsification",
-  "pipInstall": "autora-experimentalist-falsification==1.0.0",
+  "pipInstall": "autora-experimentalist-falsification==2.2.0",
   "parameters": {
     "falsification_sample": [
       {
