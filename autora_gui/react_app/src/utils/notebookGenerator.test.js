@@ -99,6 +99,39 @@ describe('generateNotebook', () => {
     expect(allCode).not.toMatch(/=sample\(/)
   })
 
+  it('derives variables from the experiment runner in the run cell', () => {
+    const state = buildState()
+    state.nodes.splice(3, 0, {
+      id: 'run-1',
+      type: 'component',
+      name: 'Expected Value Theory',
+      protocolUuid: 'proto-run',
+      parameters: { choice_temperature: 0.1 }
+    })
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'exp-1' },
+      { sourceId: 'exp-1', targetId: 'run-1' },
+      { sourceId: 'run-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'end-1' }
+    ]
+    state.components.experiment_runners = [
+      {
+        uuid: 'proto-run',
+        importPath: 'autora.experiment_runner.synthetic.economics.expected_value_theory',
+        pythonName: 'expected_value_theory',
+        protocolType: 'experiment_runner',
+        pipInstall: 'autora-synthetic'
+      }
+    ]
+    const nb = generateNotebook(state)
+    const runCell = nb.cells[nb.cells.length - 1]
+    const src = runCell.source.join('')
+    expect(src).toContain('runner = expected_value_theory(choice_temperature=0.1)')
+    expect(src).toContain('assert runner.variables is not None')
+    expect(src).toContain('variables = runner.variables')
+    expect(src).not.toContain('np.linspace')
+  })
+
   it('runs the loop at top level and references the sampler num_samples', () => {
     const nb = generateNotebook(buildState())
     const runCell = nb.cells[nb.cells.length - 1]

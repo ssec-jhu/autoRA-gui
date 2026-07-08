@@ -11,6 +11,7 @@ import {
   TEMPLATES,
   collectPipPackages,
   generateImports,
+  generateVariablesSetup,
   generateWrapper,
   prepareWorkflow
 } from './pythonGenerator'
@@ -57,7 +58,7 @@ function buildRunCell(mainPath, loopPath, filterInfo, componentMeta) {
 
   // Variable setup + state initialization (templates are indented for a
   // function body, so strip the leading 4 spaces for top-level use).
-  code.multiline(dedent(TEMPLATES.defaultVariables))
+  code.multiline(dedent(generateVariablesSetup(componentMeta, [...mainPath, ...loopPath])))
   code.blank()
   code.multiline(dedent(TEMPLATES.initState))
   code.blank()
@@ -109,7 +110,7 @@ function dedent(text) {
  * Generate a Jupyter notebook (parsed JSON object) from workflow state.
  */
 export function generateNotebook(state) {
-  const { mainPath, loopPath, filterInfo, imports, componentMeta } = prepareWorkflow(state)
+  const { mainPath, loopPath, filterInfo, imports, componentMeta, hasRunner } = prepareWorkflow(state)
 
   const cells = []
 
@@ -130,7 +131,7 @@ export function generateNotebook(state) {
   // 3. Imports
   cells.push(markdownCell('## 2. Imports'))
   const importsCode = new CodeBuilder()
-  generateImports(importsCode, imports)
+  generateImports(importsCode, imports, { usesPlaceholderVariables: !hasRunner })
   cells.push(codeCell(importsCode.toString()))
 
   // 4. Component definitions (one code cell per component for clarity)
