@@ -1,0 +1,98 @@
+{
+  "uuid": "68dc9565-3cd2-4374-b0e2-9eccabbf574a",
+  "protocolType": "experimentalist",
+  "name": "Progressive Sampler",
+  "description": "Sample from a list of samplers based on the progress / assumed confidence of model in the sampling process.",
+  "githubCommit": "https://github.com/MoAljam/autora-experimentalist-challenge-g-1/blob/4e96fcc4fe8b5ca24a3bd507d566f99199ba9ab9/src/autora/experimentalist/progressive/__init__.py#L140",
+  "pythonName": "sample",
+  "importPath": "autora.experimentalist.progressive",
+  "pipInstall": "autora-adaptable-experimentalist",
+  "parameters": {
+    "sample": [
+      {
+        "name": "samplers",
+        "description": "",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "samplers_coords",
+        "description": "",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 0,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "num_samples",
+        "description": "",
+        "datatype": "integer",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 1
+      },
+      {
+        "name": "temprature",
+        "description": "",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": 0.5
+      },
+      {
+        "name": "plot",
+        "description": "",
+        "datatype": "boolean",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": false
+      }
+    ]
+  },
+  "inputDataType": {
+    "name": "conditions",
+    "description": "Pool of candidate experimental conditions to evaluate.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  },
+  "outputDataType": {
+    "name": "conditions",
+    "description": "pd.DataFrame: new conditions",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  }
+}
