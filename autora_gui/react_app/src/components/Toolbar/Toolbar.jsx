@@ -1,8 +1,9 @@
-import React, { useRef, useCallback, useEffect } from 'react'
+import React, { useRef, useCallback, useEffect, useState } from 'react'
 import { useWorkflow } from '../../context/WorkflowContext'
 import { serializeWorkflow, deserializeWorkflow } from '../../utils/serialization'
 import { generatePythonCode, generatePipInstalls } from '../../utils/pythonGenerator'
 import { generateNotebookString } from '../../utils/notebookGenerator'
+import { createComponentJson } from '../../utils/JsonGenerator'
 import './Toolbar.css'
 
 // Canvas dimensions (should match the actual canvas size)
@@ -101,6 +102,80 @@ function Toolbar() {
       downloadFile(notebook, 'application/x-ipynb+json', 'ipynb')
     } catch (err) {
       alert(`Failed to generate notebook: ${err.message}`)
+    }
+  }
+
+  const [jsonDialogOpen, setJsonDialogOpen] = useState(false)
+  const [githubUrl, setGithubUrl] = useState('')
+  const [generatingJson, setGeneratingJson] = useState(false)
+
+  const closeJsonDialog = () => {
+    setJsonDialogOpen(false)
+    setGithubUrl('')
+  }
+
+  // Add the freshly created component to the palette
+  const addComponentToPalette = (folder, fileName, component) => {
+    const category = [...(state.components[folder] || []), { ...component, file: fileName }]
+      .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+    dispatch({
+      type: 'SET_COMPONENTS',
+      payload: { ...state.components, [folder]: category }
+    })
+  }
+
+  const handleCreateComponentJson = async (e) => {
+    e.preventDefault()
+    const url = githubUrl.trim()
+    if (!url) return
+
+    setGeneratingJson(true)
+    try {
+      const { component, folder, fileName } = await createComponentJson(url)
+      const json = JSON.stringify(component, null, 2) + '\n'
+
+      let response = null
+      try {
+        response = await fetch('/api/components', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ folder, fileName, component })
+        })
+      } catch {
+        response = null
+      }
+
+      if (response?.ok) {
+        addComponentToPalette(folder, fileName, component)
+        closeJsonDialog()
+        alert(`Created JSON/components/${folder}/${fileName}`)
+        return
+      }
+
+      const detail = response ? (await response.json().catch(() => null))?.detail : null
+      if (detail) {
+        alert(`Could not save component: ${detail}`)
+        return
+      }
+
+      // Backend not available (standalone mode): download the file instead
+      const blob = new Blob([json], { type: 'application/json' })
+      const blobUrl = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = blobUrl
+      a.download = fileName
+      a.click()
+      URL.revokeObjectURL(blobUrl)
+      addComponentToPalette(folder, fileName, component)
+      closeJsonDialog()
+      alert(
+        `Backend not available — downloaded ${fileName}.\n` +
+        `Move it to autora_gui/JSON/components/${folder}/ to keep it.`
+      )
+    } catch (err) {
+      alert(`Failed to generate component JSON: ${err.message}`)
+    } finally {
+      setGeneratingJson(false)
     }
   }
 
@@ -226,6 +301,14 @@ function Toolbar() {
             <span className="btn-icon">📓</span>
             <span className="btn-text">Generate Notebook</span>
           </button>
+          <button
+            className="toolbar-btn"
+            onClick={() => setJsonDialogOpen(true)}
+            title="Generate component JSON from a GitHub function link"
+          >
+            <span className="btn-icon">🧩</span>
+            <span className="btn-text">Generate JSON</span>
+          </button>
         </div>
 
         <div className="toolbar-divider" />
@@ -253,6 +336,51 @@ function Toolbar() {
           <span className="info-value">{state.connections.length}</span>
         </span>
       </div>
+
+      {jsonDialogOpen && (
+        <div className="modal-overlay" onClick={generatingJson ? undefined : closeJsonDialog}>
+          <form
+            className="modal-dialog"
+            onClick={(e) => e.stopPropagation()}
+            onSubmit={handleCreateComponentJson}
+          >
+            <h3 className="modal-title">Generate Component JSON</h3>
+            <p className="modal-hint">
+              Paste a GitHub link to the Python function or class implementing the
+              component, e.g.{' '}
+              <code>
+                https://github.com/AutoResearch/autora-experimentalist-bandit-random/blob/main/src/autora/experimentalist/bandit_random/__init__.py#L137
+              </code>
+            </p>
+            <input
+              className="modal-input"
+              type="url"
+              autoFocus
+              placeholder="https://github.com/AutoResearch/.../__init__.py#L137"
+              value={githubUrl}
+              onChange={(e) => setGithubUrl(e.target.value)}
+              disabled={generatingJson}
+            />
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="toolbar-btn"
+                onClick={closeJsonDialog}
+                disabled={generatingJson}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="toolbar-btn modal-submit"
+                disabled={generatingJson || !githubUrl.trim()}
+              >
+                {generatingJson ? 'Generating…' : 'Create'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </header>
   )
 }
