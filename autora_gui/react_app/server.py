@@ -62,6 +62,7 @@ def load_components() -> dict[str, list[dict]]:
             try:
                 with open(json_file) as f:
                     component = json.load(f)
+                    component["file"] = json_file.name
                     components[category].append(component)
             except (OSError, json.JSONDecodeError) as e:
                 print(f"Error loading {json_file}: {e}")

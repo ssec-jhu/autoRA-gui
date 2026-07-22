@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/neuroscience/task_switching.py#L11",
   "pythonName": "task_switching",
   "importPath": "autora.experiment_runner.synthetic.neuroscience.task_switching",
-  "pipInstall": "autora-synthetic==1.0.0",
+  "pipInstall": "autora-synthetic==2.2.0",
   "parameters": {
     "task_switching": [
       {

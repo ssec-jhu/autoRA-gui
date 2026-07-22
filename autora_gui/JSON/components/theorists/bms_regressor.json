@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-theorist-bms/blob/ce3d7edf707c54a12108700076d841c138086be1/src/autora/theorist/bms/regressor.py#L24",
   "pythonName": "BMSRegressor",
   "importPath": "autora.theorist.bms.regressor",
-  "pipInstall": "autora-theorist-bms==1.0.0",
+  "pipInstall": "autora-theorist-bms==1.0.6",
   "parameters": {
     "__init__": [
       {

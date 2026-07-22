@@ -1,0 +1,252 @@
+{
+  "name": "AutoRA Workflow",
+  "description": "Workflow created with AutoRA GUI",
+  "start": {
+    "uuid": "2672c26e-6364-422d-b775-751c95b893c3",
+    "canvasLocation": {
+      "x": 98,
+      "y": 47
+    }
+  },
+  "end": {
+    "uuid": "56dbf7ef-9651-4271-9b66-8f48fb9b5ed7",
+    "canvasLocation": {
+      "x": 837,
+      "y": 932
+    }
+  },
+  "filters": [
+    {
+      "uuid": "785461f2-ec11-40d7-be26-00c37560b6f6",
+      "maxCounter": 10,
+      "altTarget": null,
+      "canvasLocation": {
+        "x": 697,
+        "y": 634
+      }
+    }
+  ],
+  "components": [
+    {
+      "uuid": "dae52800-18a2-4818-9c45-98852ed2b37b",
+      "protocolUuid": "a5b6c7d8-e9f0-4a1b-2c3d-4e5f6a7b8c9d",
+      "parameterSetting": [
+        {
+          "uuid": "4764d0d1-ddc5-489d-ae2f-36cf73b6b555",
+          "name": "choice_temperature",
+          "value": 0.1
+        },
+        {
+          "uuid": "4e5a2d38-c150-4ac5-b8c3-8b31e9922411",
+          "name": "value_lambda",
+          "value": 0.5
+        },
+        {
+          "uuid": "6a2a9fe6-b230-4b97-8765-9f28b41bedd9",
+          "name": "resolution",
+          "value": 10
+        },
+        {
+          "uuid": "f822ec1f-221c-4356-ae9e-2c8eea5650aa",
+          "name": "minimum_value",
+          "value": -1
+        },
+        {
+          "uuid": "f429ac6e-9f38-45e8-992d-fa5ea4458d07",
+          "name": "maximum_value",
+          "value": 1
+        },
+        {
+          "uuid": "c2575c82-e495-4730-a1a7-7a26fc1fe523",
+          "name": "added_noise",
+          "value": 0.01
+        }
+      ],
+      "canvasLocation": {
+        "x": 968,
+        "y": 113
+      }
+    },
+    {
+      "uuid": "d3fcdb04-0e83-4599-8baf-40b97e16f747",
+      "protocolUuid": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
+      "parameterSetting": [
+        {
+          "uuid": "044a1815-a23b-4fe0-bdd8-610a7eb82c63",
+          "name": "num_samples",
+          "value": 1
+        },
+        {
+          "uuid": "3060f85f-9b61-470a-97f8-15d88fca27e2",
+          "name": "replace",
+          "value": false
+        }
+      ],
+      "canvasLocation": {
+        "x": 482,
+        "y": 328
+      }
+    },
+    {
+      "uuid": "e5ec84f8-9651-4799-9623-cdb93134f716",
+      "protocolUuid": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
+      "parameterSetting": [
+        {
+          "uuid": "143e9ba1-b491-42e7-8e58-f9da619ff57e",
+          "name": "tree_num",
+          "value": 3
+        },
+        {
+          "uuid": "8eca2d1e-6fcb-440a-bdd5-6cef00dee79c",
+          "name": "itr_num",
+          "value": 5000
+        },
+        {
+          "uuid": "ebdf6aba-90c9-4486-87f3-d5bf09737824",
+          "name": "alpha1",
+          "value": 0.4
+        },
+        {
+          "uuid": "13493c28-d34d-43ea-b523-7ac252116dca",
+          "name": "alpha2",
+          "value": 0.4
+        },
+        {
+          "uuid": "20e29279-7491-470a-a3d3-0f28f9ccab85",
+          "name": "beta",
+          "value": -1
+        },
+        {
+          "uuid": "858f5e6d-fab7-48e6-aebd-22690e0d314b",
+          "name": "show_log",
+          "value": false
+        },
+        {
+          "uuid": "6ca9981e-8857-4edd-ba53-c0c8f2258d29",
+          "name": "val",
+          "value": 100
+        },
+        {
+          "uuid": "53614daa-03f5-4652-87ec-c651a5e56355",
+          "name": "last_idx",
+          "value": -1
+        },
+        {
+          "uuid": "2731c113-ebaa-4883-834e-25f44dc29698",
+          "name": "prior_name",
+          "value": "Uniform"
+        }
+      ],
+      "canvasLocation": {
+        "x": 955,
+        "y": 518
+      }
+    },
+    {
+      "uuid": "9bcad5c3-c055-43c0-9742-a1b4e9fafe0b",
+      "protocolUuid": "e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",
+      "parameterSetting": [
+        {
+          "uuid": "9cb8e6fb-0de1-450f-8f48-bc84a066f55b",
+          "name": "num_samples",
+          "value": 5
+        },
+        {
+          "uuid": "59b7812d-a08d-4cf5-a84d-3938a13cef14",
+          "name": "replace",
+          "value": true
+        }
+      ],
+      "canvasLocation": {
+        "x": 24,
+        "y": 443
+      }
+    }
+  ],
+  "links": [
+    {
+      "source": "785461f2-ec11-40d7-be26-00c37560b6f6",
+      "target": "56dbf7ef-9651-4271-9b66-8f48fb9b5ed7",
+      "sourcePoint": {
+        "x": 741.9999999999998,
+        "y": 731.0566710385739
+      },
+      "targetPoint": {
+        "x": 836.769230769231,
+        "y": 971.7307692307694
+      }
+    },
+    {
+      "source": "d3fcdb04-0e83-4599-8baf-40b97e16f747",
+      "target": "dae52800-18a2-4818-9c45-98852ed2b37b",
+      "sourcePoint": {
+        "x": 642.1538461538458,
+        "y": 368.18461538461554
+      },
+      "targetPoint": {
+        "x": 968.230769230769,
+        "y": 153.1153846153847
+      }
+    },
+    {
+      "source": "dae52800-18a2-4818-9c45-98852ed2b37b",
+      "target": "e5ec84f8-9651-4799-9623-cdb93134f716",
+      "sourcePoint": {
+        "x": 1048,
+        "y": 193
+      },
+      "targetPoint": {
+        "x": 1035,
+        "y": 518
+      }
+    },
+    {
+      "source": "e5ec84f8-9651-4799-9623-cdb93134f716",
+      "target": "785461f2-ec11-40d7-be26-00c37560b6f6",
+      "sourcePoint": {
+        "x": 955.3846153846158,
+        "y": 558.4615384615385
+      },
+      "targetPoint": {
+        "x": 797.1543289325507,
+        "y": 678.7307692307694
+      }
+    },
+    {
+      "source": "2672c26e-6364-422d-b775-751c95b893c3",
+      "target": "9bcad5c3-c055-43c0-9742-a1b4e9fafe0b",
+      "sourcePoint": {
+        "x": 148,
+        "y": 127
+      },
+      "targetPoint": {
+        "x": 103.98809523809496,
+        "y": 443.0000000000001
+      }
+    },
+    {
+      "source": "9bcad5c3-c055-43c0-9742-a1b4e9fafe0b",
+      "target": "d3fcdb04-0e83-4599-8baf-40b97e16f747",
+      "sourcePoint": {
+        "x": 183.98809523809496,
+        "y": 483.0000000000001
+      },
+      "targetPoint": {
+        "x": 482,
+        "y": 368
+      }
+    },
+    {
+      "source": "785461f2-ec11-40d7-be26-00c37560b6f6",
+      "target": "9bcad5c3-c055-43c0-9742-a1b4e9fafe0b",
+      "sourcePoint": {
+        "x": 686.8456710674493,
+        "y": 679
+      },
+      "targetPoint": {
+        "x": 103.98809523809496,
+        "y": 523.0000000000001
+      }
+    }
+  ]
+}
