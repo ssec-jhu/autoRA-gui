@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychophysics/weber_fechner_law.py#L11",
   "pythonName": "weber_fechner_law",
   "importPath": "autora.experiment_runner.synthetic.psychophysics.weber_fechner_law",
-  "pipInstall": "autora-synthetic==1.0.0",
+  "pipInstall": "autora-synthetic==2.2.0",
   "parameters": {
     "weber_fechner_law": [
       {

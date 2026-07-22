@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/main/src/autora/experiment_runner/firebase_prolific/__init__.py#L267",
   "pythonName": "firebase_prolific_runner",
   "importPath": "autora.experiment_runner.firebase_prolific",
-  "pipInstall": "autora-experiment-runner-firebase-prolific==1.0.0",
+  "pipInstall": "autora-experiment-runner-firebase-prolific==1.0.1",
   "parameters": {
     "firebase_prolific_runner": [
       {

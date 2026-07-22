@@ -59,6 +59,7 @@ exclude_dirs = ["tests"]
 
 [tool.ruff]
 line-length = 120
+extend-exclude = ["autora_gui/workflow_samples"]
 lint.select = ["ALL"]
 lint.ignore = [
     "ANN002",  # https://docs.astral.sh/ruff/rules/missing-type-args/

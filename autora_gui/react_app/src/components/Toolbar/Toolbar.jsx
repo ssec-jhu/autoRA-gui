@@ -1,6 +1,8 @@
 import React, { useRef, useCallback, useEffect } from 'react'
 import { useWorkflow } from '../../context/WorkflowContext'
 import { serializeWorkflow, deserializeWorkflow } from '../../utils/serialization'
+import { generatePythonCode, generatePipInstalls } from '../../utils/pythonGenerator'
+import { generateNotebookString } from '../../utils/notebookGenerator'
 import './Toolbar.css'
 
 // Canvas dimensions (should match the actual canvas size)
@@ -67,6 +69,38 @@ function Toolbar() {
     if (state.nodes.length === 0 && state.connections.length === 0) return
     if (confirm('Clear the entire canvas?')) {
       dispatch({ type: 'CLEAR_CANVAS' })
+    }
+  }
+
+  const downloadFile = (content, type, extension) => {
+    const blob = new Blob([content], { type })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `workflow_${new Date().toISOString().slice(0, 10)}.${extension}`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleGeneratePython = () => {
+    try {
+      const pythonCode = generatePythonCode(state)
+      const pipInstalls = generatePipInstalls(state)
+
+      // Create downloadable Python file
+      const fullCode = `# ${pipInstalls}\n\n${pythonCode}`
+      downloadFile(fullCode, 'text/x-python', 'py')
+    } catch (err) {
+      alert(`Failed to generate Python code: ${err.message}`)
+    }
+  }
+
+  const handleGenerateNotebook = () => {
+    try {
+      const notebook = generateNotebookString(state)
+      downloadFile(notebook, 'application/x-ipynb+json', 'ipynb')
+    } catch (err) {
+      alert(`Failed to generate notebook: ${err.message}`)
     }
   }
 
@@ -183,6 +217,14 @@ function Toolbar() {
           >
             <span className="btn-icon">↪</span>
             <span className="btn-text">Redo</span>
+          </button>
+          <button className="toolbar-btn" onClick={handleGeneratePython} title="Generate Python code">
+            <span className="btn-icon">🐍</span>
+            <span className="btn-text">Generate Python</span>
+          </button>
+          <button className="toolbar-btn" onClick={handleGenerateNotebook} title="Generate Jupyter notebook">
+            <span className="btn-icon">📓</span>
+            <span className="btn-text">Generate Notebook</span>
           </button>
         </div>
 
