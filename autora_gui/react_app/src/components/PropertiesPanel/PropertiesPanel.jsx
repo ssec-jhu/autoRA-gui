@@ -2,6 +2,30 @@ import React from 'react'
 import { useWorkflow } from '../../context/WorkflowContext'
 import './PropertiesPanel.css'
 
+// Clickable "?" hint that toggles a description popover on click
+function ParameterHint({ description }) {
+  const [open, setOpen] = React.useState(false)
+  if (!description) return null
+  return (
+    <span className="parameter-hint-wrapper">
+      <button
+        type="button"
+        className={`parameter-hint${open ? ' active' : ''}`}
+        aria-expanded={open}
+        aria-label="Show parameter description"
+        onClick={() => setOpen(o => !o)}
+      >
+        ?
+      </button>
+      {open && (
+        <span className="parameter-hint-popover" role="tooltip">
+          {description}
+        </span>
+      )}
+    </span>
+  )
+}
+
 // Helper to determine datatype from variable type structure
 const getDataType = (varType) => {
   if (!varType) return 'unknown'
@@ -162,9 +186,7 @@ function PropertiesPanel() {
                   <div key={param.name} className="parameter-row preview-only">
                     <label className="parameter-label">
                       {param.name}
-                      {param.description && (
-                        <span className="parameter-hint" title={param.description}>?</span>
-                      )}
+                      <ParameterHint description={param.description} />
                     </label>
                     <div className="parameter-value">
                       <span className="parameter-datatype">{param.datatype}</span>
@@ -272,7 +294,7 @@ function PropertiesPanel() {
               <div className="parameter-row">
                 <label className="parameter-label">
                   Max Counter
-                  <span className="parameter-hint" title="Maximum number of loop iterations before taking the alternative path">?</span>
+                  <ParameterHint description="Maximum number of loop iterations before taking the alternative path" />
                 </label>
                 <div className="parameter-input">
                   <input
@@ -306,9 +328,7 @@ function PropertiesPanel() {
                 <div key={param.name} className="parameter-row">
                   <label className="parameter-label">
                     {param.name}
-                    {param.description && (
-                      <span className="parameter-hint" title={param.description}>?</span>
-                    )}
+                    <ParameterHint description={param.description} />
                   </label>
                   <div className="parameter-input">
                     {renderInput(param)}
