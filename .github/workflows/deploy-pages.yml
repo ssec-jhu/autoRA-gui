@@ -84,6 +84,17 @@ jobs:
           cp -r docs/_build/html/* ../deploy/docs/
         continue-on-error: true
 
+      # Build front-end (JavaScript) API docs from the JSDoc comments and nest
+      # them under the Sphinx docs at /docs/frontend/.
+      - name: Build frontend JS docs
+        run: |
+          cd main-branch/autora_gui/react_app
+          npm install
+          npm run docs:api
+          mkdir -p ../../../deploy/docs/frontend
+          cp -r frontend-docs/* ../../../deploy/docs/frontend/
+        continue-on-error: true
+
       # Create landing page as main index
       - name: Create landing page
         run: |

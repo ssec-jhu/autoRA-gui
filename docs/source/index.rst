@@ -17,3 +17,10 @@ Contents
 
    usage
    api
+
+Frontend (JavaScript) API
+-------------------------
+
+The browser front-end (the React workflow editor) is documented separately,
+generated from its JSDoc comments:
+`Frontend API reference <frontend/index.html>`_.
