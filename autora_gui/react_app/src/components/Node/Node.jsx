@@ -1,3 +1,11 @@
+/**
+ * Renders a single draggable node on the AutoRA Workflow Editor canvas and
+ * provides the geometry helpers used to place and connect its ports. Handles
+ * regular protocol nodes, control nodes (start/end) and the rotated diamond
+ * filter node, including dragging, selection and port connection interactions.
+ *
+ * @module components/Node/Node
+ */
 import React, { memo, useRef, useState, useCallback, useMemo } from 'react'
 import './Node.css'
 
@@ -16,6 +24,14 @@ const CONTROL_NODE_WIDTH = 100
 const CONTROL_NODE_HEIGHT = 80
 const DIAMOND_SIZE = 90
 
+/**
+ * Determines whether a given port acts as an input or an output based on the
+ * node type and the port's position.
+ *
+ * @param {string} nodeType - The node's type (e.g. 'filter_point', 'start_point', 'end_point').
+ * @param {string} portId - The port identifier ('top', 'right', 'bottom' or 'left').
+ * @returns {string} 'input' or 'output'.
+ */
 // Determine if a port is input or output based on node type and port position
 export function getPortType(nodeType, portId) {
   if (nodeType === 'filter_point') {
@@ -34,6 +50,17 @@ export function getPortType(nodeType, portId) {
   return (portId === 'top' || portId === 'left') ? 'input' : 'output'
 }
 
+/**
+ * Checks whether a given port participates in any connection and returns the
+ * role it plays in that connection, by matching the port's absolute position
+ * against connection endpoints within a distance threshold.
+ *
+ * @param {string} nodeId - The id of the node owning the port.
+ * @param {string} portId - The port identifier ('top', 'right', 'bottom' or 'left').
+ * @param {Array} connections - The list of connection objects to search.
+ * @param {Array} portPositions - Absolute port positions for the node (as returned by getNodePorts).
+ * @returns {string|null} 'output' if the port is a connection source, 'input' if a target, or null if unconnected.
+ */
 // Check if a port has a connection and return the connection role
 // Returns: 'output' if port is source, 'input' if port is target, null if not connected
 function getPortConnectionRole(nodeId, portId, connections, portPositions) {
@@ -66,6 +93,17 @@ function getPortConnectionRole(nodeId, portId, connections, portPositions) {
   return null
 }
 
+/**
+ * Computes the absolute visual/connection coordinates of a node's four ports
+ * based on its type, accounting for the 45 degree rotation of diamond filter
+ * nodes and the differing dimensions of control and regular nodes.
+ *
+ * @param {Object} node - The node object.
+ * @param {string} node.type - The node's type.
+ * @param {number} node.x - The node's x origin on the canvas.
+ * @param {number} node.y - The node's y origin on the canvas.
+ * @returns {Array} An array of port objects, each with { id, x, y }.
+ */
 // Get port positions for a node based on its type (visual/connection coordinates)
 export function getNodePorts(node) {
   const isDiamond = node.type === 'filter_point'
@@ -120,6 +158,15 @@ export function getNodePorts(node) {
   }
 }
 
+/**
+ * Finds the node port nearest to a given point in canvas coordinates.
+ *
+ * @param {Object} node - The node object whose ports are considered.
+ * @param {Object} point - The reference point.
+ * @param {number} point.x - The point's x coordinate.
+ * @param {number} point.y - The point's y coordinate.
+ * @returns {Object} The closest port object ({ id, x, y }).
+ */
 // Find closest port to a given point
 export function findClosestPort(node, point) {
   const ports = getNodePorts(node)
@@ -137,6 +184,25 @@ export function findClosestPort(node, point) {
   return closest
 }
 
+/**
+ * Renders a single workflow node on the canvas, adapting its layout to the node
+ * type (regular, control or diamond filter). Manages pointer-driven dragging,
+ * selection, and renders interactive connection ports colored by their input/
+ * output role and current connection state.
+ *
+ * @param {Object} props
+ * @param {Object} props.node - The node data (id, type, name, x, y).
+ * @param {boolean} props.isSelected - Whether this node is currently selected.
+ * @param {boolean} props.isConnecting - Whether a connection is being drawn from/to this node.
+ * @param {Array} props.connections - All current connections, used to color ports by role.
+ * @param {Function} props.onSelect - Called with the node id when the node is selected.
+ * @param {Function} props.onPositionChange - Called with (nodeId, newX, newY) while dragging.
+ * @param {Function} props.onBorderClick - Called with (nodeId, point) when a port is clicked to connect.
+ * @param {Function} props.onDragStart - Called when dragging of this node begins.
+ * @param {Function} props.onDragEnd - Called when dragging of this node ends.
+ * @param {number} props.zoom - Current canvas zoom factor, used to convert pointer coordinates.
+ * @returns {JSX.Element}
+ */
 function Node({ node, isSelected, isConnecting, connections, onSelect, onPositionChange, onBorderClick, onDragStart, onDragEnd, zoom }) {
   const nodeRef = useRef(null)
   const [isDragging, setIsDragging] = useState(false)

@@ -1,3 +1,12 @@
+/**
+ * Unit tests for `utils/notebookGenerator`.
+ *
+ * Covers generation of a Jupyter notebook (nbformat 4) object and its JSON string
+ * form from a workflow state, verifying cell structure, metadata/kernelspec, and
+ * that workflow components are translated into the expected notebook content.
+ *
+ * @module utils/notebookGenerator.test
+ */
 import { describe, it, expect } from 'vitest'
 import { generateNotebook, generateNotebookString } from './notebookGenerator'
 

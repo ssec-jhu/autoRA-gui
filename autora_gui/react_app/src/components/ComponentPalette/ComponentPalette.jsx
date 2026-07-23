@@ -1,3 +1,11 @@
+/**
+ * Left-hand sidebar of the AutoRA Workflow Editor that lists the available
+ * workflow building blocks. Groups control nodes and protocol components
+ * (theorists, experimentalists, experiment runners) into collapsible,
+ * searchable sections that can be dragged onto the canvas or clicked to preview.
+ *
+ * @module components/ComponentPalette/ComponentPalette
+ */
 import React, { useState, useMemo, useEffect } from 'react'
 import { useWorkflow } from '../../context/WorkflowContext'
 import './ComponentPalette.css'
@@ -36,6 +44,14 @@ const controlNodes = [
   }
 ]
 
+/**
+ * Renders the component palette sidebar: a search box plus collapsible sections
+ * of control nodes and protocol components. Auto-expands the section containing
+ * the currently selected/previewed component, and supports drag-to-canvas and
+ * click-to-preview interactions.
+ *
+ * @returns {JSX.Element}
+ */
 function ComponentPalette() {
   const { state, dispatch } = useWorkflow()
   const [searchTerm, setSearchTerm] = useState('')
