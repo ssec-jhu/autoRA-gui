@@ -34,7 +34,7 @@ jobs:
   # * Owner: org, e.g. ssec-jhu
   # * Repository name: name of repo not-including org, e.g. autoRA-gui
   # * Workflow name: dist.yml
-  # * Environment name: (leave blank)
+  # * Environment name: testpypi (for TestPyPI) or pypi (for PyPI)
   #
   # This should be done separately for both testpypi and pypi (these need
   # separate accounts).
@@ -45,6 +45,7 @@ jobs:
     needs:
     - build
     runs-on: ubuntu-latest
+    environment: testpypi
     permissions:
       id-token: write
     steps:
@@ -65,6 +66,7 @@ jobs:
     - build
     - publish-to-testpypi
     runs-on: ubuntu-latest
+    environment: pypi
     permissions:
       id-token: write
     steps:
