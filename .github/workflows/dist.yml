@@ -12,7 +12,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: "3.11"
+        python-version: "3.14"
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip
@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: testpypi
-      url: https://test.pypi.org/p/<pypi-package-name>
+      url: https://test.pypi.org/p/autora-gui
     permissions:
       id-token: write
     steps:
@@ -70,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/<pypi-package-name> 
+      url: https://pypi.org/p/autora-gui
     permissions:
       id-token: write
     steps:
