@@ -4,7 +4,7 @@
 [![Docs](https://github.com/ssec-jhu/autoRA-gui/actions/workflows/deploy-pages.yml/badge.svg)](https://ssec-jhu.github.io/autoRA-gui)
 [![codecov](https://codecov.io/gh/ssec-jhu/autoRA-gui/branch/main/graph/badge.svg?token=Ry6ZXSfGa3)](https://codecov.io/gh/ssec-jhu/autoRA-gui)
 [![Security](https://github.com/ssec-jhu/autoRA-gui/actions/workflows/security.yml/badge.svg)](https://github.com/ssec-jhu/autoRA-gui/actions/workflows/security.yml)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21497808.svg)](https://doi.org/10.5281/zenodo.21497808)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21515099.svg)](https://doi.org/10.5281/zenodo.21515099)
 [![PyPI](https://img.shields.io/pypi/v/autora-gui.svg)](https://pypi.org/project/autora-gui/)
 
 
