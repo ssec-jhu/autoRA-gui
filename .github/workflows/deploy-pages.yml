@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Standalone Version and Documentation
 
 on:
   push:
