@@ -10,141 +10,212 @@
 
 ![SSEC-JHU Logo](docs/_static/SSEC_logo_horiz_blue_1152x263.png)
 
-Base repo template to be used by all others.
+**autora-gui** is a browser-based, visual workflow editor for
+[AutoRA](https://autoresearch.github.io/autora/) (Automated Research Assistant). It lets you
+assemble AutoRA theorists, experimentalists, and experiment runners into a closed-loop research
+workflow by dragging components onto a canvas, wiring them together, and editing their parameters —
+then export the result to a runnable AutoRA workflow.
 
-Things to do when using this template:
+The editor is served by a [FastAPI](https://fastapi.tiangolo.com/) backend that reads component and
+schema definitions from `autora_gui/JSON/`, with a [React](https://react.dev/) front-end
+(`autora_gui/react_app`). A live, self-contained build is deployed to GitHub Pages:
 
- * Run ```python project_setup.py```
- * Uncomment above DOI in README.md and correct ``<insert_ID_number>``.
- * Correct "description" field in .zenodo.json to reflect description of child repo.
- * Correct the ``CI Status`` badge with the correct token in the URL.
- * Update [zenodo.json](.zenodo.json). For more details see [zenodo.json docs](https://developers.zenodo.org/#representation) and [zenodo docs on contributors vs creators](https://help.zenodo.org/docs/deposit/describe-records/contributors/).
- * Update quickstart guide below.
- * Go to https://github.com/ssec-jhu/autoRA-gui/settings/pages and set the "source"
-   field for "Build and deployment" to "GitHub Actions".
+**🔗 Live demo: https://ssec-jhu.github.io/autoRA-gui**
 
-What's included in this template:
+## Repository layout
 
- * Licence file
- * Code of Conduct
- * Build & Setup, inc. ``pip`` dependency requirements.
- * Dependabot GitHub action
- * CI for GitHub actions: lint, pytest, build & publish docker image to GitHub Packages.
- * Dockerfile.
- * Pytest example(s).
- * Githooks.
- * Docs that build and deploy to https://ssec-jhu.github.io/autoRA-gui
+| Path | Description |
+| --- | --- |
+| `autora_gui/react_app/` | Primary React + Vite front-end and its FastAPI backend (`server.py`). |
+| `autora_gui/js_app/` | Lightweight vanilla-JavaScript editor variant. |
+| `autora_gui/desktop_app/` | Desktop editor variant (canvas, components, models, properties). |
+| `autora_gui/JSON/` | Component and JSON-schema definitions that drive the editor. |
+| `autora_gui/data_model.py` | Pydantic data models describing workflows and components. |
+| `autora_gui/workflow_samples/` | Example exported workflows (`.py`, `.ipynb`, `.json`). |
+| `docs/` | Sphinx documentation sources. |
+
+---
 
 # Quickstart Guide
 
-Add here, streamlined instructions on how to get the code running as swiftly as possible, and provide usage example(s).
-This shouldn't attempt to cover all OS's and/or build variations - just the canonical. Since users are most likely
-viewing this README from GitHub.com, assuming a repo context might be best, where instructions look like those below.
-Alternatively, if this package is distributed on PyPi, perhaps just ``pip install <package-name>``, followed by quick
-user instructions, will suffice.
+```bash
+# 1. Clone the repository
+git clone git@github.com:ssec-jhu/autoRA-gui.git
+cd autoRA-gui
 
-  * ``git clone git@github.com:ssec-jhu/autoRA-gui.git``
-  * ``conda create -n autora_gui python pip``
-  * ``conda activate autora_gui``
-  * ``pip pinstall -e .``
-  * Add user instructions.
+# 2. Create and activate a conda environment
+conda create -n autora_gui python=3.11 pip
+conda activate autora_gui
 
-# Installation, Build, & Run instructions
+# 3. Install the package (editable) with dev dependencies
+pip install -e ".[dev]"
 
-### Conda:
+# 4. Start the FastAPI backend (from the react_app directory)
+cd autora_gui/react_app
+uvicorn server:app --reload --port 8000
 
-For additional cmds see the [Conda cheat-sheet](https://docs.conda.io/projects/conda/en/4.6.0/_downloads/52a95608c49671267e40c689e0bc00ca/conda-cheatsheet.pdf).
+# 5. In a second terminal, start the React dev server
+cd autora_gui/react_app
+npm install
+npm run dev
+```
+
+The editor is then available at **http://localhost:3000** (the front-end talks to the backend on
+port 8000). Prefer no local setup at all? Use the [live demo](https://ssec-jhu.github.io/autoRA-gui).
+
+---
+
+# Installation
+
+### Create a conda virtual environment
+
+For additional commands see the [Conda cheat-sheet](https://docs.conda.io/projects/conda/en/4.6.0/_downloads/52a95608c49671267e40c689e0bc00ca/conda-cheatsheet.pdf).
 
  * Download and install either [miniconda](https://docs.conda.io/en/latest/miniconda.html#installing) or [anaconda](https://docs.anaconda.com/free/anaconda/install/index.html).
- * Create new environment (env) and install ``conda create -n <environment_name>``
- * Activate/switch to new env ``conda activate <environment_name>``
- * ``cd`` into repo dir.
- * Install ``python`` and ``pip`` ``conda install python=3.11 pip``
- * Install all required dependencies (assuming local dev work), there are two ways to do this
-   * If working with tox (recommended) ``pip install -r requirements/dev.txt``.
-   * If you would like to setup an environment with all requirements to run outside of tox ``pip install -r requirements/all.txt``.
+ * Create a new environment: ``conda create -n autora_gui python=3.11 pip`` (Python 3.11+ is required).
+ * Activate it: ``conda activate autora_gui``.
+ * ``cd`` into the repo directory.
+ * Install the Python dependencies. There are two common options:
+   * **For development with tox (recommended):** ``pip install -r requirements/dev.txt``.
+   * **To run everything outside of tox:** ``pip install -r requirements/all.txt``.
 
-### Build:
+### Install the front-end dependencies (Node.js)
 
-  #### with Docker:
-  * Download & install Docker - see [Docker install docs](https://docs.docker.com/get-docker/).
-  * ``cd`` into repo dir.
-  * Build image: ``docker build -t <image_name> .``
+The React front-end requires [Node.js](https://nodejs.org/) (v20 recommended):
 
-  #### with Python ecosystem:
-  * ``cd`` into repo dir.
-  * ``conda activate <environment_name>``
-  * Build and install package in <environment_name> conda env: ``pip install .``
-  * Do the same but in dev/editable mode (changes to repo will be reflected in env installation upon python kernel restart)
-    _NOTE: This is the preferred installation method for dev work._
-    ``pip install -e .``.
-    _NOTE: If you didn't install dependencies from ``requirements/dev.txt``, you can install
-    a looser constrained set of deps using: ``pip install -e .[dev]``._
+```bash
+cd autora_gui/react_app
+npm install
+```
+
+# Build with Python
+
+  * ``cd`` into the repo directory and activate your environment: ``conda activate autora_gui``.
+  * Build and install the package: ``pip install .``.
+  * For dev/editable mode (repo changes are reflected in the installed package on kernel restart —
+    the preferred method for development): ``pip install -e .``.
+    _NOTE: to pull in the looser-constrained dev extras at the same time, use ``pip install -e ".[dev]"``._
+  * To build the distributable wheel and source tarball (this is what CI publishes to PyPI):
+    ``tox -e build-dist`` (or ``python -m build``). Artifacts are written to ``dist/``.
+
+# Run with Python
+
+The editor has two processes: the FastAPI backend and the React front-end.
+
+  * Activate your environment and ``cd`` into the front-end directory:
+    ```bash
+    conda activate autora_gui
+    cd autora_gui/react_app
+    ```
+  * Start the backend API:
+    ```bash
+    uvicorn server:app --reload --port 8000
+    ```
+  * In a second terminal, start the front-end dev server:
+    ```bash
+    cd autora_gui/react_app
+    npm run dev
+    ```
+  * Open **http://localhost:3000** in your browser.
+
+To produce the single-file, self-contained build (the one deployed to GitHub Pages), run
+``python build_standalone.py`` from ``autora_gui/react_app`` and open the generated ``index.html``.
+
+---
+
+# Docker
+
+The repository ships a [`Dockerfile`](Dockerfile) that installs the production dependencies
+(``requirements/prd.txt``) and serves the FastAPI backend. On every push, CI builds this image and
+publishes it to the GitHub Container Registry at ``ghcr.io/ssec-jhu/autora-gui``
+(see [ci.yml](https://github.com/ssec-jhu/autoRA-gui/blob/main/.github/workflows/ci.yml)).
+
+### Build
+
+  * Download & install Docker — see the [Docker install docs](https://docs.docker.com/get-docker/).
+  * ``cd`` into the repo directory.
+  * Build the image: ``docker build -t autora-gui .``.
 
 ### Run
 
-  #### with Docker:
-  * Follow the above [Build with Docker instructions](#with-docker).
-  * Run container from image: ``docker run -d -p 8000:8000 <image_name>``. _NOTE: ``-p 8000:8000`` is specific to the example application using port 8000._
-  * Alternatively, images can be pulled from ``ghcr.io/ssec-jhu/`` e.g., ``docker pull ghcr.io/ssec-jhu/autora-gui:pr-1``.
+  * Run a container, mapping the backend port:
+    ```bash
+    docker run -d -p 8000:8000 autora-gui
+    ```
+    The backend API is then available at http://localhost:8000.
+  * Alternatively, pull the pre-built image from the registry, e.g.:
+    ```bash
+    docker pull ghcr.io/ssec-jhu/autora-gui:main
+    ```
 
-  #### with Python ecosystem:
-  * Follow the above [Build with Python ecosystem instructions](#with-python-ecosystem).
-  * Run ``uvicorn autora_gui.app.main:app --host 0.0.0.0 --port", "8000``. _NOTE: This is just an example and is obviously application dependent._
+The container serves the backend API only; the React front-end is built and served separately (see
+[Run with Python](#run-with-python) or the [live demo](https://ssec-jhu.github.io/autoRA-gui)).
 
-### Usage:
-To be completed by child repo.
-
+---
 
 # Testing
+
 _NOTE: The following steps require ``pip install -r requirements/dev.txt``._
 
 ## Using tox
 
-* Run tox ``tox``. This will run all of linting, security, test, docs and package building within tox virtual environments.
-* To run an individual step, use ``tox -e {step}`` for example, ``tox -e test``, ``tox -e build-docs``, etc.
+Tox runs each check in its own isolated virtual environment, matching the CI on GitHub Actions
+(see [ci.yml](https://github.com/ssec-jhu/autoRA-gui/blob/main/.github/workflows/ci.yml)).
 
-Typically, the CI tests run in github actions will use tox to run as above. See also [ci.yml](https://github.com/ssec-jhu/autoRA-gui/blob/main/.github/workflows/ci.yml).
+* Run the full suite (style, security, tests, docs, and package build): ``tox``.
+* Run an individual environment with ``tox -e {env}``:
 
-## Outside of tox:
+  | Command | What it does |
+  | --- | --- |
+  | ``tox -e check-style`` | Lint and format check with ruff. |
+  | ``tox -e check-security`` | Security scan with bandit. |
+  | ``tox -e format`` | Auto-format code and sort imports with ruff. |
+  | ``tox -e test`` | Run the pytest suite with coverage. |
+  | ``tox -e build-docs`` | Build the Sphinx HTML docs. |
+  | ``tox -e build-dist`` | Build the wheel and source distribution. |
 
-The below assume you are running steps without tox, and that all requirements are installed into a conda environment, e.g. with ``pip install -r requirements/all.txt``.
+## Outside of tox
 
-_NOTE: Tox will run these for you, this is specifically if there is a requirement to setup environment and run these outside the purview of tox._
+The following assume all requirements are installed into your conda environment, e.g. with
+``pip install -r requirements/all.txt``.
 
-### Linting:
-Facilitates in testing typos, syntax, style, and other simple code analysis tests.
-  * ``cd`` into repo dir.
-  * Switch/activate correct environment: ``conda activate <environment_name>``
-  * Run ``ruff .``
-  * This can be automatically run (recommended for devs) every time you ``git push`` by installing the provided
-    ``pre-push`` git hook available in ``./githooks``.
-    Instructions are in that file - just ``cp ./githooks/pre-push .git/hooks/;chmod +x .git/hooks/pre-push``.
+_NOTE: Tox will run these for you; the steps below are for running them directly._
 
-### Security Checks:
-Facilitates in checking for security concerns using [Bandit](https://bandit.readthedocs.io/en/latest/index.html).
- * ``cd`` into repo dir.
- * ``bandit --severity-level=medium -r autora_gui``
+### Linting
 
-### Unit Tests:
-Facilitates in testing core package functionality at a modular level.
-  * ``cd`` into repo dir.
-  * Run all available tests: ``pytest .``
-  * Run specific test: ``pytest tests/test_util.py::test_base_dummy``.
+Checks style, imports, and simple code-analysis issues using [ruff](https://docs.astral.sh/ruff/).
+  * ``cd`` into the repo directory and activate your environment.
+  * Check formatting: ``ruff format . --check``.
+  * Check lint rules: ``ruff check .``.
+  * These can run automatically on every ``git push`` by installing the provided ``pre-push`` git
+    hook: ``cp ./githooks/pre-push .git/hooks/; chmod +x .git/hooks/pre-push``.
 
-### Regression tests:
-Facilitates in testing whether core data results differ during development.
-  * WIP
+### Security Checks
 
-### Smoke Tests:
-Facilitates in testing at the application and infrastructure level.
-  * WIP
+Checks for security concerns using [Bandit](https://bandit.readthedocs.io/en/latest/index.html).
+  * ``cd`` into the repo directory.
+  * Run: ``bandit -c pyproject.toml --severity-level=medium -r autora_gui``.
 
-### Build Docs:
-Facilitates in building, testing & viewing the docs.
- * ``cd`` into repo dir.
- * ``pip install -r requirements/docs.txt``
- * ``cd docs``
- * ``make clean``
- * ``make html``
- * To view the docs in your default browser run ``open docs/_build/html/index.html``.
+### Unit Tests
+
+Tests core package functionality at a modular level with [pytest](https://docs.pytest.org/). Test
+suites live under ``autora_gui/tests``, ``autora_gui/js_app/tests``, and
+``autora_gui/react_app/tests``.
+  * ``cd`` into the repo directory.
+  * Run all Python tests with coverage: ``pytest --cov=./``.
+  * Run a specific test: ``pytest autora_gui/tests/test_util.py``.
+  * Run the React front-end tests: from ``autora_gui/react_app`` run ``npm test`` (or
+    ``npm run test:coverage``).
+
+### Build Docs
+
+Builds, tests, and lets you view the [Sphinx](https://www.sphinx-doc.org/) documentation.
+  * The simplest route is ``tox -e build-docs``.
+  * To build manually:
+    * ``pip install -r requirements/docs.txt``.
+    * ``cd docs``.
+    * ``make clean``.
+    * ``make html``.
+    * View the docs in your browser: ``open docs/_build/html/index.html``.
+
+The docs are automatically built and deployed to https://ssec-jhu.github.io/autoRA-gui.
