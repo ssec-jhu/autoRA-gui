@@ -2,6 +2,8 @@
  * Python Code Generator for AutoRA Workflows
  *
  * Generates executable Python code from workflow graph state.
+ *
+ * @module utils/pythonGenerator
  */
 
 export const CONTROL_NODE_TYPES = ['start_point', 'end_point', 'filter_point']
@@ -42,29 +44,65 @@ export class CodeBuilder {
     this.lines = []
   }
 
+  /**
+   * Append a single line of text.
+   *
+   * @param {string} [text=''] - Line contents.
+   * @returns {CodeBuilder} This builder, for chaining.
+   */
   line(text = '') {
     this.lines.push(text)
     return this
   }
 
+  /**
+   * Append a line prefixed with the given number of 4-space indent levels.
+   *
+   * @param {string} text - Line contents.
+   * @param {number} [level=1] - Number of indent levels.
+   * @returns {CodeBuilder} This builder, for chaining.
+   */
   indent(text, level = 1) {
     this.lines.push('    '.repeat(level) + text)
     return this
   }
 
+  /**
+   * Append a `#`-prefixed Python comment at the given indent level.
+   *
+   * @param {string} text - Comment text (without the leading `#`).
+   * @param {number} [level=0] - Number of indent levels.
+   * @returns {CodeBuilder} This builder, for chaining.
+   */
   comment(text, level = 0) {
     return this.indent(`# ${text}`, level)
   }
 
+  /**
+   * Append a blank line.
+   *
+   * @returns {CodeBuilder} This builder, for chaining.
+   */
   blank() {
     return this.line('')
   }
 
+  /**
+   * Append a multi-line string as separate lines.
+   *
+   * @param {string} text - Newline-separated text.
+   * @returns {CodeBuilder} This builder, for chaining.
+   */
   multiline(text) {
     text.split('\n').forEach(l => this.line(l))
     return this
   }
 
+  /**
+   * Render all accumulated lines as a single newline-joined string.
+   *
+   * @returns {string} The built source code.
+   */
   toString() {
     return this.lines.join('\n')
   }
@@ -72,6 +110,10 @@ export class CodeBuilder {
 
 /**
  * Traverse the workflow graph and return nodes in execution order
+ *
+ * @param {Object[]} nodes - Graph nodes, each with `id`, `type` and optional `filterParams`.
+ * @param {Object[]} connections - Graph edges, each with `sourceId` and `targetId`.
+ * @returns {Object} `{ mainPath, loopPath, filterInfo }` where the paths are ordered node arrays and `filterInfo` is `{ maxCounter }` or null.
  */
 export function getExecutionOrder(nodes, connections) {
   const startNode = nodes.find(n => n.type === 'start_point')
@@ -95,6 +137,14 @@ export function getExecutionOrder(nodes, connections) {
   const loopPath = []
   const visited = new Set()
 
+  /**
+   * Depth-first search for a path of node ids from a start node to any target.
+   *
+   * @param {string} fromId - Node id to start from.
+   * @param {string[]} toIds - Target node ids to search for.
+   * @param {string[]} [path=[]] - Accumulated ids on the current path.
+   * @returns {string[]|null} Ordered node ids from start to target (inclusive), or null if none.
+   */
   function findPath(fromId, toIds, path = []) {
     if (toIds.includes(fromId)) return [...path, fromId]
     if (visited.has(fromId)) return null
@@ -162,6 +212,9 @@ export function getExecutionOrder(nodes, connections) {
 /**
  * Generate a valid Python variable name from a component name.
  * Parenthesized qualifiers like "(Synthetic, Economics)" are dropped.
+ *
+ * @param {string} name - Human-readable component name.
+ * @returns {string} A lowercase, underscore-separated identifier.
  */
 export function toPythonName(name) {
   return name
@@ -174,6 +227,9 @@ export function toPythonName(name) {
 
 /**
  * Format a JavaScript value as Python literal
+ *
+ * @param {*} value - Value to format (null/undefined, boolean, string, array or number).
+ * @returns {string} The Python literal representation.
  */
 function formatPythonValue(value) {
   if (value === null || value === undefined) return 'None'
@@ -185,6 +241,10 @@ function formatPythonValue(value) {
 
 /**
  * Build parameter string from params object
+ *
+ * @param {Object} params - Map of parameter name to value.
+ * @param {string[]} [exclude=[]] - Parameter names to omit.
+ * @returns {string} Comma-separated `name=value` keyword arguments (nulls skipped).
  */
 function buildParamString(params, exclude = []) {
   return Object.entries(params)
@@ -195,6 +255,10 @@ function buildParamString(params, exclude = []) {
 
 /**
  * Generate wrapper function for a theorist component
+ *
+ * @param {CodeBuilder} code - Builder to append the wrapper to.
+ * @param {Object} meta - Component metadata with `pythonName`, `params`, `varName` and `nodeName`.
+ * @returns {void}
  */
 function generateTheoristWrapper(code, meta) {
   const { pythonName, params, varName, nodeName } = meta
@@ -207,6 +271,10 @@ function generateTheoristWrapper(code, meta) {
 
 /**
  * Generate wrapper function for an experiment runner component
+ *
+ * @param {CodeBuilder} code - Builder to append the wrapper to.
+ * @param {Object} meta - Component metadata with `pythonName`, `params`, `varName`, `nodeName` and `runParamNames`.
+ * @returns {void}
  */
 function generateRunnerWrapper(code, meta) {
   const { pythonName, params, varName, nodeName, runParamNames = [] } = meta
@@ -227,6 +295,9 @@ function generateRunnerWrapper(code, meta) {
 
 /**
  * Find the variable name of a data type spec, descending through list wrappers
+ *
+ * @param {Object} dataType - Data type spec with a `name` or a nested `variable`.
+ * @returns {string|null} The resolved data type name, or null if none.
  */
 function dataTypeName(dataType) {
   if (!dataType) return null
@@ -237,6 +308,10 @@ function dataTypeName(dataType) {
 
 /**
  * Generate wrapper function for an experimentalist component (pooler/sampler)
+ *
+ * @param {CodeBuilder} code - Builder to append the wrapper to.
+ * @param {Object} meta - Component metadata with `pythonName`, `params`, `varName`, `nodeName`, `inputDataType` and `outputDataType`.
+ * @returns {void}
  */
 function generateExperimentalistWrapper(code, meta) {
   const { pythonName, params, varName, nodeName, inputDataType, outputDataType } = meta
@@ -285,6 +360,10 @@ function generateExperimentalistWrapper(code, meta) {
 
 /**
  * Dispatch wrapper generation based on the component's protocol type.
+ *
+ * @param {CodeBuilder} code - Builder to append the wrapper to.
+ * @param {Object} meta - Component metadata; `protocolType` selects the wrapper style.
+ * @returns {void}
  */
 export function generateWrapper(code, meta) {
   if (meta.protocolType === 'theorist') {
@@ -299,6 +378,9 @@ export function generateWrapper(code, meta) {
 /**
  * Collect execution order, imports and per-component metadata from the
  * workflow state. Shared by the Python file and Jupyter notebook generators.
+ *
+ * @param {Object} state - Editor state with `nodes`, `connections` and `components`.
+ * @returns {Object} `{ mainPath, loopPath, filterInfo, imports, componentMeta, hasRunner }`.
  */
 export function prepareWorkflow(state) {
   const { nodes, connections, components } = state
@@ -369,6 +451,10 @@ export function prepareWorkflow(state) {
  * Build the variables-initialization block (indented for a function body).
  * When the workflow contains an experiment runner, the variables are created
  * and governed by the runner; otherwise fall back to the placeholder template.
+ *
+ * @param {Map} componentMeta - Map of node id to component metadata.
+ * @param {Object[]} orderedNodes - Nodes in execution order, used to find any runner.
+ * @returns {string} Indented Python source for the variables setup block.
  */
 export function generateVariablesSetup(componentMeta, orderedNodes) {
   const runnerMeta = orderedNodes
@@ -390,6 +476,12 @@ export function generateVariablesSetup(componentMeta, orderedNodes) {
  * Emit the import block (standard + component + data imports) into a builder.
  * `Variable` and numpy are only needed by the placeholder variables template,
  * so they are skipped when the variables come from an experiment runner.
+ *
+ * @param {CodeBuilder} code - Builder to append the imports to.
+ * @param {Map} imports - Map of import path to a Set of imported (possibly aliased) names.
+ * @param {Object} [options] - Options object.
+ * @param {boolean} [options.usesPlaceholderVariables=true] - Whether to also import `Variable` and numpy for the placeholder template.
+ * @returns {void}
  */
 export function generateImports(code, imports, { usesPlaceholderVariables = true } = {}) {
   code.multiline(TEMPLATES.standardImports)
@@ -406,6 +498,9 @@ export function generateImports(code, imports, { usesPlaceholderVariables = true
 
 /**
  * Generate Python code from workflow state
+ *
+ * @param {Object} state - Editor state with `nodes`, `connections` and `components`.
+ * @returns {string} A complete, runnable Python script as a string.
  */
 export function generatePythonCode(state) {
   const { mainPath, loopPath, filterInfo, imports, componentMeta, hasRunner } = prepareWorkflow(state)
@@ -470,6 +565,9 @@ export function generatePythonCode(state) {
 
 /**
  * Collect the set of pip packages required by the workflow's components.
+ *
+ * @param {Object} state - Editor state with `nodes` and `components`.
+ * @returns {string[]} Deduplicated list of pip package specifiers.
  */
 export function collectPipPackages(state) {
   const { nodes, components } = state
@@ -487,6 +585,9 @@ export function collectPipPackages(state) {
 
 /**
  * Generate pip install commands for all required packages
+ *
+ * @param {Object} state - Editor state with `nodes` and `components`.
+ * @returns {string} A `pip install ...` command, or a comment when none are required.
  */
 export function generatePipInstalls(state) {
   const pipPackages = collectPipPackages(state)

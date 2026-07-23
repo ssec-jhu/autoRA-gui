@@ -4,6 +4,8 @@
  * Produces the same Python program as the Python code generator, but split
  * into ordered notebook cells. The first code cell installs every package
  * required by the imports that follow.
+ *
+ * @module utils/notebookGenerator
  */
 
 import {
@@ -18,6 +20,9 @@ import {
 
 /**
  * Build a notebook markdown cell from one or more lines of text.
+ *
+ * @param {string} text - Markdown source text.
+ * @returns {Object} Jupyter markdown cell object.
  */
 function markdownCell(text) {
   return {
@@ -29,6 +34,9 @@ function markdownCell(text) {
 
 /**
  * Build a notebook code cell from a block of source text.
+ *
+ * @param {string} text - Python source text.
+ * @returns {Object} Jupyter code cell object.
  */
 function codeCell(text) {
   return {
@@ -43,6 +51,9 @@ function codeCell(text) {
 /**
  * Convert a string into the array-of-lines form Jupyter uses for `source`,
  * where every line except the last keeps its trailing newline.
+ *
+ * @param {string} text - Multi-line source text.
+ * @returns {string[]} Array of lines, each but the last ending in a newline.
  */
 function toSource(text) {
   const lines = text.split('\n')
@@ -52,6 +63,12 @@ function toSource(text) {
 /**
  * Build the "run the workflow" code cell. Unlike the standalone Python file,
  * the notebook runs the loop at top level so each cycle's state is inspectable.
+ *
+ * @param {Object[]} mainPath - Nodes executed once before the loop, in order.
+ * @param {Object[]} loopPath - Nodes executed each loop cycle, in order.
+ * @param {Object} filterInfo - Filter info with `maxCounter` controlling the number of cycles; may be null.
+ * @param {Map} componentMeta - Map of node id to component metadata (`varName`, `nodeName`, `pythonName`).
+ * @returns {string} Python source for the run cell.
  */
 function buildRunCell(mainPath, loopPath, filterInfo, componentMeta) {
   const code = new CodeBuilder()
@@ -98,6 +115,9 @@ function buildRunCell(mainPath, loopPath, filterInfo, componentMeta) {
 /**
  * Remove a single level (4 spaces) of leading indentation from each line so
  * function-body templates can be reused at notebook top level.
+ *
+ * @param {string} text - Indented multi-line source text.
+ * @returns {string} Text with one 4-space indent level removed from each line.
  */
 function dedent(text) {
   return text
@@ -108,6 +128,9 @@ function dedent(text) {
 
 /**
  * Generate a Jupyter notebook (parsed JSON object) from workflow state.
+ *
+ * @param {Object} state - Editor state with `nodes`, `connections` and `components`.
+ * @returns {Object} Jupyter notebook object with `cells`, `metadata`, `nbformat` and `nbformat_minor`.
  */
 export function generateNotebook(state) {
   const { mainPath, loopPath, filterInfo, imports, componentMeta, hasRunner } = prepareWorkflow(state)
@@ -167,6 +190,9 @@ export function generateNotebook(state) {
 /**
  * Generate the notebook as a formatted JSON string ready to write to a
  * `.ipynb` file.
+ *
+ * @param {Object} state - Editor state with `nodes`, `connections` and `components`.
+ * @returns {string} Notebook serialized as a formatted JSON string.
  */
 export function generateNotebookString(state) {
   return JSON.stringify(generateNotebook(state), null, 1)

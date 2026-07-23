@@ -1,0 +1,17 @@
+{
+  "plugins": ["node_modules/jsdoc-babel"],
+  "babel": {
+    "extensions": ["js", "jsx"],
+    "presets": ["@babel/preset-react"]
+  },
+  "source": {
+    "include": ["src"],
+    "includePattern": ".+\\.jsx?$",
+    "excludePattern": "(node_modules|dist|coverage|/data/|\\.test\\.jsx?$)"
+  },
+  "opts": {
+    "destination": "frontend-docs",
+    "recurse": true,
+    "readme": "README.md"
+  }
+}
