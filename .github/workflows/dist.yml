@@ -32,12 +32,12 @@ jobs:
   #
   # * PyPI Project Name: name of pypi package
   # * Owner: org, e.g. ssec-jhu
-  # * Repository name: name of repo not-including org, e.g. base-template
+  # * Repository name: name of repo not-including org, e.g. autoRA-gui
   # * Workflow name: dist.yml
+  # * Environment name: (leave blank)
   #
   # This should be done separately for both testpypi and pypi (these need
-  # separate accounts). Once complete, uncomment the "Publish distribution"
-  # sections below.
+  # separate accounts).
   #
   publish-to-testpypi:
     name: Publish to TestPyPI
@@ -45,9 +45,6 @@ jobs:
     needs:
     - build
     runs-on: ubuntu-latest
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/autora-gui
     permissions:
       id-token: write
     steps:
@@ -68,9 +65,6 @@ jobs:
     - build
     - publish-to-testpypi
     runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/p/autora-gui
     permissions:
       id-token: write
     steps:
