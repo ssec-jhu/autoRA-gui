@@ -27,8 +27,6 @@ schema definitions from `autora_gui/JSON/`, with a [React](https://react.dev/) f
 | Path | Description |
 | --- | --- |
 | `autora_gui/react_app/` | Primary React + Vite front-end and its FastAPI backend (`server.py`). |
-| `autora_gui/js_app/` | Lightweight vanilla-JavaScript editor variant. |
-| `autora_gui/desktop_app/` | Desktop editor variant (canvas, components, models, properties). |
 | `autora_gui/JSON/` | Component and JSON-schema definitions that drive the editor. |
 | `autora_gui/data_model.py` | Pydantic data models describing workflows and components. |
 | `autora_gui/workflow_samples/` | Example exported workflows (`.py`, `.ipynb`, `.json`). |
