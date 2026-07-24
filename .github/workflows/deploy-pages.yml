@@ -1,10 +1,10 @@
-name: Deploy to GitHub Pages
+name: Standalone Version and Documentation
 
 on:
   push:
     branches:
       - main
-      - generate_code
+      - create_json
   workflow_dispatch:  # Allow manual trigger
 
 permissions:
@@ -52,20 +52,20 @@ jobs:
           cp ../../index.html ../../../deploy/main/index.html
         continue-on-error: true
 
-      # Build Python code generation version from generate_code branch
-      - name: Checkout generate_code branch
+      # Build component JSON generation version from create_json branch
+      - name: Checkout create_json branch
         uses: actions/checkout@v4
         with:
-          ref: generate_code
-          path: generate_code-branch
+          ref: create_json
+          path: create_json-branch
 
-      - name: Build Python code generation standalone version
+      - name: Build component JSON generation standalone version
         run: |
-          cd generate_code-branch/autora_gui/react_app
+          cd create_json-branch/autora_gui/react_app
           npm install
           python build_standalone.py
-          mkdir -p ../../../deploy/generate_code
-          cp ../../index.html ../../../deploy/generate_code/index.html
+          mkdir -p ../../../deploy/create_json
+          cp ../../index.html ../../../deploy/create_json/index.html
         continue-on-error: true
 
       # Build Sphinx docs from main branch
@@ -82,6 +82,17 @@ jobs:
           tox -e build-docs
           mkdir -p ../deploy/docs
           cp -r docs/_build/html/* ../deploy/docs/
+        continue-on-error: true
+
+      # Build front-end (JavaScript) API docs from the JSDoc comments and nest
+      # them under the Sphinx docs at /docs/frontend/.
+      - name: Build frontend JS docs
+        run: |
+          cd main-branch/autora_gui/react_app
+          npm install
+          npm run docs:api
+          mkdir -p ../../../deploy/docs/frontend
+          cp -r frontend-docs/* ../../../deploy/docs/frontend/
         continue-on-error: true
 
       # Create landing page as main index
@@ -110,7 +121,7 @@ jobs:
           <h1>AutoRA Workflow Editor and Documentation</h1>
           <div class="versions">
           <a href="./main/" class="version-card"><h2>Workflow Editor</h2><p>React-based GUI</p></a>
-          <a href="./generate_code/" class="version-card"><h2>Workflow Editor with Code Generation</h2><p>React-based GUI with code generation</p></a>
+          <a href="./create_json/" class="version-card"><h2>Workflow Editor with JSON Generation</h2><p>React-based GUI with component JSON generation</p></a>
           <a href="./docs/" class="version-card"><h2>Documentation</h2><p>API reference and guides</p></a>
           </div>
           </div>
@@ -135,6 +146,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Standalone Version and Documentation
         id: deployment
         uses: actions/deploy-pages@v4

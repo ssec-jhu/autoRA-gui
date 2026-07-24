@@ -1,3 +1,11 @@
+/**
+ * Top toolbar for the AutoRA Workflow Editor. Provides workflow actions
+ * (save/load JSON, clear, undo/redo), code generation (Python and Jupyter
+ * notebook), zoom controls, and live counts of nodes and connections.
+ *
+ * @module components/Toolbar/Toolbar
+ */
+
 import React, { useRef, useCallback, useEffect } from 'react'
 import { useWorkflow } from '../../context/WorkflowContext'
 import { serializeWorkflow, deserializeWorkflow } from '../../utils/serialization'
@@ -5,6 +13,12 @@ import { generatePythonCode, generatePipInstalls } from '../../utils/pythonGener
 import { generateNotebookString } from '../../utils/notebookGenerator'
 import './Toolbar.css'
 
+/**
+ * Read the current canvas element's dimensions, falling back to a default size
+ * when the canvas is not present in the DOM.
+ *
+ * @returns {{width: number, height: number}} The canvas width and height in pixels
+ */
 // Canvas dimensions (should match the actual canvas size)
 const getCanvasCenter = () => {
   const canvas = document.querySelector('.canvas')
@@ -15,10 +29,23 @@ const getCanvasCenter = () => {
   return { width: 800, height: 600 } // fallback
 }
 
+/**
+ * Toolbar component. Reads and dispatches workflow state via context and
+ * exposes the editor's top-level actions. Registers global keyboard shortcuts
+ * for undo/redo while mounted.
+ *
+ * @returns {JSX.Element}
+ */
 function Toolbar() {
   const { state, dispatch } = useWorkflow()
   const fileInputRef = useRef(null)
 
+  /**
+   * Serialize the current workflow, validate it against the backend (skipping
+   * silently on network failure), then download it as a timestamped JSON file.
+   *
+   * @returns {Promise<void>}
+   */
   const handleSave = async () => {
     const workflow = serializeWorkflow(state)
 
@@ -47,6 +74,13 @@ function Toolbar() {
     URL.revokeObjectURL(url)
   }
 
+  /**
+   * Read a selected JSON file, deserialize it into nodes and connections, and
+   * load it into the workflow state. Alerts on parse/deserialize failure.
+   *
+   * @param {Event} e - Change event from the hidden file input
+   * @returns {void}
+   */
   const handleLoad = (e) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -65,6 +99,11 @@ function Toolbar() {
     e.target.value = ''
   }
 
+  /**
+   * Clear the entire canvas after user confirmation, unless it is already empty.
+   *
+   * @returns {void}
+   */
   const handleClear = () => {
     if (state.nodes.length === 0 && state.connections.length === 0) return
     if (confirm('Clear the entire canvas?')) {
@@ -72,6 +111,14 @@ function Toolbar() {
     }
   }
 
+  /**
+   * Trigger a browser download of the given content as a timestamped file.
+   *
+   * @param {string} content - File contents to download
+   * @param {string} type - MIME type for the blob
+   * @param {string} extension - File extension (without the dot)
+   * @returns {void}
+   */
   const downloadFile = (content, type, extension) => {
     const blob = new Blob([content], { type })
     const url = URL.createObjectURL(blob)
@@ -82,6 +129,12 @@ function Toolbar() {
     URL.revokeObjectURL(url)
   }
 
+  /**
+   * Generate Python source for the current workflow (with pip install header)
+   * and download it as a .py file. Alerts on generation failure.
+   *
+   * @returns {void}
+   */
   const handleGeneratePython = () => {
     try {
       const pythonCode = generatePythonCode(state)
@@ -95,6 +148,12 @@ function Toolbar() {
     }
   }
 
+  /**
+   * Generate a Jupyter notebook for the current workflow and download it as an
+   * .ipynb file. Alerts on generation failure.
+   *
+   * @returns {void}
+   */
   const handleGenerateNotebook = () => {
     try {
       const notebook = generateNotebookString(state)
@@ -104,10 +163,20 @@ function Toolbar() {
     }
   }
 
+  /**
+   * Dispatch an undo action.
+   *
+   * @returns {void}
+   */
   const handleUndo = () => {
     dispatch({ type: 'UNDO' })
   }
 
+  /**
+   * Dispatch a redo action.
+   *
+   * @returns {void}
+   */
   const handleRedo = () => {
     dispatch({ type: 'REDO' })
   }
@@ -135,6 +204,13 @@ function Toolbar() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [canUndo, canRedo])
 
+  /**
+   * Zoom the canvas to a new level while keeping the viewport center fixed,
+   * clamping the zoom to the allowed range and adjusting pan accordingly.
+   *
+   * @param {number} newZoom - Desired zoom level before clamping
+   * @returns {void}
+   */
   // Zoom relative to canvas center
   const zoomToCenter = useCallback((newZoom) => {
     // Clamp the new zoom value
@@ -159,14 +235,29 @@ function Toolbar() {
     dispatch({ type: 'SET_PAN', payload: { x: newPanX, y: newPanY } })
   }, [state.zoom, state.pan, dispatch])
 
+  /**
+   * Increase the zoom level by one step, centered on the viewport.
+   *
+   * @returns {void}
+   */
   const handleZoomIn = () => {
     zoomToCenter(state.zoom + 0.1)
   }
 
+  /**
+   * Decrease the zoom level by one step, centered on the viewport.
+   *
+   * @returns {void}
+   */
   const handleZoomOut = () => {
     zoomToCenter(state.zoom - 0.1)
   }
 
+  /**
+   * Reset zoom to 100% and recenter the pan to the origin.
+   *
+   * @returns {void}
+   */
   const handleZoomReset = () => {
     dispatch({ type: 'SET_ZOOM', payload: 1 })
     dispatch({ type: 'SET_PAN', payload: { x: 0, y: 0 } })

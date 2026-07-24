@@ -1,9 +1,23 @@
+/**
+ * The main workspace of the AutoRA Workflow Editor. Renders the pannable/zoomable
+ * canvas that hosts workflow nodes and the SVG connections between them, and handles
+ * drag-and-drop node creation, panning, zooming, selection, and port-to-port connecting.
+ *
+ * @module components/Canvas/Canvas
+ */
 import React, { useRef, useCallback, useState, useEffect } from 'react'
 import { useWorkflow } from '../../context/WorkflowContext'
 import Node from '../Node/Node'
 import Connection from './Connection'
 import './Canvas.css'
 
+/**
+ * Renders the interactive workflow canvas, including all nodes, connections, and the
+ * live zoom/node/connection info overlay. Wires up drop, pan, zoom, click-to-deselect,
+ * and connection-creation interactions against the shared workflow state.
+ *
+ * @returns {JSX.Element}
+ */
 function Canvas() {
   const canvasRef = useRef(null)
   const { state, dispatch } = useWorkflow()
@@ -12,6 +26,14 @@ function Canvas() {
   const [hasDragged, setHasDragged] = useState(false)
   const { connectingFrom } = state
 
+  /**
+   * Converts screen (viewport) coordinates into canvas-space coordinates, accounting
+   * for the current zoom level and pan offset.
+   *
+   * @param {number} screenX - The x coordinate in screen pixels (e.g. e.clientX).
+   * @param {number} screenY - The y coordinate in screen pixels (e.g. e.clientY).
+   * @returns {{x: number, y: number}} The equivalent point in canvas space.
+   */
   const screenToCanvas = useCallback((screenX, screenY) => {
     if (!canvasRef.current) return { x: 0, y: 0 }
     const rect = canvasRef.current.getBoundingClientRect()
@@ -21,11 +43,26 @@ function Canvas() {
     }
   }, [state.zoom, state.pan])
 
+  /**
+   * Allows dropping palette components onto the canvas by preventing the default
+   * behavior and signalling a "copy" drop effect.
+   *
+   * @param {DragEvent} e - The dragover event.
+   * @returns {void}
+   */
   const handleDragOver = (e) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'copy'
   }
 
+  /**
+   * Handles dropping a component from the palette onto the canvas: reads the dragged
+   * component JSON, converts the drop point to canvas coordinates, and dispatches an
+   * ADD_NODE action (offset so the node is centered on the cursor).
+   *
+   * @param {DragEvent} e - The drop event carrying the component JSON payload.
+   * @returns {void}
+   */
   const handleDrop = useCallback((e) => {
     e.preventDefault()
     const data = e.dataTransfer.getData('application/json')
@@ -40,6 +77,13 @@ function Canvas() {
     })
   }, [screenToCanvas, dispatch])
 
+  /**
+   * Deselects all nodes/connections when the user clicks empty canvas space, but only
+   * if the interaction was a genuine click rather than the end of a pan drag.
+   *
+   * @param {MouseEvent} e - The click event.
+   * @returns {void}
+   */
   const handleCanvasClick = (e) => {
     // Only deselect if user didn't drag (was a real click)
     if (!hasDragged && (e.target === canvasRef.current || e.target.classList.contains('canvas-inner'))) {
@@ -47,6 +91,13 @@ function Canvas() {
     }
   }
 
+  /**
+   * Zooms the canvas in/out on mouse wheel, clamped to the range 0.25x-2x, and adjusts
+   * the pan so the canvas point under the cursor stays fixed during the zoom.
+   *
+   * @param {WheelEvent} e - The wheel event.
+   * @returns {void}
+   */
   const handleWheel = useCallback((e) => {
     e.preventDefault()
     const delta = e.deltaY > 0 ? -0.1 : 0.1
@@ -68,6 +119,13 @@ function Canvas() {
     dispatch({ type: 'SET_PAN', payload: { x: newPanX, y: newPanY } })
   }, [state.zoom, state.pan, dispatch])
 
+  /**
+   * Begins panning the canvas when the user presses the middle mouse button, or the
+   * left button on empty canvas space or with Alt held. Records the starting offset.
+   *
+   * @param {MouseEvent} e - The mousedown event.
+   * @returns {void}
+   */
   const handleMouseDown = (e) => {
     // Left click on empty canvas, middle mouse button, or Alt + left click - start panning
     const isCanvasClick = e.target === canvasRef.current || e.target.classList.contains('canvas-inner')
@@ -79,6 +137,13 @@ function Canvas() {
     }
   }
 
+  /**
+   * While panning is active, updates the pan offset to follow the cursor and marks
+   * that a drag occurred (so the subsequent click is not treated as a deselect).
+   *
+   * @param {MouseEvent} e - The mousemove event.
+   * @returns {void}
+   */
   const handleMouseMove = useCallback((e) => {
     if (isPanning) {
       setHasDragged(true)
@@ -92,6 +157,12 @@ function Canvas() {
     }
   }, [isPanning, panStart, state.zoom, dispatch])
 
+  /**
+   * Ends panning and clears the drag flag on the next tick, giving the click handler
+   * a chance to read hasDragged before it resets.
+   *
+   * @returns {void}
+   */
   const handleMouseUp = () => {
     setIsPanning(false)
     // Reset hasDragged after a short delay to allow click handler to check it
@@ -106,6 +177,15 @@ function Canvas() {
     }
   }, [handleWheel])
 
+  /**
+   * Handles clicking a node's border port. If no connection is in progress, starts one
+   * from the clicked port; otherwise, if the click is on a different node, completes the
+   * connection from the pending source to this target.
+   *
+   * @param {string} nodeId - The id of the clicked node.
+   * @param {{x: number, y: number}} point - The clicked port position in canvas space.
+   * @returns {void}
+   */
   const handleBorderClick = useCallback((nodeId, point) => {
     if (!connectingFrom) {
       // Start new connection
@@ -124,6 +204,15 @@ function Canvas() {
     }
   }, [connectingFrom, dispatch])
 
+  /**
+   * Persists updated source/target port positions for a connection when its auto-routing
+   * selects different ports than were previously stored.
+   *
+   * @param {string} connectionId - The id of the connection whose ports changed.
+   * @param {{x: number, y: number}} sourcePoint - The new source port position.
+   * @param {{x: number, y: number}} targetPoint - The new target port position.
+   * @returns {void}
+   */
   const handlePortsChanged = useCallback((connectionId, sourcePoint, targetPoint) => {
     dispatch({
       type: 'UPDATE_CONNECTION_PORTS',

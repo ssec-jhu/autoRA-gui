@@ -1,3 +1,13 @@
+/**
+ * Unit tests for `utils/pythonGenerator`.
+ *
+ * Covers translating a workflow state into runnable Python: name sanitization
+ * (toPythonName), execution ordering, import-alias preparation, import and
+ * pip-install generation, full code generation, runner parameter grouping,
+ * variable initialization, and pip package collection.
+ *
+ * @module utils/pythonGenerator.test
+ */
 import { describe, it, expect } from 'vitest'
 import {
   CodeBuilder,

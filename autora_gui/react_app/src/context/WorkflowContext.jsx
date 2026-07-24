@@ -1,9 +1,21 @@
+/**
+ * Global state store for the workflow editor. Holds all editor state (nodes,
+ * connections, selection, zoom/pan, and undo/redo history) via a reducer and
+ * exposes it to the component tree through a React Context provider and the
+ * useWorkflow hook.
+ *
+ * @module context/WorkflowContext
+ */
+
 import React, { createContext, useContext, useReducer, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { EMBEDDED_COMPONENTS } from '../data/components.js'
 
 const WorkflowContext = createContext(null)
 
+/**
+ * Action types that should be recorded in the undo/redo history.
+ */
 // Actions that should be tracked in undo/redo history
 const UNDOABLE_ACTIONS = [
   'ADD_NODE',
@@ -16,8 +28,14 @@ const UNDOABLE_ACTIONS = [
   'END_DRAG'  // Commits drag as single undo step
 ]
 
+/**
+ * Maximum number of history entries retained for undo/redo.
+ */
 const MAX_HISTORY_SIZE = 50
 
+/**
+ * Initial reducer state for a fresh, empty workflow editor session.
+ */
 export const initialState = {
   components: {},
   nodes: [],
@@ -35,6 +53,17 @@ export const initialState = {
   dragStartState: null
 }
 
+/**
+ * Core reducer that applies a single action to the workflow state. Handles node
+ * lifecycle (ADD_NODE, UPDATE_NODE, UPDATE_NODE_POSITION, DELETE_NODE),
+ * connection lifecycle (ADD_CONNECTION, DELETE_CONNECTION, UPDATE_CONNECTION_PORTS),
+ * selection (SELECT_NODE, SELECT_CONNECTION, DESELECT_ALL), connecting/drag
+ * gestures, viewport (SET_ZOOM, SET_PAN), workflow load/clear, and undo/redo.
+ *
+ * @param {Object} state - The current workflow state.
+ * @param {Object} action - The dispatched action with a `type` and optional `payload`.
+ * @returns {Object} The next workflow state.
+ */
 export function workflowReducer(state, action) {
   switch (action.type) {
     case 'SET_COMPONENTS':
@@ -268,6 +297,18 @@ export function workflowReducer(state, action) {
   }
 }
 
+/**
+ * Reducer wrapper that layers undo/redo history management over
+ * workflowReducer. UNDO/REDO are delegated directly; END_DRAG commits the
+ * pre-drag snapshot as a single history entry; other undoable actions push the
+ * prior state onto the history stack (capped at MAX_HISTORY_SIZE) and clear the
+ * redo future when nodes or connections actually change. Non-undoable actions
+ * pass through unchanged.
+ *
+ * @param {Object} state - The current workflow state.
+ * @param {Object} action - The dispatched action with a `type` and optional `payload`.
+ * @returns {Object} The next workflow state, including updated history.
+ */
 // Wrapper reducer that handles history for undoable actions
 function undoableReducer(state, action) {
   // Handle undo/redo directly
@@ -321,6 +362,15 @@ function undoableReducer(state, action) {
   return workflowReducer(state, action)
 }
 
+/**
+ * Context provider that owns the workflow reducer state and dispatch, making
+ * them available to descendant components. On mount it seeds the component
+ * catalog from embedded data when present, otherwise fetching it from the API.
+ *
+ * @param {Object} props - Component props.
+ * @param {JSX.Element} props.children - The subtree that consumes the context.
+ * @returns {JSX.Element} The provider wrapping its children.
+ */
 export function WorkflowProvider({ children }) {
   const [state, dispatch] = useReducer(undoableReducer, initialState)
 
@@ -343,6 +393,12 @@ export function WorkflowProvider({ children }) {
   )
 }
 
+/**
+ * Custom hook for accessing the workflow context. Must be called within a
+ * WorkflowProvider, otherwise it throws.
+ *
+ * @returns {Object} The context value: `{ state, dispatch }`.
+ */
 export function useWorkflow() {
   const context = useContext(WorkflowContext)
   if (!context) {

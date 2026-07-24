@@ -12,7 +12,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: "3.11"
+        python-version: "3.14"
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip
@@ -32,12 +32,12 @@ jobs:
   #
   # * PyPI Project Name: name of pypi package
   # * Owner: org, e.g. ssec-jhu
-  # * Repository name: name of repo not-including org, e.g. base-template
+  # * Repository name: name of repo not-including org, e.g. autoRA-gui
   # * Workflow name: dist.yml
+  # * Environment name: testpypi (for TestPyPI) or pypi (for PyPI)
   #
   # This should be done separately for both testpypi and pypi (these need
-  # separate accounts). Once complete, uncomment the "Publish distribution"
-  # sections below.
+  # separate accounts).
   #
   publish-to-testpypi:
     name: Publish to TestPyPI
@@ -45,9 +45,7 @@ jobs:
     needs:
     - build
     runs-on: ubuntu-latest
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/<pypi-package-name>
+    environment: testpypi
     permissions:
       id-token: write
     steps:
@@ -56,10 +54,10 @@ jobs:
       with:
         name: python-package-distributions
         path: dist/
-    # - name: Publish distribution TestPyPI
-    #   uses: pypa/gh-action-pypi-publish@release/v1
-    #   with:
-    #     repository-url: https://test.pypi.org/legacy/
+    - name: Publish distribution to TestPyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
 
   publish-to-pypi:
     name: Publish to PyPI
@@ -68,9 +66,7 @@ jobs:
     - build
     - publish-to-testpypi
     runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/p/<pypi-package-name> 
+    environment: pypi
     permissions:
       id-token: write
     steps:
@@ -79,5 +75,5 @@ jobs:
       with:
         name: python-package-distributions
         path: dist/
-    # - name: Publish distribution to PyPI
-    #   uses: pypa/gh-action-pypi-publish@release/v1
+    - name: Publish distribution to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
