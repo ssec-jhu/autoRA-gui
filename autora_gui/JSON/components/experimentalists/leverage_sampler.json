@@ -3,10 +3,10 @@
   "protocolType": "experimentalist",
   "name": "Leverage Sampler",
   "description": "Identifies influential datapoints by iteratively refitting models using leave-one-out validation. Computes how much each point affects model performance and selects candidates based on their influence.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-leverage/blob/main/src/autora/experimentalist/leverage/__init__.py#L148",
-  "pythonName": "leverage_sample",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-leverage/blob/main/src/autora/experimentalist/leverage/__init__.py#L8",
+  "pythonName": "sample",
   "importPath": "autora.experimentalist.leverage",
-  "pipInstall": "autora-experimentalist-leverage==1.0.0",
+  "pipInstall": "autora-experimentalist-leverage==1.10",
   "parameters": {
     "leverage_sample": [
       {
@@ -63,56 +63,56 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "name": "conditions",
-      "description": "Pool of candidate experimental conditions (independent variables).",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
+  "inputDataType": {
+    "variables": [
+      {
+        "name": "conditions",
+        "description": "Pool of candidate experimental conditions (independent variables).",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
+      {
+        "name": "Y",
+        "description": "Pool of dependent variables corresponding to the conditions.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "models",
+        "description": "Scikit-learn compatible regression or classification model(s) to evaluate leverage.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
+  "outputDataType": {
+    "name": "conditions",
+    "description": "Selected influential experimental conditions with added Gaussian noise.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
     },
-    {
-      "name": "Y",
-      "description": "Pool of dependent variables corresponding to the conditions.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    },
-    {
-      "name": "models",
-      "description": "Scikit-learn compatible regression or classification model(s) to evaluate leverage.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
-  "outputDataType": [
-    {
-      "name": "conditions",
-      "description": "Selected influential experimental conditions with added Gaussian noise.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ]
+    "validValues": null,
+    "default": null
+  }
 }

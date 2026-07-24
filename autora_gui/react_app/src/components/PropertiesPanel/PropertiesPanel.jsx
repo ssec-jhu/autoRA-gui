@@ -1,11 +1,130 @@
+/**
+ * Right-hand properties panel for the AutoRA Workflow Editor. Displays the
+ * editable parameters, filter settings, inputs, and outputs of the currently
+ * selected node, or a read-only preview of a component hovered/clicked in the
+ * palette when no node is selected.
+ *
+ * @module components/PropertiesPanel/PropertiesPanel
+ */
+
 import React from 'react'
 import { useWorkflow } from '../../context/WorkflowContext'
 import './PropertiesPanel.css'
 
+/**
+ * Clickable "?" hint that toggles a description popover on click.
+ *
+ * @param {Object} props
+ * @param {string} props.description - Parameter description shown in the popover; renders nothing when falsy
+ * @returns {JSX.Element|null}
+ */
+// Clickable "?" hint that toggles a description popover on click
+function ParameterHint({ description }) {
+  const [open, setOpen] = React.useState(false)
+  if (!description) return null
+  return (
+    <span className="parameter-hint-wrapper">
+      <button
+        type="button"
+        className={`parameter-hint${open ? ' active' : ''}`}
+        aria-expanded={open}
+        aria-label="Show parameter description"
+        onClick={() => setOpen(o => !o)}
+      >
+        ?
+      </button>
+      {open && (
+        <span className="parameter-hint-popover" role="tooltip">
+          {description}
+        </span>
+      )}
+    </span>
+  )
+}
+
+/**
+ * Determine a human-readable datatype string from a variable type structure,
+ * recursing through list wrappers and summarizing dict variants.
+ *
+ * @param {Object} varType - Variable type descriptor (primitive, dict, or list shaped)
+ * @returns {string} The resolved datatype (e.g. 'integer', 'dict[real]', 'list[real]', or 'unknown')
+ */
+// Helper to determine datatype from variable type structure
+const getDataType = (varType) => {
+  if (!varType) return 'unknown'
+  // PrimitiveVariableType: has 'datatype' directly
+  if (varType.datatype) return varType.datatype
+  // DictVariableType: has 'variables' (array or single object)
+  if (varType.variables) {
+    if (Array.isArray(varType.variables)) {
+      const innerTypes = varType.variables.map(v => v.datatype || 'unknown')
+      const uniqueTypes = [...new Set(innerTypes)]
+      return `dict[${uniqueTypes.join(', ')}]`
+    } else {
+      // Single object (legacy format)
+      const innerType = varType.variables.datatype || 'unknown'
+      return `dict[${innerType}]`
+    }
+  }
+  // ListVariableType: has 'variable' (singular)
+  if (varType.variable) return `list[${getDataType(varType.variable)}]`
+  return 'unknown'
+}
+
+/**
+ * Find the display name of a variable, descending through list wrappers.
+ *
+ * @param {Object} varType - Variable type descriptor
+ * @returns {string} The variable's name, or 'unknown' if none is found
+ */
+// Find the display name of a variable, descending through list wrappers
+const getVariableName = (varType) => {
+  if (!varType) return 'unknown'
+  if (varType.name) return varType.name
+  if (varType.variable) return getVariableName(varType.variable)
+  return 'unknown'
+}
+
+/**
+ * Normalize a data type spec (null, single variable, dict {variables},
+ * list {variable}, or legacy array) into a list of {name, type} entries.
+ *
+ * @param {Object|Array} dataType - Data type descriptor to normalize
+ * @returns {Array<{name: string, type: string}>} List of display entries for rendering
+ */
+// Normalize a data type spec (null, single variable, dict {variables},
+// list {variable}, or legacy array) into a list of {name, type} entries
+const getVariableEntries = (dataType) => {
+  if (!dataType) return []
+  if (Array.isArray(dataType)) {
+    return dataType.map(v => ({ name: getVariableName(v), type: getDataType(v) }))
+  }
+  if (Array.isArray(dataType.variables)) {
+    return dataType.variables.map(v => ({ name: getVariableName(v), type: getDataType(v) }))
+  }
+  return [{ name: getVariableName(dataType), type: getDataType(dataType) }]
+}
+
+/**
+ * Properties panel component. Reads the workflow state from context and renders
+ * one of three views: the selected node's editable properties, a read-only
+ * preview of a palette component, or an empty-state prompt. Defines local
+ * helpers for parameter editing, value parsing, and input rendering.
+ *
+ * @returns {JSX.Element}
+ */
 function PropertiesPanel() {
   const { state, dispatch } = useWorkflow()
   const selectedNode = state.nodes.find(n => n.id === state.selectedNodeId)
+  const previewedComponent = state.previewedComponent
 
+  /**
+   * Dispatch an update to a single parameter on the selected node.
+   *
+   * @param {string} paramName - Name of the parameter to update
+   * @param {*} value - New value for the parameter
+   * @returns {void}
+   */
   const handleParameterChange = (paramName, value) => {
     dispatch({
       type: 'UPDATE_NODE',
@@ -16,6 +135,13 @@ function PropertiesPanel() {
     })
   }
 
+  /**
+   * Coerce a raw input string into the correct JS type for the given datatype.
+   *
+   * @param {string} value - Raw value from the input element
+   * @param {string} datatype - Target datatype ('integer', 'real', 'boolean', or other)
+   * @returns {number|boolean|string|null} Parsed value, or null when the input is empty
+   */
   const parseValue = (value, datatype) => {
     if (value === '' || value === null || value === undefined) return null
     switch (datatype) {
@@ -30,6 +156,13 @@ function PropertiesPanel() {
     }
   }
 
+  /**
+   * Render the appropriate input control for a parameter based on its datatype
+   * (number, boolean/categorical select, or text).
+   *
+   * @param {Object} param - Parameter descriptor with name, datatype, default, and validValues
+   * @returns {JSX.Element} The input or select element for editing the parameter
+   */
   const renderInput = (param) => {
     const currentValue = selectedNode.parameters[param.name]
 
@@ -89,21 +222,111 @@ function PropertiesPanel() {
     }
   }
 
+  // Show previewed component when no node is selected
+  if (!selectedNode && previewedComponent) {
+    const previewParams = Object.values(previewedComponent.parameters || {}).flat()
+    const previewInputs = getVariableEntries(previewedComponent.inputDataType)
+    const previewOutputs = getVariableEntries(previewedComponent.outputDataType)
+    return (
+      <aside className="properties-panel">
+        <div className="properties-header">
+          <h2>Component Preview</h2>
+        </div>
+        <div className="properties-content">
+          <div className="property-section">
+            <div className="node-info">
+              <h3 className="node-info-name">{previewedComponent.name}</h3>
+              <span className="node-info-type">{previewedComponent.protocolType?.replace('_', ' ')}</span>
+            </div>
+            {previewedComponent.description && (
+              <p className="node-description">{previewedComponent.description}</p>
+            )}
+          </div>
+
+          {previewParams.length > 0 && (
+            <div className="property-section">
+              <h4 className="section-title">Parameters</h4>
+              <div className="parameters-list">
+                {previewParams.map(param => (
+                  <div key={param.name} className="parameter-row preview-only">
+                    <label className="parameter-label">
+                      {param.name}
+                      <ParameterHint description={param.description} />
+                    </label>
+                    <div className="parameter-value">
+                      <span className="parameter-datatype">{param.datatype}</span>
+                    </div>
+                    {param.default !== undefined && param.default !== null && (
+                      <span className="parameter-default">
+                        Default: {param.default.toString()}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {previewInputs.length > 0 && (
+            <div className="property-section">
+              <h4 className="section-title">Inputs</h4>
+              <div className="data-types">
+                {previewInputs.map((input, idx) => (
+                  <div key={idx} className="data-type-item">
+                    <span className="data-type-name">{input.name}</span>
+                    <span className="data-type-type">{input.type}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {previewOutputs.length > 0 && (
+            <div className="property-section">
+              <h4 className="section-title">Outputs</h4>
+              <div className="data-types">
+                {previewOutputs.map((output, idx) => (
+                  <div key={idx} className="data-type-item">
+                    <span className="data-type-name">{output.name}</span>
+                    <span className="data-type-type">{output.type}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="preview-hint">
+            <p>Drag this component to the canvas to use it</p>
+          </div>
+        </div>
+      </aside>
+    )
+  }
+
   if (!selectedNode) {
     return (
       <aside className="properties-panel">
         <div className="properties-empty">
           <div className="empty-icon">📋</div>
           <h3>No Selection</h3>
-          <p>Select a node to view and edit its properties</p>
+          <p>Select a node or click a component to view its properties</p>
         </div>
       </aside>
     )
   }
 
   const parameters = Object.values(selectedNode.componentData?.parameters || {}).flat()
+  const nodeInputs = getVariableEntries(selectedNode.componentData?.inputDataType)
+  const nodeOutputs = getVariableEntries(selectedNode.componentData?.outputDataType)
   const isFilterNode = selectedNode.type === 'filter_point'
 
+  /**
+   * Dispatch an update to a single filter parameter on the selected filter node.
+   *
+   * @param {string} paramName - Name of the filter parameter to update
+   * @param {*} value - New value for the filter parameter
+   * @returns {void}
+   */
   const handleFilterParameterChange = (paramName, value) => {
     dispatch({
       type: 'UPDATE_NODE',
@@ -128,6 +351,12 @@ function PropertiesPanel() {
           {selectedNode.description && (
             <p className="node-description">{selectedNode.description}</p>
           )}
+          <button
+            className="delete-node-btn"
+            onClick={() => dispatch({ type: 'DELETE_NODE', payload: selectedNode.id })}
+          >
+            Delete Node
+          </button>
         </div>
 
         {isFilterNode && (
@@ -137,7 +366,7 @@ function PropertiesPanel() {
               <div className="parameter-row">
                 <label className="parameter-label">
                   Max Counter
-                  <span className="parameter-hint" title="Maximum number of loop iterations before taking the alternative path">?</span>
+                  <ParameterHint description="Maximum number of loop iterations before taking the alternative path" />
                 </label>
                 <div className="parameter-input">
                   <input
@@ -171,9 +400,7 @@ function PropertiesPanel() {
                 <div key={param.name} className="parameter-row">
                   <label className="parameter-label">
                     {param.name}
-                    {param.description && (
-                      <span className="parameter-hint" title={param.description}>?</span>
-                    )}
+                    <ParameterHint description={param.description} />
                   </label>
                   <div className="parameter-input">
                     {renderInput(param)}
@@ -189,28 +416,28 @@ function PropertiesPanel() {
           </div>
         )}
 
-        {selectedNode.componentData?.inputDataType && (
+        {nodeInputs.length > 0 && (
           <div className="property-section">
             <h4 className="section-title">Inputs</h4>
             <div className="data-types">
-              {selectedNode.componentData.inputDataType.map((input, idx) => (
+              {nodeInputs.map((input, idx) => (
                 <div key={idx} className="data-type-item">
                   <span className="data-type-name">{input.name}</span>
-                  <span className="data-type-type">{input.datatype}</span>
+                  <span className="data-type-type">{input.type}</span>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {selectedNode.componentData?.outputDataType && (
+        {nodeOutputs.length > 0 && (
           <div className="property-section">
             <h4 className="section-title">Outputs</h4>
             <div className="data-types">
-              {selectedNode.componentData.outputDataType.map((output, idx) => (
+              {nodeOutputs.map((output, idx) => (
                 <div key={idx} className="data-type-item">
                   <span className="data-type-name">{output.name}</span>
-                  <span className="data-type-type">{output.datatype}</span>
+                  <span className="data-type-type">{output.type}</span>
                 </div>
               ))}
             </div>

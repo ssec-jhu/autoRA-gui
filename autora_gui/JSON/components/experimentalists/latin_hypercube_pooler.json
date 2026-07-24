@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-lhs/blob/main/src/autora/experimentalist/lhs/__init__.py#L16",
   "pythonName": "pool",
   "importPath": "autora.experimentalist.lhs",
-  "pipInstall": "autora-experimentalist-lhs==1.0.0",
+  "pipInstall": "autora==4.2.0",
   "parameters": {
     "pool": [
       {
@@ -35,32 +35,28 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "name": "variables",
-      "description": "Variable collection with minimum and maximum values for each independent variable.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": 1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
-  "outputDataType": [
-    {
-      "name": "conditions",
-      "description": "DataFrame of experimental conditions sampled using Latin Hypercube design.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ]
+  "inputDataType": {
+    "name": "ivs",
+    "description": "Variable collection with minimum and maximum values for each independent variable.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  },
+  "outputDataType": {
+    "name": "res",
+    "description": "DataFrame of experimental conditions sampled using Latin Hypercube design.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  }
 }

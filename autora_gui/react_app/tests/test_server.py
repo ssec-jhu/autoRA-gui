@@ -6,6 +6,7 @@ from autora_gui.react_app.server import (
     CanvasLocation,
     ControlComponent,
     FilterComponent,
+    ParameterSetting,
     Workflow,
     WorkflowComponent,
     WorkflowLink,
@@ -14,6 +15,18 @@ from autora_gui.react_app.server import (
 )
 
 client = TestClient(app)
+
+
+class TestLifespan:
+    """Tests for the lifespan startup handler."""
+
+    def test_lifespan_prints_category_counts(self, capsys):
+        """Test that startup prints one line per component category."""
+        with TestClient(app):
+            pass
+        captured = capsys.readouterr()
+        for category in ("controls", "theorists", "experimentalists", "experiment_runners"):
+            assert category in captured.out
 
 
 class TestLoadComponents:
@@ -68,6 +81,18 @@ class TestPydanticModels:
         )
         assert comp.uuid == "comp-1"
         assert comp.parameterSetting == []
+
+    def test_parameter_setting_valid(self):
+        """Test ParameterSetting with valid data."""
+        ps = ParameterSetting(uuid="ps-1", name="learning_rate", value=0.01)
+        assert ps.uuid == "ps-1"
+        assert ps.name == "learning_rate"
+        assert ps.value == 0.01
+
+    def test_parameter_setting_optional_name(self):
+        """Test ParameterSetting with no name."""
+        ps = ParameterSetting(uuid="ps-2", value=42)
+        assert ps.name is None
 
     def test_workflow_link_valid(self):
         """Test WorkflowLink with valid data."""
@@ -143,3 +168,14 @@ class TestAPIEndpoints:
         data = response.json()
         assert data["success"] is True
         assert data["workflow_id"] == "My Workflow"
+
+    def test_get_schema_valid(self):
+        """Test GET /api/schema/{name} with a known schema."""
+        response = client.get("/api/schema/workflow_model")
+        assert response.status_code == 200
+        assert isinstance(response.json(), dict)
+
+    def test_get_schema_invalid(self):
+        """Test GET /api/schema/{name} with an unknown schema returns 404."""
+        response = client.get("/api/schema/nonexistent_schema")
+        assert response.status_code == 404

@@ -47,6 +47,7 @@
               "type": "null"
             }
           ],
+          "default": null,
           "title": "Name"
         },
         "description": {
@@ -58,29 +59,41 @@
               "type": "null"
             }
           ],
+          "default": null,
           "title": "Description"
         },
         "variables": {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/PrimitiveVariableType"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrimitiveVariableType"
+            },
+            {
+              "$ref": "#/$defs/ListVariableType"
+            },
+            {
+              "$ref": "#/$defs/DictVariableType"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/PrimitiveVariableType"
+                  },
+                  {
+                    "$ref": "#/$defs/ListVariableType"
+                  },
+                  {
+                    "$ref": "#/$defs/DictVariableType"
+                  }
+                ]
               },
-              {
-                "$ref": "#/$defs/ListVariableType"
-              },
-              {
-                "$ref": "#/$defs/DictVariableType"
-              }
-            ]
-          },
-          "title": "Variables",
-          "type": "array"
+              "type": "array"
+            }
+          ],
+          "title": "Variables"
         }
       },
       "required": [
-        "name",
-        "description",
         "variables"
       ],
       "title": "DictVariableType",
@@ -98,6 +111,7 @@
               "type": "null"
             }
           ],
+          "default": null,
           "title": "Name"
         },
         "description": {
@@ -109,6 +123,7 @@
               "type": "null"
             }
           ],
+          "default": null,
           "title": "Description"
         },
         "variable": {
@@ -127,8 +142,6 @@
         }
       },
       "required": [
-        "name",
-        "description",
         "variable"
       ],
       "title": "ListVariableType",
@@ -146,6 +159,7 @@
               "type": "null"
             }
           ],
+          "default": null,
           "title": "Name"
         },
         "description": {
@@ -157,6 +171,7 @@
               "type": "null"
             }
           ],
+          "default": null,
           "title": "Description"
         },
         "datatype": {
@@ -200,8 +215,6 @@
         }
       },
       "required": [
-        "name",
-        "description",
         "datatype"
       ],
       "title": "PrimitiveVariableType",
@@ -282,20 +295,13 @@
     "inputDataType": {
       "anyOf": [
         {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/PrimitiveVariableType"
-              },
-              {
-                "$ref": "#/$defs/ListVariableType"
-              },
-              {
-                "$ref": "#/$defs/DictVariableType"
-              }
-            ]
-          },
-          "type": "array"
+          "$ref": "#/$defs/PrimitiveVariableType"
+        },
+        {
+          "$ref": "#/$defs/ListVariableType"
+        },
+        {
+          "$ref": "#/$defs/DictVariableType"
         },
         {
           "type": "null"
@@ -306,20 +312,13 @@
     "outputDataType": {
       "anyOf": [
         {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/PrimitiveVariableType"
-              },
-              {
-                "$ref": "#/$defs/ListVariableType"
-              },
-              {
-                "$ref": "#/$defs/DictVariableType"
-              }
-            ]
-          },
-          "type": "array"
+          "$ref": "#/$defs/PrimitiveVariableType"
+        },
+        {
+          "$ref": "#/$defs/ListVariableType"
+        },
+        {
+          "$ref": "#/$defs/DictVariableType"
         },
         {
           "type": "null"

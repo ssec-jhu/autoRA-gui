@@ -3,10 +3,10 @@
   "protocolType": "experimentalist",
   "name": "Nearest Values Sampler",
   "description": "Returns the nearest values between input samples and reference conditions using Euclidean distance.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-nearest-value/blob/main/src/autora/experimentalist/nearest_value/__init__.py#L66",
-  "pythonName": "nearest_values_sampler",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-nearest-value/blob/main/src/autora/experimentalist/nearest_value/__init__.py#L9",
+  "pythonName": "sample",
   "importPath": "autora.experimentalist.nearest_value",
-  "pipInstall": "autora-experimentalist-nearest_value==1.0.0",
+  "pipInstall": "autora-experimentalist-nearest-value==2.2.0",
   "parameters": {
     "nearest_values_sampler": [
       {
@@ -23,44 +23,44 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "name": "conditions",
-      "description": "Pool of candidate experimental condition samples to select from.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
+  "inputDataType": {
+    "variables": [
+      {
+        "name": "conditions",
+        "description": "Pool of candidate experimental condition samples to select from.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
+      {
+        "name": "reference_conditions",
+        "description": "Reference conditions used as distance reference points for finding nearest values.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
+  "outputDataType": {
+    "name": "conditions",
+    "description": "Selected nearest experimental conditions.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
     },
-    {
-      "name": "reference_conditions",
-      "description": "Reference conditions used as distance reference points for finding nearest values.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
-  "outputDataType": [
-    {
-      "name": "conditions",
-      "description": "Selected nearest experimental conditions.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ]
+    "validValues": null,
+    "default": null
+  }
 }

@@ -116,11 +116,8 @@ jobs:
   docs:
     name: Build docs with Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
-    # need permissions to deploy to GitHub Pages
     permissions:
       contents: read
-      pages: write
-      id-token: write
     strategy:
       matrix:
         python-version: [ 3.11 ]
@@ -140,15 +137,6 @@ jobs:
           SPHINXOPTS: '-W'
         run: tox -e build-docs
         shell: bash
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        with:
-          path: ./docs/_build/html
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
   build:
     name: Build and Publish.
@@ -179,6 +167,6 @@ jobs:
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
           context: .
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

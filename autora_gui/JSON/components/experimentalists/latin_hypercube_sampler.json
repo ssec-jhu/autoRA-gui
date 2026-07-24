@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-lhs/blob/main/src/autora/experimentalist/lhs/__init__.py#L107",
   "pythonName": "sample",
   "importPath": "autora.experimentalist.lhs",
-  "pipInstall": "autora-experimentalist-lhs==1.0.0",
+  "pipInstall": "autora==4.2.0",
   "parameters": {
     "sample": [
       {
@@ -47,44 +47,44 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "name": "conditions",
-      "description": "Pool of candidate experimental conditions to sample from.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
+  "inputDataType": {
+    "variables": [
+      {
+        "name": "conditions",
+        "description": "Pool of candidate experimental conditions to sample from.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
+      {
+        "name": "reference_conditions",
+        "description": "Pre-existing conditions used to exclude occupied hypercubes from sampling.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
+  "outputDataType": {
+    "name": "conditions",
+    "description": "Selected experimental conditions using Latin Hypercube Sampling.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": true
     },
-    {
-      "name": "reference_conditions",
-      "description": "Pre-existing conditions used to exclude occupied hypercubes from sampling.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 0,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
-  "outputDataType": [
-    {
-      "name": "conditions",
-      "description": "Selected experimental conditions using Latin Hypercube Sampling.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ]
+    "validValues": null,
+    "default": null
+  }
 }

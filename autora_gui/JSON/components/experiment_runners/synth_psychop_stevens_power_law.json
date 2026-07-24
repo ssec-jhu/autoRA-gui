@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychophysics/stevens_power_law.py#L11",
   "pythonName": "stevens_power_law",
   "importPath": "autora.experiment_runner.synthetic.psychophysics.stevens_power_law",
-  "pipInstall": "autora-synthetic==1.0.0",
+  "pipInstall": "autora-synthetic==2.2.0",
   "parameters": {
     "stevens_power_law": [
       {
@@ -85,32 +85,28 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "name": "conditions",
-      "description": "Physical stimulus intensity values.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
-  "outputDataType": [
-    {
-      "name": "observations",
-      "description": "Perceived stimulus intensity.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ]
+  "inputDataType": {
+    "name": "S",
+    "description": "Stimulus intensity",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  },
+  "outputDataType": {
+    "name": "perceived_intensity",
+    "description": "Perceived intensity",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  }
 }

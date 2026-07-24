@@ -1,3 +1,12 @@
+/**
+ * Unit tests for `utils/serialization`.
+ *
+ * Covers round-tripping a workflow between editor state and its persisted form:
+ * serializeWorkflow (start/end/filter nodes, components, and links) and
+ * deserializeWorkflow (reconstructing nodes and connections from saved data).
+ *
+ * @module utils/serialization.test
+ */
 import { describe, it, expect, vi } from 'vitest'
 import { serializeWorkflow, deserializeWorkflow } from './serialization'
 
@@ -103,6 +112,7 @@ describe('serializeWorkflow', () => {
   })
 })
 
+// Reconstructing editor state from persisted workflow data
 describe('deserializeWorkflow', () => {
   const componentsMap = {
     theorists: [

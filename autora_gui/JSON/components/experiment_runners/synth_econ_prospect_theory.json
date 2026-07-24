@@ -6,7 +6,7 @@
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/economics/prospect_theory.py#L13",
   "pythonName": "prospect_theory",
   "importPath": "autora.experiment_runner.synthetic.economics.prospect_theory",
-  "pipInstall": "autora-synthetic==1.0.0",
+  "pipInstall": "autora-synthetic==2.2.0",
   "parameters": {
     "prospect_theory": [
       {
@@ -145,32 +145,68 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "name": "conditions",
-      "description": "Gamble options with values and probabilities.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
+  "inputDataType": {
+    "variables": [
+      {
+        "name": "v_a",
+        "description": "Value of Option A (in dollars).",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
-    }
-  ],
-  "outputDataType": [
-    {
-      "name": "observations",
-      "description": "Choice probabilities reflecting prospect theory predictions.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
+      {
+        "name": "p_a",
+        "description": "Probability of Option A (0 to 1).",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
-    }
-  ]
+      {
+        "name": "v_b",
+        "description": "Value of Option B (in dollars).",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "p_b",
+        "description": "Probability of Option B (0 to 1).",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
+  "outputDataType": {
+    "name": "choose_A",
+    "description": "Probability of choosing Option A (0 to 1).",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  }
 }

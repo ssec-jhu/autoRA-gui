@@ -1,12 +1,51 @@
-import React, { useRef } from 'react'
+/**
+ * Top toolbar for the AutoRA Workflow Editor. Provides workflow actions
+ * (save/load JSON, clear, undo/redo), code generation (Python and Jupyter
+ * notebook), zoom controls, and live counts of nodes and connections.
+ *
+ * @module components/Toolbar/Toolbar
+ */
+
+import React, { useRef, useCallback, useEffect } from 'react'
 import { useWorkflow } from '../../context/WorkflowContext'
 import { serializeWorkflow, deserializeWorkflow } from '../../utils/serialization'
+import { generatePythonCode, generatePipInstalls } from '../../utils/pythonGenerator'
+import { generateNotebookString } from '../../utils/notebookGenerator'
 import './Toolbar.css'
 
+/**
+ * Read the current canvas element's dimensions, falling back to a default size
+ * when the canvas is not present in the DOM.
+ *
+ * @returns {{width: number, height: number}} The canvas width and height in pixels
+ */
+// Canvas dimensions (should match the actual canvas size)
+const getCanvasCenter = () => {
+  const canvas = document.querySelector('.canvas')
+  if (canvas) {
+    const rect = canvas.getBoundingClientRect()
+    return { width: rect.width, height: rect.height }
+  }
+  return { width: 800, height: 600 } // fallback
+}
+
+/**
+ * Toolbar component. Reads and dispatches workflow state via context and
+ * exposes the editor's top-level actions. Registers global keyboard shortcuts
+ * for undo/redo while mounted.
+ *
+ * @returns {JSX.Element}
+ */
 function Toolbar() {
   const { state, dispatch } = useWorkflow()
   const fileInputRef = useRef(null)
 
+  /**
+   * Serialize the current workflow, validate it against the backend (skipping
+   * silently on network failure), then download it as a timestamped JSON file.
+   *
+   * @returns {Promise<void>}
+   */
   const handleSave = async () => {
     const workflow = serializeWorkflow(state)
 
@@ -35,6 +74,13 @@ function Toolbar() {
     URL.revokeObjectURL(url)
   }
 
+  /**
+   * Read a selected JSON file, deserialize it into nodes and connections, and
+   * load it into the workflow state. Alerts on parse/deserialize failure.
+   *
+   * @param {Event} e - Change event from the hidden file input
+   * @returns {void}
+   */
   const handleLoad = (e) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -53,21 +99,165 @@ function Toolbar() {
     e.target.value = ''
   }
 
+  /**
+   * Clear the entire canvas after user confirmation, unless it is already empty.
+   *
+   * @returns {void}
+   */
   const handleClear = () => {
     if (state.nodes.length === 0 && state.connections.length === 0) return
-    if (confirm('Clear the entire canvas? This cannot be undone.')) {
+    if (confirm('Clear the entire canvas?')) {
       dispatch({ type: 'CLEAR_CANVAS' })
     }
   }
 
+  /**
+   * Trigger a browser download of the given content as a timestamped file.
+   *
+   * @param {string} content - File contents to download
+   * @param {string} type - MIME type for the blob
+   * @param {string} extension - File extension (without the dot)
+   * @returns {void}
+   */
+  const downloadFile = (content, type, extension) => {
+    const blob = new Blob([content], { type })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `workflow_${new Date().toISOString().slice(0, 10)}.${extension}`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  /**
+   * Generate Python source for the current workflow (with pip install header)
+   * and download it as a .py file. Alerts on generation failure.
+   *
+   * @returns {void}
+   */
+  const handleGeneratePython = () => {
+    try {
+      const pythonCode = generatePythonCode(state)
+      const pipInstalls = generatePipInstalls(state)
+
+      // Create downloadable Python file
+      const fullCode = `# ${pipInstalls}\n\n${pythonCode}`
+      downloadFile(fullCode, 'text/x-python', 'py')
+    } catch (err) {
+      alert(`Failed to generate Python code: ${err.message}`)
+    }
+  }
+
+  /**
+   * Generate a Jupyter notebook for the current workflow and download it as an
+   * .ipynb file. Alerts on generation failure.
+   *
+   * @returns {void}
+   */
+  const handleGenerateNotebook = () => {
+    try {
+      const notebook = generateNotebookString(state)
+      downloadFile(notebook, 'application/x-ipynb+json', 'ipynb')
+    } catch (err) {
+      alert(`Failed to generate notebook: ${err.message}`)
+    }
+  }
+
+  /**
+   * Dispatch an undo action.
+   *
+   * @returns {void}
+   */
+  const handleUndo = () => {
+    dispatch({ type: 'UNDO' })
+  }
+
+  /**
+   * Dispatch a redo action.
+   *
+   * @returns {void}
+   */
+  const handleRedo = () => {
+    dispatch({ type: 'REDO' })
+  }
+
+  const canUndo = state.past?.length > 0
+  const canRedo = state.future?.length > 0
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't trigger if user is typing in an input
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        if (canUndo) handleUndo()
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault()
+        if (canRedo) handleRedo()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [canUndo, canRedo])
+
+  /**
+   * Zoom the canvas to a new level while keeping the viewport center fixed,
+   * clamping the zoom to the allowed range and adjusting pan accordingly.
+   *
+   * @param {number} newZoom - Desired zoom level before clamping
+   * @returns {void}
+   */
+  // Zoom relative to canvas center
+  const zoomToCenter = useCallback((newZoom) => {
+    // Clamp the new zoom value
+    const clampedZoom = Math.max(0.25, Math.min(2, newZoom))
+    if (clampedZoom === state.zoom) return
+
+    // Get canvas dimensions
+    const { width, height } = getCanvasCenter()
+
+    // Calculate the canvas center point in canvas coordinates (before zoom)
+    // The center of the viewport in screen coords is (width/2, height/2)
+    // In canvas coords: centerX = (width/2) / oldZoom - pan.x
+    const centerX = (width / 2) / state.zoom - state.pan.x
+    const centerY = (height / 2) / state.zoom - state.pan.y
+
+    // After zoom, we want the same canvas point to be at the viewport center
+    // newPan.x = (width/2) / newZoom - centerX
+    const newPanX = (width / 2) / clampedZoom - centerX
+    const newPanY = (height / 2) / clampedZoom - centerY
+
+    dispatch({ type: 'SET_ZOOM', payload: clampedZoom })
+    dispatch({ type: 'SET_PAN', payload: { x: newPanX, y: newPanY } })
+  }, [state.zoom, state.pan, dispatch])
+
+  /**
+   * Increase the zoom level by one step, centered on the viewport.
+   *
+   * @returns {void}
+   */
   const handleZoomIn = () => {
-    dispatch({ type: 'SET_ZOOM', payload: state.zoom + 0.1 })
+    zoomToCenter(state.zoom + 0.1)
   }
 
+  /**
+   * Decrease the zoom level by one step, centered on the viewport.
+   *
+   * @returns {void}
+   */
   const handleZoomOut = () => {
-    dispatch({ type: 'SET_ZOOM', payload: state.zoom - 0.1 })
+    zoomToCenter(state.zoom - 0.1)
   }
 
+  /**
+   * Reset zoom to 100% and recenter the pan to the origin.
+   *
+   * @returns {void}
+   */
   const handleZoomReset = () => {
     dispatch({ type: 'SET_ZOOM', payload: 1 })
     dispatch({ type: 'SET_PAN', payload: { x: 0, y: 0 } })
@@ -100,6 +290,32 @@ function Toolbar() {
           <button className="toolbar-btn danger" onClick={handleClear} title="Clear canvas">
             <span className="btn-icon">🗑</span>
             <span className="btn-text">Clear</span>
+          </button>
+          <button
+            className="toolbar-btn"
+            onClick={handleUndo}
+            disabled={!canUndo}
+            title="Undo (Ctrl+Z)"
+          >
+            <span className="btn-icon">↩</span>
+            <span className="btn-text">Undo</span>
+          </button>
+          <button
+            className="toolbar-btn"
+            onClick={handleRedo}
+            disabled={!canRedo}
+            title="Redo (Ctrl+Y)"
+          >
+            <span className="btn-icon">↪</span>
+            <span className="btn-text">Redo</span>
+          </button>
+          <button className="toolbar-btn" onClick={handleGeneratePython} title="Generate Python code">
+            <span className="btn-icon">🐍</span>
+            <span className="btn-text">Generate Python</span>
+          </button>
+          <button className="toolbar-btn" onClick={handleGenerateNotebook} title="Generate Jupyter notebook">
+            <span className="btn-icon">📓</span>
+            <span className="btn-text">Generate Notebook</span>
           </button>
         </div>
 

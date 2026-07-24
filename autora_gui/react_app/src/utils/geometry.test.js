@@ -1,3 +1,12 @@
+/**
+ * Unit tests for `utils/geometry`.
+ *
+ * Covers node port placement (getPortPosition) and coordinate conversions between
+ * screen and canvas space (screenToCanvas, canvasToScreen), including zoom and pan
+ * handling and custom node dimensions.
+ *
+ * @module utils/geometry.test
+ */
 import { describe, it, expect } from 'vitest'
 import {
   getPortPosition,

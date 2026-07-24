@@ -3,10 +3,10 @@
   "protocolType": "experimentalist",
   "name": "Model Disagreement Sampler",
   "description": "Selects experimental conditions where multiple models show the greatest prediction disagreement, useful for identifying informative experiments.",
-  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-model-disagreement/blob/main/src/autora/experimentalist/model_disagreement/__init__.py#L310",
-  "pythonName": "model_disagreement_sampler",
+  "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-model-disagreement/blob/main/src/autora/experimentalist/model_disagreement/__init__.py#L287",
+  "pythonName": "sample",
   "importPath": "autora.experimentalist.model_disagreement",
-  "pipInstall": "autora-experimentalist-model-disagreement==1.0.0",
+  "pipInstall": "autora-experimentalist-model-disagreement==2.2.0",
   "parameters": {
     "model_disagreement_sampler": [
       {
@@ -23,44 +23,44 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "name": "conditions",
-      "description": "Pool of candidate experimental conditions to evaluate.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
+  "inputDataType": {
+    "variables": [
+      {
+        "name": "conditions",
+        "description": "Pool of candidate experimental conditions to evaluate.",
+        "datatype": "real",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": null
       },
-      "validValues": null,
-      "default": null
+      {
+        "name": "models",
+        "description": "List of trained sklearn models to compare predictions.",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 2,
+          "maxOccurs": -1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      }
+    ]
+  },
+  "outputDataType": {
+    "name": "conditions",
+    "description": "Selected conditions with highest model disagreement.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
     },
-    {
-      "name": "models",
-      "description": "List of trained sklearn models to compare predictions.",
-      "datatype": "string",
-      "cardinality": {
-        "minOccurs": 2,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
-  "outputDataType": [
-    {
-      "name": "conditions",
-      "description": "Selected conditions with highest model disagreement.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ]
+    "validValues": null,
+    "default": null
+  }
 }

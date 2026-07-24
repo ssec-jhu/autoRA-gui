@@ -1,11 +1,10 @@
-name: Deploy to GitHub Pages
+name: Standalone Version and Documentation
 
 on:
   push:
     branches:
-      - gui_poc_js
-      - gui_poc_react
       - main
+      - create_json
   workflow_dispatch:  # Allow manual trigger
 
 permissions:
@@ -37,20 +36,36 @@ jobs:
       - name: Create deployment directory
         run: mkdir -p deploy
 
-      # Build React version from gui_poc_react branch
+      # Build React version from main branch
       - name: Checkout React branch
         uses: actions/checkout@v4
         with:
-          ref: gui_poc_react
-          path: react-branch
+          ref: main
+          path: main-branch
 
-      - name: Build React standalone
+      - name: Build main standalone version
         run: |
-          cd react-branch/autora_gui/react_app
+          cd main-branch/autora_gui/react_app
           npm install
           python build_standalone.py
-          mkdir -p ../../../deploy/react
-          cp ../../index.html ../../../deploy/react/index.html
+          mkdir -p ../../../deploy/main
+          cp ../../index.html ../../../deploy/main/index.html
+        continue-on-error: true
+
+      # Build component JSON generation version from create_json branch
+      - name: Checkout create_json branch
+        uses: actions/checkout@v4
+        with:
+          ref: create_json
+          path: create_json-branch
+
+      - name: Build component JSON generation standalone version
+        run: |
+          cd create_json-branch/autora_gui/react_app
+          npm install
+          python build_standalone.py
+          mkdir -p ../../../deploy/create_json
+          cp ../../index.html ../../../deploy/create_json/index.html
         continue-on-error: true
 
       # Build Sphinx docs from main branch
@@ -67,6 +82,17 @@ jobs:
           tox -e build-docs
           mkdir -p ../deploy/docs
           cp -r docs/_build/html/* ../deploy/docs/
+        continue-on-error: true
+
+      # Build front-end (JavaScript) API docs from the JSDoc comments and nest
+      # them under the Sphinx docs at /docs/frontend/.
+      - name: Build frontend JS docs
+        run: |
+          cd main-branch/autora_gui/react_app
+          npm install
+          npm run docs:api
+          mkdir -p ../../../deploy/docs/frontend
+          cp -r frontend-docs/* ../../../deploy/docs/frontend/
         continue-on-error: true
 
       # Create landing page as main index
@@ -94,7 +120,8 @@ jobs:
           <div class="container">
           <h1>AutoRA Workflow Editor and Documentation</h1>
           <div class="versions">
-          <a href="./react/" class="version-card"><h2>Workflow Editor</h2><p>Modern React-based implementation</p></a>
+          <a href="./main/" class="version-card"><h2>Workflow Editor</h2><p>React-based GUI</p></a>
+          <a href="./create_json/" class="version-card"><h2>Workflow Editor with JSON Generation</h2><p>React-based GUI with component JSON generation</p></a>
           <a href="./docs/" class="version-card"><h2>Documentation</h2><p>API reference and guides</p></a>
           </div>
           </div>
@@ -119,6 +146,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Standalone Version and Documentation
         id: deployment
         uses: actions/deploy-pages@v4

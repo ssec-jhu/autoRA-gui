@@ -87,9 +87,15 @@ class TestVariableType:
         assert var.name == "test_var"
         assert var.description is None
 
-    def test_missing_name_raises_error(self):
-        with pytest.raises(ValidationError):
-            VariableType(description="Missing name")
+    def test_name_defaults_to_none(self):
+        var = VariableType(description="Has description only")
+        assert var.name is None
+        assert var.description == "Has description only"
+
+    def test_all_fields_default_to_none(self):
+        var = VariableType()
+        assert var.name is None
+        assert var.description is None
 
 
 class TestCardinality:
@@ -413,8 +419,8 @@ class TestProtocol:
             importPath="some.module.path",
             pipInstall="some-package",
             parameters={"__init__": [param]},
-            inputDataType=[param],
-            outputDataType=[param],
+            inputDataType=param,
+            outputDataType=param,
         )
         assert protocol.pythonName == "FullClass"
         assert protocol.githubCommit == "abc123"
@@ -602,14 +608,29 @@ class TestComponentJsonFiles:
         return list(components_dir.rglob("*.json"))
 
     def test_all_components_validate_against_protocol_model(self, component_files):
-        """All component JSON files should be valid Protocol instances."""
+        """All component JSON files should be valid Protocol instances.
+
+        Variable-type container objects (those with a 'variables' or 'variable' key)
+        may omit 'name' and 'description' — these are normalised to None before
+        validation to accommodate component files that leave them implicit.
+        """
         import json
+
+        def _fill_variable_type_defaults(obj):
+            if isinstance(obj, list):
+                return [_fill_variable_type_defaults(item) for item in obj]
+            if isinstance(obj, dict):
+                result = {k: _fill_variable_type_defaults(v) for k, v in obj.items()}
+                if "variables" in result or "variable" in result:
+                    result.setdefault("name", None)
+                    result.setdefault("description", None)
+                return result
+            return obj
 
         for file_path in component_files:
             with open(file_path) as f:
                 data = json.load(f)
-            # This will raise ValidationError if invalid
-            Protocol.model_validate(data)
+            Protocol.model_validate(_fill_variable_type_defaults(data))
 
     def test_all_uuids_are_unique(self, component_files):
         """All component UUIDs should be unique across files."""

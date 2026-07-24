@@ -3,10 +3,10 @@
   "protocolType": "theorist",
   "name": "BMS Regressor",
   "description": "Bayesian Machine Scientist that discovers symbolic equations using MCMC sampling with informed priors over mathematical expressions.",
-  "githubCommit": "https://github.com/AutoResearch/autora-theorist-bms/blob/ce3d7edf707c54a12108700076d841c138086be1/src/autora/theorist/bms/regressor.py#L23",
+  "githubCommit": "https://github.com/AutoResearch/autora-theorist-bms/blob/ce3d7edf707c54a12108700076d841c138086be1/src/autora/theorist/bms/regressor.py#L24",
   "pythonName": "BMSRegressor",
   "importPath": "autora.theorist.bms.regressor",
-  "pipInstall": "autora-theorist-bms==1.0.0",
+  "pipInstall": "autora-theorist-bms==1.0.6",
   "parameters": {
     "__init__": [
       {
@@ -49,32 +49,28 @@
       }
     ]
   },
-  "inputDataType": [
-    {
-      "name": "X",
-      "description": "Input features as a 2D array.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ],
-  "outputDataType": [
-    {
-      "name": "y",
-      "description": "Predicted target values.",
-      "datatype": "real",
-      "cardinality": {
-        "minOccurs": 1,
-        "maxOccurs": -1,
-        "unique": true
-      },
-      "validValues": null,
-      "default": null
-    }
-  ]
+  "inputDataType": {
+    "name": "X",
+    "description": "Input features as a 2D array.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  },
+  "outputDataType": {
+    "name": "y",
+    "description": "Predicted target values.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  }
 }

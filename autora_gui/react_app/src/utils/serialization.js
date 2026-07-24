@@ -1,7 +1,23 @@
+/**
+ * Conversion between the editor's in-memory graph state and the persisted
+ * workflow JSON format. `serializeWorkflow` writes editor state to workflow
+ * JSON; `deserializeWorkflow` rebuilds editor state from workflow JSON.
+ *
+ * @module utils/serialization
+ */
+
 import { v4 as uuidv4 } from 'uuid'
 
 const CONTROL_NODE_TYPES = ['start_point', 'end_point', 'filter_point']
 
+/**
+ * Serialize editor graph state into the persisted workflow JSON structure,
+ * splitting nodes into start/end/filter control nodes and protocol components
+ * and mapping connections to links.
+ *
+ * @param {Object} state - Editor state with `nodes` and `connections` arrays.
+ * @returns {Object} Workflow JSON with `name`, `description`, `start`, `end`, `filters`, `components` and `links`.
+ */
 export function serializeWorkflow(state) {
   const startNode = state.nodes.find(n => n.type === 'start_point')
   const endNode = state.nodes.find(n => n.type === 'end_point')
@@ -65,6 +81,15 @@ export function serializeWorkflow(state) {
   }
 }
 
+/**
+ * Rebuild editor graph state from workflow JSON, recreating control nodes and
+ * protocol component nodes (with parameter defaults merged from the matching
+ * protocol) and reconstructing connections for links whose endpoints exist.
+ *
+ * @param {Object} workflow - Workflow JSON with `start`, `end`, `filters`, `components` and `links`.
+ * @param {Object} componentsMap - Map of protocol category to arrays of protocol definitions, keyed by `uuid`.
+ * @returns {Object} Editor state `{ nodes, connections }`.
+ */
 export function deserializeWorkflow(workflow, componentsMap) {
   const allComponents = Object.values(componentsMap).flat()
   const nodes = []
