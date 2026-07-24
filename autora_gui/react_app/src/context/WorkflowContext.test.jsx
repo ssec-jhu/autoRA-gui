@@ -1,3 +1,12 @@
+/**
+ * Unit tests for `context/WorkflowContext`.
+ *
+ * Covers the workflow reducer (node/connection mutations, filter params, undo/redo
+ * history) plus the WorkflowProvider component and the useWorkflow hook, including
+ * undo/redo integration through the provider.
+ *
+ * @module context/WorkflowContext.test
+ */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import { renderHook } from '@testing-library/react'
@@ -575,6 +584,7 @@ describe('workflowReducer', () => {
   })
 })
 
+// Provider component rendering and context wiring
 describe('WorkflowProvider', () => {
   it('renders children', () => {
     render(
@@ -637,6 +647,7 @@ describe('WorkflowProvider', () => {
   })
 })
 
+// Consumer hook access and dispatch behavior
 describe('useWorkflow', () => {
   it('throws error when used outside WorkflowProvider', () => {
     // Suppress console.error for this test
@@ -707,6 +718,7 @@ describe('useWorkflow', () => {
   })
 })
 
+// Reducer history: reverting to previous states
 describe('UNDO action', () => {
   it('restores previous state from history', () => {
     const state = {
@@ -777,6 +789,7 @@ describe('UNDO action', () => {
   })
 })
 
+// Reducer history: reapplying undone states
 describe('REDO action', () => {
   it('restores next state from future', () => {
     const state = {
@@ -847,6 +860,7 @@ describe('REDO action', () => {
   })
 })
 
+// End-to-end undo/redo through the provider and hook
 describe('Undo/Redo integration with WorkflowProvider', () => {
   it('tracks history for undoable actions', () => {
     const wrapper = ({ children }) => (

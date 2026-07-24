@@ -1,3 +1,10 @@
+/**
+ * Renders a single connection (edge) between two workflow nodes in the AutoRA Workflow
+ * Editor. Contains the orthogonal auto-routing engine that chooses optimal source/target
+ * ports and computes an SVG path that avoids overlapping nodes and other connections.
+ *
+ * @module components/Canvas/Connection
+ */
 import React, { memo, useMemo, useEffect } from 'react'
 import { getNodePorts, getPortType } from '../Node/Node'
 
@@ -9,6 +16,17 @@ const CONTROL_NODE_HEIGHT = 80
 const DIAMOND_SIZE = 90
 const PADDING = 20 // Padding around nodes for routing
 
+/**
+ * Computes the padded bounding box of a node, sized according to its shape/type
+ * (diamond filter, control node, or standard node), for use in collision detection.
+ *
+ * @param {Object} node - The node to measure.
+ * @param {string} node.type - The node type (e.g. 'filter_point', 'start_point').
+ * @param {number} node.x - The node's x position.
+ * @param {number} node.y - The node's y position.
+ * @param {number} [extraPadding=0] - Additional padding to add beyond the default.
+ * @returns {{x: number, y: number, width: number, height: number}} The bounding box.
+ */
 // Get node bounding box with padding
 function getNodeBounds(node, extraPadding = 0) {
   const isDiamond = node.type === 'filter_point'
@@ -39,6 +57,20 @@ function getNodeBounds(node, extraPadding = 0) {
   }
 }
 
+/**
+ * Determines whether two line segments (x1,y1)-(x2,y2) and (x3,y3)-(x4,y4) cross,
+ * using a slightly inset parametric test so endpoints that merely touch don't count.
+ *
+ * @param {number} x1 - First segment start x.
+ * @param {number} y1 - First segment start y.
+ * @param {number} x2 - First segment end x.
+ * @param {number} y2 - First segment end y.
+ * @param {number} x3 - Second segment start x.
+ * @param {number} y3 - Second segment start y.
+ * @param {number} x4 - Second segment end x.
+ * @param {number} y4 - Second segment end y.
+ * @returns {boolean} True if the segments intersect (excluding near-endpoint touches).
+ */
 // Check if two line segments intersect
 function segmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
   const denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1)
@@ -50,6 +82,16 @@ function segmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
   return ua > 0.01 && ua < 0.99 && ub > 0.01 && ub < 0.99
 }
 
+/**
+ * Checks whether a line segment crosses any of the four edges of a rectangle.
+ *
+ * @param {number} x1 - Segment start x.
+ * @param {number} y1 - Segment start y.
+ * @param {number} x2 - Segment end x.
+ * @param {number} y2 - Segment end y.
+ * @param {{x: number, y: number, width: number, height: number}} rect - The rectangle.
+ * @returns {boolean} True if the segment intersects any edge of the rectangle.
+ */
 // Check if a line segment intersects a rectangle
 function lineIntersectsRect(x1, y1, x2, y2, rect) {
   const edges = [
@@ -67,6 +109,22 @@ function lineIntersectsRect(x1, y1, x2, y2, rect) {
   return false
 }
 
+/**
+ * Determines whether a routing segment passes through any node's padded bounds,
+ * while tolerating the segment legitimately touching a node at the exact port
+ * positions where the connection attaches.
+ *
+ * @param {number} x1 - Segment start x.
+ * @param {number} y1 - Segment start y.
+ * @param {number} x2 - Segment end x.
+ * @param {number} y2 - Segment end y.
+ * @param {Array<Object>} nodes - All nodes to test against.
+ * @param {number} portX1 - Source port x (allowed touch point).
+ * @param {number} portY1 - Source port y (allowed touch point).
+ * @param {number} portX2 - Target port x (allowed touch point).
+ * @param {number} portY2 - Target port y (allowed touch point).
+ * @returns {boolean} True if the segment improperly crosses a node.
+ */
 // Check if segment crosses any node (except at port endpoints)
 function segmentCrossesNodes(x1, y1, x2, y2, nodes, portX1, portY1, portX2, portY2) {
   for (const node of nodes) {
@@ -104,6 +162,16 @@ function segmentCrossesNodes(x1, y1, x2, y2, nodes, portX1, portY1, portX2, port
   return false
 }
 
+/**
+ * Builds a list of straight-line segment approximations for all connections except the
+ * one currently being routed, resolving each connection's endpoints from its stored
+ * points or its nodes' default ports.
+ *
+ * @param {Array<Object>} connections - All connections in the workflow.
+ * @param {string} currentConnectionId - Id of the connection to exclude from the result.
+ * @param {Array<Object>} allNodes - All nodes, used to resolve default port positions.
+ * @returns {Array<{x1: number, y1: number, x2: number, y2: number, connId: string}>} Segment approximations.
+ */
 // Parse existing connection paths to get their segments
 function getExistingConnectionSegments(connections, currentConnectionId, allNodes) {
   const segments = []
@@ -132,6 +200,13 @@ function getExistingConnectionSegments(connections, currentConnectionId, allNode
   return segments
 }
 
+/**
+ * Checks whether any segment of a candidate path crosses any existing connection segment.
+ *
+ * @param {Array<Array<number>>} path - Ordered list of [x, y] points forming the path.
+ * @param {Array<{x1: number, y1: number, x2: number, y2: number}>} existingSegments - Existing connection segments.
+ * @returns {boolean} True if the path crosses an existing connection.
+ */
 // Check if a path crosses existing connections
 function pathCrossesConnections(path, existingSegments) {
   for (let i = 0; i < path.length - 1; i++) {
@@ -149,6 +224,16 @@ function pathCrossesConnections(path, existingSegments) {
   return false
 }
 
+/**
+ * Detects whether a candidate path runs along (overlaps) an existing connection by
+ * comparing parallel horizontal or vertical segments that are close together and
+ * share a meaningful span of overlap.
+ *
+ * @param {Array<Array<number>>} path - Ordered list of [x, y] points forming the path.
+ * @param {Array<{x1: number, y1: number, x2: number, y2: number}>} existingSegments - Existing connection segments.
+ * @param {number} [threshold=15] - Max perpendicular distance to treat segments as coinciding.
+ * @returns {boolean} True if the path substantially overlaps an existing connection.
+ */
 // Check if path coincides with another connection (same route)
 function pathCoincides(path, existingSegments, threshold = 15) {
   for (let i = 0; i < path.length - 1; i++) {
@@ -186,6 +271,13 @@ function pathCoincides(path, existingSegments, threshold = 15) {
   return false
 }
 
+/**
+ * Returns the outward unit direction vector for a named port, used to build the initial
+ * stub of a routed path leaving/entering a node.
+ *
+ * @param {string} portId - The port identifier ('top', 'bottom', 'left', or 'right').
+ * @returns {{dx: number, dy: number}} The outward direction vector (defaults to right).
+ */
 // Get port direction
 function getPortDirection(portId) {
   switch (portId) {
@@ -197,6 +289,14 @@ function getPortDirection(portId) {
   }
 }
 
+/**
+ * Finds the id of the port nearest to a given point (by Euclidean distance).
+ *
+ * @param {Object} node - The node owning the ports (unused for the lookup itself).
+ * @param {{x: number, y: number}} point - The reference point.
+ * @param {Array<{id: string, x: number, y: number}>} ports - Candidate ports.
+ * @returns {string} The id of the closest port.
+ */
 // Find closest port
 function findPortId(node, point, ports) {
   let closest = ports[0]
@@ -211,6 +311,16 @@ function findPortId(node, point, ports) {
   return closest.id
 }
 
+/**
+ * Determines whether a given port on a node is already used (within a small distance
+ * threshold) as the source or target of any connection other than the current one.
+ *
+ * @param {string} nodeId - The id of the node owning the port.
+ * @param {{x: number, y: number}} port - The port position to test.
+ * @param {Array<Object>} connections - All connections in the workflow.
+ * @param {string} currentConnectionId - Id of the connection to ignore.
+ * @returns {boolean} True if the port is occupied by another connection.
+ */
 // Check if a port is occupied by any connection (except the current one)
 function isPortOccupied(nodeId, port, connections, currentConnectionId) {
   const threshold = 20
@@ -235,6 +345,16 @@ function isPortOccupied(nodeId, port, connections, currentConnectionId) {
   return false
 }
 
+/**
+ * Returns the node's ports that are both the correct type for the requested role
+ * (output for source, input for target) and not already occupied by another connection.
+ *
+ * @param {Object} node - The node whose ports are considered.
+ * @param {Array<Object>} connections - All connections in the workflow.
+ * @param {string} currentConnectionId - Id of the connection being routed (ignored for occupancy).
+ * @param {boolean} isSource - True to find output (source) ports, false for input (target) ports.
+ * @returns {Array<{id: string, x: number, y: number}>} The available ports.
+ */
 // Get available (unoccupied neutral) ports for a node that can be used as source or target
 function getAvailablePorts(node, connections, currentConnectionId, isSource) {
   const ports = getNodePorts(node)
@@ -259,6 +379,20 @@ function getAvailablePorts(node, connections, currentConnectionId, isSource) {
   return availablePorts
 }
 
+/**
+ * Generates a set of candidate orthogonal routes between a source and target point,
+ * trying several stub lengths and routing strategies (direct, mid-split, and detours
+ * around the top/bottom/left/right extents of all nodes) depending on port orientation.
+ *
+ * @param {number} x1 - Source point x.
+ * @param {number} y1 - Source point y.
+ * @param {number} x2 - Target point x.
+ * @param {number} y2 - Target point y.
+ * @param {{dx: number, dy: number}} sourceDir - Outward direction of the source port.
+ * @param {{dx: number, dy: number}} targetDir - Outward direction of the target port.
+ * @param {Array<Object>} nodes - All nodes, used to compute detour extents.
+ * @returns {Array<Array<Array<number>>>} A list of candidate paths, each an ordered list of [x, y] points.
+ */
 // Generate multiple path options with different routing strategies
 function generatePathOptions(x1, y1, x2, y2, sourceDir, targetDir, nodes) {
   const options = []
@@ -339,6 +473,13 @@ function generatePathOptions(x1, y1, x2, y2, sourceDir, targetDir, nodes) {
   return options
 }
 
+/**
+ * Converts a list of points into an SVG path string, removing duplicate points and
+ * collapsing consecutive collinear (same horizontal or vertical) segments.
+ *
+ * @param {Array<Array<number>>} points - Ordered list of [x, y] points.
+ * @returns {string} An SVG path "d" attribute string.
+ */
 // Clean path - remove redundant points
 function cleanPath(points) {
   if (points.length < 2) return 'M 0 0'
@@ -367,6 +508,20 @@ function cleanPath(points) {
   return 'M ' + cleaned.map(p => `${p[0]} ${p[1]}`).join(' L ')
 }
 
+/**
+ * Assigns a cost to a candidate path (lower is better): heavy penalties for crossing
+ * nodes, medium for crossing or coinciding with other connections, plus smaller costs
+ * proportional to total length and number of bends.
+ *
+ * @param {Array<Array<number>>} path - Ordered list of [x, y] points forming the path.
+ * @param {Array<Object>} nodes - All nodes, for collision checks.
+ * @param {Array<Object>} existingSegments - Existing connection segments, for crossing/coincidence checks.
+ * @param {number} x1 - Source port x (allowed touch point).
+ * @param {number} y1 - Source port y (allowed touch point).
+ * @param {number} x2 - Target port x (allowed touch point).
+ * @param {number} y2 - Target port y (allowed touch point).
+ * @returns {number} The path score; lower values are preferred.
+ */
 // Score a single path
 function scorePath(path, nodes, existingSegments, x1, y1, x2, y2) {
   let score = 0
@@ -406,6 +561,20 @@ function scorePath(path, nodes, existingSegments, x1, y1, x2, y2) {
   return score
 }
 
+/**
+ * The primary routing engine. Considers the original ports plus available alternative
+ * source/target ports, generates candidate paths for each combination, scores them, and
+ * returns the lowest-cost path together with the ports that produced it.
+ *
+ * @param {{x: number, y: number}} originalSourcePort - The connection's current source point.
+ * @param {{x: number, y: number}} originalTargetPort - The connection's current target point.
+ * @param {Object} sourceNode - The source node.
+ * @param {Object} targetNode - The target node.
+ * @param {Array<Object>} nodes - All nodes in the workflow.
+ * @param {Array<Object>} connections - All connections in the workflow.
+ * @param {string} currentConnectionId - Id of the connection being routed.
+ * @returns {{pathD: string, sourcePort: Object, targetPort: Object}} The best SVG path string and the chosen source/target ports.
+ */
 // Main path builder - now returns both path and optimal ports
 function buildOrthogonalPathWithPortSelection(
   originalSourcePort, originalTargetPort,
@@ -504,6 +673,22 @@ function buildOrthogonalPathWithPortSelection(
   }
 }
 
+/**
+ * Legacy single-route builder kept for backward compatibility: generates candidate paths
+ * for fixed source/target points and directions, then returns the best-scoring one as an
+ * SVG path string (without alternative port selection).
+ *
+ * @param {number} x1 - Source point x.
+ * @param {number} y1 - Source point y.
+ * @param {number} x2 - Target point x.
+ * @param {number} y2 - Target point y.
+ * @param {{dx: number, dy: number}} sourceDir - Outward direction of the source port.
+ * @param {{dx: number, dy: number}} targetDir - Outward direction of the target port.
+ * @param {Array<Object>} nodes - All nodes in the workflow.
+ * @param {Array<Object>} connections - All connections in the workflow.
+ * @param {string} currentConnectionId - Id of the connection being routed.
+ * @returns {string} The best-scoring SVG path "d" string.
+ */
 // Legacy function for backward compatibility
 function buildOrthogonalPath(x1, y1, x2, y2, sourceDir, targetDir, nodes, connections, currentConnectionId) {
   const pathOptions = generatePathOptions(x1, y1, x2, y2, sourceDir, targetDir, nodes)
@@ -523,6 +708,23 @@ function buildOrthogonalPath(x1, y1, x2, y2, sourceDir, targetDir, nodes, connec
   return cleanPath(bestPath)
 }
 
+/**
+ * Renders a single connection between two nodes as an auto-routed orthogonal SVG path,
+ * with an invisible wide hit-area for easier selection, endpoint dots, and an arrowhead.
+ * Recomputes the optimal route (memoized) and notifies the parent when the chosen ports
+ * differ from the connection's stored points.
+ *
+ * @param {Object} props
+ * @param {Object} props.connection - The connection data (id, sourceId, targetId, optional sourcePoint/targetPoint).
+ * @param {Object} props.sourceNode - The source node.
+ * @param {Object} props.targetNode - The target node.
+ * @param {Array<Object>} props.allNodes - All nodes in the workflow, used for routing/collision.
+ * @param {Array<Object>} props.allConnections - All connections, used for crossing/occupancy checks.
+ * @param {boolean} props.isSelected - Whether this connection is currently selected.
+ * @param {Function} props.onSelect - Called with the connection id when the connection is clicked.
+ * @param {Function} props.onPortsChanged - Called with (id, sourcePoint, targetPoint) when routing selects new ports.
+ * @returns {JSX.Element}
+ */
 function Connection({ connection, sourceNode, targetNode, allNodes, allConnections, isSelected, onSelect, onPortsChanged }) {
   const sourcePorts = getNodePorts(sourceNode)
   const targetPorts = getNodePorts(targetNode)

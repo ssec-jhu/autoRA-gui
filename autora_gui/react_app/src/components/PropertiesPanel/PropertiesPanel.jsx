@@ -1,7 +1,23 @@
+/**
+ * Right-hand properties panel for the AutoRA Workflow Editor. Displays the
+ * editable parameters, filter settings, inputs, and outputs of the currently
+ * selected node, or a read-only preview of a component hovered/clicked in the
+ * palette when no node is selected.
+ *
+ * @module components/PropertiesPanel/PropertiesPanel
+ */
+
 import React from 'react'
 import { useWorkflow } from '../../context/WorkflowContext'
 import './PropertiesPanel.css'
 
+/**
+ * Clickable "?" hint that toggles a description popover on click.
+ *
+ * @param {Object} props
+ * @param {string} props.description - Parameter description shown in the popover; renders nothing when falsy
+ * @returns {JSX.Element|null}
+ */
 // Clickable "?" hint that toggles a description popover on click
 function ParameterHint({ description }) {
   const [open, setOpen] = React.useState(false)
@@ -26,6 +42,13 @@ function ParameterHint({ description }) {
   )
 }
 
+/**
+ * Determine a human-readable datatype string from a variable type structure,
+ * recursing through list wrappers and summarizing dict variants.
+ *
+ * @param {Object} varType - Variable type descriptor (primitive, dict, or list shaped)
+ * @returns {string} The resolved datatype (e.g. 'integer', 'dict[real]', 'list[real]', or 'unknown')
+ */
 // Helper to determine datatype from variable type structure
 const getDataType = (varType) => {
   if (!varType) return 'unknown'
@@ -48,6 +71,12 @@ const getDataType = (varType) => {
   return 'unknown'
 }
 
+/**
+ * Find the display name of a variable, descending through list wrappers.
+ *
+ * @param {Object} varType - Variable type descriptor
+ * @returns {string} The variable's name, or 'unknown' if none is found
+ */
 // Find the display name of a variable, descending through list wrappers
 const getVariableName = (varType) => {
   if (!varType) return 'unknown'
@@ -56,6 +85,13 @@ const getVariableName = (varType) => {
   return 'unknown'
 }
 
+/**
+ * Normalize a data type spec (null, single variable, dict {variables},
+ * list {variable}, or legacy array) into a list of {name, type} entries.
+ *
+ * @param {Object|Array} dataType - Data type descriptor to normalize
+ * @returns {Array<{name: string, type: string}>} List of display entries for rendering
+ */
 // Normalize a data type spec (null, single variable, dict {variables},
 // list {variable}, or legacy array) into a list of {name, type} entries
 const getVariableEntries = (dataType) => {
@@ -69,11 +105,26 @@ const getVariableEntries = (dataType) => {
   return [{ name: getVariableName(dataType), type: getDataType(dataType) }]
 }
 
+/**
+ * Properties panel component. Reads the workflow state from context and renders
+ * one of three views: the selected node's editable properties, a read-only
+ * preview of a palette component, or an empty-state prompt. Defines local
+ * helpers for parameter editing, value parsing, and input rendering.
+ *
+ * @returns {JSX.Element}
+ */
 function PropertiesPanel() {
   const { state, dispatch } = useWorkflow()
   const selectedNode = state.nodes.find(n => n.id === state.selectedNodeId)
   const previewedComponent = state.previewedComponent
 
+  /**
+   * Dispatch an update to a single parameter on the selected node.
+   *
+   * @param {string} paramName - Name of the parameter to update
+   * @param {*} value - New value for the parameter
+   * @returns {void}
+   */
   const handleParameterChange = (paramName, value) => {
     dispatch({
       type: 'UPDATE_NODE',
@@ -84,6 +135,13 @@ function PropertiesPanel() {
     })
   }
 
+  /**
+   * Coerce a raw input string into the correct JS type for the given datatype.
+   *
+   * @param {string} value - Raw value from the input element
+   * @param {string} datatype - Target datatype ('integer', 'real', 'boolean', or other)
+   * @returns {number|boolean|string|null} Parsed value, or null when the input is empty
+   */
   const parseValue = (value, datatype) => {
     if (value === '' || value === null || value === undefined) return null
     switch (datatype) {
@@ -98,6 +156,13 @@ function PropertiesPanel() {
     }
   }
 
+  /**
+   * Render the appropriate input control for a parameter based on its datatype
+   * (number, boolean/categorical select, or text).
+   *
+   * @param {Object} param - Parameter descriptor with name, datatype, default, and validValues
+   * @returns {JSX.Element} The input or select element for editing the parameter
+   */
   const renderInput = (param) => {
     const currentValue = selectedNode.parameters[param.name]
 
@@ -255,6 +320,13 @@ function PropertiesPanel() {
   const nodeOutputs = getVariableEntries(selectedNode.componentData?.outputDataType)
   const isFilterNode = selectedNode.type === 'filter_point'
 
+  /**
+   * Dispatch an update to a single filter parameter on the selected filter node.
+   *
+   * @param {string} paramName - Name of the filter parameter to update
+   * @param {*} value - New value for the filter parameter
+   * @returns {void}
+   */
   const handleFilterParameterChange = (paramName, value) => {
     dispatch({
       type: 'UPDATE_NODE',
