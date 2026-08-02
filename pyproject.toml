@@ -21,7 +21,7 @@ dev = [
     "pytest-cov",
     "ruff",
     "setuptools>=61.2",
-    "setuptools_scm[toml]>=8.0",
+    "setuptools_scm[toml]>=10.2.1",
     "tox"
 ]
 docs = [
@@ -38,7 +38,7 @@ documentation = "https://github.com/ssec-jhu/autoRA-gui"
 repository = "https://github.com/ssec-jhu/autoRA-gui"
 
 [build-system]
-requires = ["setuptools>=61.2", "setuptools_scm[toml]>=8.0"]
+requires = ["setuptools>=61.2", "setuptools_scm[toml]>=10.2.1"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
