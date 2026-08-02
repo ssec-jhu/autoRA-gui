@@ -126,6 +126,7 @@ AutoRA (Automated Research Assistant) automates empirical research: model discov
 
 ```python
 from autora.state import StandardState
+
 state = StandardState(variables=variables)
 ```
 
