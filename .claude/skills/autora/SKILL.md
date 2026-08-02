@@ -1,182 +1,156 @@
 ---
 name: autora
-description: Study AutoRA theorist, experimentalist, and experiment-runner repositories to understand their architecture, parameters, and integration patterns
+description: Study AutoRA theorist, experimentalist, and experiment-runner components to understand their architecture, parameters, and integration into autoRA-gui
 disable-model-invocation: true
-allowed-tools: WebFetch, WebSearch, Read, Grep
 ---
 
 # AutoRA Research Skill
 
-Study the AutoRA framework and repositories to understand their implementation and how to integrate them into the autoRA-gui project.
+Study the AutoRA framework and its components to understand their implementation and how to integrate them into the autoRA-gui project.
 
-## AutoRA Overview
+## Source of Truth: the local component catalog
 
-**Documentation**: https://autoresearch.github.io/autora/
+**The authoritative catalog lives in `autora_gui/JSON/components/`** — one JSON file per component, grouped into `theorists/`, `experimentalists/`, and `experiment_runners/`. Each file is a `Protocol` record (see `autora_gui/data_model.py`) that pins the exact Python name, import path, install version, and full parameter schema the GUI exposes.
 
-AutoRA (Automated Research Assistant) is an open-source framework that automates empirical research phases: model discovery, experimental design, data collection, and documentation. Originally developed for behavioral and brain sciences, it's adaptable to materials science, physics, and other empirical disciplines.
+**Always read the JSON first.** Web docs (below) explain *concepts*; the JSON files are the ground truth for names, versions, defaults, and valid values. When they disagree, the JSON wins.
 
-### Core Architecture: Autonomous Empirical Research
+**Documentation (concepts only)**: https://autoresearch.github.io/autora/
 
-AutoRA implements a two-agent closed-loop system:
-1. **Theorist Agent**: Constructs computational models linking experimental conditions to outcomes
-2. **Experimentalist Agent**: Designs follow-up experiments to refine and validate models
+## Component JSON schema
 
-### The State Mechanism
+Each file conforms to the `Protocol` model. Top-level fields:
 
-Every procedure accepts a State object and returns a State object. The `StandardState` contains four fields:
-- **variables**: Definitions of experimental variables and parameters
-- **conditions**: Experimental conditions or configurations
-- **experiment_data**: Collected experimental results and observations
-- **models**: Fitted theoretical models or learned representations
+| Field | Meaning |
+|-------|---------|
+| `uuid` | Stable identifier for the protocol |
+| `protocolType` | `theorist` \| `experimentalist` \| `experiment_runner` |
+| `name` | Human-readable label shown in the GUI |
+| `description` | One-line summary |
+| `githubCommit` | Permalink to the pinned source implementation |
+| `pythonName` | Class/function to call (e.g. `DARTSRegressor`, `sample`) |
+| `importPath` | Module to import `pythonName` from |
+| `pipInstall` | Exact pinned dependency (e.g. `autora-theorist-darts==1.1.0`) |
+| `parameters` | `dict[str, list[VariableType]]` — keyed by callable name |
+| `inputDataType` | Expected input variable(s) |
+| `outputDataType` | Produced output variable(s) |
+
+**`parameters` keying**: the dict key is the name of the callable the parameters belong to, not a fixed literal:
+- Theorists key on `__init__` (constructor args); some add `fit` (e.g. `bms_regressor`).
+- Experimentalists key on their function name (e.g. `sample`, `pool`, `grid_pool`, `novelty_sampler`).
+- Experiment runners key on their factory (e.g. `firebase_runner`, `q_learning`); synthetic runners add `run` for the runner callable.
+
+**Each parameter** (a `PrimitiveVariableType`) has:
+- `name`, `description`
+- `datatype`: `real` \| `integer` \| `boolean` \| `string` \| `categorical` \| `any`
+- `cardinality`: `{minOccurs, maxOccurs, unique}` — `maxOccurs: -1` means unbounded (a list); `>1` means a multi-select
+- `validValues`: allowed options for `categorical`, else `null`
+- `default`: default value (`null` if required with no default)
+
+`inputDataType`/`outputDataType` are either a single `PrimitiveVariableType` (e.g. DARTS `X` → `y`) or a `{ "variables": [...] }` group (e.g. Firebase `conditions` → `observations`).
+
+## Component catalog
+
+Names/paths/versions below are copied from the JSON; treat the JSON as canonical if this drifts.
+
+### Theorists (`theorists/`)
+
+| File | pythonName | importPath | pipInstall |
+|------|-----------|-----------|-----------|
+| `bms_regressor` | `BMSRegressor` | `autora.theorist.bms.regressor` | `autora-theorist-bms==1.0.6` |
+| `bsr_regressor` | `BSRRegressor` | `autora.theorist.bsr.regressor` | `autora-theorist-bsr==1.0.0` |
+| `darts_regressor` | `DARTSRegressor` | `autora.theorist.darts.regressor` | `autora-theorist-darts==1.1.0` |
+
+- **BMS** — Bayesian Machine Scientist; symbolic equation discovery via MCMC with informed priors.
+- **BSR** — Bayesian Symbolic Regression; builds expressions from basic functions via MCMC.
+- **DARTS** — Differentiable Architecture Search; composition of functions/coefficients minimizing a loss. Rich `__init__` (batch size, graph nodes, `output_type`, `darts_type` original/fair, learning-rate schedules, `primitives` multi-select, sampling strategy).
+
+### Experimentalists (`experimentalists/`)
+
+Split into **poolers** (generate a pool of conditions) and **samplers** (select from a pool). A given repo may provide both.
+
+| File | pythonName | importPath | pipInstall |
+|------|-----------|-----------|-----------|
+| `random_pooler` | `pool` | `autora.experimentalist.random` | `autora-core==5.0.3` |
+| `random_sampler` | `sample` | `autora.experimentalist.random` | `autora-core==5.0.3` |
+| `grid_pooler` | `pool` | `autora.experimentalist.grid` | `autora-core==5.0.3` |
+| `latin_hypercube_pooler` | `pool` | `autora.experimentalist.lhs` | `autora==4.2.0` |
+| `latin_hypercube_sampler` | `sample` | `autora.experimentalist.lhs` | `autora==4.2.0` |
+| `bandit_random_pooler` | `pool` | `autora.experimentalist.bandit_random` | `autora-experimentalist-bandit-random==1.0.0` |
+| `falsification_pooler` | `pool` | `autora.experimentalist.falsification` | `autora-experimentalist-falsification==2.2.0` |
+| `falsification_sampler` | `sample` | `autora.experimentalist.falsification` | `autora-experimentalist-falsification==2.2.0` |
+| `novelty_sampler` | `sample` | `autora.experimentalist.novelty` | `autora-experimentalist-novelty==2.2.0` |
+| `novelty_score_sampler` | `score_sample` | `autora.experimentalist.novelty` | `autora-experimentalist-novelty==2.2.0` |
+| `uncertainty_sampler` | `sample` | `autora.experimentalist.uncertainty` | `autora-experimentalist-uncertainty==2.1.0` |
+| `model_disagreement_sampler` | `sample` | `autora.experimentalist.model_disagreement` | `autora-experimentalist-model-disagreement==2.2.0` |
+| `leverage_sampler` | `sample` | `autora.experimentalist.leverage` | `autora-experimentalist-leverage==1.10` |
+| `nearest_values_sampler` | `sample` | `autora.experimentalist.nearest_value` | `autora-experimentalist-nearest-value==2.2.0` |
+| `summed_inequality_sampler` | `sample` | `autora.experimentalist.inequality` | `autora-experimentalist-inequality==2.2.0` |
+| `prediction_filter` | `filter` | `autora.experimentalist.prediction_filter` | `autora-experimentalist-prediction-filter==1.1.0` |
+| `mixture_sampler` | `sample` | `autora.experimentalist.mixture` | `mixture-experimentalist==1.0.0a7` |
+
+Behavior notes: **falsification** targets conditions likely to break the current model; **novelty** maximizes distance from existing data (`score_sample` also returns scores); **uncertainty** selects highest-uncertainty conditions (active learning); **model_disagreement** picks where models diverge most; **leverage** does leave-one-out refitting (computationally expensive); **nearest_value** snaps to allowed values; **inequality** samples by inequality vs. a reference pool; **prediction_filter** keeps conditions whose predicted outcome passes a filter; **mixture** aggregates multiple rankers with temperature-scaled weights; **grid**/**random**/**lhs** are the space-coverage poolers.
+
+### Experiment runners (`experiment_runners/`)
+
+Two families: **human-data runners** (Firebase/Prolific) and **synthetic runners** (`autora-synthetic`, ground-truth simulators for testing).
+
+| File | pythonName | importPath | pipInstall |
+|------|-----------|-----------|-----------|
+| `firebase_runner` | `firebase_runner` | `autora.experiment_runner.firebase_prolific` | `autora-experiment-runner-firebase-prolific==1.0.1` |
+| `firebase_prolific_runner` | `firebase_prolific_runner` | `autora.experiment_runner.firebase_prolific` | `autora-experiment-runner-firebase-prolific==1.0.1` |
+| `synth_abstr_equation_experiment` | `equation_experiment` | `autora.experiment_runner.synthetic.abstract.equation` | `autora-synthetic==2.2.0` |
+| `synth_abstr_lmm_experiment` | `lmm_experiment` | `autora.experiment_runner.synthetic.abstract.lmm` | `autora-synthetic==2.2.0` |
+| `synth_econ_expected_value_theory` | `expected_value_theory` | `autora.experiment_runner.synthetic.economics.expected_value_theory` | `autora-synthetic==2.2.0` |
+| `synth_econ_prospect_theory` | `prospect_theory` | `autora.experiment_runner.synthetic.economics.prospect_theory` | `autora-synthetic==2.2.0` |
+| `synth_neuro_task_switching` | `task_switching` | `autora.experiment_runner.synthetic.neuroscience.task_switching` | `autora-synthetic==2.2.0` |
+| `synth_psychol_exp_learning` | `exp_learning` | `autora.experiment_runner.synthetic.psychology.exp_learning` | `autora-synthetic==2.2.0` |
+| `synth_psychol_luce_choice_ratio` | `luce_choice_ratio` | `autora.experiment_runner.synthetic.psychology.luce_choice_ratio` | `autora-synthetic==2.2.0` |
+| `synth_psychol_q_learning` | `q_learning` | `autora.experiment_runner.synthetic.psychology.q_learning` | `autora-synthetic==2.2.0` |
+| `synth_psychop_stevens_power_law` | `stevens_power_law` | `autora.experiment_runner.synthetic.psychophysics.stevens_power_law` | `autora-synthetic==2.2.0` |
+| `synth_psychop_weber_fechner_law` | `weber_fechner_law` | `autora.experiment_runner.synthetic.psychophysics.weber_fechner_law` | `autora-synthetic==2.2.0` |
+
+- **Firebase / Firebase-Prolific** — host web experiments on Firebase and collect Firestore responses; the Prolific variant also handles participant recruitment. Input `conditions` → output `observations`.
+- **Synthetic runners** — SymPy-equation, linear-mixed-model, and domain models (economics, neuroscience, psychology, psychophysics) that produce noisy ground-truth data for testing pipelines without human subjects.
+
+## Core AutoRA concepts
+
+AutoRA (Automated Research Assistant) automates empirical research: model discovery, experimental design, data collection, documentation.
+
+**Closed loop**: Experimentalist → generates conditions → Experiment Runner → executes, collects data → Theorist → fits/refines models → repeat. Supports fixed iterations, stopping criteria, or conditional cycling (see `Filter` in `data_model.py`).
+
+**State mechanism**: every procedure takes and returns a `StandardState` with four fields:
+- `variables` — experimental variable/parameter definitions
+- `conditions` — conditions to run
+- `experiment_data` — collected observations
+- `models` — fitted models
 
 ```python
 from autora.state import StandardState
 state = StandardState(variables=variables)
 ```
 
-### Functional Workflow
+## Code style (AutoRA contribution guidelines)
 
-Components chain together operating on shared state:
-1. **Experimentalist** → generates novel experiment conditions
-2. **Experiment Runner** → executes experiments, updates state with results
-3. **Theorist** → analyzes data, refines theoretical models
+- `snake_case` variables/modules, `CamelCase` classes
+- Docstrings on public elements, PEP 8
 
-Supports fixed iterations, stopping criteria, or conditional cycling.
-
-### Package Structure
-
-Parent-child package model: the parent `autora` package depends on `autora-core` and `autora-synthetic`, plus optional module dependencies.
-
-## Theorist Repositories
-
-### 1. DARTS (Differentiable Architecture Search)
-- **Repository**: https://github.com/AutoResearch/autora-theorist-darts
-- **Purpose**: Automated model discovery through neural architecture optimization
-- **Main class**: `DARTSRegressor` from `autora.theorist.darts`
-- **Install**: `pip install -U "autora[theorist-darts]"`
-
-### 2. BMS (Bayesian Machine Scientist)
-- **Repository**: https://github.com/AutoResearch/autora-theorist-bms
-- **Purpose**: Equation discovery using Bayesian methods for symbolic regression
-- **Main class**: `BMSRegressor` from `autora.theorist.bms`
-- **Install**: `pip install -U "autora[theorist-bms]"`
-
-### 3. BSR (Bayesian Symbolic Regression)
-- **Repository**: https://github.com/AutoResearch/autora-theorist-bsr
-- **Purpose**: Discover equations that fit data using probabilistic symbolic regression
-- **Main class**: `BSRRegressor` from `autora.theorist.bsr`
-- **Install**: `pip install -U "autora[theorist-bsr]"`
-
-## Experimentalist Repositories
-
-### 1. Falsification
-- **Repository**: https://github.com/AutoResearch/autora-experimentalist-falsification
-- **Purpose**: Identifies conditions where candidate model is predicted to perform worst
-- **Main function**: `falsification_pool` from `autora.experimentalist.falsification`
-- **Install**: `pip install -U "autora[experimentalist-falsification]"`
-
-### 2. Novelty
-- **Repository**: https://github.com/AutoResearch/autora-experimentalist-novelty
-- **Purpose**: Samples conditions based on maximum distance from existing data
-- **Main functions**: `novelty_sampler`, `novelty_score_sampler` from `autora.experimentalist.novelty`
-- **Install**: `pip install -U "autora[experimentalist-novelty]"`
-
-### 3. Uncertainty
-- **Repository**: https://github.com/AutoResearch/autora-experimentalist-uncertainty
-- **Purpose**: Selects conditions where model is most uncertain (least confident, margin, entropy)
-- **Main function**: `uncertainty_sample` from `autora.experimentalist.uncertainty`
-- **Install**: `pip install -U "autora[experimentalist-uncertainty]"`
-
-### 4. Model Disagreement
-- **Repository**: https://github.com/AutoResearch/autora-experimentalist-model-disagreement
-- **Purpose**: Identifies conditions where two models make divergent predictions
-- **Main function**: `model_disagreement_sample` from `autora.experimentalist.model_disagreement`
-- **Install**: `pip install -U "autora[experimentalist-model-disagreement]"`
-
-### 5. LHS (Latin Hypercube Sampling)
-- **Repository**: https://github.com/AutoResearch/autora-experimentalist-lhs
-- **Purpose**: Generates evenly-distributed samples accounting for existing data
-- **Main methods**: `sample`, `pool` from `autora.experimentalist.lhs`
-- **Install**: `pip install -U "autora[experimentalist-lhs]"`
-
-### 6. Prediction Filter
-- **Repository**: https://github.com/AutoResearch/autora-experimentalist-prediction-filter
-- **Purpose**: Filters conditions based on model predictions (removes invalid/null predictions)
-- **Install**: `pip install -U "autora[experimentalist-prediction-filter]"`
-
-### 7. Bandit Random
-- **Repository**: https://github.com/AutoResearch/autora-experimentalist-bandit-random
-- **Purpose**: Multi-armed bandit strategy with random sampling for exploration
-- **Install**: `pip install -U "autora[experimentalist-bandit-random]"`
-
-### 8. Inequality
-- **Repository**: https://github.com/AutoResearch/autora-experimentalist-inequality
-- **Purpose**: Sampling based on inequality/variance measures
-- **Main function**: `summed_inequality_sample` from `autora.experimentalist.inequality`
-- **Install**: `pip install -U "autora[experimentalist-inequality]"`
-
-### 9. Nearest Value
-- **Repository**: https://github.com/AutoResearch/autora-experimentalist-nearest-value
-- **Purpose**: Returns nearest values between input samples and allowed values
-- **Main function**: `nearest_values_sampler` from `autora.experimentalist.nearest_value`
-- **Install**: `pip install -U "autora[experimentalist-nearest-value]"`
-
-### 10. Leverage
-- **Repository**: https://github.com/AutoResearch/autora-experimentalist-leverage
-- **Purpose**: Identifies influential datapoints via leave-one-out refitting
-- **Main function**: `leverage_sample` from `autora.experimentalist.leverage`
-- **Note**: Computationally expensive - scales with data size and model count
-- **Install**: `pip install -U "autora[experimentalist-leverage]"`
-
-## Experiment Runner Repositories
-
-### 1. Firebase Experimentation Manager
-- **Repository**: https://github.com/AutoResearch/autora-experiment-runner-experimentation-manager-firebase
-- **Purpose**: Manages communication between AutoRA and Firebase-hosted experiments
-- **Install**: `pip install "autora[experiment-runner-experimentation-manager-firebase]"`
-
-### 2. Prolific Recruitment Manager
-- **Repository**: https://github.com/AutoResearch/autora-experiment-runner-recruitment-manager-prolific
-- **Purpose**: Recruit participants via Prolific for AutoRA experiments
-- **Main function**: `setup_study` from `autora.experiment_runner.recruitment_manager.prolific`
-- **Install**: `pip install "autora[experiment-runner-recruitment-manager-prolific]"`
-
-### 3. Firebase Prolific Runner
-- **Repository**: https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific
-- **Purpose**: Run experiments with Firebase and Prolific, automates study creation
-- **Note**: Early alpha version - use with caution
-- **Install**: `pip install "autora[experiment-runner-firebase-prolific]"`
-
-## Code Style (from AutoRA contribution guidelines)
-
-- Snake case for variables/modules (`example_name`)
-- Camel case for classes (`ExampleClass`)
-- Comprehensive docstrings for public elements
-- PEP 8 style guide compliance
-
-## Key Documentation Links
+## Doc links (concepts)
 
 - Main docs: https://autoresearch.github.io/autora/
-- Tutorials: https://autoresearch.github.io/autora/tutorials/
-- State Mechanism: https://autoresearch.github.io/autora/core/docs/The%20State%20Mechanism/
+- State mechanism: https://autoresearch.github.io/autora/core/docs/The%20State%20Mechanism/
 - Contribution guide: https://autoresearch.github.io/autora/contribute/
 - Forum: https://github.com/orgs/AutoResearch/discussions
 
-## Research Focus
+## When invoked
 
-When invoked, study these repositories for:
+1. **Start from the JSON** in `autora_gui/JSON/components/` for the component in question — it is the exact contract the GUI uses.
+2. Cross-check the pinned source via `githubCommit` when parameter semantics are unclear.
+3. Consult web docs only for conceptual background.
 
-1. **Parameters**: What configuration options does each class/function accept?
-2. **Input/Output Types**: What data formats do they expect and produce?
-3. **State Integration**: How do components read from and write to StandardState?
-4. **GUI Considerations**: What parameters should be exposed in the autoRA-gui interface?
-
-## Output
-
-Provide findings relevant to autoRA-gui integration:
-- Parameter definitions for each component (name, type, defaults, valid values)
+Report findings relevant to autoRA-gui integration:
+- Parameter definitions (name, datatype, cardinality, validValues, default) — quote from the JSON
 - Input/output data type specifications
-- Suggested Protocol model definitions matching the data_model.py structure
-- Any implementation recommendations
+- Whether a new/edited JSON conforms to the `Protocol` model in `data_model.py` (validate against `autora_gui/JSON/schemas/protocol_model.json`)
+- Implementation recommendations
 
 $ARGUMENTS
