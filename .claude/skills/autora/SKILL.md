@@ -1,7 +1,7 @@
 ---
 name: autora
 description: Study AutoRA theorist, experimentalist, and experiment-runner components to understand their architecture, parameters, and integration into autoRA-gui
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # AutoRA Research Skill

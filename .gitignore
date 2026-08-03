@@ -178,3 +178,6 @@ coverage
 
 # Generated JSDoc API docs
 frontend-docs
+
+# Claude
+settings.local.json
