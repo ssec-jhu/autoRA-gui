@@ -4,6 +4,7 @@
   "name": "Latin Hypercube Pooler",
   "description": "Generates a pool of experimental conditions using Latin Hypercube Sampling (LHS). Divides the variable ranges into bins, creates hypercube combinations, and samples random values within selected regions for better space coverage than pure random sampling.",
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-lhs/blob/main/src/autora/experimentalist/lhs/__init__.py#L16",
+  "github.io": "https://github.com/AutoResearch/autora-experimentalist-lhs/blob/main/docs/index.md",
   "pythonName": "pool",
   "importPath": "autora.experimentalist.lhs",
   "pipInstall": "autora==4.2.0",

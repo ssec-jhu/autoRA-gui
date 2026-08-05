@@ -4,6 +4,7 @@
   "name": "Falsification Sampler",
   "description": "Selects experimental conditions that are most likely to falsify the current model by maximizing predicted model error.",
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L194",
+  "github.io": "https://autoresearch.github.io/autora/user-guide/experimentalists/falsification/",
   "pythonName": "sample",
   "importPath": "autora.experimentalist.falsification",
   "pipInstall": "autora-experimentalist-falsification==2.2.0",

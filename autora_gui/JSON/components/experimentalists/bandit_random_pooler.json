@@ -4,6 +4,7 @@
   "name": "Bandit Random Pooler",
   "description": "Generates binary reward sequences for multi-armed bandit tasks. Creates sequences based on underlying probability distributions with optional drift dynamics.",
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-bandit-random/blob/main/src/autora/experimentalist/bandit_random/__init__.py#L137",
+  "github.io": "https://autoresearch.github.io/autora/user-guide/experimentalists/bandit-random/",
   "pythonName": "pool",
   "importPath": "autora.experimentalist.bandit_random",
   "pipInstall": "autora-experimentalist-bandit-random==1.0.0",

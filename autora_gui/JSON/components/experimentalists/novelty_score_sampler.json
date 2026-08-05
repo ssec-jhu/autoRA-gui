@@ -4,6 +4,7 @@
   "name": "Novelty Score Sampler",
   "description": "Selects experimental conditions based on dissimilarity to reference conditions and returns both the conditions and their dissimilarity scores.",
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L81",
+  "github.io": "https://autoresearch.github.io/autora/user-guide/experimentalists/novelty/Basic%20Usage/",
   "pythonName": "score_sample",
   "importPath": "autora.experimentalist.novelty",
   "pipInstall": "autora-experimentalist-novelty==2.2.0",
