@@ -4,6 +4,7 @@
   "name": "Q-Learning (Synthetic, Psychology)",
   "description": "Synthetic experiment runner implementing Q-learning for n-armed bandit tasks. Simulates agent decision-making behavior with configurable learning parameters.",
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychology/q_learning.py#L114",
+  "github.io": "https://autoresearch.github.io/autora/synthetic/docs/Examples/Psychology/Q-Learning/",
   "pythonName": "q_learning",
   "importPath": "autora.experiment_runner.synthetic.psychology.q_learning",
   "pipInstall": "autora-synthetic==2.2.0",
