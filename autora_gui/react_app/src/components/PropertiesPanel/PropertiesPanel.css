@@ -58,7 +58,24 @@
 }
 
 .node-info {
+  position: relative;
   margin-bottom: 12px;
+  padding-right: 24px;
+}
+
+.github-io-link {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: color 0.15s ease;
+}
+
+.github-io-link:hover {
+  color: var(--accent-primary);
 }
 
 .node-info-name {

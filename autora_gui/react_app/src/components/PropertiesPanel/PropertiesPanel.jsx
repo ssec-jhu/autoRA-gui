@@ -43,6 +43,46 @@ function ParameterHint({ description }) {
 }
 
 /**
+ * External-link icon that opens the component's github_io documentation page
+ * in a new browser tab. Rendered in the upper-right corner of the component
+ * name; renders nothing when no url is provided.
+ *
+ * @param {Object} props
+ * @param {string} props.url - The github_io documentation URL; renders nothing when falsy
+ * @returns {JSX.Element|null}
+ */
+// External-link icon linking to the component's github_io documentation page
+function GithubIoLink({ url }) {
+  if (!url) return null
+  return (
+    <a
+      className="github-io-link"
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Open component documentation in a new tab"
+      title="Open component documentation"
+    >
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M14 4h6v6" />
+        <line x1="10" y1="14" x2="20" y2="4" />
+        <path d="M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6" />
+      </svg>
+    </a>
+  )
+}
+
+/**
  * Determine a human-readable datatype string from a variable type structure,
  * recursing through list wrappers and summarizing dict variants.
  *
@@ -235,6 +275,7 @@ function PropertiesPanel() {
         <div className="properties-content">
           <div className="property-section">
             <div className="node-info">
+              <GithubIoLink url={previewedComponent.github_io} />
               <h3 className="node-info-name">{previewedComponent.name}</h3>
               <span className="node-info-type">{previewedComponent.protocolType?.replace('_', ' ')}</span>
             </div>
@@ -345,6 +386,7 @@ function PropertiesPanel() {
       <div className="properties-content">
         <div className="property-section">
           <div className="node-info">
+            <GithubIoLink url={selectedNode.componentData?.github_io} />
             <h3 className="node-info-name">{selectedNode.name}</h3>
             <span className="node-info-type">{selectedNode.type.replace('_', ' ')}</span>
           </div>
