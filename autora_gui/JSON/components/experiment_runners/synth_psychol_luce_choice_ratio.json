@@ -4,7 +4,7 @@
   "name": "Luce Choice Ratio (Synthetic, Psychology)",
   "description": "Synthetic experiment runner implementing the Shepard-Luce Choice Rule for modeling choice probability based on similarity ratings to categories.",
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychology/luce_choice_ratio.py#L11",
-  "github.io": "https://autoresearch.github.io/autora/synthetic/docs/Examples/Psychology/Luce-Choice-Ratio/",
+  "github_io": "https://autoresearch.github.io/autora/synthetic/docs/Examples/Psychology/Luce-Choice-Ratio/",
   "pythonName": "luce_choice_ratio",
   "importPath": "autora.experiment_runner.synthetic.psychology.luce_choice_ratio",
   "pipInstall": "autora-synthetic==2.2.0",

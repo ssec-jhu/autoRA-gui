@@ -253,6 +253,10 @@
       "title": "Githubcommit",
       "type": "string"
     },
+    "github_io": {
+      "title": "Github Io",
+      "type": "string"
+    },
     "pythonName": {
       "title": "Pythonname",
       "type": "string"
@@ -333,6 +337,7 @@
     "name",
     "description",
     "githubCommit",
+    "github_io",
     "pythonName",
     "importPath",
     "pipInstall",

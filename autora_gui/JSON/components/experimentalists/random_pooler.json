@@ -4,7 +4,7 @@
   "name": "Random Pooler",
   "description": "Generates a pool of experimental conditions by randomly sampling from the defined variable space.",
   "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/random.py#L9",
-  "github.io": "https://autoresearch.github.io/autora/core/docs/experimentalists/random/",
+  "github_io": "https://autoresearch.github.io/autora/core/docs/experimentalists/random/",
   "pythonName": "pool",
   "importPath": "autora.experimentalist.random",
   "pipInstall": "autora-core==5.0.3",

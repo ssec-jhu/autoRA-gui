@@ -4,7 +4,7 @@
   "name": "Random Sampler",
   "description": "Randomly selects a subset of experimental conditions from a given pool.",
   "githubCommit": "https://github.com/AutoResearch/autora-core/blob/main/src/autora/experimentalist/random.py#L137",
-  "github.io": "https://autoresearch.github.io/autora/core/docs/pipeline/Experimentalist%20Pipeline%20Examples/",
+  "github_io": "https://autoresearch.github.io/autora/core/docs/pipeline/Experimentalist%20Pipeline%20Examples/",
   "pythonName": "sample",
   "importPath": "autora.experimentalist.random",
   "pipInstall": "autora-core==5.0.3",

@@ -4,7 +4,7 @@
   "name": "Linear Mixed Model Experiment (Synthetic, Abstract)",
   "description": "Synthetic experiment runner implementing a linear mixed model with fixed and random effects. Supports R-style formula notation (e.g., 'y ~ x1 + (1|group)') for specifying random intercepts, random slopes, and multiple grouping variables.",
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/abstract/lmm.py#L164",
-  "github.io": "https://autoresearch.github.io/autora/synthetic/docs/Examples/Abstract/LMM/",
+  "github_io": "https://autoresearch.github.io/autora/synthetic/docs/Examples/Abstract/LMM/",
   "pythonName": "lmm_experiment",
   "importPath": "autora.experiment_runner.synthetic.abstract.lmm",
   "pipInstall": "autora-synthetic==2.2.0",

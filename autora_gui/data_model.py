@@ -89,6 +89,7 @@ class Protocol(AutoraBaseModel):
     name: str
     description: str
     githubCommit: str
+    github_io: str
     pythonName: str
     importPath: str
     pipInstall: str

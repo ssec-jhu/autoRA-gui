@@ -4,7 +4,7 @@
   "name": "BMS Regressor",
   "description": "Bayesian Machine Scientist that discovers symbolic equations using MCMC sampling with informed priors over mathematical expressions.",
   "githubCommit": "https://github.com/AutoResearch/autora-theorist-bms/blob/ce3d7edf707c54a12108700076d841c138086be1/src/autora/theorist/bms/regressor.py#L24",
-  "github.io": "https://autoresearch.github.io/autora/user-guide/theorists/bms/",
+  "github_io": "https://autoresearch.github.io/autora/user-guide/theorists/bms/",
   "pythonName": "BMSRegressor",
   "importPath": "autora.theorist.bms.regressor",
   "pipInstall": "autora-theorist-bms==1.0.6",

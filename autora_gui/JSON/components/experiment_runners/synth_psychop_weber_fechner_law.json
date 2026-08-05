@@ -4,7 +4,7 @@
   "name": "Weber-Fechner Law (Synthetic, Psychophysics)",
   "description": "Synthetic experiment runner implementing the Weber-Fechner Law, which relates perceived intensity to physical stimulus intensity logarithmically.",
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychophysics/weber_fechner_law.py#L11",
-  "github.io": "https://autoresearch.github.io/autora/synthetic/docs/Examples/Psychophysics/Weber-Fechner-Law/",
+  "github_io": "https://autoresearch.github.io/autora/synthetic/docs/Examples/Psychophysics/Weber-Fechner-Law/",
   "pythonName": "weber_fechner_law",
   "importPath": "autora.experiment_runner.synthetic.psychophysics.weber_fechner_law",
   "pipInstall": "autora-synthetic==2.2.0",

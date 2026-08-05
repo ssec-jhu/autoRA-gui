@@ -4,7 +4,7 @@
   "name": "Mixture Sampler",
   "description": "Implements ensemble sampling across multiple ranking functions. Aggregates scores from various samplers using weighted mixture logic, adjusts probabilities via temperature scaling, then selects conditions proportionally to their adjusted scores.",
   "githubCommit": "https://github.com/blinodelka/mixture_experimental_strategies/blob/main/src/autora/experimentalist/mixture/__init__.py#L24",
-  "github.io": "https://autoresearch.github.io/autora/user-guide/experimentalists/mixture/",
+  "github_io": "https://autoresearch.github.io/autora/user-guide/experimentalists/mixture/",
   "pythonName": "sample",
   "importPath": "autora.experimentalist.mixture",
   "pipInstall": "mixture-experimentalist==1.0.0a7",

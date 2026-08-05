@@ -4,7 +4,7 @@
   "name": "Exponential Learning (Synthetic, Psychology)",
   "description": "Synthetic experiment runner implementing exponential learning curves based on Heathcote, Brown, & Mewhort (2000) and Thurstone (1919).",
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychology/exp_learning.py#L11",
-  "github.io": "https://autoresearch.github.io/autora/synthetic/docs/Examples/Psychology/Exponential-Learning/",
+  "github_io": "https://autoresearch.github.io/autora/synthetic/docs/Examples/Psychology/Exponential-Learning/",
   "pythonName": "exp_learning",
   "importPath": "autora.experiment_runner.synthetic.psychology.exp_learning",
   "pipInstall": "autora-synthetic==2.2.0",

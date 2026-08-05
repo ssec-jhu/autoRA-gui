@@ -4,7 +4,7 @@
   "name": "Firebase Runner",
   "description": "Experiment runner for hosting web-based experiments on Firebase and collecting participant responses via Firestore.",
   "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/main/src/autora/experiment_runner/firebase_prolific/__init__.py#L291",
-  "github.io": "https://autoresearch.github.io/autora/reference/autora/experiment_runner/firebase_prolific/#autora.experiment_runner.firebase_prolific.firebase_runner",
+  "github_io": "https://autoresearch.github.io/autora/reference/autora/experiment_runner/firebase_prolific/#autora.experiment_runner.firebase_prolific.firebase_runner",
   "pythonName": "firebase_runner",
   "importPath": "autora.experiment_runner.firebase_prolific",
   "pipInstall": "autora-experiment-runner-firebase-prolific==1.0.1",

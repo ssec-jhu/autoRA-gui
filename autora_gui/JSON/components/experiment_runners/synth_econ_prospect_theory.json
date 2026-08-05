@@ -4,7 +4,7 @@
   "name": "Prospect Theory (Synthetic, Economics)",
   "description": "Synthetic experiment runner implementing Kahneman & Tversky's (1979) Prospect Theory with nonlinear value and probability weighting functions.",
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/economics/prospect_theory.py#L13",
-  "github.io": "https://autoresearch.github.io/autora/synthetic/docs/Examples/Economics/Prospect-Theory/",
+  "github_io": "https://autoresearch.github.io/autora/synthetic/docs/Examples/Economics/Prospect-Theory/",
   "pythonName": "prospect_theory",
   "importPath": "autora.experiment_runner.synthetic.economics.prospect_theory",
   "pipInstall": "autora-synthetic==2.2.0",

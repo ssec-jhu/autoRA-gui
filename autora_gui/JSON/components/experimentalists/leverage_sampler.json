@@ -4,7 +4,7 @@
   "name": "Leverage Sampler",
   "description": "Identifies influential datapoints by iteratively refitting models using leave-one-out validation. Computes how much each point affects model performance and selects candidates based on their influence.",
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-leverage/blob/main/src/autora/experimentalist/leverage/__init__.py#L8",
-  "github.io": "https://autoresearch.github.io/autora/user-guide/experimentalists/leverage/",
+  "github_io": "https://autoresearch.github.io/autora/user-guide/experimentalists/leverage/",
   "pythonName": "sample",
   "importPath": "autora.experimentalist.leverage",
   "pipInstall": "autora-experimentalist-leverage==1.10",

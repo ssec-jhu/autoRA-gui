@@ -4,7 +4,7 @@
   "name": "Firebase Prolific Runner",
   "description": "Experiment runner for conducting human behavioral experiments with participant recruitment via Prolific and experiment hosting on Firebase.",
   "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-firebase-prolific/blob/main/src/autora/experiment_runner/firebase_prolific/__init__.py#L267",
-  "github.io": "https://autoresearch.github.io/autora/user-guide/experiment-runners/behavioral-web-experiments/firebase-prolific-runner/",
+  "github_io": "https://autoresearch.github.io/autora/user-guide/experiment-runners/behavioral-web-experiments/firebase-prolific-runner/",
   "pythonName": "firebase_prolific_runner",
   "importPath": "autora.experiment_runner.firebase_prolific",
   "pipInstall": "autora-experiment-runner-firebase-prolific==1.0.1",
