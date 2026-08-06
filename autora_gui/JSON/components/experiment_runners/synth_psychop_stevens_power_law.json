@@ -4,6 +4,7 @@
   "name": "Stevens Power Law (Synthetic, Psychophysics)",
   "description": "Synthetic experiment runner implementing Stevens' Power Law, which models perceived intensity as a power function of physical stimulus intensity.",
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/psychophysics/stevens_power_law.py#L11",
+  "github_io": "https://autoresearch.github.io/autora/reference/autora/experiment_runner/synthetic/psychophysics/stevens_power_law/",
   "pythonName": "stevens_power_law",
   "importPath": "autora.experiment_runner.synthetic.psychophysics.stevens_power_law",
   "pipInstall": "autora-synthetic==2.2.0",
