@@ -172,6 +172,17 @@ export function getExecutionOrder(nodes, connections) {
       }
     }
 
+    // A Filter must have a second (loop-back) output connection to close the
+    // experiment loop. Without it there is no cycle, so refuse to generate code
+    // that would emit a misleading `for i in range(...)` loop.
+    if (!loopBackTarget) {
+      throw new Error(
+        'The Filter node is missing its second output connection that closes the ' +
+        'experiment loop. Please connect the Filter back to a component to form the ' +
+        'loop before generating code.'
+      )
+    }
+
     if (pathToFilter) {
       for (let i = 1; i < pathToFilter.length; i++) {
         const node = nodes.find(n => n.id === pathToFilter[i])

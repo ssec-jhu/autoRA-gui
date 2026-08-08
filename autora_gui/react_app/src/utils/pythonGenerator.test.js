@@ -116,6 +116,37 @@ describe('getExecutionOrder', () => {
     expect(loopPath).toEqual([])
     expect(filterInfo).toBeNull()
   })
+
+  it('throws when a filter has no second (loop-back) output connection', () => {
+    const { nodes } = buildState()
+    nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 3 } })
+    // Filter only connects forward to end — no loop-back to close the cycle.
+    const connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'end-1' }
+    ]
+    expect(() => getExecutionOrder(nodes, connections)).toThrow(/second output connection/)
+  })
+
+  it('accepts a filter with a loop-back output that closes the cycle', () => {
+    const { nodes } = buildState()
+    nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 3 } })
+    nodes.push({ id: 'loop-1', type: 'component', name: 'Loop Runner', protocolUuid: 'proto-loop' })
+    const connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'end-1' },
+      { sourceId: 'filt-1', targetId: 'loop-1' }
+    ]
+    const { loopPath, filterInfo } = getExecutionOrder(nodes, connections)
+    expect(loopPath.map(n => n.id)).toEqual(['loop-1'])
+    expect(filterInfo).toEqual({ maxCounter: 3 })
+  })
 })
 
 describe('prepareWorkflow aliasing', () => {
