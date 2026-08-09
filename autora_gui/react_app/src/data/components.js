@@ -2428,7 +2428,7 @@ export const EMBEDDED_COMPONENTS = {
       "github_io": "https://autoresearch.github.io/autora/abstract-equation/docs/Basic%20Usage/",
       "pythonName": "equation_experiment",
       "importPath": "autora.experiment_runner.synthetic.abstract.equation",
-      "pipInstall": "autora-synthetic==2.2.0",
+      "pipInstall": "autora-synthetic-abstract-equation==0.1.0",
       "parameters": {
         "equation_experiment": [
           {
