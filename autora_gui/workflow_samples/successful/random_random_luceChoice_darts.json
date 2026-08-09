@@ -1,0 +1,307 @@
+{
+  "name": "AutoRA Workflow",
+  "description": "Workflow created with AutoRA GUI",
+  "start": {
+    "uuid": "a35449e4-23bb-44ba-910a-ceb7ff6042c4",
+    "canvasLocation": {
+      "x": -240,
+      "y": -485
+    }
+  },
+  "end": {
+    "uuid": "24924fb4-126f-403f-8fd3-2bf16f485e8e",
+    "canvasLocation": {
+      "x": -43,
+      "y": 400
+    }
+  },
+  "filters": [
+    {
+      "uuid": "2a809a47-2adf-4264-9416-43cdfa4b4ae4",
+      "maxCounter": 10,
+      "altTarget": null,
+      "canvasLocation": {
+        "x": -109,
+        "y": 194
+      }
+    }
+  ],
+  "components": [
+    {
+      "uuid": "721e73ec-bcf7-43e1-96db-4dff24d83500",
+      "protocolUuid": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f",
+      "parameterSetting": [
+        {
+          "uuid": "f4077ba0-476f-405d-9637-1e2c5f3cfc7b",
+          "name": "batch_size",
+          "value": 64
+        },
+        {
+          "uuid": "f10e5916-0dd9-4f0f-98d9-b9f6220290f0",
+          "name": "num_graph_nodes",
+          "value": 2
+        },
+        {
+          "uuid": "0dacd288-51f0-46e8-889f-00f3a4ff1a5b",
+          "name": "output_type",
+          "value": "real"
+        },
+        {
+          "uuid": "229eae45-7b07-4e7f-a371-967ff7c1ae22",
+          "name": "classifier_weight_decay",
+          "value": 0.01
+        },
+        {
+          "uuid": "d85f484b-701b-4f10-8571-cdb55c713935",
+          "name": "darts_type",
+          "value": "original"
+        },
+        {
+          "uuid": "a076a8fc-b165-41e7-b31c-fc60604a4830",
+          "name": "param_updates_per_epoch",
+          "value": 10
+        },
+        {
+          "uuid": "e747f37e-3e5f-4db3-85f8-53d75c6557dd",
+          "name": "param_updates_for_sampled_model",
+          "value": 100
+        },
+        {
+          "uuid": "a3baf331-a185-42bc-9bdf-76d34dd69ef8",
+          "name": "param_learning_rate_max",
+          "value": 0.025
+        },
+        {
+          "uuid": "b5b4d2bb-a6b2-4afd-b43c-71174fb81d64",
+          "name": "param_learning_rate_min",
+          "value": 0.01
+        },
+        {
+          "uuid": "71728cbe-d45d-4eac-b3b9-a94ac995fea6",
+          "name": "param_momentum",
+          "value": 0.9
+        },
+        {
+          "uuid": "a5bea537-a7c4-4b3b-915a-ebecb8af903a",
+          "name": "arch_updates_per_epoch",
+          "value": 1
+        },
+        {
+          "uuid": "7e6b90ab-a255-440b-9265-2b3383d6680b",
+          "name": "arch_learning_rate_max",
+          "value": 0.003
+        },
+        {
+          "uuid": "813134fd-e4ba-45bb-9d3b-1816ba1a976a",
+          "name": "arch_weight_decay",
+          "value": 0.0001
+        },
+        {
+          "uuid": "2f162a1b-f238-4d00-9c71-2c1645d8707c",
+          "name": "arch_weight_decay_df",
+          "value": 0.0003
+        },
+        {
+          "uuid": "40827043-097f-4273-b5e5-b3a91f8b5b55",
+          "name": "arch_weight_decay_base",
+          "value": 0
+        },
+        {
+          "uuid": "8e996a15-f566-4bf1-b725-e6af52982d76",
+          "name": "arch_momentum",
+          "value": 0.9
+        },
+        {
+          "uuid": "f2c21d95-0e21-4dde-b658-7e606422e2c9",
+          "name": "fair_darts_loss_weight",
+          "value": 1
+        },
+        {
+          "uuid": "6e6d72e6-9649-46e5-8ee1-01843952cfeb",
+          "name": "max_epochs",
+          "value": 10
+        },
+        {
+          "uuid": "b8a7b592-7ee0-437b-883e-4894778e17a8",
+          "name": "grad_clip",
+          "value": 5
+        },
+        {
+          "uuid": "a0834227-f400-427a-bf22-5e163ef09eaf",
+          "name": "primitives",
+          "value": [
+            "none",
+            "add",
+            "subtract",
+            "linear",
+            "linear_logistic",
+            "linear_relu"
+          ]
+        },
+        {
+          "uuid": "50b1ef00-f647-478a-b20a-d7e14a3ff856",
+          "name": "train_classifier_coefficients",
+          "value": false
+        },
+        {
+          "uuid": "7cb3428f-553f-4fc6-8c8b-a0a49f446177",
+          "name": "train_classifier_bias",
+          "value": false
+        },
+        {
+          "uuid": "0ca163f7-1939-477f-9019-6e0705660837",
+          "name": "sampling_strategy",
+          "value": "max"
+        }
+      ],
+      "canvasLocation": {
+        "x": 152,
+        "y": -34
+      }
+    },
+    {
+      "uuid": "e6b91830-b6d1-48a7-b6df-4286e74ff791",
+      "protocolUuid": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
+      "parameterSetting": [
+        {
+          "uuid": "5693e7a5-3cde-4264-8633-465a8de0b433",
+          "name": "num_samples",
+          "value": 1
+        },
+        {
+          "uuid": "7cae6395-8835-453b-9e91-a6a387b0bb69",
+          "name": "replace",
+          "value": false
+        }
+      ],
+      "canvasLocation": {
+        "x": 269,
+        "y": -468
+      }
+    },
+    {
+      "uuid": "a7cca558-846e-46af-998d-a2a20df951bc",
+      "protocolUuid": "e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",
+      "parameterSetting": [
+        {
+          "uuid": "83842896-e42a-49bf-b523-8b568f0a3873",
+          "name": "num_samples",
+          "value": 5
+        },
+        {
+          "uuid": "0b0e2792-1039-4849-a56f-7d139d29902b",
+          "name": "replace",
+          "value": true
+        }
+      ],
+      "canvasLocation": {
+        "x": -16,
+        "y": -492
+      }
+    },
+    {
+      "uuid": "de15984a-a1d2-4d2b-b521-9e6fa54c45f7",
+      "protocolUuid": "b6c7d8e9-f0a1-4b2c-3d4e-5f6a7b8c9d0e",
+      "parameterSetting": [
+        {
+          "uuid": "d2bf0fe5-a05e-4cd2-81ac-b6d48448b779",
+          "name": "resolution",
+          "value": 8
+        },
+        {
+          "uuid": "6669eccb-10f8-402e-a962-0a2f5643d08e",
+          "name": "maximum_similarity",
+          "value": 10
+        },
+        {
+          "uuid": "1643fb32-f039-4231-975a-c504eb86ada3",
+          "name": "focus",
+          "value": 0.8
+        },
+        {
+          "uuid": "50e9542a-6129-4954-9e66-088e1797d69e",
+          "name": "added_noise",
+          "value": 0.01
+        }
+      ],
+      "canvasLocation": {
+        "x": 286,
+        "y": -212
+      }
+    }
+  ],
+  "links": [
+    {
+      "source": "2a809a47-2adf-4264-9416-43cdfa4b4ae4",
+      "target": "24924fb4-126f-403f-8fd3-2bf16f485e8e",
+      "sourcePoint": {
+        "x": -64.35227272727275,
+        "y": 291.27287150477423
+      },
+      "targetPoint": {
+        "x": 6.897727272727252,
+        "y": 400.19696969696975
+      }
+    },
+    {
+      "source": "a35449e4-23bb-44ba-910a-ceb7ff6042c4",
+      "target": "a7cca558-846e-46af-998d-a2a20df951bc",
+      "sourcePoint": {
+        "x": -140.0467171717172,
+        "y": -444.5252525252524
+      },
+      "targetPoint": {
+        "x": -16.435606060606005,
+        "y": -451.89069264069246
+      }
+    },
+    {
+      "source": "a7cca558-846e-46af-998d-a2a20df951bc",
+      "target": "e6b91830-b6d1-48a7-b6df-4286e74ff791",
+      "sourcePoint": {
+        "x": 143.564393939394,
+        "y": -451.89069264069246
+      },
+      "targetPoint": {
+        "x": 268.76010101010115,
+        "y": -428.1363636363635
+      }
+    },
+    {
+      "source": "721e73ec-bcf7-43e1-96db-4dff24d83500",
+      "target": "2a809a47-2adf-4264-9416-43cdfa4b4ae4",
+      "sourcePoint": {
+        "x": 231.60101010101005,
+        "y": 46.010101010100925
+      },
+      "targetPoint": {
+        "x": -64.35227272727275,
+        "y": 180.96421363967283
+      }
+    },
+    {
+      "source": "e6b91830-b6d1-48a7-b6df-4286e74ff791",
+      "target": "de15984a-a1d2-4d2b-b521-9e6fa54c45f7",
+      "sourcePoint": {
+        "x": 348.76010101010115,
+        "y": -388.1363636363635
+      },
+      "targetPoint": {
+        "x": 366.42153679653677,
+        "y": -211.8311688311686
+      }
+    },
+    {
+      "source": "de15984a-a1d2-4d2b-b521-9e6fa54c45f7",
+      "target": "721e73ec-bcf7-43e1-96db-4dff24d83500",
+      "sourcePoint": {
+        "x": 366.42153679653677,
+        "y": -131.8311688311686
+      },
+      "targetPoint": {
+        "x": 231.60101010101005,
+        "y": -33.989898989899075
+      }
+    }
+  ]
+}
