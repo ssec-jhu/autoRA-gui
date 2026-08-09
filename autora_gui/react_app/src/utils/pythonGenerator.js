@@ -275,12 +275,14 @@ function buildParamString(params, exclude = []) {
  * Generate wrapper function for a theorist component
  *
  * @param {CodeBuilder} code - Builder to append the wrapper to.
- * @param {Object} meta - Component metadata with `pythonName`, `params`, `varName` and `nodeName`.
+ * @param {Object} meta - Component metadata with `pythonName`, `params`, `varName`, `nodeName` and `runParamNames` (non-constructor params to exclude from instantiation).
  * @returns {void}
  */
 function generateTheoristWrapper(code, meta) {
-  const { pythonName, params, varName, nodeName } = meta
-  const paramStr = buildParamString(params)
+  const { pythonName, params, varName, nodeName, runParamNames = [] } = meta
+  // Only pass constructor (__init__) params to instantiation; params belonging
+  // to other methods (e.g. fit) are excluded so instantiation does not fail.
+  const paramStr = buildParamString(params, runParamNames)
 
   code.comment(nodeName)
   code.line(`${varName} = estimator_on_state(${pythonName}(${paramStr}))`)
@@ -434,15 +436,15 @@ export function prepareWorkflow(state) {
     if (!imports.has(importPath)) imports.set(importPath, new Set())
     imports.get(importPath).add(alias ? `${pythonName} as ${alias}` : pythonName)
 
-    // Parameters are grouped by function in the JSON: the group named after
-    // the factory function configures it; any other group (e.g. "run")
-    // belongs to the runner's run() method
-    const factoryParamNames = new Set(
-      (protocol.parameters?.[pythonName] || []).map(p => p.name)
-    )
-    const runParamNames = Object.entries(protocol.parameters || {})
-      .filter(([group]) => group !== pythonName)
-      .flatMap(([, groupParams]) => (Array.isArray(groupParams) ? groupParams : []).map(p => p.name))
+    // Parameters are grouped by function in the JSON. The instantiation group
+    // configures the constructor/factory: theorist classes use an "__init__"
+    // group, runner factories use a group named after the function (pythonName).
+    // Any other group (e.g. "fit" for a theorist, "run" for a runner) is applied
+    // elsewhere, not at instantiation, so its params must be excluded from it.
+    const initGroup = protocol.parameters?.[pythonName] || protocol.parameters?.['__init__'] || []
+    const factoryParamNames = new Set(initGroup.map(p => p.name))
+    const runParamNames = Object.values(protocol.parameters || {})
+      .flatMap(groupParams => (Array.isArray(groupParams) ? groupParams : []).map(p => p.name))
       .filter(name => !factoryParamNames.has(name))
 
     componentMeta.set(node.id, {

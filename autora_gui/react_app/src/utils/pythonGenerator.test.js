@@ -289,6 +289,19 @@ describe('generatePythonCode', () => {
     expect(code).toContain('bms_regressor_on_state = estimator_on_state(BMSRegressor(epochs=100))')
   })
 
+  it('excludes non-__init__ (e.g. fit) params from theorist instantiation', () => {
+    const state = buildState()
+    // BMSRegressor: epochs/ts are __init__ params, num_param is a fit param
+    state.components.theorists[0].parameters = {
+      __init__: [{ name: 'epochs' }, { name: 'ts' }],
+      fit: [{ name: 'num_param' }]
+    }
+    state.nodes[3].parameters = { epochs: 100, num_param: 5 }
+    const code = generatePythonCode(state)
+    expect(code).toContain('bms_regressor_on_state = estimator_on_state(BMSRegressor(epochs=100))')
+    expect(code).not.toContain('num_param')
+  })
+
   it('throws when the workflow has no components', () => {
     const empty = { nodes: [{ id: 'start-1', type: 'start_point' }], connections: [], components: {} }
     expect(() => generatePythonCode(empty)).toThrow('No components found')
