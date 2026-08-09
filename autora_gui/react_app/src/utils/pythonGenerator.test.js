@@ -355,6 +355,21 @@ describe('runner parameter grouping', () => {
     const code = generatePythonCode(state)
     expect(code).toContain('return Delta(experiment_data=runner.run(conditions=conditions))')
   })
+
+  it('emits dict/list literal string parameters unquoted', () => {
+    const state = buildStateWithRunner()
+    state.nodes[3].parameters = {
+      fixed_effects: "{'Intercept': 0., 'x1': 2.}",
+      allowed: '[1, 2, 3]',
+      formula: 'rt ~ 1 + x1'
+    }
+    const code = generatePythonCode(state)
+    expect(code).toContain("fixed_effects={'Intercept': 0., 'x1': 2.}")
+    expect(code).toContain('allowed=[1, 2, 3]')
+    // Plain strings stay quoted
+    expect(code).toContain('formula="rt ~ 1 + x1"')
+    expect(code).not.toContain('fixed_effects="')
+  })
 })
 
 describe('variables initialization', () => {

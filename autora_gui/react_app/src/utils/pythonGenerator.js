@@ -245,7 +245,14 @@ export function toPythonName(name) {
 function formatPythonValue(value) {
   if (value === null || value === undefined) return 'None'
   if (typeof value === 'boolean') return value ? 'True' : 'False'
-  if (typeof value === 'string') return `"${value.replace(/"/g, '\\"')}"`
+  if (typeof value === 'string') {
+    // A string that already holds a Python container literal (dict or list),
+    // e.g. a "dict"-typed field like fixed_effects, is emitted verbatim so it
+    // is not wrapped in quotes and stays a real dict/list in the generated code.
+    const trimmed = value.trim()
+    if (/^\{[\s\S]*\}$/.test(trimmed) || /^\[[\s\S]*\]$/.test(trimmed)) return trimmed
+    return `"${value.replace(/"/g, '\\"')}"`
+  }
   if (Array.isArray(value)) return `[${value.map(formatPythonValue).join(', ')}]`
   return String(value)
 }
