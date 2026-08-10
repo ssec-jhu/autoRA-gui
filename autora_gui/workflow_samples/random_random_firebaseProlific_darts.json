@@ -32,102 +32,102 @@
       "protocolUuid": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f",
       "parameterSetting": [
         {
-          "uuid": "abbaa494-a7ec-45a7-a731-566e43909e42",
+          "uuid": "7333e2a3-d6d3-42ad-b3b1-5b689d1aa7ae",
           "name": "batch_size",
           "value": 64
         },
         {
-          "uuid": "9717a75c-dbca-412b-8c5e-c31cb53ed2ea",
+          "uuid": "39723c5a-8abb-4503-835b-fb5d95a1b819",
           "name": "num_graph_nodes",
           "value": 2
         },
         {
-          "uuid": "4e466d84-164e-4bb5-bea9-a0952a87a927",
+          "uuid": "85f16864-6915-4c17-a9f6-94c33f253c38",
           "name": "output_type",
           "value": "real"
         },
         {
-          "uuid": "345974a0-61ea-44a4-a4c7-5a7eb96013a3",
+          "uuid": "bf66ee04-9153-4ab1-b8c8-63340d0f778a",
           "name": "classifier_weight_decay",
           "value": 0.01
         },
         {
-          "uuid": "c5001108-38d5-47a4-8383-6455802046cd",
+          "uuid": "3d6039c3-d51d-4995-88bb-193e849aab94",
           "name": "darts_type",
           "value": "original"
         },
         {
-          "uuid": "daeb68e7-e8b4-4e47-85b7-7730b57e3ed0",
+          "uuid": "9b339e14-5b13-40f2-9e48-337978ec5f22",
           "name": "param_updates_per_epoch",
           "value": 10
         },
         {
-          "uuid": "f921e444-a89c-4c84-9b40-78e97ce5ab1d",
+          "uuid": "2c40175c-3e33-4752-8504-81dea0af3065",
           "name": "param_updates_for_sampled_model",
           "value": 100
         },
         {
-          "uuid": "1c071e66-dbd8-4eef-b9cb-b2d0f7931205",
+          "uuid": "a053383b-ec43-4956-b057-4510cfbc23f7",
           "name": "param_learning_rate_max",
           "value": 0.025
         },
         {
-          "uuid": "3a0b06eb-08ec-4fd8-984e-474ea462aeb5",
+          "uuid": "21760a97-b239-4f07-94bb-cd9852744c08",
           "name": "param_learning_rate_min",
           "value": 0.01
         },
         {
-          "uuid": "5c7b5217-52f4-4b3c-b26d-f62004d7e2c9",
+          "uuid": "54192286-bc1f-45da-b9a0-95453e040afc",
           "name": "param_momentum",
           "value": 0.9
         },
         {
-          "uuid": "f610b9b1-dfcc-4cf0-b915-2999362c9d7b",
+          "uuid": "ec3a3805-e846-45f4-8137-f66828928405",
           "name": "arch_updates_per_epoch",
           "value": 1
         },
         {
-          "uuid": "9f4498a6-080f-4c49-9d00-e61362d97aee",
+          "uuid": "0a9afab4-e82d-41dd-b0ee-37d5aba99904",
           "name": "arch_learning_rate_max",
           "value": 0.003
         },
         {
-          "uuid": "fac3ebd7-34c3-453d-abc4-916d19a59e98",
+          "uuid": "c377cf2d-f369-40f9-8662-558559530ca7",
           "name": "arch_weight_decay",
           "value": 0.0001
         },
         {
-          "uuid": "001ef2f4-175b-41a9-a55c-9a637bc3799f",
+          "uuid": "12197ed0-71bc-4da6-a54c-74df6b35a896",
           "name": "arch_weight_decay_df",
           "value": 0.0003
         },
         {
-          "uuid": "ff2bcc18-785c-44b1-b8c1-994286adcb23",
+          "uuid": "8bcd8e8f-05f8-4ace-a618-8a45c4453080",
           "name": "arch_weight_decay_base",
           "value": 0
         },
         {
-          "uuid": "03166b13-f73c-41c0-b441-86f0ad838ea7",
+          "uuid": "cdf99681-ac23-4b04-8dd4-95d7af4413ce",
           "name": "arch_momentum",
           "value": 0.9
         },
         {
-          "uuid": "5007a32a-c3b4-4130-b707-c32246a341d3",
+          "uuid": "ae61dbe8-384f-42c8-8208-e98718cffdba",
           "name": "fair_darts_loss_weight",
           "value": 1
         },
         {
-          "uuid": "230df604-c726-4622-8291-d83c013a1f6f",
+          "uuid": "29e7e9c7-1f3a-4c4f-a268-372903b97362",
           "name": "max_epochs",
           "value": 10
         },
         {
-          "uuid": "800df7a4-76b6-41ba-b15e-e3c633a8ff10",
+          "uuid": "d20ce17b-e426-4558-a69d-fd3428d6c897",
           "name": "grad_clip",
           "value": 5
         },
         {
-          "uuid": "3a8516a6-78d0-49ea-bdea-3789292c98bd",
+          "uuid": "53b986d7-6630-40a7-a17d-e71c8304b524",
           "name": "primitives",
           "value": [
             "none",
@@ -139,17 +139,17 @@
           ]
         },
         {
-          "uuid": "da80e7b9-a9eb-4785-b49c-e321cce6424b",
+          "uuid": "2b2fbe52-1ee7-425a-be04-7419f7d585d6",
           "name": "train_classifier_coefficients",
           "value": false
         },
         {
-          "uuid": "bc23e997-9bec-4c2f-b02f-7bf59153dca8",
+          "uuid": "7cb4ce39-4205-4db9-9243-e885d66386c5",
           "name": "train_classifier_bias",
           "value": false
         },
         {
-          "uuid": "1e84541b-988e-4457-94cb-4609b3f5cedc",
+          "uuid": "961f6b9a-da80-4693-bd4c-db4152af2186",
           "name": "sampling_strategy",
           "value": "max"
         }
@@ -164,12 +164,12 @@
       "protocolUuid": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
       "parameterSetting": [
         {
-          "uuid": "2ad6a6c7-bcf0-4e4a-9583-20ab870ddbff",
+          "uuid": "12528a85-1421-4dc8-9fc9-3cd49d0a7c97",
           "name": "num_samples",
           "value": 1
         },
         {
-          "uuid": "0870f752-6769-4ec0-8dc2-a83bb97a78bf",
+          "uuid": "07dc1fe3-810d-4f47-83d9-6437ed403fa2",
           "name": "replace",
           "value": false
         }
@@ -184,12 +184,12 @@
       "protocolUuid": "e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",
       "parameterSetting": [
         {
-          "uuid": "fd1651dd-50e0-412a-8210-b8195f22b3be",
+          "uuid": "226654ed-3b87-4943-8195-5333f3afb6f1",
           "name": "num_samples",
           "value": 5
         },
         {
-          "uuid": "0d3cdebd-ed09-46d5-a04e-d0b1ff301d65",
+          "uuid": "8d22234e-a984-4c9e-941a-ccdcc5307399",
           "name": "replace",
           "value": true
         }
@@ -204,24 +204,24 @@
       "protocolUuid": "d6e7f8a9-b0c1-4d2e-3f4a-5b6c7d8e9f0a",
       "parameterSetting": [
         {
-          "uuid": "877685c4-b7fe-4cdb-95f3-c06defe6ee95",
+          "uuid": "c8580c01-968a-4b30-8c5c-fd047cec8406",
           "name": "sleep_time",
           "value": 30
         },
         {
-          "uuid": "49785558-722c-4341-9dfe-0c4facd71bfa",
+          "uuid": "cfd9a051-ca38-47f9-b44e-20649774213b",
           "name": "study_completion_time",
           "value": 10
         },
         {
-          "uuid": "567a10bd-94ea-4102-bbbe-0fda5c1bd27a",
+          "uuid": "a39e8428-24d7-43cb-989d-27692debff9a",
           "name": "exclude_studies",
           "value": [
             "default"
           ]
         },
         {
-          "uuid": "a0d57e1e-fdf7-446d-bdb8-c8d87216b9c8",
+          "uuid": "3da30047-9878-4dfd-99ec-e12d30955e7a",
           "name": "approve_no_code",
           "value": true
         }
@@ -303,6 +303,18 @@
       "targetPoint": {
         "x": 231.60101010101005,
         "y": -33.989898989899075
+      }
+    },
+    {
+      "source": "2a809a47-2adf-4264-9416-43cdfa4b4ae4",
+      "target": "a7cca558-846e-46af-998d-a2a20df951bc",
+      "sourcePoint": {
+        "x": -119.15432893255071,
+        "y": 239
+      },
+      "targetPoint": {
+        "x": 64,
+        "y": -412
       }
     }
   ]
