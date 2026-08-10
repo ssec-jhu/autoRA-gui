@@ -32,12 +32,12 @@
       "protocolUuid": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
       "parameterSetting": [
         {
-          "uuid": "b82542b4-e0a8-4280-911a-a97a7168c842",
+          "uuid": "20d93f90-4b3b-47d1-97b8-8b7c616d2a91",
           "name": "num_samples",
           "value": 1
         },
         {
-          "uuid": "a8efe9a1-352b-4e73-bfd4-ffe2a4eb19aa",
+          "uuid": "1b71363f-dfe2-4dba-8cb0-c35702098abb",
           "name": "replace",
           "value": false
         }
@@ -52,12 +52,12 @@
       "protocolUuid": "e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",
       "parameterSetting": [
         {
-          "uuid": "d9bf11fb-67a6-47e3-8e6d-3c815fb6c65d",
+          "uuid": "c4b9d0c6-7beb-4e19-9d58-1595e72e22b6",
           "name": "num_samples",
           "value": 5
         },
         {
-          "uuid": "d0cee1be-60e0-44d7-ae9a-eee2aacece69",
+          "uuid": "c52e05ec-7c53-43a0-95e5-9a43733a5297",
           "name": "replace",
           "value": true
         }
@@ -72,102 +72,102 @@
       "protocolUuid": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f",
       "parameterSetting": [
         {
-          "uuid": "74ae2c85-a357-4aa7-bda2-00c55ea92a22",
+          "uuid": "6c1af8e9-cbd1-4f93-9f83-7f6fa0bdfd15",
           "name": "batch_size",
           "value": 64
         },
         {
-          "uuid": "6d924143-eab2-4b2c-a9e2-1551c70d911d",
+          "uuid": "31ad0e6a-aedd-4a93-8309-8306a168d4e4",
           "name": "num_graph_nodes",
           "value": 2
         },
         {
-          "uuid": "a45e0570-cc1b-44bc-954c-08b31433010a",
+          "uuid": "ee16d181-2472-4f35-b503-315c5bb46260",
           "name": "output_type",
           "value": "real"
         },
         {
-          "uuid": "119c3754-c1f8-47eb-806e-69ff2aec3e95",
+          "uuid": "a31a83a5-c246-409f-980c-feb604c8484c",
           "name": "classifier_weight_decay",
           "value": 0.01
         },
         {
-          "uuid": "2b3f0834-4d5a-4c4a-8f1d-dddf0a0c7e47",
+          "uuid": "3372911b-53df-4a45-8811-e3b271e3cbf0",
           "name": "darts_type",
           "value": "original"
         },
         {
-          "uuid": "7186ca4f-58b9-47b6-b058-9a2a622329e9",
+          "uuid": "92a2776a-b958-4d1e-ae55-a7f43211f92e",
           "name": "param_updates_per_epoch",
           "value": 10
         },
         {
-          "uuid": "c664411a-5bce-471c-a358-27d36d5009d5",
+          "uuid": "285dc422-5a68-4951-a164-c138e51898b3",
           "name": "param_updates_for_sampled_model",
           "value": 100
         },
         {
-          "uuid": "cba2ec5c-464b-4f5c-9f97-ed2d09c5b3c2",
+          "uuid": "0fe2e364-1654-4a9d-8301-0ac61741fbbc",
           "name": "param_learning_rate_max",
           "value": 0.025
         },
         {
-          "uuid": "1b9a21e5-5abc-42bc-a440-69eb6bb40cfa",
+          "uuid": "1a261a70-a4a9-4b6c-a644-ecb91d39240f",
           "name": "param_learning_rate_min",
           "value": 0.01
         },
         {
-          "uuid": "52fcf238-9804-49de-b8fb-91f7c214c11f",
+          "uuid": "543d72dc-12e1-4128-9062-a73b40ba1f9f",
           "name": "param_momentum",
           "value": 0.9
         },
         {
-          "uuid": "4a29e961-b3f6-4faf-b0e7-784b1626bae4",
+          "uuid": "4ec8d2bf-9245-43f0-ae54-f0d9ff0a1066",
           "name": "arch_updates_per_epoch",
           "value": 1
         },
         {
-          "uuid": "b78b7d46-864b-4e83-a57c-30babea738f0",
+          "uuid": "a8e1e6b0-5d63-4cef-8395-3e9c1b70c47c",
           "name": "arch_learning_rate_max",
           "value": 0.003
         },
         {
-          "uuid": "6093b2d8-ecad-466c-8f0f-281e1cfcd18c",
+          "uuid": "9c6b6d0c-6563-404c-b60b-15992bc32727",
           "name": "arch_weight_decay",
           "value": 0.0001
         },
         {
-          "uuid": "cf826776-932b-4ec6-a986-2afe092cc4d6",
+          "uuid": "e13f7416-b862-4ad4-a189-496f1d2e106d",
           "name": "arch_weight_decay_df",
           "value": 0.0003
         },
         {
-          "uuid": "ebe9b4e4-fa96-4303-a0b0-7a3ece5e181d",
+          "uuid": "642afd1e-97a7-4443-9aa9-83b7ab0c0a92",
           "name": "arch_weight_decay_base",
           "value": 0
         },
         {
-          "uuid": "1a28bb95-f299-4bd4-aa16-8ab60653bd08",
+          "uuid": "d77b5623-332d-4a93-9189-3ce5e799ab02",
           "name": "arch_momentum",
           "value": 0.9
         },
         {
-          "uuid": "ff03042d-55a6-47c0-9379-81bd56808c22",
+          "uuid": "1eced68c-0156-40b2-ab5f-09275e6b16fa",
           "name": "fair_darts_loss_weight",
           "value": 1
         },
         {
-          "uuid": "07318fa7-7cb0-44c1-a069-dd39278df7a7",
+          "uuid": "ea79aa0b-0d5c-4b0e-b9d9-d4ce699c3f22",
           "name": "max_epochs",
           "value": 10
         },
         {
-          "uuid": "8b392f1f-76ae-4339-8634-6c993a139145",
+          "uuid": "14255fb8-b1b2-49f1-a03b-42c453c49291",
           "name": "grad_clip",
           "value": 5
         },
         {
-          "uuid": "5d280108-33dd-46b0-bcc9-ca4c75464958",
+          "uuid": "9532b0d5-9968-46ee-80d5-b7f4fdd27eea",
           "name": "primitives",
           "value": [
             "none",
@@ -179,17 +179,17 @@
           ]
         },
         {
-          "uuid": "5b9f8035-e955-4f05-b1d7-b8f6c365632b",
+          "uuid": "717eb645-e097-40c8-ac4e-2cd5f5314b82",
           "name": "train_classifier_coefficients",
           "value": false
         },
         {
-          "uuid": "862c7ee1-4cb6-4789-b83e-c548a5a5dcd4",
+          "uuid": "6422dd83-f70e-485c-922b-daaafdeb52b5",
           "name": "train_classifier_bias",
           "value": false
         },
         {
-          "uuid": "4bbb639b-0fc6-47b5-a2d0-cd9632ae1f78",
+          "uuid": "df52e9b1-a52e-41a9-958f-a7587d099f08",
           "name": "sampling_strategy",
           "value": "max"
         }
@@ -204,52 +204,52 @@
       "protocolUuid": "c7d8e9f0-a1b2-4c3d-4e5f-6a7b8c9d0e1f",
       "parameterSetting": [
         {
-          "uuid": "b0cf0657-72dc-48f2-8671-7ef434cabb89",
+          "uuid": "e668e242-86fb-4271-ae4b-48a1fa850d1b",
           "name": "choice_temperature",
           "value": 0.1
         },
         {
-          "uuid": "3a5a95f3-8b7a-4cbe-adb7-d8563e7d7cdf",
+          "uuid": "ae7241ea-c022-445e-90ae-3923aac34c29",
           "name": "value_alpha",
           "value": 0.88
         },
         {
-          "uuid": "21af2910-3494-4c88-be33-c9b9cc9e2704",
+          "uuid": "bef92f94-79bb-4cda-b18f-ae8e992305ac",
           "name": "value_beta",
           "value": 0.88
         },
         {
-          "uuid": "1daeeaca-9744-468b-8d18-5b8b3134eb60",
+          "uuid": "8e3d5eae-5c6f-4a52-8330-d5f6a199674c",
           "name": "value_lambda",
           "value": 2.25
         },
         {
-          "uuid": "10763fcb-37d0-46ba-a023-e98f183edaee",
+          "uuid": "145b5c74-5853-4255-9da1-9201e35871b7",
           "name": "probability_alpha",
           "value": 0.61
         },
         {
-          "uuid": "19157917-e2a7-4e5a-9d2b-e4ff4d5e957b",
+          "uuid": "bd5f8137-ce4a-4d81-b5d2-ebc4c3c46077",
           "name": "probability_beta",
           "value": 0.69
         },
         {
-          "uuid": "fafa7546-3824-457d-bf40-b42319fe5235",
+          "uuid": "79b4f4c7-86e5-4717-a58a-ae38f457806a",
           "name": "resolution",
           "value": 10
         },
         {
-          "uuid": "ba1126ec-06a0-4030-8cac-e27b1323bd12",
+          "uuid": "4535ba72-7a30-4a8f-84f0-4795d532ce13",
           "name": "minimum_value",
           "value": -1
         },
         {
-          "uuid": "3789fa75-a7ea-4d03-aaae-33b03e40e68e",
+          "uuid": "1f1eba97-aed3-4d35-8a91-c6f9830bcca8",
           "name": "maximum_value",
           "value": 1
         },
         {
-          "uuid": "7f06df1d-83b2-402b-ada3-6888b7f56539",
+          "uuid": "ef1696d0-f738-4ef8-856f-52ca10b78478",
           "name": "added_noise",
           "value": 0.01
         }
@@ -271,18 +271,6 @@
       "targetPoint": {
         "x": 639.8659003831419,
         "y": 539.3563218390802
-      }
-    },
-    {
-      "source": "26f2d388-badd-480a-a604-bc52509d3d70",
-      "target": "30323e1a-69be-492f-bbde-bdf801de5549",
-      "sourcePoint": {
-        "x": -366.9017763845352,
-        "y": 428.44723092998913
-      },
-      "targetPoint": {
-        "x": -502.30303030303025,
-        "y": 599.848484848485
       }
     },
     {
@@ -343,6 +331,18 @@
       "targetPoint": {
         "x": 140.6174494876317,
         "y": 1050.4664143609375
+      }
+    },
+    {
+      "source": "a03c4eb8-60ba-4063-90b8-e0318293c7dd",
+      "target": "4fc6afbb-17e7-46ad-80d6-07dfaf544011",
+      "sourcePoint": {
+        "x": 622,
+        "y": 933.0172439427031
+      },
+      "targetPoint": {
+        "x": -173,
+        "y": 609
       }
     }
   ]

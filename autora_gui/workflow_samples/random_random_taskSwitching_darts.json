@@ -32,102 +32,102 @@
       "protocolUuid": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f",
       "parameterSetting": [
         {
-          "uuid": "95d0a575-cc5a-47b1-acd0-e351cad1d8dc",
+          "uuid": "92ac7655-e70c-44f4-bf57-9eef7c56ef38",
           "name": "batch_size",
           "value": 64
         },
         {
-          "uuid": "c49636ea-79f3-49a4-913f-6bff80b46b61",
+          "uuid": "57255442-266d-4562-960c-74de279dad24",
           "name": "num_graph_nodes",
           "value": 2
         },
         {
-          "uuid": "1e03dc04-c2d0-48b4-bd10-800e26cf4556",
+          "uuid": "cb738c7f-f5e0-4ac9-b4d2-3d4250847ffa",
           "name": "output_type",
           "value": "real"
         },
         {
-          "uuid": "a0b3a8a1-c771-4213-8737-960ff2fc2243",
+          "uuid": "2c542ee7-b9e0-4487-909d-328c20cbeb73",
           "name": "classifier_weight_decay",
           "value": 0.01
         },
         {
-          "uuid": "4369fbef-90bf-48ea-9499-9af7a70405ea",
+          "uuid": "09a7f833-de47-4654-9f91-0f9c83eaa825",
           "name": "darts_type",
           "value": "original"
         },
         {
-          "uuid": "d98719e2-31fe-401d-8189-947bd8ab37cc",
+          "uuid": "db3344fa-fd55-425c-aa7f-f3bfe065b31f",
           "name": "param_updates_per_epoch",
           "value": 10
         },
         {
-          "uuid": "3288ed3c-c259-4816-868c-f74c8421a61a",
+          "uuid": "52f5c7bc-5039-48d5-b267-fdb2eae1a9af",
           "name": "param_updates_for_sampled_model",
           "value": 100
         },
         {
-          "uuid": "40a941a6-4137-4956-83be-d1caa5e826c5",
+          "uuid": "18a0e9e0-fdd6-40e9-9f51-ce19515dc419",
           "name": "param_learning_rate_max",
           "value": 0.025
         },
         {
-          "uuid": "0c80d58b-0a04-4f74-922b-e23a051d11d2",
+          "uuid": "56c4439f-2d1c-42de-8a81-8135ef9f9264",
           "name": "param_learning_rate_min",
           "value": 0.01
         },
         {
-          "uuid": "9d62f478-2033-4d42-8993-3c961c829b59",
+          "uuid": "a9d761ab-2809-4568-a7d4-b8c9cfd7cf3b",
           "name": "param_momentum",
           "value": 0.9
         },
         {
-          "uuid": "5a4367f3-ace2-41c9-87b0-ede081b8816b",
+          "uuid": "4e8d2c7d-95f1-442d-a43b-a0c3610e48d4",
           "name": "arch_updates_per_epoch",
           "value": 1
         },
         {
-          "uuid": "70f2a474-9c0b-4cba-bc74-39150a6c332b",
+          "uuid": "1d55a3c3-1ed4-4efa-8e20-9077d3e2440e",
           "name": "arch_learning_rate_max",
           "value": 0.003
         },
         {
-          "uuid": "63144db8-fe6a-4d2a-a61b-fe60d684d92e",
+          "uuid": "aa5d5dbd-8428-4e45-be25-fdcb8d3b6bd1",
           "name": "arch_weight_decay",
           "value": 0.0001
         },
         {
-          "uuid": "70407edc-19ff-466f-9531-f268cdb4d4ff",
+          "uuid": "5c752312-c05c-43d9-a4f8-3c159d1d9ed4",
           "name": "arch_weight_decay_df",
           "value": 0.0003
         },
         {
-          "uuid": "b24e8619-2b5e-4a83-9859-021e1ad46369",
+          "uuid": "99e54da2-bee1-41e7-9e15-85c79eba57b3",
           "name": "arch_weight_decay_base",
           "value": 0
         },
         {
-          "uuid": "b06113a3-af05-45ae-ade6-c6fd29582ede",
+          "uuid": "07844c3f-336f-457f-8704-9e428268bc90",
           "name": "arch_momentum",
           "value": 0.9
         },
         {
-          "uuid": "231ad90e-cb46-4332-a5a5-06a381413c97",
+          "uuid": "f1efd53b-85bd-4d62-856e-4ddea8d831bc",
           "name": "fair_darts_loss_weight",
           "value": 1
         },
         {
-          "uuid": "b7f5ce78-c630-40fa-b507-6859dbf583f2",
+          "uuid": "88ed34aa-8770-4fcb-a977-de50fe4254b5",
           "name": "max_epochs",
           "value": 10
         },
         {
-          "uuid": "2f65816b-dc13-4e8b-81b2-ca2bc5bb5477",
+          "uuid": "e2c1522d-f69e-4adf-86f7-028f1fe3a218",
           "name": "grad_clip",
           "value": 5
         },
         {
-          "uuid": "69f792f1-1331-4a0c-9b16-88624a47c02b",
+          "uuid": "29c1cada-8d0b-4c54-afd6-6a54281c8497",
           "name": "primitives",
           "value": [
             "none",
@@ -139,17 +139,17 @@
           ]
         },
         {
-          "uuid": "d8a03ef1-6513-4199-aa88-59642523f11b",
+          "uuid": "e1c651c7-7a87-4aff-8452-b39a34591de6",
           "name": "train_classifier_coefficients",
           "value": false
         },
         {
-          "uuid": "d27a4a16-6177-46a1-941e-91cd2e3a6fcf",
+          "uuid": "87736abd-464c-407f-9a49-e8308f6ee297",
           "name": "train_classifier_bias",
           "value": false
         },
         {
-          "uuid": "7a60fd18-8e94-4e2e-b52a-33334874136e",
+          "uuid": "57dc8bc8-40e5-4820-b2d8-c5557df73e65",
           "name": "sampling_strategy",
           "value": "max"
         }
@@ -164,12 +164,12 @@
       "protocolUuid": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
       "parameterSetting": [
         {
-          "uuid": "63be8581-8fe2-4b58-affb-005897a0a966",
+          "uuid": "85f28a66-0ebc-41cc-8519-f1e6fbdc3f9e",
           "name": "num_samples",
           "value": 1
         },
         {
-          "uuid": "2934cd2f-1cca-474e-a37e-d1bb44b74401",
+          "uuid": "71267c46-4500-493c-8c8d-fac134b428e8",
           "name": "replace",
           "value": false
         }
@@ -184,12 +184,12 @@
       "protocolUuid": "e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",
       "parameterSetting": [
         {
-          "uuid": "b8afa660-2b05-44d5-81bc-0f5914e3e18f",
+          "uuid": "ec1075c4-c1df-4b43-a887-3d75960450b8",
           "name": "num_samples",
           "value": 5
         },
         {
-          "uuid": "9f0727db-79cf-4a24-95b3-51029c701b52",
+          "uuid": "43a1a8f2-01cf-4cfe-a8f3-f6f8c8936aa3",
           "name": "replace",
           "value": true
         }
@@ -204,32 +204,32 @@
       "protocolUuid": "17f22b12-3eb6-4396-b311-e72fa2e248f1",
       "parameterSetting": [
         {
-          "uuid": "5b365e93-f67c-421d-b214-95966f3da177",
+          "uuid": "55faf9d5-3dda-4aff-b367-69cb733d0729",
           "name": "resolution",
           "value": 50
         },
         {
-          "uuid": "609b210b-cbca-4801-8091-8226071f421b",
+          "uuid": "72b9a5ca-946f-4d28-8c8b-efb784e8acb4",
           "name": "priming_default",
           "value": 0.3
         },
         {
-          "uuid": "bfd5ce9c-ab6f-48ac-b6a1-ac17f3d21b4c",
+          "uuid": "9f19fefb-0bd3-4751-9629-308ab1a12714",
           "name": "temperature",
           "value": 0.2
         },
         {
-          "uuid": "44e5f188-770a-402c-bddd-07720267a2c9",
+          "uuid": "631b7abe-2cd0-4257-ac3f-4da21b0458cd",
           "name": "minimum_task_control",
           "value": 0.15
         },
         {
-          "uuid": "e68f3165-6f3a-409c-aaac-08e5f6c201c4",
+          "uuid": "2d50e0f5-3e8c-4eef-81f4-535c6c7ac29d",
           "name": "constant",
           "value": 1.5
         },
         {
-          "uuid": "b5e24920-9403-4bd2-a079-8e1bb7db1612",
+          "uuid": "4d6ea59d-6e5b-4150-b8f2-d97870892825",
           "name": "added_noise",
           "value": 0.01
         }
@@ -311,6 +311,18 @@
       "targetPoint": {
         "x": 231.60101010101005,
         "y": -33.989898989899075
+      }
+    },
+    {
+      "source": "2a809a47-2adf-4264-9416-43cdfa4b4ae4",
+      "target": "fa8f1b98-ae0d-4255-8ad1-d0373dfe329c",
+      "sourcePoint": {
+        "x": -119.15432893255071,
+        "y": 239
+      },
+      "targetPoint": {
+        "x": 61,
+        "y": -395
       }
     }
   ]
