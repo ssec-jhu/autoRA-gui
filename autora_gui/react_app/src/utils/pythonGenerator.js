@@ -33,7 +33,22 @@ Generated on: ${date}
     )`,
 
   initState: `    # Initialize state
-    state = StandardState(variables=variables)`
+    state = StandardState(variables=variables)`,
+
+  // Service-account credential entries for firebase runners. All fields are
+  // placeholders the user must replace with values from their Firebase
+  // service-account JSON.
+  firebaseCredentialEntries: `            "type": "service_account",
+            "project_id": "project_id",
+            "private_key_id": "private_key_id",
+            "private_key": "-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n",
+            "client_email": "xxx@iam.gserviceaccount.com",
+            "client_id": "001",
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/...",
+            "universe_domain": "googleapis.com"`
 }
 
 /**
@@ -290,26 +305,61 @@ function generateTheoristWrapper(code, meta) {
 }
 
 /**
+ * Whether a runner component is a synthetic experiment runner. Synthetic
+ * runners (under `autora.experiment_runner.synthetic.*`) return an object that
+ * exposes `.variables` and `.run(conditions)`. Real data-collection runners
+ * (e.g. firebase) return a plain callable that takes conditions directly and
+ * has no `.variables`.
+ *
+ * @param {Object} meta - Component metadata with `protocolType` and `importPath`.
+ * @returns {boolean} True for synthetic experiment runners.
+ */
+function isSyntheticRunner(meta) {
+  return meta?.protocolType === 'experiment_runner' &&
+    (meta.importPath || '').includes('.synthetic.')
+}
+
+/**
  * Generate wrapper function for an experiment runner component
  *
  * @param {CodeBuilder} code - Builder to append the wrapper to.
- * @param {Object} meta - Component metadata with `pythonName`, `params`, `varName`, `nodeName` and `runParamNames`.
+ * @param {Object} meta - Component metadata with `pythonName`, `params`, `varName`, `nodeName`, `runParamNames`, `importPath` and `usesFirebaseCredentials`.
  * @returns {void}
  */
 function generateRunnerWrapper(code, meta) {
   const { pythonName, params, varName, nodeName, runParamNames = [] } = meta
-  const factoryParamStr = buildParamString(params, runParamNames)
-  const runParamStr = buildParamString(
-    Object.fromEntries(Object.entries(params).filter(([name]) => runParamNames.includes(name)))
-  )
-  const runArgs = ['conditions=conditions', runParamStr].filter(Boolean).join(', ')
 
   code.comment(nodeName)
   code.line('@on_state()')
   code.line(`def ${varName}(conditions: pd.DataFrame) -> Delta:`)
-  code.indent(`runner = ${pythonName}(${factoryParamStr})`)
-  code.indent('assert runner.run is not None')
-  code.indent(`return Delta(experiment_data=runner.run(${runArgs}))`)
+
+  if (isSyntheticRunner(meta)) {
+    const factoryParamStr = buildParamString(params, runParamNames)
+    const runParamStr = buildParamString(
+      Object.fromEntries(Object.entries(params).filter(([name]) => runParamNames.includes(name)))
+    )
+    const runArgs = ['conditions=conditions', runParamStr].filter(Boolean).join(', ')
+    code.indent(`runner = ${pythonName}(${factoryParamStr})`)
+    code.indent('assert runner.run is not None')
+    code.indent(`return Delta(experiment_data=runner.run(${runArgs}))`)
+  } else if (meta.usesFirebaseCredentials) {
+    // Firebase runners require a service-account credentials dict; emit a
+    // filled-in template (placeholders for the user to replace) so the runner
+    // does not fail on a missing `firebase_credentials`.
+    const otherParams = buildParamString(params, ['firebase_credentials'])
+    code.indent(`runner = ${pythonName}(`)
+    code.indent('# TODO: replace the placeholders below with your own Firebase service-account credentials', 2)
+    code.indent('firebase_credentials={', 2)
+    code.multiline(TEMPLATES.firebaseCredentialEntries)
+    code.indent(otherParams ? `}, ${otherParams})` : '})', 2)
+    code.indent('return Delta(experiment_data=runner(conditions))')
+  } else {
+    // Real runners return a plain callable invoked directly with conditions;
+    // every param configures the factory (there is no separate run() call).
+    const factoryParamStr = buildParamString(params)
+    code.indent(`runner = ${pythonName}(${factoryParamStr})`)
+    code.indent('return Delta(experiment_data=runner(conditions))')
+  }
   code.blank()
 }
 
@@ -400,7 +450,7 @@ export function generateWrapper(code, meta) {
  * workflow state. Shared by the Python file and Jupyter notebook generators.
  *
  * @param {Object} state - Editor state with `nodes`, `connections` and `components`.
- * @returns {Object} `{ mainPath, loopPath, filterInfo, imports, componentMeta, hasRunner }`.
+ * @returns {Object} `{ mainPath, loopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner }`.
  */
 export function prepareWorkflow(state) {
   const { nodes, connections, components } = state
@@ -443,9 +493,12 @@ export function prepareWorkflow(state) {
     // elsewhere, not at instantiation, so its params must be excluded from it.
     const initGroup = protocol.parameters?.[pythonName] || protocol.parameters?.['__init__'] || []
     const factoryParamNames = new Set(initGroup.map(p => p.name))
-    const runParamNames = Object.values(protocol.parameters || {})
+    const declaredParamNames = Object.values(protocol.parameters || {})
       .flatMap(groupParams => (Array.isArray(groupParams) ? groupParams : []).map(p => p.name))
-      .filter(name => !factoryParamNames.has(name))
+    const runParamNames = declaredParamNames.filter(name => !factoryParamNames.has(name))
+    // Runners that require Firebase service-account credentials get a filled-in
+    // credentials template emitted automatically (see generateRunnerWrapper).
+    const usesFirebaseCredentials = declaredParamNames.includes('firebase_credentials')
 
     componentMeta.set(node.id, {
       importPath,
@@ -454,6 +507,7 @@ export function prepareWorkflow(state) {
       inputDataType,
       outputDataType: protocol.outputDataType,
       runParamNames,
+      usesFirebaseCredentials,
       protocolType,
       params: node.parameters || {},
       varName: `${toPythonName(node.name)}_on_state`,
@@ -461,16 +515,18 @@ export function prepareWorkflow(state) {
     })
   })
 
-  const hasRunner = [...componentMeta.values()]
-    .some(meta => meta.protocolType === 'experiment_runner')
+  // Only synthetic runners provide `.variables`; with such a runner the
+  // variables are derived from it, otherwise placeholder variables are emitted.
+  const derivesVariablesFromRunner = [...componentMeta.values()].some(isSyntheticRunner)
 
-  return { mainPath, loopPath, filterInfo, imports, componentMeta, hasRunner }
+  return { mainPath, loopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner }
 }
 
 /**
  * Build the variables-initialization block (indented for a function body).
- * When the workflow contains an experiment runner, the variables are created
- * and governed by the runner; otherwise fall back to the placeholder template.
+ * When the workflow contains a synthetic experiment runner, the variables are
+ * created and governed by the runner; otherwise fall back to the placeholder
+ * template (real runners such as firebase do not expose `.variables`).
  *
  * @param {Map} componentMeta - Map of node id to component metadata.
  * @param {Object[]} orderedNodes - Nodes in execution order, used to find any runner.
@@ -479,7 +535,7 @@ export function prepareWorkflow(state) {
 export function generateVariablesSetup(componentMeta, orderedNodes) {
   const runnerMeta = orderedNodes
     .map(node => componentMeta.get(node.id))
-    .find(meta => meta?.protocolType === 'experiment_runner')
+    .find(isSyntheticRunner)
 
   if (!runnerMeta) return TEMPLATES.defaultVariables
 
@@ -523,7 +579,7 @@ export function generateImports(code, imports, { usesPlaceholderVariables = true
  * @returns {string} A complete, runnable Python script as a string.
  */
 export function generatePythonCode(state) {
-  const { mainPath, loopPath, filterInfo, imports, componentMeta, hasRunner } = prepareWorkflow(state)
+  const { mainPath, loopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner } = prepareWorkflow(state)
 
   // Build Python code
   const code = new CodeBuilder()
@@ -531,7 +587,7 @@ export function generatePythonCode(state) {
   // Header and imports
   code.multiline(TEMPLATES.header(new Date().toISOString()))
   code.blank()
-  generateImports(code, imports, { usesPlaceholderVariables: !hasRunner })
+  generateImports(code, imports, { usesPlaceholderVariables: !derivesVariablesFromRunner })
   code.blank().blank()
 
   // Generate wrapper functions

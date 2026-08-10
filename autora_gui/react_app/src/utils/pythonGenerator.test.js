@@ -348,6 +348,66 @@ function buildStateWithRunner() {
   return state
 }
 
+// Extend the base state with a real (non-synthetic) firebase runner
+function buildStateWithFirebaseRunner() {
+  const state = buildStateWithRunner()
+  state.nodes[3] = {
+    id: 'run-1',
+    type: 'component',
+    name: 'Firebase Runner',
+    protocolUuid: 'proto-run',
+    parameters: { time_out: 300, sleep_time: 30 }
+  }
+  state.components.experiment_runners = [
+    {
+      uuid: 'proto-run',
+      importPath: 'autora.experiment_runner.firebase_prolific',
+      pythonName: 'firebase_runner',
+      file: 'firebase_runner.json',
+      protocolType: 'experiment_runner',
+      parameters: {
+        firebase_runner: [
+          { name: 'firebase_credentials', datatype: 'string' },
+          { name: 'time_out', datatype: 'integer' },
+          { name: 'sleep_time', datatype: 'integer' }
+        ]
+      },
+      pipInstall: 'autora[experiment-runner-firebase-prolific]'
+    }
+  ]
+  return state
+}
+
+describe('real (non-synthetic) runners', () => {
+  it('calls the runner directly instead of runner.run()', () => {
+    const code = generatePythonCode(buildStateWithFirebaseRunner())
+    expect(code).toContain('return Delta(experiment_data=runner(conditions))')
+    expect(code).not.toContain('runner.run')
+  })
+
+  it('auto-emits a firebase_credentials template with the other params', () => {
+    const code = generatePythonCode(buildStateWithFirebaseRunner())
+    expect(code).toContain('runner = firebase_runner(')
+    expect(code).toContain('firebase_credentials={')
+    expect(code).toContain('"type": "service_account",')
+    expect(code).toContain('"private_key": "-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n",')
+    // A comment prompts the user to supply their own credentials
+    expect(code).toContain('# TODO: replace the placeholders below with your own Firebase service-account credentials')
+    // Other factory params trail the credentials dict on the closing line
+    expect(code).toContain('}, time_out=300, sleep_time=30)')
+    // No PEM file reading
+    expect(code).not.toContain('open(')
+  })
+
+  it('does not derive variables from the runner (no runner.variables)', () => {
+    const code = generatePythonCode(buildStateWithFirebaseRunner())
+    expect(code).not.toContain('runner.variables')
+    // Falls back to placeholder variables, which need Variable + numpy
+    expect(code).toContain('from autora.variable import VariableCollection, Variable')
+    expect(code).toContain('import numpy as np')
+  })
+})
+
 describe('runner parameter grouping', () => {
   it('names the wrapper without the parenthesized qualifier', () => {
     const code = generatePythonCode(buildStateWithRunner())
