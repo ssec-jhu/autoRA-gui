@@ -147,6 +147,42 @@ describe('getExecutionOrder', () => {
     expect(loopPath.map(n => n.id)).toEqual(['loop-1'])
     expect(filterInfo).toEqual({ maxCounter: 3 })
   })
+
+  it('puts nodes before the loop-back target into preLoopPath (run once)', () => {
+    const { nodes } = buildState()
+    nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } })
+    // start -> pool -> samp -> theo -> filter; filter loops back to samp (not pool)
+    const connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'samp-1' },
+      { sourceId: 'filt-1', targetId: 'end-1' }
+    ]
+    const { preLoopPath, mainPath, loopPath } = getExecutionOrder(nodes, connections)
+    // pool runs once (before the loop-back target); samp + theo are the loop body
+    expect(preLoopPath.map(n => n.id)).toEqual(['pool-1'])
+    expect(mainPath.map(n => n.id)).toEqual(['samp-1', 'theo-1'])
+    expect(loopPath).toEqual([])
+  })
+
+  it('leaves preLoopPath empty when the loop covers the whole path', () => {
+    const { nodes } = buildState()
+    nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } })
+    // filter loops back to the first component: everything is in the loop
+    const connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'pool-1' },
+      { sourceId: 'filt-1', targetId: 'end-1' }
+    ]
+    const { preLoopPath, mainPath } = getExecutionOrder(nodes, connections)
+    expect(preLoopPath).toEqual([])
+    expect(mainPath.map(n => n.id)).toEqual(['pool-1', 'samp-1', 'theo-1'])
+  })
 })
 
 describe('prepareWorkflow aliasing', () => {
@@ -305,6 +341,30 @@ describe('generatePythonCode', () => {
   it('throws when the workflow has no components', () => {
     const empty = { nodes: [{ id: 'start-1', type: 'start_point' }], connections: [], components: {} }
     expect(() => generatePythonCode(empty)).toThrow('No components found')
+  })
+
+  it('runs pre-loop nodes once, outside the for loop', () => {
+    const state = buildState()
+    state.nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } })
+    // pool runs once; filter loops back to samp, so samp+theo repeat
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'samp-1' },
+      { sourceId: 'filt-1', targetId: 'end-1' }
+    ]
+    const code = generatePythonCode(state)
+    const forIdx = code.indexOf('for i in range(')
+    const poolIdx = code.indexOf('state = random_pooler_on_state(state)')
+    const sampIdx = code.indexOf('state = falsification_sampler_on_state(state')
+    // The pooler call comes before the loop; the sampler call after it
+    expect(poolIdx).toBeGreaterThan(-1)
+    expect(poolIdx).toBeLessThan(forIdx)
+    expect(sampIdx).toBeGreaterThan(forIdx)
+    // The pooler is not indented inside the loop body (8 spaces)
+    expect(code).not.toContain('        state = random_pooler_on_state(state)')
   })
 })
 

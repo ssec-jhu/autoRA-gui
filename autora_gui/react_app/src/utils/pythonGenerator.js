@@ -128,7 +128,7 @@ export class CodeBuilder {
  *
  * @param {Object[]} nodes - Graph nodes, each with `id`, `type` and optional `filterParams`.
  * @param {Object[]} connections - Graph edges, each with `sourceId` and `targetId`.
- * @returns {Object} `{ mainPath, loopPath, filterInfo }` where the paths are ordered node arrays and `filterInfo` is `{ maxCounter }` or null.
+ * @returns {Object} `{ preLoopPath, mainPath, loopPath, filterInfo }` where the paths are ordered node arrays (`preLoopPath` runs once before the loop, `mainPath`+`loopPath` run each cycle) and `filterInfo` is `{ maxCounter }` or null.
  */
 export function getExecutionOrder(nodes, connections) {
   const startNode = nodes.find(n => n.type === 'start_point')
@@ -148,6 +148,7 @@ export function getExecutionOrder(nodes, connections) {
     adjacency[conn.sourceId].push(conn.targetId)
   })
 
+  const preLoopPath = []
   const mainPath = []
   const loopPath = []
   const visited = new Set()
@@ -199,9 +200,17 @@ export function getExecutionOrder(nodes, connections) {
     }
 
     if (pathToFilter) {
+      // The loop restarts at the loop-back target. Nodes on the path *before*
+      // it run once (pre-loop); the loop-back target and everything after it
+      // (up to the filter) form the loop body. When the loop-back target is not
+      // on the path, the whole path is the loop body.
+      const loopBackIdx = pathToFilter.indexOf(loopBackTarget)
       for (let i = 1; i < pathToFilter.length; i++) {
         const node = nodes.find(n => n.id === pathToFilter[i])
-        if (node && !CONTROL_NODE_TYPES.includes(node.type)) {
+        if (!node || CONTROL_NODE_TYPES.includes(node.type)) continue
+        if (loopBackIdx > 0 && i < loopBackIdx) {
+          preLoopPath.push(node)
+        } else {
           mainPath.push(node)
         }
       }
@@ -210,7 +219,8 @@ export function getExecutionOrder(nodes, connections) {
     if (loopBackTarget) {
       const loopNode = nodes.find(n => n.id === loopBackTarget)
       if (loopNode && !CONTROL_NODE_TYPES.includes(loopNode.type)) {
-        if (!mainPath.find(n => n.id === loopBackTarget)) {
+        if (!mainPath.find(n => n.id === loopBackTarget) &&
+            !preLoopPath.find(n => n.id === loopBackTarget)) {
           loopPath.push(loopNode)
         }
       }
@@ -229,6 +239,7 @@ export function getExecutionOrder(nodes, connections) {
   }
 
   return {
+    preLoopPath,
     mainPath,
     loopPath,
     filterInfo: filterNode ? { maxCounter: filterNode.filterParams?.maxCounter ?? 10 } : null
@@ -576,21 +587,21 @@ export function generateWrapper(code, meta) {
  * workflow state. Shared by the Python file and Jupyter notebook generators.
  *
  * @param {Object} state - Editor state with `nodes`, `connections` and `components`.
- * @returns {Object} `{ mainPath, loopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner }`.
+ * @returns {Object} `{ preLoopPath, mainPath, loopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner }`.
  */
 export function prepareWorkflow(state) {
   const { nodes, connections, components } = state
   const allComponents = components ? Object.values(components).flat() : []
-  const { mainPath, loopPath, filterInfo } = getExecutionOrder(nodes, connections)
+  const { preLoopPath, mainPath, loopPath, filterInfo } = getExecutionOrder(nodes, connections)
 
-  if (mainPath.length === 0) {
+  if (preLoopPath.length + mainPath.length + loopPath.length === 0) {
     throw new Error('No components found in workflow. Add components and connect them.')
   }
 
   // Collect imports and component metadata
   const imports = new Map()
   const componentMeta = new Map()
-  const allPathNodes = [...mainPath, ...loopPath]
+  const allPathNodes = [...preLoopPath, ...mainPath, ...loopPath]
 
   allPathNodes.forEach(node => {
     const protocol = allComponents.find(c => c.uuid === node.protocolUuid)
@@ -654,7 +665,7 @@ export function prepareWorkflow(state) {
   // Runners needing synthesized X/y require IV/DV and numpy imports.
   const needsEquationVariables = [...componentMeta.values()].some(needsXYVariables)
 
-  return { mainPath, loopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables }
+  return { preLoopPath, mainPath, loopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables }
 }
 
 /**
@@ -718,7 +729,7 @@ export function generateImports(code, imports, { usesPlaceholderVariables = true
  * @returns {string} A complete, runnable Python script as a string.
  */
 export function generatePythonCode(state) {
-  const { mainPath, loopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables } = prepareWorkflow(state)
+  const { preLoopPath, mainPath, loopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables } = prepareWorkflow(state)
 
   // Build Python code
   const code = new CodeBuilder()
@@ -736,10 +747,32 @@ export function generatePythonCode(state) {
 
   // Generate main function
   code.line('def main():')
-  code.multiline(generateVariablesSetup(componentMeta, [...mainPath, ...loopPath]))
+  code.multiline(generateVariablesSetup(componentMeta, [...preLoopPath, ...mainPath, ...loopPath]))
   code.indent('')
   code.multiline(TEMPLATES.initState)
   code.indent('')
+
+  // Emit a single `state = fn(state[, num_samples=…])` call at the given level.
+  const addComponentCall = (node, level) => {
+    const meta = componentMeta.get(node.id)
+    if (!meta) return
+
+    const { varName, nodeName, pythonName } = meta
+    const isSampler = pythonName.includes('sample') || pythonName.includes('sampler')
+
+    code.indent(`# ${nodeName}`, level)
+    if (isSampler && node.parameters?.num_samples) {
+      code.indent(`state = ${varName}(state, num_samples=${node.parameters.num_samples})`, level)
+    } else {
+      code.indent(`state = ${varName}(state)`, level)
+    }
+    code.indent('', level)
+  }
+
+  // Nodes before the loop-back target run once, before the loop.
+  if (preLoopPath.length) {
+    preLoopPath.forEach(node => addComponentCall(node, 1))
+  }
 
   const maxCycles = filterInfo?.maxCounter ?? 10
   code.indent(`# Main experiment loop (${maxCycles} cycles)`)
@@ -747,25 +780,8 @@ export function generatePythonCode(state) {
   code.indent("print(f'Cycle {i}')", 2)
   code.indent('', 2)
 
-  // Add component calls in execution order
-  const addComponentCall = (node) => {
-    const meta = componentMeta.get(node.id)
-    if (!meta) return
-
-    const { varName, nodeName, pythonName } = meta
-    const isSampler = pythonName.includes('sample') || pythonName.includes('sampler')
-
-    code.indent(`# ${nodeName}`, 2)
-    if (isSampler && node.parameters?.num_samples) {
-      code.indent(`state = ${varName}(state, num_samples=${node.parameters.num_samples})`, 2)
-    } else {
-      code.indent(`state = ${varName}(state)`, 2)
-    }
-    code.indent('', 2)
-  }
-
-  mainPath.forEach(addComponentCall)
-  loopPath.forEach(addComponentCall)
+  mainPath.forEach(node => addComponentCall(node, 2))
+  loopPath.forEach(node => addComponentCall(node, 2))
 
   code.indent('')
   code.indent('print("Workflow completed!")')

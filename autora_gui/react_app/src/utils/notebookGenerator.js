@@ -64,21 +64,42 @@ function toSource(text) {
  * Build the "run the workflow" code cell. Unlike the standalone Python file,
  * the notebook runs the loop at top level so each cycle's state is inspectable.
  *
- * @param {Object[]} mainPath - Nodes executed once before the loop, in order.
- * @param {Object[]} loopPath - Nodes executed each loop cycle, in order.
+ * @param {Object[]} preLoopPath - Nodes executed once before the loop, in order.
+ * @param {Object[]} mainPath - Nodes executed each loop cycle, in order.
+ * @param {Object[]} loopPath - Additional loop-body nodes, in order.
  * @param {Object} filterInfo - Filter info with `maxCounter` controlling the number of cycles; may be null.
  * @param {Map} componentMeta - Map of node id to component metadata (`varName`, `nodeName`, `pythonName`).
  * @returns {string} Python source for the run cell.
  */
-function buildRunCell(mainPath, loopPath, filterInfo, componentMeta) {
+function buildRunCell(preLoopPath, mainPath, loopPath, filterInfo, componentMeta) {
   const code = new CodeBuilder()
 
   // Variable setup + state initialization (templates are indented for a
   // function body, so strip the leading 4 spaces for top-level use).
-  code.multiline(dedent(generateVariablesSetup(componentMeta, [...mainPath, ...loopPath])))
+  code.multiline(dedent(generateVariablesSetup(componentMeta, [...preLoopPath, ...mainPath, ...loopPath])))
   code.blank()
   code.multiline(dedent(TEMPLATES.initState))
   code.blank()
+
+  // Emit a single `state = fn(state[, num_samples=…])` call at the given level.
+  const addComponentCall = (node, level) => {
+    const meta = componentMeta.get(node.id)
+    if (!meta) return
+
+    const { varName, nodeName, pythonName } = meta
+    const isSampler = pythonName.includes('sample') || pythonName.includes('sampler')
+
+    code.indent(`# ${nodeName}`, level)
+    if (isSampler && node.parameters?.num_samples) {
+      code.indent(`state = ${varName}(state, num_samples=${node.parameters.num_samples})`, level)
+    } else {
+      code.indent(`state = ${varName}(state)`, level)
+    }
+    code.blank()
+  }
+
+  // Nodes before the loop-back target run once, before the loop.
+  preLoopPath.forEach(node => addComponentCall(node, 0))
 
   const maxCycles = filterInfo?.maxCounter ?? 10
   code.line(`# Main experiment loop (${maxCycles} cycles)`)
@@ -86,24 +107,8 @@ function buildRunCell(mainPath, loopPath, filterInfo, componentMeta) {
   code.indent("print(f'Cycle {i}')")
   code.blank()
 
-  const addComponentCall = (node) => {
-    const meta = componentMeta.get(node.id)
-    if (!meta) return
-
-    const { varName, nodeName, pythonName } = meta
-    const isSampler = pythonName.includes('sample') || pythonName.includes('sampler')
-
-    code.indent(`# ${nodeName}`)
-    if (isSampler && node.parameters?.num_samples) {
-      code.indent(`state = ${varName}(state, num_samples=${node.parameters.num_samples})`)
-    } else {
-      code.indent(`state = ${varName}(state)`)
-    }
-    code.blank()
-  }
-
-  mainPath.forEach(addComponentCall)
-  loopPath.forEach(addComponentCall)
+  mainPath.forEach(node => addComponentCall(node, 1))
+  loopPath.forEach(node => addComponentCall(node, 1))
 
   code.blank()
   code.line('print("Workflow completed!")')
@@ -133,7 +138,7 @@ function dedent(text) {
  * @returns {Object} Jupyter notebook object with `cells`, `metadata`, `nbformat` and `nbformat_minor`.
  */
 export function generateNotebook(state) {
-  const { mainPath, loopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables } = prepareWorkflow(state)
+  const { preLoopPath, mainPath, loopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables } = prepareWorkflow(state)
 
   const cells = []
 
@@ -168,7 +173,7 @@ export function generateNotebook(state) {
 
   // 5. Run the workflow
   cells.push(markdownCell('## 4. Run the workflow'))
-  cells.push(codeCell(buildRunCell(mainPath, loopPath, filterInfo, componentMeta)))
+  cells.push(codeCell(buildRunCell(preLoopPath, mainPath, loopPath, filterInfo, componentMeta)))
 
   return {
     cells,

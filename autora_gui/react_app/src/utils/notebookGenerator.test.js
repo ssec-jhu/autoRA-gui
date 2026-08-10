@@ -153,6 +153,34 @@ describe('generateNotebook', () => {
     expect(src).toContain('print("Workflow completed!")')
   })
 
+  it('runs pre-loop nodes once, before the loop', () => {
+    const state = buildState()
+    // Insert a pooler before the sampler; filter loops back to the sampler only
+    state.nodes.splice(1, 0, {
+      id: 'pool-1', type: 'component', name: 'Grid Pooler', protocolUuid: 'proto-pool', parameters: {}
+    })
+    state.nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 4 } })
+    state.components.experimentalists.push({
+      uuid: 'proto-pool', importPath: 'autora.experimentalist.grid', pythonName: 'grid_pool',
+      file: 'grid_pooler.json', protocolType: 'experimentalist', pipInstall: 'autora-core'
+    })
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'exp-1' },
+      { sourceId: 'exp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'exp-1' },
+      { sourceId: 'filt-1', targetId: 'end-1' }
+    ]
+    const src = generateNotebook(state).cells[generateNotebook(state).cells.length - 1].source.join('')
+    const forIdx = src.indexOf('for i in range(')
+    const poolIdx = src.indexOf('state = grid_pooler_on_state(state)')
+    // The pooler runs before the loop and is not indented into the loop body
+    expect(poolIdx).toBeGreaterThan(-1)
+    expect(poolIdx).toBeLessThan(forIdx)
+    expect(src).not.toContain('    state = grid_pooler_on_state(state)')
+  })
+
   it('serializes to parseable JSON', () => {
     const json = generateNotebookString(buildState())
     expect(() => JSON.parse(json)).not.toThrow()
