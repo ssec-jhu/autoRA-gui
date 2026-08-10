@@ -286,6 +286,114 @@ function buildParamString(params, exclude = []) {
     .join(', ')
 }
 
+// Factory params (keyed by function pythonName) whose string value is not a
+// plain string but must be parsed into a SymPy expression via sympify().
+const SYMPIFY_PARAMS = { equation_experiment: ['expression'] }
+
+/**
+ * Build a factory/constructor parameter string, wrapping any params that must
+ * be SymPy expressions (see SYMPIFY_PARAMS) in `sympify(...)`.
+ *
+ * @param {string} pythonName - The factory function name (identifies special params).
+ * @param {Object} params - Map of parameter name to value.
+ * @param {string[]} [exclude=[]] - Parameter names to omit.
+ * @returns {string} Comma-separated `name=value` keyword arguments (nulls skipped).
+ */
+function buildFactoryParamString(pythonName, params, exclude = []) {
+  const sympifyNames = SYMPIFY_PARAMS[pythonName] || []
+  return Object.entries(params)
+    .filter(([k, v]) => v !== null && v !== undefined && !exclude.includes(k))
+    .map(([k, v]) => sympifyNames.includes(k)
+      ? `${k}=sympify(${formatPythonValue(String(v))})`
+      : `${k}=${formatPythonValue(v)}`)
+    .join(', ')
+}
+
+// SymPy/numpy function names and constants that must not be treated as
+// variable symbols when scanning an expression for its free variables.
+const NON_SYMBOL_NAMES = new Set([
+  'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh',
+  'exp', 'log', 'ln', 'sqrt', 'Abs', 'abs', 'sign', 'floor', 'ceiling',
+  'Max', 'Min', 'pi', 'E', 'I', 'oo'
+])
+
+/**
+ * Extract the distinct variable symbols from a SymPy expression string, sorted
+ * by name and excluding known function/constant names.
+ *
+ * @param {string} expression - e.g. "x_1 ** 2 - x_2 ** 2".
+ * @returns {string[]} Sorted unique variable names.
+ */
+function parseExpressionSymbols(expression) {
+  const ids = String(expression || '').match(/[A-Za-z_]\w*/g) || []
+  return [...new Set(ids)].filter(id => !NON_SYMBOL_NAMES.has(id)).sort()
+}
+
+/**
+ * Extract the independent-variable names from a mixed-model formula. Uses the
+ * right-hand side of `~`, drops intercept markers and random-effect groups.
+ *
+ * @param {string} formula - e.g. "rt ~ 1 + x1".
+ * @returns {string[]} Sorted unique IV names.
+ */
+function parseFormulaIVs(formula) {
+  const s = String(formula || '')
+  const rhs = (s.includes('~') ? s.split('~')[1] : s).replace(/\([^)]*\)/g, '')
+  const ids = rhs.match(/[A-Za-z_]\w*/g) || []
+  return [...new Set(ids)].sort()
+}
+
+// Synthetic runners whose factory needs X (and sometimes y) as Variable objects
+// the workflow does not capture. Each entry names the param carrying the
+// variable spec, how to parse IV names from it, and whether a y (DV) is needed.
+const XY_RUNNERS = {
+  equation_experiment: { specParam: 'expression', parseIVs: parseExpressionSymbols, needsY: true },
+  lmm_experiment: { specParam: 'formula', parseIVs: parseFormulaIVs, needsY: false }
+}
+
+/**
+ * Whether a runner needs X/y Variable objects synthesized for its factory call.
+ *
+ * @param {Object} meta - Component metadata.
+ * @returns {boolean}
+ */
+function needsXYVariables(meta) {
+  return isSyntheticRunner(meta) && !!XY_RUNNERS[meta?.pythonName]
+}
+
+/**
+ * Build the multi-line `runner = <name>(...)` call for a runner that needs X/y,
+ * synthesizing an IV per variable in its expression/formula (and a DV when the
+ * factory takes one) with default ranges the user adjusts. Emitted with a
+ * 4-space base indent for use inside a function body.
+ *
+ * @param {Object} meta - Runner metadata with `pythonName`, `params`, `runParamNames`.
+ * @returns {string} The indented, newline-joined call.
+ */
+function buildXYRunnerCall(meta) {
+  const { pythonName, params, runParamNames = [] } = meta
+  const cfg = XY_RUNNERS[pythonName]
+  const ivNames = cfg.parseIVs(params[cfg.specParam])
+  const finalIVs = ivNames.length ? ivNames : ['x']
+  const range = 'allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)'
+  // Regular factory params (expression is sympified by buildFactoryParamString).
+  const factory = buildFactoryParamString(pythonName, params, runParamNames)
+
+  const lines = [`    runner = ${pythonName}(`]
+  if (factory) lines.push(`        ${factory},`)
+  lines.push('        # TODO: adjust the variable names and ranges below for your experiment')
+  lines.push('        X=[')
+  finalIVs.forEach(n => lines.push(`            IV(name="${n}", ${range}),`))
+  if (cfg.needsY) {
+    lines.push('        ],')
+    const dvName = ['y', 'z', 'output'].find(n => !finalIVs.includes(n)) || 'dv'
+    lines.push(`        y=DV(name="${dvName}", ${range}))`)
+  } else {
+    lines.push('        ])')
+  }
+  return lines.join('\n')
+}
+
 /**
  * Generate wrapper function for a theorist component
  *
@@ -334,12 +442,17 @@ function generateRunnerWrapper(code, meta) {
   code.line(`def ${varName}(conditions: pd.DataFrame) -> Delta:`)
 
   if (isSyntheticRunner(meta)) {
-    const factoryParamStr = buildParamString(params, runParamNames)
     const runParamStr = buildParamString(
       Object.fromEntries(Object.entries(params).filter(([name]) => runParamNames.includes(name)))
     )
     const runArgs = ['conditions=conditions', runParamStr].filter(Boolean).join(', ')
-    code.indent(`runner = ${pythonName}(${factoryParamStr})`)
+    if (needsXYVariables(meta)) {
+      // Synthesize the required X (IVs) and y (DV); the workflow does not carry them.
+      code.multiline(buildXYRunnerCall(meta))
+    } else {
+      const factoryParamStr = buildFactoryParamString(pythonName, params, runParamNames)
+      code.indent(`runner = ${pythonName}(${factoryParamStr})`)
+    }
     code.indent('assert runner.run is not None')
     code.indent(`return Delta(experiment_data=runner.run(${runArgs}))`)
   } else if (meta.usesFirebaseCredentials) {
@@ -486,6 +599,13 @@ export function prepareWorkflow(state) {
     if (!imports.has(importPath)) imports.set(importPath, new Set())
     imports.get(importPath).add(alias ? `${pythonName} as ${alias}` : pythonName)
 
+    // Some factory params must be SymPy expressions (e.g. equation_experiment's
+    // `expression`); pull in sympify when such a param is actually set.
+    if ((SYMPIFY_PARAMS[pythonName] || []).some(name => (node.parameters || {})[name] != null)) {
+      if (!imports.has('sympy')) imports.set('sympy', new Set())
+      imports.get('sympy').add('sympify')
+    }
+
     // Parameters are grouped by function in the JSON. The instantiation group
     // configures the constructor/factory: theorist classes use an "__init__"
     // group, runner factories use a group named after the function (pythonName).
@@ -518,8 +638,10 @@ export function prepareWorkflow(state) {
   // Only synthetic runners provide `.variables`; with such a runner the
   // variables are derived from it, otherwise placeholder variables are emitted.
   const derivesVariablesFromRunner = [...componentMeta.values()].some(isSyntheticRunner)
+  // Runners needing synthesized X/y require IV/DV and numpy imports.
+  const needsEquationVariables = [...componentMeta.values()].some(needsXYVariables)
 
-  return { mainPath, loopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner }
+  return { mainPath, loopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables }
 }
 
 /**
@@ -539,10 +661,12 @@ export function generateVariablesSetup(componentMeta, orderedNodes) {
 
   if (!runnerMeta) return TEMPLATES.defaultVariables
 
-  const paramStr = buildParamString(runnerMeta.params, runnerMeta.runParamNames || [])
+  const runnerCall = needsXYVariables(runnerMeta)
+    ? buildXYRunnerCall(runnerMeta)
+    : `    runner = ${runnerMeta.pythonName}(${buildFactoryParamString(runnerMeta.pythonName, runnerMeta.params, runnerMeta.runParamNames || [])})`
   return [
     '    # Variables are created and governed by the experiment runner',
-    `    runner = ${runnerMeta.pythonName}(${paramStr})`,
+    runnerCall,
     '    assert runner.variables is not None',
     '    variables = runner.variables'
   ].join('\n')
@@ -557,11 +681,15 @@ export function generateVariablesSetup(componentMeta, orderedNodes) {
  * @param {Map} imports - Map of import path to a Set of imported (possibly aliased) names.
  * @param {Object} [options] - Options object.
  * @param {boolean} [options.usesPlaceholderVariables=true] - Whether to also import `Variable` and numpy for the placeholder template.
+ * @param {boolean} [options.usesEquationVariables=false] - Whether to also import `IV`, `DV` and numpy for a synthesized equation runner X/y.
  * @returns {void}
  */
-export function generateImports(code, imports, { usesPlaceholderVariables = true } = {}) {
+export function generateImports(code, imports, { usesPlaceholderVariables = true, usesEquationVariables = false } = {}) {
   code.multiline(TEMPLATES.standardImports)
-  code.line(`from autora.variable import VariableCollection${usesPlaceholderVariables ? ', Variable' : ''}`)
+  const variableNames = ['VariableCollection']
+  if (usesPlaceholderVariables) variableNames.push('Variable')
+  if (usesEquationVariables) variableNames.push('IV', 'DV')
+  code.line(`from autora.variable import ${variableNames.join(', ')}`)
 
   imports.forEach((names, importPath) => {
     code.line(`from ${importPath} import ${Array.from(names).join(', ')}`)
@@ -569,7 +697,7 @@ export function generateImports(code, imports, { usesPlaceholderVariables = true
 
   code.blank()
   code.multiline(TEMPLATES.dataImports)
-  if (usesPlaceholderVariables) code.line('import numpy as np')
+  if (usesPlaceholderVariables || usesEquationVariables) code.line('import numpy as np')
 }
 
 /**
@@ -579,7 +707,7 @@ export function generateImports(code, imports, { usesPlaceholderVariables = true
  * @returns {string} A complete, runnable Python script as a string.
  */
 export function generatePythonCode(state) {
-  const { mainPath, loopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner } = prepareWorkflow(state)
+  const { mainPath, loopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables } = prepareWorkflow(state)
 
   // Build Python code
   const code = new CodeBuilder()
@@ -587,7 +715,7 @@ export function generatePythonCode(state) {
   // Header and imports
   code.multiline(TEMPLATES.header(new Date().toISOString()))
   code.blank()
-  generateImports(code, imports, { usesPlaceholderVariables: !derivesVariablesFromRunner })
+  generateImports(code, imports, { usesPlaceholderVariables: !derivesVariablesFromRunner, usesEquationVariables: needsEquationVariables })
   code.blank().blank()
 
   // Generate wrapper functions

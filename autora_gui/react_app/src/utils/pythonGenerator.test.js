@@ -408,6 +408,142 @@ describe('real (non-synthetic) runners', () => {
   })
 })
 
+// Extend the base state with the equation_experiment synthetic runner
+function buildStateWithEquationRunner() {
+  const state = buildStateWithRunner()
+  state.nodes[3] = {
+    id: 'run-1',
+    type: 'component',
+    name: 'Equation Experiment (Synthetic, Abstract)',
+    protocolUuid: 'proto-run',
+    parameters: { expression: 'x_1 ** 2 - x_2 ** 2', rename_output_columns: true, added_noise: 0.01 }
+  }
+  state.components.experiment_runners = [
+    {
+      uuid: 'proto-run',
+      importPath: 'autora.experiment_runner.synthetic.abstract.equation',
+      pythonName: 'equation_experiment',
+      file: 'synth_abstr_equation_experiment.json',
+      protocolType: 'experiment_runner',
+      parameters: {
+        equation_experiment: [
+          { name: 'expression', datatype: 'string' },
+          { name: 'rename_output_columns', datatype: 'boolean' }
+        ],
+        run: [{ name: 'added_noise', datatype: 'real' }]
+      },
+      pipInstall: 'autora-synthetic'
+    }
+  ]
+  return state
+}
+
+describe('sympify expression params', () => {
+  it("wraps equation_experiment's expression in sympify and imports it", () => {
+    const code = generatePythonCode(buildStateWithEquationRunner())
+    expect(code).toContain('from sympy import sympify')
+    // Wrapped in both the runner wrapper and the variables-setup block
+    const matches = code.match(/expression=sympify\("x_1 \*\* 2 - x_2 \*\* 2"\)/g)
+    expect(matches).not.toBeNull()
+    expect(matches.length).toBe(2)
+    expect(code).not.toContain('expression="x_1 ** 2 - x_2 ** 2"')
+  })
+
+  it('does not import sympify when no sympify param is used', () => {
+    expect(generatePythonCode(buildStateWithRunner())).not.toContain('sympify')
+  })
+})
+
+describe('equation_experiment X/y synthesis', () => {
+  it('synthesizes one IV per expression symbol plus a DV', () => {
+    const code = generatePythonCode(buildStateWithEquationRunner())
+    expect(code).toContain('X=[')
+    expect(code).toContain('IV(name="x_1", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)),')
+    expect(code).toContain('IV(name="x_2", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)),')
+    expect(code).toContain('y=DV(name="y", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))')
+    expect(code).toContain('# TODO: adjust the variable names and ranges below for your experiment')
+  })
+
+  it('imports IV, DV and numpy for the synthesized variables', () => {
+    const code = generatePythonCode(buildStateWithEquationRunner())
+    expect(code).toContain('from autora.variable import VariableCollection, IV, DV')
+    expect(code).toContain('import numpy as np')
+  })
+
+  it('names the DV to avoid colliding with an expression symbol', () => {
+    const state = buildStateWithEquationRunner()
+    state.nodes[3].parameters.expression = 'x ** 2 - y ** 2'
+    const code = generatePythonCode(state)
+    expect(code).toContain('IV(name="x",')
+    expect(code).toContain('IV(name="y",')
+    // "y" is taken by an IV, so the DV falls back to the next free name
+    expect(code).toContain('y=DV(name="z",')
+  })
+
+  it('does not treat function names as variables', () => {
+    const state = buildStateWithEquationRunner()
+    state.nodes[3].parameters.expression = 'sin(x_1) + cos(x_2)'
+    const code = generatePythonCode(state)
+    expect(code).toContain('IV(name="x_1",')
+    expect(code).toContain('IV(name="x_2",')
+    expect(code).not.toContain('IV(name="sin"')
+    expect(code).not.toContain('IV(name="cos"')
+  })
+})
+
+// Extend the base state with the lmm_experiment synthetic runner
+function buildStateWithLmmRunner() {
+  const state = buildStateWithRunner()
+  state.nodes[3] = {
+    id: 'run-1',
+    type: 'component',
+    name: 'Linear Mixed Model Experiment (Synthetic, Abstract)',
+    protocolUuid: 'proto-run',
+    parameters: { formula: 'rt ~ 1 + x1', fixed_effects: "{'Intercept': 0., 'x1': 2.}" }
+  }
+  state.components.experiment_runners = [
+    {
+      uuid: 'proto-run',
+      importPath: 'autora.experiment_runner.synthetic.abstract.lmm',
+      pythonName: 'lmm_experiment',
+      file: 'synth_abstr_lmm_experiment.json',
+      protocolType: 'experiment_runner',
+      parameters: {
+        lmm_experiment: [
+          { name: 'formula', datatype: 'string' },
+          { name: 'fixed_effects', datatype: 'string' }
+        ],
+        run: [{ name: 'added_noise', datatype: 'real' }]
+      },
+      pipInstall: 'autora-synthetic'
+    }
+  ]
+  return state
+}
+
+describe('lmm_experiment X synthesis', () => {
+  it('synthesizes IVs from the formula RHS and passes no y', () => {
+    const code = generatePythonCode(buildStateWithLmmRunner())
+    expect(code).toContain('formula="rt ~ 1 + x1"')
+    expect(code).toContain("fixed_effects={'Intercept': 0., 'x1': 2.}")
+    expect(code).toContain('IV(name="x1", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)),')
+    // lmm takes no y argument; the DV comes from the formula
+    expect(code).not.toContain('y=DV(')
+    expect(code).toContain('from autora.variable import VariableCollection, IV, DV')
+    expect(code).toContain('import numpy as np')
+  })
+
+  it('handles multiple IVs and ignores the intercept marker', () => {
+    const state = buildStateWithLmmRunner()
+    state.nodes[3].parameters.formula = 'rt ~ 1 + x1 + x2'
+    const code = generatePythonCode(state)
+    expect(code).toContain('IV(name="x1",')
+    expect(code).toContain('IV(name="x2",')
+    expect(code).not.toContain('IV(name="rt"')  // rt is the DV, not an IV
+    expect(code).not.toContain('IV(name="1"')
+  })
+})
+
 describe('runner parameter grouping', () => {
   it('names the wrapper without the parenthesized qualifier', () => {
     const code = generatePythonCode(buildStateWithRunner())

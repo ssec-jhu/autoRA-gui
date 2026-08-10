@@ -133,7 +133,7 @@ function dedent(text) {
  * @returns {Object} Jupyter notebook object with `cells`, `metadata`, `nbformat` and `nbformat_minor`.
  */
 export function generateNotebook(state) {
-  const { mainPath, loopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner } = prepareWorkflow(state)
+  const { mainPath, loopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables } = prepareWorkflow(state)
 
   const cells = []
 
@@ -154,7 +154,7 @@ export function generateNotebook(state) {
   // 3. Imports
   cells.push(markdownCell('## 2. Imports'))
   const importsCode = new CodeBuilder()
-  generateImports(importsCode, imports, { usesPlaceholderVariables: !derivesVariablesFromRunner })
+  generateImports(importsCode, imports, { usesPlaceholderVariables: !derivesVariablesFromRunner, usesEquationVariables: needsEquationVariables })
   cells.push(codeCell(importsCode.toString()))
 
   // 4. Component definitions (one code cell per component for clarity)
