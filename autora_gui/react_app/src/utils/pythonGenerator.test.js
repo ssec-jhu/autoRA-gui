@@ -442,10 +442,10 @@ describe('sympify expression params', () => {
   it("wraps equation_experiment's expression in sympify and imports it", () => {
     const code = generatePythonCode(buildStateWithEquationRunner())
     expect(code).toContain('from sympy import sympify')
-    // Wrapped in both the runner wrapper and the variables-setup block
+    // The runner (with its sympified expression) is built once and reused
     const matches = code.match(/expression=sympify\("x_1 \*\* 2 - x_2 \*\* 2"\)/g)
     expect(matches).not.toBeNull()
-    expect(matches.length).toBe(2)
+    expect(matches.length).toBe(1)
     expect(code).not.toContain('expression="x_1 ** 2 - x_2 ** 2"')
   })
 
@@ -541,6 +541,18 @@ describe('lmm_experiment X synthesis', () => {
     expect(code).toContain('IV(name="x2",')
     expect(code).not.toContain('IV(name="rt"')  // rt is the DV, not an IV
     expect(code).not.toContain('IV(name="1"')
+  })
+})
+
+describe('synthetic runner is built once (no duplication)', () => {
+  it('constructs the runner in the component section and reuses it for variables', () => {
+    const code = generatePythonCode(buildStateWithLmmRunner())
+    // Exactly one construction of the runner across the whole file
+    expect(code.match(/runner = lmm_experiment\(/g).length).toBe(1)
+    // The wrapper and the variables setup both reference the shared runner
+    expect(code).toContain('return Delta(experiment_data=runner.run(conditions=conditions))')
+    expect(code).toContain('# Variables are governed by the experiment runner defined above')
+    expect(code).toContain('variables = runner.variables')
   })
 })
 

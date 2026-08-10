@@ -108,7 +108,7 @@ describe('generateNotebook', () => {
     expect(allCode).not.toMatch(/=sample\(/)
   })
 
-  it('derives variables from the experiment runner in the run cell', () => {
+  it('builds the runner once and reuses it for variables in the run cell', () => {
     const state = buildState()
     state.nodes.splice(3, 0, {
       id: 'run-1',
@@ -133,12 +133,15 @@ describe('generateNotebook', () => {
       }
     ]
     const nb = generateNotebook(state)
-    const runCell = nb.cells[nb.cells.length - 1]
-    const src = runCell.source.join('')
-    expect(src).toContain('runner = expected_value_theory(choice_temperature=0.1)')
-    expect(src).toContain('assert runner.variables is not None')
-    expect(src).toContain('variables = runner.variables')
-    expect(src).not.toContain('np.linspace')
+    const allCode = nb.cells.filter(c => c.cell_type === 'code').map(c => c.source.join('')).join('\n')
+    const runCell = nb.cells[nb.cells.length - 1].source.join('')
+    // The runner is constructed exactly once, in its component-definition cell
+    expect(allCode.match(/runner = expected_value_theory\(choice_temperature=0\.1\)/g).length).toBe(1)
+    expect(runCell).not.toContain('runner = expected_value_theory')
+    // The run cell reuses that runner for the variables
+    expect(runCell).toContain('assert runner.variables is not None')
+    expect(runCell).toContain('variables = runner.variables')
+    expect(runCell).not.toContain('np.linspace')
   })
 
   it('runs the loop at top level and references the sampler num_samples', () => {

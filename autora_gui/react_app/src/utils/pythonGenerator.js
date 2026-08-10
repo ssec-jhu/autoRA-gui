@@ -368,9 +368,10 @@ function needsXYVariables(meta) {
  * 4-space base indent for use inside a function body.
  *
  * @param {Object} meta - Runner metadata with `pythonName`, `params`, `runParamNames`.
+ * @param {number} [baseSpaces=4] - Leading indentation for the first line.
  * @returns {string} The indented, newline-joined call.
  */
-function buildXYRunnerCall(meta) {
+function buildXYRunnerCall(meta, baseSpaces = 4) {
   const { pythonName, params, runParamNames = [] } = meta
   const cfg = XY_RUNNERS[pythonName]
   const ivNames = cfg.parseIVs(params[cfg.specParam])
@@ -378,18 +379,21 @@ function buildXYRunnerCall(meta) {
   const range = 'allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)'
   // Regular factory params (expression is sympified by buildFactoryParamString).
   const factory = buildFactoryParamString(pythonName, params, runParamNames)
+  const pad = ' '.repeat(baseSpaces)
+  const pad2 = ' '.repeat(baseSpaces + 4)
+  const pad3 = ' '.repeat(baseSpaces + 8)
 
-  const lines = [`    runner = ${pythonName}(`]
-  if (factory) lines.push(`        ${factory},`)
-  lines.push('        # TODO: adjust the variable names and ranges below for your experiment')
-  lines.push('        X=[')
-  finalIVs.forEach(n => lines.push(`            IV(name="${n}", ${range}),`))
+  const lines = [`${pad}runner = ${pythonName}(`]
+  if (factory) lines.push(`${pad2}${factory},`)
+  lines.push(`${pad2}# TODO: adjust the variable names and ranges below for your experiment`)
+  lines.push(`${pad2}X=[`)
+  finalIVs.forEach(n => lines.push(`${pad3}IV(name="${n}", ${range}),`))
   if (cfg.needsY) {
-    lines.push('        ],')
+    lines.push(`${pad2}],`)
     const dvName = ['y', 'z', 'output'].find(n => !finalIVs.includes(n)) || 'dv'
-    lines.push(`        y=DV(name="${dvName}", ${range}))`)
+    lines.push(`${pad2}y=DV(name="${dvName}", ${range}))`)
   } else {
-    lines.push('        ])')
+    lines.push(`${pad2}])`)
   }
   return lines.join('\n')
 }
@@ -438,24 +442,33 @@ function generateRunnerWrapper(code, meta) {
   const { pythonName, params, varName, nodeName, runParamNames = [] } = meta
 
   code.comment(nodeName)
-  code.line('@on_state()')
-  code.line(`def ${varName}(conditions: pd.DataFrame) -> Delta:`)
 
   if (isSyntheticRunner(meta)) {
     const runParamStr = buildParamString(
       Object.fromEntries(Object.entries(params).filter(([name]) => runParamNames.includes(name)))
     )
     const runArgs = ['conditions=conditions', runParamStr].filter(Boolean).join(', ')
+    // Build the runner once at module scope so the same object is reused by the
+    // variables setup (see generateVariablesSetup) — no need to rebuild it.
     if (needsXYVariables(meta)) {
       // Synthesize the required X (IVs) and y (DV); the workflow does not carry them.
-      code.multiline(buildXYRunnerCall(meta))
+      code.multiline(buildXYRunnerCall(meta, 0))
     } else {
       const factoryParamStr = buildFactoryParamString(pythonName, params, runParamNames)
-      code.indent(`runner = ${pythonName}(${factoryParamStr})`)
+      code.line(`runner = ${pythonName}(${factoryParamStr})`)
     }
-    code.indent('assert runner.run is not None')
+    code.blank()
+    code.line('@on_state()')
+    code.line(`def ${varName}(conditions: pd.DataFrame) -> Delta:`)
     code.indent(`return Delta(experiment_data=runner.run(${runArgs}))`)
-  } else if (meta.usesFirebaseCredentials) {
+    code.blank()
+    return
+  }
+
+  code.line('@on_state()')
+  code.line(`def ${varName}(conditions: pd.DataFrame) -> Delta:`)
+
+  if (meta.usesFirebaseCredentials) {
     // Firebase runners require a service-account credentials dict; emit a
     // filled-in template (placeholders for the user to replace) so the runner
     // does not fail on a missing `firebase_credentials`.
@@ -647,8 +660,9 @@ export function prepareWorkflow(state) {
 /**
  * Build the variables-initialization block (indented for a function body).
  * When the workflow contains a synthetic experiment runner, the variables are
- * created and governed by the runner; otherwise fall back to the placeholder
- * template (real runners such as firebase do not expose `.variables`).
+ * taken from the `runner` already built in that runner's component definition
+ * (see generateRunnerWrapper) rather than rebuilding it; otherwise fall back to
+ * the placeholder template (real runners such as firebase have no `.variables`).
  *
  * @param {Map} componentMeta - Map of node id to component metadata.
  * @param {Object[]} orderedNodes - Nodes in execution order, used to find any runner.
@@ -661,12 +675,9 @@ export function generateVariablesSetup(componentMeta, orderedNodes) {
 
   if (!runnerMeta) return TEMPLATES.defaultVariables
 
-  const runnerCall = needsXYVariables(runnerMeta)
-    ? buildXYRunnerCall(runnerMeta)
-    : `    runner = ${runnerMeta.pythonName}(${buildFactoryParamString(runnerMeta.pythonName, runnerMeta.params, runnerMeta.runParamNames || [])})`
+  // Reuse the `runner` defined in the component section — do not rebuild it.
   return [
-    '    # Variables are created and governed by the experiment runner',
-    runnerCall,
+    '    # Variables are governed by the experiment runner defined above',
     '    assert runner.variables is not None',
     '    variables = runner.variables'
   ].join('\n')
