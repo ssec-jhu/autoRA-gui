@@ -183,6 +183,57 @@ describe('getExecutionOrder', () => {
     expect(preLoopPath).toEqual([])
     expect(mainPath.map(n => n.id)).toEqual(['pool-1', 'samp-1', 'theo-1'])
   })
+
+  it('routes the filter exit path (to end) into postLoopPath', () => {
+    // Mirrors workflow_2026-08-11: a pooler before the loop, and a second
+    // pooler on the filter's exit branch that must run once *after* the loop.
+    const { nodes } = buildState()
+    nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } })
+    nodes.push({
+      id: 'pool-2', type: 'component', name: 'Random Pooler 2',
+      protocolUuid: 'proto-pool', parameters: { num_samples: 10 }
+    })
+    // start -> pool-1 -> samp -> theo -> filter; filter loops back to samp
+    // and exits through pool-2 -> end.
+    const connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'samp-1' },
+      { sourceId: 'filt-1', targetId: 'pool-2' },
+      { sourceId: 'pool-2', targetId: 'end-1' }
+    ]
+    const { preLoopPath, mainPath, loopPath, postLoopPath } = getExecutionOrder(nodes, connections)
+    expect(preLoopPath.map(n => n.id)).toEqual(['pool-1'])
+    expect(mainPath.map(n => n.id)).toEqual(['samp-1', 'theo-1'])
+    expect(loopPath).toEqual([])
+    expect(postLoopPath.map(n => n.id)).toEqual(['pool-2'])
+  })
+
+  it('detects the loop-back target regardless of filter output order', () => {
+    // The exit branch is listed *before* the loop-back branch; the loop-back
+    // must still be identified by rejoining the path, not by list position.
+    const { nodes } = buildState()
+    nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } })
+    nodes.push({
+      id: 'pool-2', type: 'component', name: 'Random Pooler 2',
+      protocolUuid: 'proto-pool', parameters: { num_samples: 10 }
+    })
+    const connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'pool-2' },   // exit branch first
+      { sourceId: 'pool-2', targetId: 'end-1' },
+      { sourceId: 'filt-1', targetId: 'samp-1' }     // loop-back branch second
+    ]
+    const { preLoopPath, mainPath, postLoopPath } = getExecutionOrder(nodes, connections)
+    expect(preLoopPath.map(n => n.id)).toEqual(['pool-1'])
+    expect(mainPath.map(n => n.id)).toEqual(['samp-1', 'theo-1'])
+    expect(postLoopPath.map(n => n.id)).toEqual(['pool-2'])
+  })
 })
 
 describe('prepareWorkflow aliasing', () => {
@@ -365,6 +416,37 @@ describe('generatePythonCode', () => {
     expect(sampIdx).toBeGreaterThan(forIdx)
     // The pooler is not indented inside the loop body (8 spaces)
     expect(code).not.toContain('        state = random_pooler_on_state(state)')
+  })
+
+  it('runs a filter-exit (post-loop) node once, after the for loop', () => {
+    // workflow_2026-08-11 shape: pooler#1 before the loop, samp+theo in the
+    // loop, pooler#2 on the exit branch — pooler#2 must run once after the loop.
+    const state = buildState()
+    state.nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } })
+    state.nodes.push({
+      id: 'pool-2', type: 'component', name: 'Random Pooler 2',
+      protocolUuid: 'proto-pool', parameters: { num_samples: 10 }
+    })
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'samp-1' },
+      { sourceId: 'filt-1', targetId: 'pool-2' },
+      { sourceId: 'pool-2', targetId: 'end-1' }
+    ]
+    const code = generatePythonCode(state)
+    const forIdx = code.indexOf('for i in range(')
+    const pool1Idx = code.indexOf('    state = random_pooler_on_state(state)')
+    const pool2Idx = code.indexOf('    state = random_pooler_2_on_state(state)')
+    // pooler#1 before the loop, pooler#2 after it
+    expect(pool1Idx).toBeGreaterThan(-1)
+    expect(pool1Idx).toBeLessThan(forIdx)
+    expect(pool2Idx).toBeGreaterThan(forIdx)
+    // pooler#2 runs once at function-body indent (4 spaces), not inside the loop (8)
+    expect(code).toContain('    state = random_pooler_2_on_state(state)')
+    expect(code).not.toContain('        state = random_pooler_2_on_state(state)')
   })
 })
 

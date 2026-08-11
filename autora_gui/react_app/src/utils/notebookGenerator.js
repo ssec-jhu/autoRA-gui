@@ -67,16 +67,17 @@ function toSource(text) {
  * @param {Object[]} preLoopPath - Nodes executed once before the loop, in order.
  * @param {Object[]} mainPath - Nodes executed each loop cycle, in order.
  * @param {Object[]} loopPath - Additional loop-body nodes, in order.
+ * @param {Object[]} postLoopPath - Nodes executed once after the loop, in order.
  * @param {Object} filterInfo - Filter info with `maxCounter` controlling the number of cycles; may be null.
  * @param {Map} componentMeta - Map of node id to component metadata (`varName`, `nodeName`, `pythonName`).
  * @returns {string} Python source for the run cell.
  */
-function buildRunCell(preLoopPath, mainPath, loopPath, filterInfo, componentMeta) {
+function buildRunCell(preLoopPath, mainPath, loopPath, postLoopPath, filterInfo, componentMeta) {
   const code = new CodeBuilder()
 
   // Variable setup + state initialization (templates are indented for a
   // function body, so strip the leading 4 spaces for top-level use).
-  code.multiline(dedent(generateVariablesSetup(componentMeta, [...preLoopPath, ...mainPath, ...loopPath])))
+  code.multiline(dedent(generateVariablesSetup(componentMeta, [...preLoopPath, ...mainPath, ...loopPath, ...postLoopPath])))
   code.blank()
   code.multiline(dedent(TEMPLATES.initState))
   code.blank()
@@ -110,6 +111,12 @@ function buildRunCell(preLoopPath, mainPath, loopPath, filterInfo, componentMeta
   mainPath.forEach(node => addComponentCall(node, 1))
   loopPath.forEach(node => addComponentCall(node, 1))
 
+  // Nodes after the loop-back target's exit run once, after the loop.
+  if (postLoopPath.length) {
+    code.blank()
+    postLoopPath.forEach(node => addComponentCall(node, 0))
+  }
+
   code.blank()
   code.line('print("Workflow completed!")')
   code.line('state')
@@ -138,7 +145,7 @@ function dedent(text) {
  * @returns {Object} Jupyter notebook object with `cells`, `metadata`, `nbformat` and `nbformat_minor`.
  */
 export function generateNotebook(state) {
-  const { preLoopPath, mainPath, loopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables } = prepareWorkflow(state)
+  const { preLoopPath, mainPath, loopPath, postLoopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables } = prepareWorkflow(state)
 
   const cells = []
 
@@ -173,7 +180,7 @@ export function generateNotebook(state) {
 
   // 5. Run the workflow
   cells.push(markdownCell('## 4. Run the workflow'))
-  cells.push(codeCell(buildRunCell(preLoopPath, mainPath, loopPath, filterInfo, componentMeta)))
+  cells.push(codeCell(buildRunCell(preLoopPath, mainPath, loopPath, postLoopPath, filterInfo, componentMeta)))
 
   return {
     cells,
