@@ -65,13 +65,7 @@ function Toolbar() {
       console.warn('Validation skipped:', err)
     }
 
-    const blob = new Blob([JSON.stringify(workflow, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `workflow_${new Date().toISOString().slice(0, 10)}.json`
-    a.click()
-    URL.revokeObjectURL(url)
+    await saveFile(JSON.stringify(workflow, null, 2), { type: 'application/json', extension: 'json' })
   }
 
   /**
@@ -112,19 +106,45 @@ function Toolbar() {
   }
 
   /**
-   * Trigger a browser download of the given content as a timestamped file.
+   * Save content to a file. Where supported (Chromium browsers) this opens a
+   * native Save dialog so the user can pick the name and location; elsewhere
+   * (Firefox/Safari) it falls back to a download named with a unique timestamp
+   * (date + time) so repeated saves don't collide.
    *
-   * @param {string} content - File contents to download
-   * @param {string} type - MIME type for the blob
-   * @param {string} extension - File extension (without the dot)
-   * @returns {void}
+   * @param {string} content - File contents
+   * @param {Object} opts - Options
+   * @param {string} opts.type - MIME type for the blob
+   * @param {string} opts.extension - File extension (without the dot)
+   * @returns {Promise<void>}
    */
-  const downloadFile = (content, type, extension) => {
+  const saveFile = async (content, { type, extension }) => {
+    // Filesystem-safe timestamp, e.g. "2026-08-10_16-06-43"
+    const stamp = new Date().toISOString().slice(0, 19).replace('T', '_').replace(/:/g, '-')
+    const suggestedName = `workflow_${stamp}.${extension}`
     const blob = new Blob([content], { type })
+
+    // Chromium: native Save dialog lets the user choose/rename the file
+    if (window.showSaveFilePicker) {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName,
+          types: [{ description: `${extension.toUpperCase()} file`, accept: { [type]: [`.${extension}`] } }]
+        })
+        const writable = await handle.createWritable()
+        await writable.write(blob)
+        await writable.close()
+        return
+      } catch (err) {
+        if (err.name === 'AbortError') return // user cancelled the dialog
+        console.warn('Save dialog unavailable, falling back to download:', err)
+      }
+    }
+
+    // Fallback (Firefox/Safari): download with a unique, timestamped name
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `workflow_${new Date().toISOString().slice(0, 10)}.${extension}`
+    a.download = suggestedName
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -133,16 +153,16 @@ function Toolbar() {
    * Generate Python source for the current workflow (with pip install header)
    * and download it as a .py file. Alerts on generation failure.
    *
-   * @returns {void}
+   * @returns {Promise<void>}
    */
-  const handleGeneratePython = () => {
+  const handleGeneratePython = async () => {
     try {
       const pythonCode = generatePythonCode(state)
       const pipInstalls = generatePipInstalls(state)
 
       // Create downloadable Python file
       const fullCode = `# ${pipInstalls}\n\n${pythonCode}`
-      downloadFile(fullCode, 'text/x-python', 'py')
+      await saveFile(fullCode, { type: 'text/x-python', extension: 'py' })
     } catch (err) {
       alert(`Failed to generate Python code: ${err.message}`)
     }
@@ -152,12 +172,12 @@ function Toolbar() {
    * Generate a Jupyter notebook for the current workflow and download it as an
    * .ipynb file. Alerts on generation failure.
    *
-   * @returns {void}
+   * @returns {Promise<void>}
    */
-  const handleGenerateNotebook = () => {
+  const handleGenerateNotebook = async () => {
     try {
       const notebook = generateNotebookString(state)
-      downloadFile(notebook, 'application/x-ipynb+json', 'ipynb')
+      await saveFile(notebook, { type: 'application/x-ipynb+json', extension: 'ipynb' })
     } catch (err) {
       alert(`Failed to generate notebook: ${err.message}`)
     }
