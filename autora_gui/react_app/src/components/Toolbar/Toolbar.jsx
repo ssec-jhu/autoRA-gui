@@ -11,6 +11,7 @@ import { useWorkflow } from '../../context/WorkflowContext'
 import { serializeWorkflow, deserializeWorkflow } from '../../utils/serialization'
 import { generatePythonCode, generatePipInstalls } from '../../utils/pythonGenerator'
 import { generateNotebookString } from '../../utils/notebookGenerator'
+import { computeFitToScreen } from '../../utils/geometry'
 import './Toolbar.css'
 
 /**
@@ -34,9 +35,16 @@ const getCanvasCenter = () => {
  * exposes the editor's top-level actions. Registers global keyboard shortcuts
  * for undo/redo while mounted.
  *
+ * The three regions (brand, actions, info) are sized to mirror the columns
+ * below (left panel, canvas, right panel) so the first action button lines up
+ * with the canvas's left edge and the zoom controls with its right edge.
+ *
+ * @param {Object} props
+ * @param {number} props.leftWidth - Width of the left component palette panel, in pixels.
+ * @param {number} props.rightWidth - Width of the right properties panel, in pixels.
  * @returns {JSX.Element}
  */
-function Toolbar() {
+function Toolbar({ leftWidth, rightWidth }) {
   const { state, dispatch } = useWorkflow()
   const fileInputRef = useRef(null)
 
@@ -283,9 +291,22 @@ function Toolbar() {
     dispatch({ type: 'SET_PAN', payload: { x: 0, y: 0 } })
   }
 
+  /**
+   * Fit the whole workflow into the visible canvas by computing the zoom and pan
+   * that center all nodes within the viewport (see `computeFitToScreen`).
+   *
+   * @returns {void}
+   */
+  const handleFitToScreen = () => {
+    const fit = computeFitToScreen(state.nodes, getCanvasCenter())
+    if (!fit) return
+    dispatch({ type: 'SET_ZOOM', payload: fit.zoom })
+    dispatch({ type: 'SET_PAN', payload: fit.pan })
+  }
+
   return (
     <header className="toolbar">
-      <div className="toolbar-brand">
+      <div className="toolbar-brand" style={{ width: leftWidth }}>
         <span className="brand-icon">🧪</span>
         <span className="brand-text">AutoRA Workflow Editor</span>
       </div>
@@ -339,22 +360,32 @@ function Toolbar() {
           </button>
         </div>
 
-        <div className="toolbar-divider" />
+        {/* Push the view controls to the canvas's right edge */}
+        <div className="toolbar-spacer" />
 
-        <div className="toolbar-group zoom-controls">
-          <button className="toolbar-btn icon-only" onClick={handleZoomOut} title="Zoom out">
-            −
+        <div className="toolbar-group">
+          <button className="toolbar-btn" onClick={handleFitToScreen} title="Fit workflow to canvas">
+            <span className="btn-icon">🖥</span>
+            <span className="btn-text">Fit to Screen</span>
           </button>
-          <button className="zoom-display" onClick={handleZoomReset} title="Reset zoom">
-            {Math.round(state.zoom * 100)}%
-          </button>
-          <button className="toolbar-btn icon-only" onClick={handleZoomIn} title="Zoom in">
-            +
-          </button>
+
+          <div className="toolbar-divider" />
+
+          <div className="toolbar-group zoom-controls">
+            <button className="toolbar-btn icon-only" onClick={handleZoomOut} title="Zoom out">
+              −
+            </button>
+            <button className="zoom-display" onClick={handleZoomReset} title="Reset zoom">
+              {Math.round(state.zoom * 100)}%
+            </button>
+            <button className="toolbar-btn icon-only" onClick={handleZoomIn} title="Zoom in">
+              +
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="toolbar-info">
+      <div className="toolbar-info" style={{ width: rightWidth }}>
         <span className="info-item">
           <span className="info-label">Nodes:</span>
           <span className="info-value">{state.nodes.length}</span>
