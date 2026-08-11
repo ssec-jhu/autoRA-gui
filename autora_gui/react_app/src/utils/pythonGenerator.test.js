@@ -109,15 +109,21 @@ describe('getExecutionOrder', () => {
     expect(() => getExecutionOrder([], [])).toThrow('Start node')
   })
 
-  it('returns component nodes between start and end in path order', () => {
+  // Map blocks to a compact shape for readable assertions.
+  const shape = blocks => blocks.map(b =>
+    b.type === 'loop'
+      ? { type: 'loop', maxCounter: b.maxCounter, ids: b.nodes.map(n => n.id) }
+      : { type: 'once', ids: b.nodes.map(n => n.id) })
+
+  it('wraps a filter-less workflow in one default experiment loop', () => {
     const { nodes, connections } = buildState()
-    const { mainPath, loopPath, filterInfo } = getExecutionOrder(nodes, connections)
-    expect(mainPath.map(n => n.id)).toEqual(['pool-1', 'samp-1', 'theo-1'])
-    expect(loopPath).toEqual([])
-    expect(filterInfo).toBeNull()
+    const { blocks } = getExecutionOrder(nodes, connections)
+    expect(shape(blocks)).toEqual([
+      { type: 'loop', maxCounter: 10, ids: ['pool-1', 'samp-1', 'theo-1'] }
+    ])
   })
 
-  it('throws when a filter has no second (loop-back) output connection', () => {
+  it('throws when a filter has no loop-back output connection', () => {
     const { nodes } = buildState()
     nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 3 } })
     // Filter only connects forward to end — no loop-back to close the cycle.
@@ -128,27 +134,28 @@ describe('getExecutionOrder', () => {
       { sourceId: 'theo-1', targetId: 'filt-1' },
       { sourceId: 'filt-1', targetId: 'end-1' }
     ]
-    expect(() => getExecutionOrder(nodes, connections)).toThrow(/second output connection/)
+    expect(() => getExecutionOrder(nodes, connections)).toThrow(/loop-back output/)
   })
 
-  it('accepts a filter with a loop-back output that closes the cycle', () => {
+  it('uses the filter maxCounter as the loop cycle count', () => {
     const { nodes } = buildState()
     nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 3 } })
-    nodes.push({ id: 'loop-1', type: 'component', name: 'Loop Runner', protocolUuid: 'proto-loop' })
+    // filter loops back to the first component: everything is in the loop
     const connections = [
       { sourceId: 'start-1', targetId: 'pool-1' },
       { sourceId: 'pool-1', targetId: 'samp-1' },
       { sourceId: 'samp-1', targetId: 'theo-1' },
       { sourceId: 'theo-1', targetId: 'filt-1' },
-      { sourceId: 'filt-1', targetId: 'end-1' },
-      { sourceId: 'filt-1', targetId: 'loop-1' }
+      { sourceId: 'filt-1', targetId: 'pool-1' },
+      { sourceId: 'filt-1', targetId: 'end-1' }
     ]
-    const { loopPath, filterInfo } = getExecutionOrder(nodes, connections)
-    expect(loopPath.map(n => n.id)).toEqual(['loop-1'])
-    expect(filterInfo).toEqual({ maxCounter: 3 })
+    const { blocks } = getExecutionOrder(nodes, connections)
+    expect(shape(blocks)).toEqual([
+      { type: 'loop', maxCounter: 3, ids: ['pool-1', 'samp-1', 'theo-1'] }
+    ])
   })
 
-  it('puts nodes before the loop-back target into preLoopPath (run once)', () => {
+  it('puts nodes before the loop-back target into a run-once block', () => {
     const { nodes } = buildState()
     nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } })
     // start -> pool -> samp -> theo -> filter; filter loops back to samp (not pool)
@@ -160,31 +167,15 @@ describe('getExecutionOrder', () => {
       { sourceId: 'filt-1', targetId: 'samp-1' },
       { sourceId: 'filt-1', targetId: 'end-1' }
     ]
-    const { preLoopPath, mainPath, loopPath } = getExecutionOrder(nodes, connections)
+    const { blocks } = getExecutionOrder(nodes, connections)
     // pool runs once (before the loop-back target); samp + theo are the loop body
-    expect(preLoopPath.map(n => n.id)).toEqual(['pool-1'])
-    expect(mainPath.map(n => n.id)).toEqual(['samp-1', 'theo-1'])
-    expect(loopPath).toEqual([])
+    expect(shape(blocks)).toEqual([
+      { type: 'once', ids: ['pool-1'] },
+      { type: 'loop', maxCounter: 10, ids: ['samp-1', 'theo-1'] }
+    ])
   })
 
-  it('leaves preLoopPath empty when the loop covers the whole path', () => {
-    const { nodes } = buildState()
-    nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } })
-    // filter loops back to the first component: everything is in the loop
-    const connections = [
-      { sourceId: 'start-1', targetId: 'pool-1' },
-      { sourceId: 'pool-1', targetId: 'samp-1' },
-      { sourceId: 'samp-1', targetId: 'theo-1' },
-      { sourceId: 'theo-1', targetId: 'filt-1' },
-      { sourceId: 'filt-1', targetId: 'pool-1' },
-      { sourceId: 'filt-1', targetId: 'end-1' }
-    ]
-    const { preLoopPath, mainPath } = getExecutionOrder(nodes, connections)
-    expect(preLoopPath).toEqual([])
-    expect(mainPath.map(n => n.id)).toEqual(['pool-1', 'samp-1', 'theo-1'])
-  })
-
-  it('routes the filter exit path (to end) into postLoopPath', () => {
+  it('routes the filter exit path (to end) into a trailing run-once block', () => {
     // Mirrors workflow_2026-08-11: a pooler before the loop, and a second
     // pooler on the filter's exit branch that must run once *after* the loop.
     const { nodes } = buildState()
@@ -204,11 +195,12 @@ describe('getExecutionOrder', () => {
       { sourceId: 'filt-1', targetId: 'pool-2' },
       { sourceId: 'pool-2', targetId: 'end-1' }
     ]
-    const { preLoopPath, mainPath, loopPath, postLoopPath } = getExecutionOrder(nodes, connections)
-    expect(preLoopPath.map(n => n.id)).toEqual(['pool-1'])
-    expect(mainPath.map(n => n.id)).toEqual(['samp-1', 'theo-1'])
-    expect(loopPath).toEqual([])
-    expect(postLoopPath.map(n => n.id)).toEqual(['pool-2'])
+    const { blocks } = getExecutionOrder(nodes, connections)
+    expect(shape(blocks)).toEqual([
+      { type: 'once', ids: ['pool-1'] },
+      { type: 'loop', maxCounter: 10, ids: ['samp-1', 'theo-1'] },
+      { type: 'once', ids: ['pool-2'] }
+    ])
   })
 
   it('detects the loop-back target regardless of filter output order', () => {
@@ -229,10 +221,43 @@ describe('getExecutionOrder', () => {
       { sourceId: 'pool-2', targetId: 'end-1' },
       { sourceId: 'filt-1', targetId: 'samp-1' }     // loop-back branch second
     ]
-    const { preLoopPath, mainPath, postLoopPath } = getExecutionOrder(nodes, connections)
-    expect(preLoopPath.map(n => n.id)).toEqual(['pool-1'])
-    expect(mainPath.map(n => n.id)).toEqual(['samp-1', 'theo-1'])
-    expect(postLoopPath.map(n => n.id)).toEqual(['pool-2'])
+    const { blocks } = getExecutionOrder(nodes, connections)
+    expect(shape(blocks)).toEqual([
+      { type: 'once', ids: ['pool-1'] },
+      { type: 'loop', maxCounter: 10, ids: ['samp-1', 'theo-1'] },
+      { type: 'once', ids: ['pool-2'] }
+    ])
+  })
+
+  it('produces one loop block per filter for a multi-loop workflow', () => {
+    // Two sequential loops: start -> a -> b -> filter1 (loops to a, exits to c)
+    // -> c -> d -> filter2 (loops to c, exits to end).
+    const nodes = [
+      { id: 'start-1', type: 'start_point' },
+      { id: 'a', type: 'component', name: 'A', protocolUuid: 'proto-pool' },
+      { id: 'b', type: 'component', name: 'B', protocolUuid: 'proto-theo' },
+      { id: 'c', type: 'component', name: 'C', protocolUuid: 'proto-pool' },
+      { id: 'd', type: 'component', name: 'D', protocolUuid: 'proto-theo' },
+      { id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } },
+      { id: 'filt-2', type: 'filter_point', filterParams: { maxCounter: 2 } },
+      { id: 'end-1', type: 'end_point' }
+    ]
+    const connections = [
+      { sourceId: 'start-1', targetId: 'a' },
+      { sourceId: 'a', targetId: 'b' },
+      { sourceId: 'b', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'a' },
+      { sourceId: 'filt-1', targetId: 'c' },
+      { sourceId: 'c', targetId: 'd' },
+      { sourceId: 'd', targetId: 'filt-2' },
+      { sourceId: 'filt-2', targetId: 'c' },
+      { sourceId: 'filt-2', targetId: 'end-1' }
+    ]
+    const { blocks } = getExecutionOrder(nodes, connections)
+    expect(shape(blocks)).toEqual([
+      { type: 'loop', maxCounter: 10, ids: ['a', 'b'] },
+      { type: 'loop', maxCounter: 2, ids: ['c', 'd'] }
+    ])
   })
 })
 
@@ -447,6 +472,42 @@ describe('generatePythonCode', () => {
     // pooler#2 runs once at function-body indent (4 spaces), not inside the loop (8)
     expect(code).toContain('    state = random_pooler_2_on_state(state)')
     expect(code).not.toContain('        state = random_pooler_2_on_state(state)')
+  })
+
+  it('emits a separate for-loop per filter for a multi-loop workflow', () => {
+    // Two sequential loops (mirrors workflow_2loops.json): pool+theo repeat 10x,
+    // then a second pool2+theo2 repeat 2x. Each loop body is indented into its
+    // own `for i in range(...)`.
+    const state = buildState()
+    state.nodes.push(
+      { id: 'pool-2', type: 'component', name: 'Random Pooler 2', protocolUuid: 'proto-pool', parameters: {} },
+      { id: 'theo-2', type: 'component', name: 'BMS Regressor 2', protocolUuid: 'proto-theo', parameters: {} },
+      { id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } },
+      { id: 'filt-2', type: 'filter_point', filterParams: { maxCounter: 2 } }
+    )
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'pool-1' },   // loop 1 back-edge
+      { sourceId: 'filt-1', targetId: 'pool-2' },   // exit into loop 2
+      { sourceId: 'pool-2', targetId: 'theo-2' },
+      { sourceId: 'theo-2', targetId: 'filt-2' },
+      { sourceId: 'filt-2', targetId: 'pool-2' },   // loop 2 back-edge
+      { sourceId: 'filt-2', targetId: 'end-1' }
+    ]
+    const code = generatePythonCode(state)
+    // Two independent for-loops, with the second one's cycle count
+    expect(code.match(/for i in range\(/g).length).toBe(2)
+    expect(code).toContain('for i in range(10):')
+    expect(code).toContain('for i in range(2):')
+    // Each loop's nodes are indented into the loop body (8 spaces)
+    expect(code).toContain('        state = random_pooler_on_state(state)')
+    expect(code).toContain('        state = random_pooler_2_on_state(state)')
+    // Loop 2 comes after loop 1
+    expect(code.indexOf('for i in range(2):')).toBeGreaterThan(code.indexOf('for i in range(10):'))
+    expect(code.indexOf('state = random_pooler_2_on_state(state)'))
+      .toBeGreaterThan(code.indexOf('for i in range(2):'))
   })
 })
 

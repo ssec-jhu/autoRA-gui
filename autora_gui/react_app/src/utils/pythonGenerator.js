@@ -124,147 +124,104 @@ export class CodeBuilder {
 }
 
 /**
- * Traverse the workflow graph and return nodes in execution order
+ * Traverse the workflow graph and split it into ordered execution blocks,
+ * supporting any number of loops (each Filter node defines one loop).
+ *
+ * The graph is walked forward from the Start node. At each Filter the traversal
+ * follows the *exit* output (toward the end) and records the *loop-back* output,
+ * which points to an already-visited node marking where that loop's body began.
+ * The linear sequence of components is then partitioned so that each filter's
+ * body becomes a `loop` block and every other run of components a `once` block.
  *
  * @param {Object[]} nodes - Graph nodes, each with `id`, `type` and optional `filterParams`.
  * @param {Object[]} connections - Graph edges, each with `sourceId` and `targetId`.
- * @returns {Object} `{ preLoopPath, mainPath, loopPath, postLoopPath, filterInfo }` where the paths are ordered node arrays (`preLoopPath` runs once before the loop, `mainPath`+`loopPath` run each cycle, `postLoopPath` runs once after the loop) and `filterInfo` is `{ maxCounter }` or null.
+ * @returns {{blocks: Array<{type: 'once'|'loop', nodes: Object[], maxCounter?: number}>}}
+ *   Ordered execution blocks: `once` blocks run their nodes a single time,
+ *   `loop` blocks run their nodes inside `for i in range(maxCounter)`.
  */
 export function getExecutionOrder(nodes, connections) {
   const startNode = nodes.find(n => n.type === 'start_point')
-  const endNode = nodes.find(n => n.type === 'end_point')
-  const filterNodes = nodes.filter(n => n.type === 'filter_point')
-
   if (!startNode) {
     throw new Error('Workflow must have a Start node')
   }
 
+  const nodeById = new Map(nodes.map(n => [n.id, n]))
+  const hasFilter = nodes.some(n => n.type === 'filter_point')
+
   // Build adjacency map (source -> [targets])
   const adjacency = {}
   connections.forEach(conn => {
-    if (!adjacency[conn.sourceId]) {
-      adjacency[conn.sourceId] = []
-    }
+    if (!adjacency[conn.sourceId]) adjacency[conn.sourceId] = []
     adjacency[conn.sourceId].push(conn.targetId)
   })
 
-  const preLoopPath = []
-  const mainPath = []
-  const loopPath = []
-  const postLoopPath = []
+  // Forward traversal from Start. Follow each node's (single) forward edge,
+  // taking the exit branch at filters. Record components in order and filters
+  // with the loop-back target that closes their loop.
+  const sequence = []   // items: { node } | { loopBackId, maxCounter }
+  const seen = []       // ids of components visited so far (loop-back detection)
   const visited = new Set()
+  let current = startNode.id
 
-  /**
-   * Depth-first search for a path of node ids from a start node to any target.
-   *
-   * @param {string} fromId - Node id to start from.
-   * @param {string[]} toIds - Target node ids to search for.
-   * @param {string[]} [path=[]] - Accumulated ids on the current path.
-   * @returns {string[]|null} Ordered node ids from start to target (inclusive), or null if none.
-   */
-  function findPath(fromId, toIds, path = []) {
-    if (toIds.includes(fromId)) return [...path, fromId]
-    if (visited.has(fromId)) return null
-    visited.add(fromId)
+  while (current != null && !visited.has(current)) {
+    visited.add(current)
+    const node = nodeById.get(current)
+    if (!node || node.type === 'end_point') break
 
-    for (const targetId of (adjacency[fromId] || [])) {
-      const result = findPath(targetId, toIds, [...path, fromId])
-      if (result) return result
+    if (node.type === 'start_point') {
+      current = (adjacency[current] || [])[0]
+      continue
     }
-    return null
+
+    if (node.type === 'filter_point') {
+      const targets = adjacency[current] || []
+      // The loop-back branch points to a node already visited (an ancestor);
+      // the other branch is the exit that continues toward the end.
+      const loopBackId = targets.find(id => seen.includes(id)) ?? null
+      if (!loopBackId) {
+        throw new Error(
+          'The Filter node is missing its loop-back output connection that closes ' +
+          'the experiment loop. Please connect the Filter back to a component to ' +
+          'form the loop before generating code.'
+        )
+      }
+      sequence.push({ loopBackId, maxCounter: node.filterParams?.maxCounter ?? 10 })
+      current = targets.find(id => id !== loopBackId) ?? null
+      continue
+    }
+
+    // Regular component
+    seen.push(current)
+    sequence.push({ node })
+    current = (adjacency[current] || [])[0]
   }
 
-  const filterNode = filterNodes[0]
-
-  if (filterNode) {
-    visited.clear()
-    const pathToFilter = findPath(startNode.id, [filterNode.id])
-    const filterTargets = adjacency[filterNode.id] || []
-
-    // Classify the filter's two outputs. The loop-back output lands back on the
-    // path to the filter, closing the cycle; the other output is the exit that
-    // continues toward the end. A target may lead to end *through* components
-    // (e.g. a final pooler), so "leads to end" is not the same as "is the end
-    // node" — hence we identify the loop-back by whether it is on the path.
-    let loopBackTarget = filterTargets.find(id => pathToFilter?.includes(id)) ?? null
-    if (!loopBackTarget) {
-      // No output rejoins the path (e.g. the loop-back target hangs off the
-      // filter as its own node): fall back to the last non-end target.
-      for (const targetId of filterTargets) {
-        const targetNode = nodes.find(n => n.id === targetId)
-        if (targetNode?.type !== 'end_point') loopBackTarget = targetId
-      }
+  // Partition the linear sequence into ordered blocks. A pending run of
+  // components accumulates until a filter closes a loop over its tail (from the
+  // loop-back target onward); components before the loop-back target run once.
+  const blocks = []
+  let run = []
+  for (const item of sequence) {
+    if (item.node) {
+      run.push(item.node)
+      continue
     }
-    const exitTarget = filterTargets.find(id => id !== loopBackTarget) ?? null
-
-    // A Filter must have a second (loop-back) output connection to close the
-    // experiment loop. Without it there is no cycle, so refuse to generate code
-    // that would emit a misleading `for i in range(...)` loop.
-    if (!loopBackTarget) {
-      throw new Error(
-        'The Filter node is missing its second output connection that closes the ' +
-        'experiment loop. Please connect the Filter back to a component to form the ' +
-        'loop before generating code.'
-      )
-    }
-
-    if (pathToFilter) {
-      // The loop restarts at the loop-back target. Nodes on the path *before*
-      // it run once (pre-loop); the loop-back target and everything after it
-      // (up to the filter) form the loop body. When the loop-back target is not
-      // on the path, the whole path is the loop body.
-      const loopBackIdx = pathToFilter.indexOf(loopBackTarget)
-      for (let i = 1; i < pathToFilter.length; i++) {
-        const node = nodes.find(n => n.id === pathToFilter[i])
-        if (!node || CONTROL_NODE_TYPES.includes(node.type)) continue
-        if (loopBackIdx > 0 && i < loopBackIdx) {
-          preLoopPath.push(node)
-        } else {
-          mainPath.push(node)
-        }
-      }
-    }
-
-    // A loop-back target that is not on the path is its own loop-body node.
-    const loopNode = nodes.find(n => n.id === loopBackTarget)
-    if (loopNode && !CONTROL_NODE_TYPES.includes(loopNode.type) &&
-        !mainPath.find(n => n.id === loopBackTarget) &&
-        !preLoopPath.find(n => n.id === loopBackTarget)) {
-      loopPath.push(loopNode)
-    }
-
-    // Nodes on the exit path (filter's non-loop-back output to the end) run once
-    // after the loop finishes, e.g. a final pooler.
-    if (endNode && exitTarget && exitTarget !== endNode.id) {
-      visited.clear()
-      const pathToEnd = findPath(exitTarget, [endNode.id])
-      if (pathToEnd) {
-        pathToEnd.forEach(id => {
-          const node = nodes.find(n => n.id === id)
-          if (node && !CONTROL_NODE_TYPES.includes(node.type)) postLoopPath.push(node)
-        })
-      }
-    }
-  } else if (endNode) {
-    visited.clear()
-    const pathToEnd = findPath(startNode.id, [endNode.id])
-    if (pathToEnd) {
-      for (let i = 1; i < pathToEnd.length - 1; i++) {
-        const node = nodes.find(n => n.id === pathToEnd[i])
-        if (node && !CONTROL_NODE_TYPES.includes(node.type)) {
-          mainPath.push(node)
-        }
-      }
-    }
+    const idx = run.findIndex(n => n.id === item.loopBackId)
+    const before = idx > 0 ? run.slice(0, idx) : []
+    const body = idx >= 0 ? run.slice(idx) : run
+    if (before.length) blocks.push({ type: 'once', nodes: before })
+    if (body.length) blocks.push({ type: 'loop', nodes: body, maxCounter: item.maxCounter })
+    run = []
+  }
+  if (run.length) {
+    // Trailing components run once — except a filter-less workflow, where the
+    // whole path is one experiment loop with the default cycle count (legacy).
+    blocks.push(hasFilter
+      ? { type: 'once', nodes: run }
+      : { type: 'loop', nodes: run, maxCounter: 10 })
   }
 
-  return {
-    preLoopPath,
-    mainPath,
-    loopPath,
-    postLoopPath,
-    filterInfo: filterNode ? { maxCounter: filterNode.filterParams?.maxCounter ?? 10 } : null
-  }
+  return { blocks }
 }
 
 /**
@@ -608,21 +565,21 @@ export function generateWrapper(code, meta) {
  * workflow state. Shared by the Python file and Jupyter notebook generators.
  *
  * @param {Object} state - Editor state with `nodes`, `connections` and `components`.
- * @returns {Object} `{ preLoopPath, mainPath, loopPath, postLoopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner }`.
+ * @returns {Object} `{ blocks, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables }`.
  */
 export function prepareWorkflow(state) {
   const { nodes, connections, components } = state
   const allComponents = components ? Object.values(components).flat() : []
-  const { preLoopPath, mainPath, loopPath, postLoopPath, filterInfo } = getExecutionOrder(nodes, connections)
+  const { blocks } = getExecutionOrder(nodes, connections)
 
-  if (preLoopPath.length + mainPath.length + loopPath.length + postLoopPath.length === 0) {
+  const allPathNodes = blocks.flatMap(block => block.nodes)
+  if (allPathNodes.length === 0) {
     throw new Error('No components found in workflow. Add components and connect them.')
   }
 
   // Collect imports and component metadata
   const imports = new Map()
   const componentMeta = new Map()
-  const allPathNodes = [...preLoopPath, ...mainPath, ...loopPath, ...postLoopPath]
 
   allPathNodes.forEach(node => {
     const protocol = allComponents.find(c => c.uuid === node.protocolUuid)
@@ -686,7 +643,7 @@ export function prepareWorkflow(state) {
   // Runners needing synthesized X/y require IV/DV and numpy imports.
   const needsEquationVariables = [...componentMeta.values()].some(needsXYVariables)
 
-  return { preLoopPath, mainPath, loopPath, postLoopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables }
+  return { blocks, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables }
 }
 
 /**
@@ -750,7 +707,7 @@ export function generateImports(code, imports, { usesPlaceholderVariables = true
  * @returns {string} A complete, runnable Python script as a string.
  */
 export function generatePythonCode(state) {
-  const { preLoopPath, mainPath, loopPath, postLoopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables } = prepareWorkflow(state)
+  const { blocks, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables } = prepareWorkflow(state)
 
   // Build Python code
   const code = new CodeBuilder()
@@ -768,7 +725,7 @@ export function generatePythonCode(state) {
 
   // Generate main function
   code.line('def main():')
-  code.multiline(generateVariablesSetup(componentMeta, [...preLoopPath, ...mainPath, ...loopPath, ...postLoopPath]))
+  code.multiline(generateVariablesSetup(componentMeta, blocks.flatMap(b => b.nodes)))
   code.indent('')
   code.multiline(TEMPLATES.initState)
   code.indent('')
@@ -790,25 +747,20 @@ export function generatePythonCode(state) {
     code.indent('', level)
   }
 
-  // Nodes before the loop-back target run once, before the loop.
-  if (preLoopPath.length) {
-    preLoopPath.forEach(node => addComponentCall(node, 1))
-  }
-
-  const maxCycles = filterInfo?.maxCounter ?? 10
-  code.indent(`# Main experiment loop (${maxCycles} cycles)`)
-  code.indent(`for i in range(${maxCycles}):`)
-  code.indent("print(f'Cycle {i}')", 2)
-  code.indent('', 2)
-
-  mainPath.forEach(node => addComponentCall(node, 2))
-  loopPath.forEach(node => addComponentCall(node, 2))
-
-  // Nodes after the loop-back target's exit run once, after the loop.
-  if (postLoopPath.length) {
-    code.indent('')
-    postLoopPath.forEach(node => addComponentCall(node, 1))
-  }
+  // Emit each block in order: `once` blocks run their nodes a single time (at
+  // the function-body indent), `loop` blocks wrap them in a for-loop. A workflow
+  // with several Filter nodes yields several loop blocks, one per loop.
+  blocks.forEach(block => {
+    if (block.type === 'loop') {
+      code.indent(`# Experiment loop (${block.maxCounter} cycles)`)
+      code.indent(`for i in range(${block.maxCounter}):`)
+      code.indent("print(f'Cycle {i}')", 2)
+      code.indent('', 2)
+      block.nodes.forEach(node => addComponentCall(node, 2))
+    } else {
+      block.nodes.forEach(node => addComponentCall(node, 1))
+    }
+  })
 
   code.indent('')
   code.indent('print("Workflow completed!")')

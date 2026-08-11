@@ -64,20 +64,16 @@ function toSource(text) {
  * Build the "run the workflow" code cell. Unlike the standalone Python file,
  * the notebook runs the loop at top level so each cycle's state is inspectable.
  *
- * @param {Object[]} preLoopPath - Nodes executed once before the loop, in order.
- * @param {Object[]} mainPath - Nodes executed each loop cycle, in order.
- * @param {Object[]} loopPath - Additional loop-body nodes, in order.
- * @param {Object[]} postLoopPath - Nodes executed once after the loop, in order.
- * @param {Object} filterInfo - Filter info with `maxCounter` controlling the number of cycles; may be null.
+ * @param {Array<{type: 'once'|'loop', nodes: Object[], maxCounter?: number}>} blocks - Ordered execution blocks (see getExecutionOrder).
  * @param {Map} componentMeta - Map of node id to component metadata (`varName`, `nodeName`, `pythonName`).
  * @returns {string} Python source for the run cell.
  */
-function buildRunCell(preLoopPath, mainPath, loopPath, postLoopPath, filterInfo, componentMeta) {
+function buildRunCell(blocks, componentMeta) {
   const code = new CodeBuilder()
 
   // Variable setup + state initialization (templates are indented for a
   // function body, so strip the leading 4 spaces for top-level use).
-  code.multiline(dedent(generateVariablesSetup(componentMeta, [...preLoopPath, ...mainPath, ...loopPath, ...postLoopPath])))
+  code.multiline(dedent(generateVariablesSetup(componentMeta, blocks.flatMap(b => b.nodes))))
   code.blank()
   code.multiline(dedent(TEMPLATES.initState))
   code.blank()
@@ -99,25 +95,22 @@ function buildRunCell(preLoopPath, mainPath, loopPath, postLoopPath, filterInfo,
     code.blank()
   }
 
-  // Nodes before the loop-back target run once, before the loop.
-  preLoopPath.forEach(node => addComponentCall(node, 0))
+  // Emit each block in order (see getExecutionOrder). At top level, `once`
+  // blocks run their nodes unindented and `loop` blocks wrap them in a
+  // for-loop. Several Filter nodes produce several loop blocks.
+  blocks.forEach(block => {
+    if (block.type === 'loop') {
+      code.line(`# Experiment loop (${block.maxCounter} cycles)`)
+      code.line(`for i in range(${block.maxCounter}):`)
+      code.indent("print(f'Cycle {i}')")
+      code.blank()
+      block.nodes.forEach(node => addComponentCall(node, 1))
+      code.blank()
+    } else {
+      block.nodes.forEach(node => addComponentCall(node, 0))
+    }
+  })
 
-  const maxCycles = filterInfo?.maxCounter ?? 10
-  code.line(`# Main experiment loop (${maxCycles} cycles)`)
-  code.line(`for i in range(${maxCycles}):`)
-  code.indent("print(f'Cycle {i}')")
-  code.blank()
-
-  mainPath.forEach(node => addComponentCall(node, 1))
-  loopPath.forEach(node => addComponentCall(node, 1))
-
-  // Nodes after the loop-back target's exit run once, after the loop.
-  if (postLoopPath.length) {
-    code.blank()
-    postLoopPath.forEach(node => addComponentCall(node, 0))
-  }
-
-  code.blank()
   code.line('print("Workflow completed!")')
   code.line('state')
 
@@ -145,7 +138,7 @@ function dedent(text) {
  * @returns {Object} Jupyter notebook object with `cells`, `metadata`, `nbformat` and `nbformat_minor`.
  */
 export function generateNotebook(state) {
-  const { preLoopPath, mainPath, loopPath, postLoopPath, filterInfo, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables } = prepareWorkflow(state)
+  const { blocks, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables } = prepareWorkflow(state)
 
   const cells = []
 
@@ -180,7 +173,7 @@ export function generateNotebook(state) {
 
   // 5. Run the workflow
   cells.push(markdownCell('## 4. Run the workflow'))
-  cells.push(codeCell(buildRunCell(preLoopPath, mainPath, loopPath, postLoopPath, filterInfo, componentMeta)))
+  cells.push(codeCell(buildRunCell(blocks, componentMeta)))
 
   return {
     cells,
