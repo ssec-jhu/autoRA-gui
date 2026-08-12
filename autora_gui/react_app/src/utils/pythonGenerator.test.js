@@ -109,12 +109,155 @@ describe('getExecutionOrder', () => {
     expect(() => getExecutionOrder([], [])).toThrow('Start node')
   })
 
-  it('returns component nodes between start and end in path order', () => {
+  // Map blocks to a compact shape for readable assertions.
+  const shape = blocks => blocks.map(b =>
+    b.type === 'loop'
+      ? { type: 'loop', maxCounter: b.maxCounter, ids: b.nodes.map(n => n.id) }
+      : { type: 'once', ids: b.nodes.map(n => n.id) })
+
+  it('wraps a filter-less workflow in one default experiment loop', () => {
     const { nodes, connections } = buildState()
-    const { mainPath, loopPath, filterInfo } = getExecutionOrder(nodes, connections)
-    expect(mainPath.map(n => n.id)).toEqual(['pool-1', 'samp-1', 'theo-1'])
-    expect(loopPath).toEqual([])
-    expect(filterInfo).toBeNull()
+    const { blocks } = getExecutionOrder(nodes, connections)
+    expect(shape(blocks)).toEqual([
+      { type: 'loop', maxCounter: 10, ids: ['pool-1', 'samp-1', 'theo-1'] }
+    ])
+  })
+
+  it('throws when a filter has no loop-back output connection', () => {
+    const { nodes } = buildState()
+    nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 3 } })
+    // Filter only connects forward to end — no loop-back to close the cycle.
+    const connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'end-1' }
+    ]
+    expect(() => getExecutionOrder(nodes, connections)).toThrow(/loop-back output/)
+  })
+
+  it('uses the filter maxCounter as the loop cycle count', () => {
+    const { nodes } = buildState()
+    nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 3 } })
+    // filter loops back to the first component: everything is in the loop
+    const connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'pool-1' },
+      { sourceId: 'filt-1', targetId: 'end-1' }
+    ]
+    const { blocks } = getExecutionOrder(nodes, connections)
+    expect(shape(blocks)).toEqual([
+      { type: 'loop', maxCounter: 3, ids: ['pool-1', 'samp-1', 'theo-1'] }
+    ])
+  })
+
+  it('puts nodes before the loop-back target into a run-once block', () => {
+    const { nodes } = buildState()
+    nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } })
+    // start -> pool -> samp -> theo -> filter; filter loops back to samp (not pool)
+    const connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'samp-1' },
+      { sourceId: 'filt-1', targetId: 'end-1' }
+    ]
+    const { blocks } = getExecutionOrder(nodes, connections)
+    // pool runs once (before the loop-back target); samp + theo are the loop body
+    expect(shape(blocks)).toEqual([
+      { type: 'once', ids: ['pool-1'] },
+      { type: 'loop', maxCounter: 10, ids: ['samp-1', 'theo-1'] }
+    ])
+  })
+
+  it('routes the filter exit path (to end) into a trailing run-once block', () => {
+    // Mirrors workflow_2026-08-11: a pooler before the loop, and a second
+    // pooler on the filter's exit branch that must run once *after* the loop.
+    const { nodes } = buildState()
+    nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } })
+    nodes.push({
+      id: 'pool-2', type: 'component', name: 'Random Pooler 2',
+      protocolUuid: 'proto-pool', parameters: { num_samples: 10 }
+    })
+    // start -> pool-1 -> samp -> theo -> filter; filter loops back to samp
+    // and exits through pool-2 -> end.
+    const connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'samp-1' },
+      { sourceId: 'filt-1', targetId: 'pool-2' },
+      { sourceId: 'pool-2', targetId: 'end-1' }
+    ]
+    const { blocks } = getExecutionOrder(nodes, connections)
+    expect(shape(blocks)).toEqual([
+      { type: 'once', ids: ['pool-1'] },
+      { type: 'loop', maxCounter: 10, ids: ['samp-1', 'theo-1'] },
+      { type: 'once', ids: ['pool-2'] }
+    ])
+  })
+
+  it('detects the loop-back target regardless of filter output order', () => {
+    // The exit branch is listed *before* the loop-back branch; the loop-back
+    // must still be identified by rejoining the path, not by list position.
+    const { nodes } = buildState()
+    nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } })
+    nodes.push({
+      id: 'pool-2', type: 'component', name: 'Random Pooler 2',
+      protocolUuid: 'proto-pool', parameters: { num_samples: 10 }
+    })
+    const connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'pool-2' },   // exit branch first
+      { sourceId: 'pool-2', targetId: 'end-1' },
+      { sourceId: 'filt-1', targetId: 'samp-1' }     // loop-back branch second
+    ]
+    const { blocks } = getExecutionOrder(nodes, connections)
+    expect(shape(blocks)).toEqual([
+      { type: 'once', ids: ['pool-1'] },
+      { type: 'loop', maxCounter: 10, ids: ['samp-1', 'theo-1'] },
+      { type: 'once', ids: ['pool-2'] }
+    ])
+  })
+
+  it('produces one loop block per filter for a multi-loop workflow', () => {
+    // Two sequential loops: start -> a -> b -> filter1 (loops to a, exits to c)
+    // -> c -> d -> filter2 (loops to c, exits to end).
+    const nodes = [
+      { id: 'start-1', type: 'start_point' },
+      { id: 'a', type: 'component', name: 'A', protocolUuid: 'proto-pool' },
+      { id: 'b', type: 'component', name: 'B', protocolUuid: 'proto-theo' },
+      { id: 'c', type: 'component', name: 'C', protocolUuid: 'proto-pool' },
+      { id: 'd', type: 'component', name: 'D', protocolUuid: 'proto-theo' },
+      { id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } },
+      { id: 'filt-2', type: 'filter_point', filterParams: { maxCounter: 2 } },
+      { id: 'end-1', type: 'end_point' }
+    ]
+    const connections = [
+      { sourceId: 'start-1', targetId: 'a' },
+      { sourceId: 'a', targetId: 'b' },
+      { sourceId: 'b', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'a' },
+      { sourceId: 'filt-1', targetId: 'c' },
+      { sourceId: 'c', targetId: 'd' },
+      { sourceId: 'd', targetId: 'filt-2' },
+      { sourceId: 'filt-2', targetId: 'c' },
+      { sourceId: 'filt-2', targetId: 'end-1' }
+    ]
+    const { blocks } = getExecutionOrder(nodes, connections)
+    expect(shape(blocks)).toEqual([
+      { type: 'loop', maxCounter: 10, ids: ['a', 'b'] },
+      { type: 'loop', maxCounter: 2, ids: ['c', 'd'] }
+    ])
   })
 })
 
@@ -258,9 +401,113 @@ describe('generatePythonCode', () => {
     expect(code).toContain('bms_regressor_on_state = estimator_on_state(BMSRegressor(epochs=100))')
   })
 
+  it('excludes non-__init__ (e.g. fit) params from theorist instantiation', () => {
+    const state = buildState()
+    // BMSRegressor: epochs/ts are __init__ params, num_param is a fit param
+    state.components.theorists[0].parameters = {
+      __init__: [{ name: 'epochs' }, { name: 'ts' }],
+      fit: [{ name: 'num_param' }]
+    }
+    state.nodes[3].parameters = { epochs: 100, num_param: 5 }
+    const code = generatePythonCode(state)
+    expect(code).toContain('bms_regressor_on_state = estimator_on_state(BMSRegressor(epochs=100))')
+    expect(code).not.toContain('num_param')
+  })
+
   it('throws when the workflow has no components', () => {
     const empty = { nodes: [{ id: 'start-1', type: 'start_point' }], connections: [], components: {} }
     expect(() => generatePythonCode(empty)).toThrow('No components found')
+  })
+
+  it('runs pre-loop nodes once, outside the for loop', () => {
+    const state = buildState()
+    state.nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } })
+    // pool runs once; filter loops back to samp, so samp+theo repeat
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'samp-1' },
+      { sourceId: 'filt-1', targetId: 'end-1' }
+    ]
+    const code = generatePythonCode(state)
+    const forIdx = code.indexOf('for i in range(')
+    const poolIdx = code.indexOf('state = random_pooler_on_state(state)')
+    const sampIdx = code.indexOf('state = falsification_sampler_on_state(state')
+    // The pooler call comes before the loop; the sampler call after it
+    expect(poolIdx).toBeGreaterThan(-1)
+    expect(poolIdx).toBeLessThan(forIdx)
+    expect(sampIdx).toBeGreaterThan(forIdx)
+    // The pooler is not indented inside the loop body (8 spaces)
+    expect(code).not.toContain('        state = random_pooler_on_state(state)')
+  })
+
+  it('runs a filter-exit (post-loop) node once, after the for loop', () => {
+    // workflow_2026-08-11 shape: pooler#1 before the loop, samp+theo in the
+    // loop, pooler#2 on the exit branch — pooler#2 must run once after the loop.
+    const state = buildState()
+    state.nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } })
+    state.nodes.push({
+      id: 'pool-2', type: 'component', name: 'Random Pooler 2',
+      protocolUuid: 'proto-pool', parameters: { num_samples: 10 }
+    })
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'samp-1' },
+      { sourceId: 'filt-1', targetId: 'pool-2' },
+      { sourceId: 'pool-2', targetId: 'end-1' }
+    ]
+    const code = generatePythonCode(state)
+    const forIdx = code.indexOf('for i in range(')
+    const pool1Idx = code.indexOf('    state = random_pooler_on_state(state)')
+    const pool2Idx = code.indexOf('    state = random_pooler_2_on_state(state)')
+    // pooler#1 before the loop, pooler#2 after it
+    expect(pool1Idx).toBeGreaterThan(-1)
+    expect(pool1Idx).toBeLessThan(forIdx)
+    expect(pool2Idx).toBeGreaterThan(forIdx)
+    // pooler#2 runs once at function-body indent (4 spaces), not inside the loop (8)
+    expect(code).toContain('    state = random_pooler_2_on_state(state)')
+    expect(code).not.toContain('        state = random_pooler_2_on_state(state)')
+  })
+
+  it('emits a separate for-loop per filter for a multi-loop workflow', () => {
+    // Two sequential loops (mirrors workflow_2loops.json): pool+theo repeat 10x,
+    // then a second pool2+theo2 repeat 2x. Each loop body is indented into its
+    // own `for i in range(...)`.
+    const state = buildState()
+    state.nodes.push(
+      { id: 'pool-2', type: 'component', name: 'Random Pooler 2', protocolUuid: 'proto-pool', parameters: {} },
+      { id: 'theo-2', type: 'component', name: 'BMS Regressor 2', protocolUuid: 'proto-theo', parameters: {} },
+      { id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } },
+      { id: 'filt-2', type: 'filter_point', filterParams: { maxCounter: 2 } }
+    )
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'pool-1' },   // loop 1 back-edge
+      { sourceId: 'filt-1', targetId: 'pool-2' },   // exit into loop 2
+      { sourceId: 'pool-2', targetId: 'theo-2' },
+      { sourceId: 'theo-2', targetId: 'filt-2' },
+      { sourceId: 'filt-2', targetId: 'pool-2' },   // loop 2 back-edge
+      { sourceId: 'filt-2', targetId: 'end-1' }
+    ]
+    const code = generatePythonCode(state)
+    // Two independent for-loops, with the second one's cycle count
+    expect(code.match(/for i in range\(/g).length).toBe(2)
+    expect(code).toContain('for i in range(10):')
+    expect(code).toContain('for i in range(2):')
+    // Each loop's nodes are indented into the loop body (8 spaces)
+    expect(code).toContain('        state = random_pooler_on_state(state)')
+    expect(code).toContain('        state = random_pooler_2_on_state(state)')
+    // Loop 2 comes after loop 1
+    expect(code.indexOf('for i in range(2):')).toBeGreaterThan(code.indexOf('for i in range(10):'))
+    expect(code.indexOf('state = random_pooler_2_on_state(state)'))
+      .toBeGreaterThan(code.indexOf('for i in range(2):'))
   })
 })
 
@@ -304,6 +551,214 @@ function buildStateWithRunner() {
   return state
 }
 
+// Extend the base state with a real (non-synthetic) firebase runner
+function buildStateWithFirebaseRunner() {
+  const state = buildStateWithRunner()
+  state.nodes[3] = {
+    id: 'run-1',
+    type: 'component',
+    name: 'Firebase Runner',
+    protocolUuid: 'proto-run',
+    parameters: { time_out: 300, sleep_time: 30 }
+  }
+  state.components.experiment_runners = [
+    {
+      uuid: 'proto-run',
+      importPath: 'autora.experiment_runner.firebase_prolific',
+      pythonName: 'firebase_runner',
+      file: 'firebase_runner.json',
+      protocolType: 'experiment_runner',
+      parameters: {
+        firebase_runner: [
+          { name: 'firebase_credentials', datatype: 'string' },
+          { name: 'time_out', datatype: 'integer' },
+          { name: 'sleep_time', datatype: 'integer' }
+        ]
+      },
+      pipInstall: 'autora[experiment-runner-firebase-prolific]'
+    }
+  ]
+  return state
+}
+
+describe('real (non-synthetic) runners', () => {
+  it('calls the runner directly instead of runner.run()', () => {
+    const code = generatePythonCode(buildStateWithFirebaseRunner())
+    expect(code).toContain('return Delta(experiment_data=runner(conditions))')
+    expect(code).not.toContain('runner.run')
+  })
+
+  it('auto-emits a firebase_credentials template with the other params', () => {
+    const code = generatePythonCode(buildStateWithFirebaseRunner())
+    expect(code).toContain('runner = firebase_runner(')
+    expect(code).toContain('firebase_credentials={')
+    expect(code).toContain('"type": "service_account",')
+    expect(code).toContain('"private_key": "-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n",')
+    // A comment prompts the user to supply their own credentials
+    expect(code).toContain('# TODO: replace the placeholders below with your own Firebase service-account credentials')
+    // Other factory params trail the credentials dict on the closing line
+    expect(code).toContain('}, time_out=300, sleep_time=30)')
+    // No PEM file reading
+    expect(code).not.toContain('open(')
+  })
+
+  it('does not derive variables from the runner (no runner.variables)', () => {
+    const code = generatePythonCode(buildStateWithFirebaseRunner())
+    expect(code).not.toContain('runner.variables')
+    // Falls back to placeholder variables, which need Variable + numpy
+    expect(code).toContain('from autora.variable import VariableCollection, Variable')
+    expect(code).toContain('import numpy as np')
+  })
+})
+
+// Extend the base state with the equation_experiment synthetic runner
+function buildStateWithEquationRunner() {
+  const state = buildStateWithRunner()
+  state.nodes[3] = {
+    id: 'run-1',
+    type: 'component',
+    name: 'Equation Experiment (Synthetic, Abstract)',
+    protocolUuid: 'proto-run',
+    parameters: { expression: 'x_1 ** 2 - x_2 ** 2', rename_output_columns: true, added_noise: 0.01 }
+  }
+  state.components.experiment_runners = [
+    {
+      uuid: 'proto-run',
+      importPath: 'autora.experiment_runner.synthetic.abstract.equation',
+      pythonName: 'equation_experiment',
+      file: 'synth_abstr_equation_experiment.json',
+      protocolType: 'experiment_runner',
+      parameters: {
+        equation_experiment: [
+          { name: 'expression', datatype: 'string' },
+          { name: 'rename_output_columns', datatype: 'boolean' }
+        ],
+        run: [{ name: 'added_noise', datatype: 'real' }]
+      },
+      pipInstall: 'autora-synthetic'
+    }
+  ]
+  return state
+}
+
+describe('sympify expression params', () => {
+  it("wraps equation_experiment's expression in sympify and imports it", () => {
+    const code = generatePythonCode(buildStateWithEquationRunner())
+    expect(code).toContain('from sympy import sympify')
+    // The runner (with its sympified expression) is built once and reused
+    const matches = code.match(/expression=sympify\("x_1 \*\* 2 - x_2 \*\* 2"\)/g)
+    expect(matches).not.toBeNull()
+    expect(matches.length).toBe(1)
+    expect(code).not.toContain('expression="x_1 ** 2 - x_2 ** 2"')
+  })
+
+  it('does not import sympify when no sympify param is used', () => {
+    expect(generatePythonCode(buildStateWithRunner())).not.toContain('sympify')
+  })
+})
+
+describe('equation_experiment X/y synthesis', () => {
+  it('synthesizes one IV per expression symbol plus a DV', () => {
+    const code = generatePythonCode(buildStateWithEquationRunner())
+    expect(code).toContain('X=[')
+    expect(code).toContain('IV(name="x_1", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)),')
+    expect(code).toContain('IV(name="x_2", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)),')
+    expect(code).toContain('y=DV(name="y", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))')
+    expect(code).toContain('# TODO: adjust the variable names and ranges below for your experiment')
+  })
+
+  it('imports IV, DV and numpy for the synthesized variables', () => {
+    const code = generatePythonCode(buildStateWithEquationRunner())
+    expect(code).toContain('from autora.variable import VariableCollection, IV, DV')
+    expect(code).toContain('import numpy as np')
+  })
+
+  it('names the DV to avoid colliding with an expression symbol', () => {
+    const state = buildStateWithEquationRunner()
+    state.nodes[3].parameters.expression = 'x ** 2 - y ** 2'
+    const code = generatePythonCode(state)
+    expect(code).toContain('IV(name="x",')
+    expect(code).toContain('IV(name="y",')
+    // "y" is taken by an IV, so the DV falls back to the next free name
+    expect(code).toContain('y=DV(name="z",')
+  })
+
+  it('does not treat function names as variables', () => {
+    const state = buildStateWithEquationRunner()
+    state.nodes[3].parameters.expression = 'sin(x_1) + cos(x_2)'
+    const code = generatePythonCode(state)
+    expect(code).toContain('IV(name="x_1",')
+    expect(code).toContain('IV(name="x_2",')
+    expect(code).not.toContain('IV(name="sin"')
+    expect(code).not.toContain('IV(name="cos"')
+  })
+})
+
+// Extend the base state with the lmm_experiment synthetic runner
+function buildStateWithLmmRunner() {
+  const state = buildStateWithRunner()
+  state.nodes[3] = {
+    id: 'run-1',
+    type: 'component',
+    name: 'Linear Mixed Model Experiment (Synthetic, Abstract)',
+    protocolUuid: 'proto-run',
+    parameters: { formula: 'rt ~ 1 + x1', fixed_effects: "{'Intercept': 0., 'x1': 2.}" }
+  }
+  state.components.experiment_runners = [
+    {
+      uuid: 'proto-run',
+      importPath: 'autora.experiment_runner.synthetic.abstract.lmm',
+      pythonName: 'lmm_experiment',
+      file: 'synth_abstr_lmm_experiment.json',
+      protocolType: 'experiment_runner',
+      parameters: {
+        lmm_experiment: [
+          { name: 'formula', datatype: 'string' },
+          { name: 'fixed_effects', datatype: 'string' }
+        ],
+        run: [{ name: 'added_noise', datatype: 'real' }]
+      },
+      pipInstall: 'autora-synthetic'
+    }
+  ]
+  return state
+}
+
+describe('lmm_experiment X synthesis', () => {
+  it('synthesizes IVs from the formula RHS and passes no y', () => {
+    const code = generatePythonCode(buildStateWithLmmRunner())
+    expect(code).toContain('formula="rt ~ 1 + x1"')
+    expect(code).toContain("fixed_effects={'Intercept': 0., 'x1': 2.}")
+    expect(code).toContain('IV(name="x1", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)),')
+    // lmm takes no y argument; the DV comes from the formula
+    expect(code).not.toContain('y=DV(')
+    expect(code).toContain('from autora.variable import VariableCollection, IV, DV')
+    expect(code).toContain('import numpy as np')
+  })
+
+  it('handles multiple IVs and ignores the intercept marker', () => {
+    const state = buildStateWithLmmRunner()
+    state.nodes[3].parameters.formula = 'rt ~ 1 + x1 + x2'
+    const code = generatePythonCode(state)
+    expect(code).toContain('IV(name="x1",')
+    expect(code).toContain('IV(name="x2",')
+    expect(code).not.toContain('IV(name="rt"')  // rt is the DV, not an IV
+    expect(code).not.toContain('IV(name="1"')
+  })
+})
+
+describe('synthetic runner is built once (no duplication)', () => {
+  it('constructs the runner in the component section and reuses it for variables', () => {
+    const code = generatePythonCode(buildStateWithLmmRunner())
+    // Exactly one construction of the runner across the whole file
+    expect(code.match(/runner = lmm_experiment\(/g).length).toBe(1)
+    // The wrapper and the variables setup both reference the shared runner
+    expect(code).toContain('return Delta(experiment_data=runner.run(conditions=conditions))')
+    expect(code).toContain('# Variables are governed by the experiment runner defined above')
+    expect(code).toContain('variables = runner.variables')
+  })
+})
+
 describe('runner parameter grouping', () => {
   it('names the wrapper without the parenthesized qualifier', () => {
     const code = generatePythonCode(buildStateWithRunner())
@@ -323,6 +778,21 @@ describe('runner parameter grouping', () => {
     state.nodes[3].parameters = { choice_temperature: 0.1 }
     const code = generatePythonCode(state)
     expect(code).toContain('return Delta(experiment_data=runner.run(conditions=conditions))')
+  })
+
+  it('emits dict/list literal string parameters unquoted', () => {
+    const state = buildStateWithRunner()
+    state.nodes[3].parameters = {
+      fixed_effects: "{'Intercept': 0., 'x1': 2.}",
+      allowed: '[1, 2, 3]',
+      formula: 'rt ~ 1 + x1'
+    }
+    const code = generatePythonCode(state)
+    expect(code).toContain("fixed_effects={'Intercept': 0., 'x1': 2.}")
+    expect(code).toContain('allowed=[1, 2, 3]')
+    // Plain strings stay quoted
+    expect(code).toContain('formula="rt ~ 1 + x1"')
+    expect(code).not.toContain('fixed_effects="')
   })
 })
 
