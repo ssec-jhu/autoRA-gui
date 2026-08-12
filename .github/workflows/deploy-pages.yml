@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - fix_python_generator
+      - improve_code_generator
   workflow_dispatch:  # Allow manual trigger
 
 permissions:
@@ -52,20 +52,20 @@ jobs:
           cp ../../index.html ../../../deploy/main/index.html
         continue-on-error: true
 
-      # Build improved code generator version from fix_python_generator branch
-      - name: Checkout fix_python_generator branch
+      # Build improved code generator version from improve_code_generator branch
+      - name: Checkout improve_code_generator branch
         uses: actions/checkout@v4
         with:
-          ref: fix_python_generator
-          path: fix_python_generator-branch
+          ref: improve_code_generator
+          path: improve_code_generator-branch
 
       - name: Build component JSON generation standalone version
         run: |
-          cd fix_python_generator-branch/autora_gui/react_app
+          cd improve_code_generator-branch/autora_gui/react_app
           npm install
           python build_standalone.py
-          mkdir -p ../../../deploy/fix_python_generator
-          cp ../../index.html ../../../deploy/fix_python_generator/index.html
+          mkdir -p ../../../deploy/improve_code_generator
+          cp ../../index.html ../../../deploy/improve_code_generator/index.html
         continue-on-error: true
 
       # Build Sphinx docs from main branch
@@ -121,7 +121,7 @@ jobs:
           <h1>AutoRA Workflow Editor and Documentation</h1>
           <div class="versions">
           <a href="./main/" class="version-card"><h2>Workflow Editor</h2><p>React-based GUI</p></a>
-          <a href="./fix_python_generator/" class="version-card"><h2>Workflow Editor with improved Code Generator</h2><p>React-based GUI with improved Code Generator</p></a>
+          <a href="./improve_code_generator/" class="version-card"><h2>Workflow Editor with improved Code Generator</h2><p>React-based GUI with improved Code Generator</p></a>
           <a href="./docs/" class="version-card"><h2>Documentation</h2><p>API reference and guides</p></a>
           </div>
           </div>
