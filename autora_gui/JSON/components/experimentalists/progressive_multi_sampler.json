@@ -4,6 +4,7 @@
   "name": "Progressive Multi Sampler",
   "description": "Sample from a list of samplers based on the progress / assumed confidence of model in the sampling process. conditions: conditions to sample from samplers: list of dicts each sampler is a dictionary with the following keys: - func: callable sampler - params: dict - name: str sampler_coords: list of the locations of the samplers on arbitrary 1d-scale num_samples: number of samples to generate temprature: float, 0 <= temprature <= 1",
   "githubCommit": "https://github.com/MoAljam/autora-experimentalist-challenge-g-1/blob/main/src/autora/experimentalist/progressive_multi/__init__.py#L128",
+  "github_io": "https://autoresearch.github.io/autora/experimentalist/",
   "pythonName": "sample",
   "importPath": "autora.experimentalist.progressive_multi",
   "pipInstall": "autora-adaptable-experimentalist",

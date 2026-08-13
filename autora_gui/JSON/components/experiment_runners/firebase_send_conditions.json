@@ -4,6 +4,7 @@
   "name": "Firebase Send Conditions",
   "description": "Upload a new set of conditions, prepare the database for observations, and set up meta-data for communication with autora cycle.",
   "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-experimentation-manager-firebase/blob/21ca13a6abf10b0f57861df46a0e6e8ba5b27418/src/autora/experiment_runner/experimentation_manager/firebase/__init__.py#L247",
+  "github_io": "https://autoresearch.github.io/autora/user-guide/experiment-runners/behavioral-web-experiments/firebase-experimentation-manager/quickstart/",
   "pythonName": "send_conditions",
   "importPath": "autora.experiment_runner.experimentation_manager.firebase",
   "pipInstall": "autora-experiment-runner-experimentation-manager-firebase==1.1.5",

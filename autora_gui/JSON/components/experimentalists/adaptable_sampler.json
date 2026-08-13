@@ -4,6 +4,7 @@
   "name": "Adaptable Sampler",
   "description": "adaptive experimentalist that samples from a set of samplers based on its history of surprisal (as jensen shannon divergence)",
   "githubCommit": "https://github.com/MoAljam/autora-experimentalist-challenge-g-1/blob/4e96fcc4fe8b5ca24a3bd507d566f99199ba9ab9/src/autora/experimentalist/adaptable/__init__.py#L402",
+  "github_io": "https://autoresearch.github.io/autora/experimentalist/",
   "pythonName": "sample",
   "importPath": "autora.experimentalist.adaptable",
   "pipInstall": "autora-adaptable-experimentalist",

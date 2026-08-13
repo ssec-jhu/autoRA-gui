@@ -4,6 +4,7 @@
   "name": "Prolific Setup Study",
   "description": "Allows for a study to be drafted given the following parameters.",
   "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-recruitment-manager-prolific/blob/ceb6194dff945c46d74f50ea0b3b9a9d76a88797/src/autora/experiment_runner/recruitment_manager/prolific/__init__.py#L445",
+  "github_io": "https://autoresearch.github.io/autora/user-guide/experiment-runners/behavioral-web-experiments/prolific-recruitment-manager/quickstart/",
   "pythonName": "setup_study",
   "importPath": "autora.experiment_runner.recruitment_manager.prolific",
   "pipInstall": "autora-experiment-runner-recruitment-manager-prolific==1.0.1",
