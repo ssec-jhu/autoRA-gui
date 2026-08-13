@@ -33,7 +33,22 @@ Generated on: ${date}
     )`,
 
   initState: `    # Initialize state
-    state = StandardState(variables=variables)`
+    state = StandardState(variables=variables)`,
+
+  // Service-account credential entries for firebase runners. All fields are
+  // placeholders the user must replace with values from their Firebase
+  // service-account JSON.
+  firebaseCredentialEntries: `            "type": "service_account",
+            "project_id": "project_id",
+            "private_key_id": "private_key_id",
+            "private_key": "-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n",
+            "client_email": "xxx@iam.gserviceaccount.com",
+            "client_id": "001",
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/...",
+            "universe_domain": "googleapis.com"`
 }
 
 /**
@@ -109,104 +124,104 @@ export class CodeBuilder {
 }
 
 /**
- * Traverse the workflow graph and return nodes in execution order
+ * Traverse the workflow graph and split it into ordered execution blocks,
+ * supporting any number of loops (each Filter node defines one loop).
+ *
+ * The graph is walked forward from the Start node. At each Filter the traversal
+ * follows the *exit* output (toward the end) and records the *loop-back* output,
+ * which points to an already-visited node marking where that loop's body began.
+ * The linear sequence of components is then partitioned so that each filter's
+ * body becomes a `loop` block and every other run of components a `once` block.
  *
  * @param {Object[]} nodes - Graph nodes, each with `id`, `type` and optional `filterParams`.
  * @param {Object[]} connections - Graph edges, each with `sourceId` and `targetId`.
- * @returns {Object} `{ mainPath, loopPath, filterInfo }` where the paths are ordered node arrays and `filterInfo` is `{ maxCounter }` or null.
+ * @returns {{blocks: Array<{type: 'once'|'loop', nodes: Object[], maxCounter?: number}>}}
+ *   Ordered execution blocks: `once` blocks run their nodes a single time,
+ *   `loop` blocks run their nodes inside `for i in range(maxCounter)`.
  */
 export function getExecutionOrder(nodes, connections) {
   const startNode = nodes.find(n => n.type === 'start_point')
-  const endNode = nodes.find(n => n.type === 'end_point')
-  const filterNodes = nodes.filter(n => n.type === 'filter_point')
-
   if (!startNode) {
     throw new Error('Workflow must have a Start node')
   }
 
+  const nodeById = new Map(nodes.map(n => [n.id, n]))
+  const hasFilter = nodes.some(n => n.type === 'filter_point')
+
   // Build adjacency map (source -> [targets])
   const adjacency = {}
   connections.forEach(conn => {
-    if (!adjacency[conn.sourceId]) {
-      adjacency[conn.sourceId] = []
-    }
+    if (!adjacency[conn.sourceId]) adjacency[conn.sourceId] = []
     adjacency[conn.sourceId].push(conn.targetId)
   })
 
-  const mainPath = []
-  const loopPath = []
+  // Forward traversal from Start. Follow each node's (single) forward edge,
+  // taking the exit branch at filters. Record components in order and filters
+  // with the loop-back target that closes their loop.
+  const sequence = []   // items: { node } | { loopBackId, maxCounter }
+  const seen = []       // ids of components visited so far (loop-back detection)
   const visited = new Set()
+  let current = startNode.id
 
-  /**
-   * Depth-first search for a path of node ids from a start node to any target.
-   *
-   * @param {string} fromId - Node id to start from.
-   * @param {string[]} toIds - Target node ids to search for.
-   * @param {string[]} [path=[]] - Accumulated ids on the current path.
-   * @returns {string[]|null} Ordered node ids from start to target (inclusive), or null if none.
-   */
-  function findPath(fromId, toIds, path = []) {
-    if (toIds.includes(fromId)) return [...path, fromId]
-    if (visited.has(fromId)) return null
-    visited.add(fromId)
+  while (current != null && !visited.has(current)) {
+    visited.add(current)
+    const node = nodeById.get(current)
+    if (!node || node.type === 'end_point') break
 
-    for (const targetId of (adjacency[fromId] || [])) {
-      const result = findPath(targetId, toIds, [...path, fromId])
-      if (result) return result
+    if (node.type === 'start_point') {
+      current = (adjacency[current] || [])[0]
+      continue
     }
-    return null
+
+    if (node.type === 'filter_point') {
+      const targets = adjacency[current] || []
+      // The loop-back branch points to a node already visited (an ancestor);
+      // the other branch is the exit that continues toward the end.
+      const loopBackId = targets.find(id => seen.includes(id)) ?? null
+      if (!loopBackId) {
+        throw new Error(
+          'The Filter node is missing its loop-back output connection that closes ' +
+          'the experiment loop. Please connect the Filter back to a component to ' +
+          'form the loop before generating code.'
+        )
+      }
+      sequence.push({ loopBackId, maxCounter: node.filterParams?.maxCounter ?? 10 })
+      current = targets.find(id => id !== loopBackId) ?? null
+      continue
+    }
+
+    // Regular component
+    seen.push(current)
+    sequence.push({ node })
+    current = (adjacency[current] || [])[0]
   }
 
-  const filterNode = filterNodes[0]
-
-  if (filterNode) {
-    visited.clear()
-    const pathToFilter = findPath(startNode.id, [filterNode.id])
-    const filterTargets = adjacency[filterNode.id] || []
-
-    let loopBackTarget = null
-    for (const targetId of filterTargets) {
-      const targetNode = nodes.find(n => n.id === targetId)
-      if (targetNode?.type !== 'end_point') {
-        loopBackTarget = targetId
-      }
+  // Partition the linear sequence into ordered blocks. A pending run of
+  // components accumulates until a filter closes a loop over its tail (from the
+  // loop-back target onward); components before the loop-back target run once.
+  const blocks = []
+  let run = []
+  for (const item of sequence) {
+    if (item.node) {
+      run.push(item.node)
+      continue
     }
-
-    if (pathToFilter) {
-      for (let i = 1; i < pathToFilter.length; i++) {
-        const node = nodes.find(n => n.id === pathToFilter[i])
-        if (node && !CONTROL_NODE_TYPES.includes(node.type)) {
-          mainPath.push(node)
-        }
-      }
-    }
-
-    if (loopBackTarget) {
-      const loopNode = nodes.find(n => n.id === loopBackTarget)
-      if (loopNode && !CONTROL_NODE_TYPES.includes(loopNode.type)) {
-        if (!mainPath.find(n => n.id === loopBackTarget)) {
-          loopPath.push(loopNode)
-        }
-      }
-    }
-  } else if (endNode) {
-    visited.clear()
-    const pathToEnd = findPath(startNode.id, [endNode.id])
-    if (pathToEnd) {
-      for (let i = 1; i < pathToEnd.length - 1; i++) {
-        const node = nodes.find(n => n.id === pathToEnd[i])
-        if (node && !CONTROL_NODE_TYPES.includes(node.type)) {
-          mainPath.push(node)
-        }
-      }
-    }
+    const idx = run.findIndex(n => n.id === item.loopBackId)
+    const before = idx > 0 ? run.slice(0, idx) : []
+    const body = idx >= 0 ? run.slice(idx) : run
+    if (before.length) blocks.push({ type: 'once', nodes: before })
+    if (body.length) blocks.push({ type: 'loop', nodes: body, maxCounter: item.maxCounter })
+    run = []
+  }
+  if (run.length) {
+    // Trailing components run once — except a filter-less workflow, where the
+    // whole path is one experiment loop with the default cycle count (legacy).
+    blocks.push(hasFilter
+      ? { type: 'once', nodes: run }
+      : { type: 'loop', nodes: run, maxCounter: 10 })
   }
 
-  return {
-    mainPath,
-    loopPath,
-    filterInfo: filterNode ? { maxCounter: filterNode.filterParams?.maxCounter ?? 10 } : null
-  }
+  return { blocks }
 }
 
 /**
@@ -234,7 +249,14 @@ export function toPythonName(name) {
 function formatPythonValue(value) {
   if (value === null || value === undefined) return 'None'
   if (typeof value === 'boolean') return value ? 'True' : 'False'
-  if (typeof value === 'string') return `"${value.replace(/"/g, '\\"')}"`
+  if (typeof value === 'string') {
+    // A string that already holds a Python container literal (dict or list),
+    // e.g. a "dict"-typed field like fixed_effects, is emitted verbatim so it
+    // is not wrapped in quotes and stays a real dict/list in the generated code.
+    const trimmed = value.trim()
+    if (/^\{[\s\S]*\}$/.test(trimmed) || /^\[[\s\S]*\]$/.test(trimmed)) return trimmed
+    return `"${value.replace(/"/g, '\\"')}"`
+  }
   if (Array.isArray(value)) return `[${value.map(formatPythonValue).join(', ')}]`
   return String(value)
 }
@@ -253,16 +275,130 @@ function buildParamString(params, exclude = []) {
     .join(', ')
 }
 
+// Factory params (keyed by function pythonName) whose string value is not a
+// plain string but must be parsed into a SymPy expression via sympify().
+const SYMPIFY_PARAMS = { equation_experiment: ['expression'] }
+
+/**
+ * Build a factory/constructor parameter string, wrapping any params that must
+ * be SymPy expressions (see SYMPIFY_PARAMS) in `sympify(...)`.
+ *
+ * @param {string} pythonName - The factory function name (identifies special params).
+ * @param {Object} params - Map of parameter name to value.
+ * @param {string[]} [exclude=[]] - Parameter names to omit.
+ * @returns {string} Comma-separated `name=value` keyword arguments (nulls skipped).
+ */
+function buildFactoryParamString(pythonName, params, exclude = []) {
+  const sympifyNames = SYMPIFY_PARAMS[pythonName] || []
+  return Object.entries(params)
+    .filter(([k, v]) => v !== null && v !== undefined && !exclude.includes(k))
+    .map(([k, v]) => sympifyNames.includes(k)
+      ? `${k}=sympify(${formatPythonValue(String(v))})`
+      : `${k}=${formatPythonValue(v)}`)
+    .join(', ')
+}
+
+// SymPy/numpy function names and constants that must not be treated as
+// variable symbols when scanning an expression for its free variables.
+const NON_SYMBOL_NAMES = new Set([
+  'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh',
+  'exp', 'log', 'ln', 'sqrt', 'Abs', 'abs', 'sign', 'floor', 'ceiling',
+  'Max', 'Min', 'pi', 'E', 'I', 'oo'
+])
+
+/**
+ * Extract the distinct variable symbols from a SymPy expression string, sorted
+ * by name and excluding known function/constant names.
+ *
+ * @param {string} expression - e.g. "x_1 ** 2 - x_2 ** 2".
+ * @returns {string[]} Sorted unique variable names.
+ */
+function parseExpressionSymbols(expression) {
+  const ids = String(expression || '').match(/[A-Za-z_]\w*/g) || []
+  return [...new Set(ids)].filter(id => !NON_SYMBOL_NAMES.has(id)).sort()
+}
+
+/**
+ * Extract the independent-variable names from a mixed-model formula. Uses the
+ * right-hand side of `~`, drops intercept markers and random-effect groups.
+ *
+ * @param {string} formula - e.g. "rt ~ 1 + x1".
+ * @returns {string[]} Sorted unique IV names.
+ */
+function parseFormulaIVs(formula) {
+  const s = String(formula || '')
+  const rhs = (s.includes('~') ? s.split('~')[1] : s).replace(/\([^)]*\)/g, '')
+  const ids = rhs.match(/[A-Za-z_]\w*/g) || []
+  return [...new Set(ids)].sort()
+}
+
+// Synthetic runners whose factory needs X (and sometimes y) as Variable objects
+// the workflow does not capture. Each entry names the param carrying the
+// variable spec, how to parse IV names from it, and whether a y (DV) is needed.
+const XY_RUNNERS = {
+  equation_experiment: { specParam: 'expression', parseIVs: parseExpressionSymbols, needsY: true },
+  lmm_experiment: { specParam: 'formula', parseIVs: parseFormulaIVs, needsY: false }
+}
+
+/**
+ * Whether a runner needs X/y Variable objects synthesized for its factory call.
+ *
+ * @param {Object} meta - Component metadata.
+ * @returns {boolean}
+ */
+function needsXYVariables(meta) {
+  return isSyntheticRunner(meta) && !!XY_RUNNERS[meta?.pythonName]
+}
+
+/**
+ * Build the multi-line `runner = <name>(...)` call for a runner that needs X/y,
+ * synthesizing an IV per variable in its expression/formula (and a DV when the
+ * factory takes one) with default ranges the user adjusts. Emitted with a
+ * 4-space base indent for use inside a function body.
+ *
+ * @param {Object} meta - Runner metadata with `pythonName`, `params`, `runParamNames`.
+ * @param {number} [baseSpaces=4] - Leading indentation for the first line.
+ * @returns {string} The indented, newline-joined call.
+ */
+function buildXYRunnerCall(meta, baseSpaces = 4) {
+  const { pythonName, params, runParamNames = [] } = meta
+  const cfg = XY_RUNNERS[pythonName]
+  const ivNames = cfg.parseIVs(params[cfg.specParam])
+  const finalIVs = ivNames.length ? ivNames : ['x']
+  const range = 'allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)'
+  // Regular factory params (expression is sympified by buildFactoryParamString).
+  const factory = buildFactoryParamString(pythonName, params, runParamNames)
+  const pad = ' '.repeat(baseSpaces)
+  const pad2 = ' '.repeat(baseSpaces + 4)
+  const pad3 = ' '.repeat(baseSpaces + 8)
+
+  const lines = [`${pad}runner = ${pythonName}(`]
+  if (factory) lines.push(`${pad2}${factory},`)
+  lines.push(`${pad2}# TODO: adjust the variable names and ranges below for your experiment`)
+  lines.push(`${pad2}X=[`)
+  finalIVs.forEach(n => lines.push(`${pad3}IV(name="${n}", ${range}),`))
+  if (cfg.needsY) {
+    lines.push(`${pad2}],`)
+    const dvName = ['y', 'z', 'output'].find(n => !finalIVs.includes(n)) || 'dv'
+    lines.push(`${pad2}y=DV(name="${dvName}", ${range}))`)
+  } else {
+    lines.push(`${pad2}])`)
+  }
+  return lines.join('\n')
+}
+
 /**
  * Generate wrapper function for a theorist component
  *
  * @param {CodeBuilder} code - Builder to append the wrapper to.
- * @param {Object} meta - Component metadata with `pythonName`, `params`, `varName` and `nodeName`.
+ * @param {Object} meta - Component metadata with `pythonName`, `params`, `varName`, `nodeName` and `runParamNames` (non-constructor params to exclude from instantiation).
  * @returns {void}
  */
 function generateTheoristWrapper(code, meta) {
-  const { pythonName, params, varName, nodeName } = meta
-  const paramStr = buildParamString(params)
+  const { pythonName, params, varName, nodeName, runParamNames = [] } = meta
+  // Only pass constructor (__init__) params to instantiation; params belonging
+  // to other methods (e.g. fit) are excluded so instantiation does not fail.
+  const paramStr = buildParamString(params, runParamNames)
 
   code.comment(nodeName)
   code.line(`${varName} = estimator_on_state(${pythonName}(${paramStr}))`)
@@ -270,26 +406,75 @@ function generateTheoristWrapper(code, meta) {
 }
 
 /**
+ * Whether a runner component is a synthetic experiment runner. Synthetic
+ * runners (under `autora.experiment_runner.synthetic.*`) return an object that
+ * exposes `.variables` and `.run(conditions)`. Real data-collection runners
+ * (e.g. firebase) return a plain callable that takes conditions directly and
+ * has no `.variables`.
+ *
+ * @param {Object} meta - Component metadata with `protocolType` and `importPath`.
+ * @returns {boolean} True for synthetic experiment runners.
+ */
+function isSyntheticRunner(meta) {
+  return meta?.protocolType === 'experiment_runner' &&
+    (meta.importPath || '').includes('.synthetic.')
+}
+
+/**
  * Generate wrapper function for an experiment runner component
  *
  * @param {CodeBuilder} code - Builder to append the wrapper to.
- * @param {Object} meta - Component metadata with `pythonName`, `params`, `varName`, `nodeName` and `runParamNames`.
+ * @param {Object} meta - Component metadata with `pythonName`, `params`, `varName`, `nodeName`, `runParamNames`, `importPath` and `usesFirebaseCredentials`.
  * @returns {void}
  */
 function generateRunnerWrapper(code, meta) {
   const { pythonName, params, varName, nodeName, runParamNames = [] } = meta
-  const factoryParamStr = buildParamString(params, runParamNames)
-  const runParamStr = buildParamString(
-    Object.fromEntries(Object.entries(params).filter(([name]) => runParamNames.includes(name)))
-  )
-  const runArgs = ['conditions=conditions', runParamStr].filter(Boolean).join(', ')
 
   code.comment(nodeName)
+
+  if (isSyntheticRunner(meta)) {
+    const runParamStr = buildParamString(
+      Object.fromEntries(Object.entries(params).filter(([name]) => runParamNames.includes(name)))
+    )
+    const runArgs = ['conditions=conditions', runParamStr].filter(Boolean).join(', ')
+    // Build the runner once at module scope so the same object is reused by the
+    // variables setup (see generateVariablesSetup) — no need to rebuild it.
+    if (needsXYVariables(meta)) {
+      // Synthesize the required X (IVs) and y (DV); the workflow does not carry them.
+      code.multiline(buildXYRunnerCall(meta, 0))
+    } else {
+      const factoryParamStr = buildFactoryParamString(pythonName, params, runParamNames)
+      code.line(`runner = ${pythonName}(${factoryParamStr})`)
+    }
+    code.blank()
+    code.line('@on_state()')
+    code.line(`def ${varName}(conditions: pd.DataFrame) -> Delta:`)
+    code.indent(`return Delta(experiment_data=runner.run(${runArgs}))`)
+    code.blank()
+    return
+  }
+
   code.line('@on_state()')
   code.line(`def ${varName}(conditions: pd.DataFrame) -> Delta:`)
-  code.indent(`runner = ${pythonName}(${factoryParamStr})`)
-  code.indent('assert runner.run is not None')
-  code.indent(`return Delta(experiment_data=runner.run(${runArgs}))`)
+
+  if (meta.usesFirebaseCredentials) {
+    // Firebase runners require a service-account credentials dict; emit a
+    // filled-in template (placeholders for the user to replace) so the runner
+    // does not fail on a missing `firebase_credentials`.
+    const otherParams = buildParamString(params, ['firebase_credentials'])
+    code.indent(`runner = ${pythonName}(`)
+    code.indent('# TODO: replace the placeholders below with your own Firebase service-account credentials', 2)
+    code.indent('firebase_credentials={', 2)
+    code.multiline(TEMPLATES.firebaseCredentialEntries)
+    code.indent(otherParams ? `}, ${otherParams})` : '})', 2)
+    code.indent('return Delta(experiment_data=runner(conditions))')
+  } else {
+    // Real runners return a plain callable invoked directly with conditions;
+    // every param configures the factory (there is no separate run() call).
+    const factoryParamStr = buildParamString(params)
+    code.indent(`runner = ${pythonName}(${factoryParamStr})`)
+    code.indent('return Delta(experiment_data=runner(conditions))')
+  }
   code.blank()
 }
 
@@ -380,21 +565,21 @@ export function generateWrapper(code, meta) {
  * workflow state. Shared by the Python file and Jupyter notebook generators.
  *
  * @param {Object} state - Editor state with `nodes`, `connections` and `components`.
- * @returns {Object} `{ mainPath, loopPath, filterInfo, imports, componentMeta, hasRunner }`.
+ * @returns {Object} `{ blocks, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables }`.
  */
 export function prepareWorkflow(state) {
   const { nodes, connections, components } = state
   const allComponents = components ? Object.values(components).flat() : []
-  const { mainPath, loopPath, filterInfo } = getExecutionOrder(nodes, connections)
+  const { blocks } = getExecutionOrder(nodes, connections)
 
-  if (mainPath.length === 0) {
+  const allPathNodes = blocks.flatMap(block => block.nodes)
+  if (allPathNodes.length === 0) {
     throw new Error('No components found in workflow. Add components and connect them.')
   }
 
   // Collect imports and component metadata
   const imports = new Map()
   const componentMeta = new Map()
-  const allPathNodes = [...mainPath, ...loopPath]
 
   allPathNodes.forEach(node => {
     const protocol = allComponents.find(c => c.uuid === node.protocolUuid)
@@ -416,16 +601,26 @@ export function prepareWorkflow(state) {
     if (!imports.has(importPath)) imports.set(importPath, new Set())
     imports.get(importPath).add(alias ? `${pythonName} as ${alias}` : pythonName)
 
-    // Parameters are grouped by function in the JSON: the group named after
-    // the factory function configures it; any other group (e.g. "run")
-    // belongs to the runner's run() method
-    const factoryParamNames = new Set(
-      (protocol.parameters?.[pythonName] || []).map(p => p.name)
-    )
-    const runParamNames = Object.entries(protocol.parameters || {})
-      .filter(([group]) => group !== pythonName)
-      .flatMap(([, groupParams]) => (Array.isArray(groupParams) ? groupParams : []).map(p => p.name))
-      .filter(name => !factoryParamNames.has(name))
+    // Some factory params must be SymPy expressions (e.g. equation_experiment's
+    // `expression`); pull in sympify when such a param is actually set.
+    if ((SYMPIFY_PARAMS[pythonName] || []).some(name => (node.parameters || {})[name] != null)) {
+      if (!imports.has('sympy')) imports.set('sympy', new Set())
+      imports.get('sympy').add('sympify')
+    }
+
+    // Parameters are grouped by function in the JSON. The instantiation group
+    // configures the constructor/factory: theorist classes use an "__init__"
+    // group, runner factories use a group named after the function (pythonName).
+    // Any other group (e.g. "fit" for a theorist, "run" for a runner) is applied
+    // elsewhere, not at instantiation, so its params must be excluded from it.
+    const initGroup = protocol.parameters?.[pythonName] || protocol.parameters?.['__init__'] || []
+    const factoryParamNames = new Set(initGroup.map(p => p.name))
+    const declaredParamNames = Object.values(protocol.parameters || {})
+      .flatMap(groupParams => (Array.isArray(groupParams) ? groupParams : []).map(p => p.name))
+    const runParamNames = declaredParamNames.filter(name => !factoryParamNames.has(name))
+    // Runners that require Firebase service-account credentials get a filled-in
+    // credentials template emitted automatically (see generateRunnerWrapper).
+    const usesFirebaseCredentials = declaredParamNames.includes('firebase_credentials')
 
     componentMeta.set(node.id, {
       importPath,
@@ -434,6 +629,7 @@ export function prepareWorkflow(state) {
       inputDataType,
       outputDataType: protocol.outputDataType,
       runParamNames,
+      usesFirebaseCredentials,
       protocolType,
       params: node.parameters || {},
       varName: `${toPythonName(node.name)}_on_state`,
@@ -441,16 +637,21 @@ export function prepareWorkflow(state) {
     })
   })
 
-  const hasRunner = [...componentMeta.values()]
-    .some(meta => meta.protocolType === 'experiment_runner')
+  // Only synthetic runners provide `.variables`; with such a runner the
+  // variables are derived from it, otherwise placeholder variables are emitted.
+  const derivesVariablesFromRunner = [...componentMeta.values()].some(isSyntheticRunner)
+  // Runners needing synthesized X/y require IV/DV and numpy imports.
+  const needsEquationVariables = [...componentMeta.values()].some(needsXYVariables)
 
-  return { mainPath, loopPath, filterInfo, imports, componentMeta, hasRunner }
+  return { blocks, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables }
 }
 
 /**
  * Build the variables-initialization block (indented for a function body).
- * When the workflow contains an experiment runner, the variables are created
- * and governed by the runner; otherwise fall back to the placeholder template.
+ * When the workflow contains a synthetic experiment runner, the variables are
+ * taken from the `runner` already built in that runner's component definition
+ * (see generateRunnerWrapper) rather than rebuilding it; otherwise fall back to
+ * the placeholder template (real runners such as firebase have no `.variables`).
  *
  * @param {Map} componentMeta - Map of node id to component metadata.
  * @param {Object[]} orderedNodes - Nodes in execution order, used to find any runner.
@@ -459,14 +660,13 @@ export function prepareWorkflow(state) {
 export function generateVariablesSetup(componentMeta, orderedNodes) {
   const runnerMeta = orderedNodes
     .map(node => componentMeta.get(node.id))
-    .find(meta => meta?.protocolType === 'experiment_runner')
+    .find(isSyntheticRunner)
 
   if (!runnerMeta) return TEMPLATES.defaultVariables
 
-  const paramStr = buildParamString(runnerMeta.params, runnerMeta.runParamNames || [])
+  // Reuse the `runner` defined in the component section — do not rebuild it.
   return [
-    '    # Variables are created and governed by the experiment runner',
-    `    runner = ${runnerMeta.pythonName}(${paramStr})`,
+    '    # Variables are governed by the experiment runner defined above',
     '    assert runner.variables is not None',
     '    variables = runner.variables'
   ].join('\n')
@@ -481,11 +681,15 @@ export function generateVariablesSetup(componentMeta, orderedNodes) {
  * @param {Map} imports - Map of import path to a Set of imported (possibly aliased) names.
  * @param {Object} [options] - Options object.
  * @param {boolean} [options.usesPlaceholderVariables=true] - Whether to also import `Variable` and numpy for the placeholder template.
+ * @param {boolean} [options.usesEquationVariables=false] - Whether to also import `IV`, `DV` and numpy for a synthesized equation runner X/y.
  * @returns {void}
  */
-export function generateImports(code, imports, { usesPlaceholderVariables = true } = {}) {
+export function generateImports(code, imports, { usesPlaceholderVariables = true, usesEquationVariables = false } = {}) {
   code.multiline(TEMPLATES.standardImports)
-  code.line(`from autora.variable import VariableCollection${usesPlaceholderVariables ? ', Variable' : ''}`)
+  const variableNames = ['VariableCollection']
+  if (usesPlaceholderVariables) variableNames.push('Variable')
+  if (usesEquationVariables) variableNames.push('IV', 'DV')
+  code.line(`from autora.variable import ${variableNames.join(', ')}`)
 
   imports.forEach((names, importPath) => {
     code.line(`from ${importPath} import ${Array.from(names).join(', ')}`)
@@ -493,7 +697,7 @@ export function generateImports(code, imports, { usesPlaceholderVariables = true
 
   code.blank()
   code.multiline(TEMPLATES.dataImports)
-  if (usesPlaceholderVariables) code.line('import numpy as np')
+  if (usesPlaceholderVariables || usesEquationVariables) code.line('import numpy as np')
 }
 
 /**
@@ -503,7 +707,7 @@ export function generateImports(code, imports, { usesPlaceholderVariables = true
  * @returns {string} A complete, runnable Python script as a string.
  */
 export function generatePythonCode(state) {
-  const { mainPath, loopPath, filterInfo, imports, componentMeta, hasRunner } = prepareWorkflow(state)
+  const { blocks, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables } = prepareWorkflow(state)
 
   // Build Python code
   const code = new CodeBuilder()
@@ -511,7 +715,7 @@ export function generatePythonCode(state) {
   // Header and imports
   code.multiline(TEMPLATES.header(new Date().toISOString()))
   code.blank()
-  generateImports(code, imports, { usesPlaceholderVariables: !hasRunner })
+  generateImports(code, imports, { usesPlaceholderVariables: !derivesVariablesFromRunner, usesEquationVariables: needsEquationVariables })
   code.blank().blank()
 
   // Generate wrapper functions
@@ -521,36 +725,42 @@ export function generatePythonCode(state) {
 
   // Generate main function
   code.line('def main():')
-  code.multiline(generateVariablesSetup(componentMeta, [...mainPath, ...loopPath]))
+  code.multiline(generateVariablesSetup(componentMeta, blocks.flatMap(b => b.nodes)))
   code.indent('')
   code.multiline(TEMPLATES.initState)
   code.indent('')
 
-  const maxCycles = filterInfo?.maxCounter ?? 10
-  code.indent(`# Main experiment loop (${maxCycles} cycles)`)
-  code.indent(`for i in range(${maxCycles}):`)
-  code.indent("print(f'Cycle {i}')", 2)
-  code.indent('', 2)
-
-  // Add component calls in execution order
-  const addComponentCall = (node) => {
+  // Emit a single `state = fn(state[, num_samples=…])` call at the given level.
+  const addComponentCall = (node, level) => {
     const meta = componentMeta.get(node.id)
     if (!meta) return
 
     const { varName, nodeName, pythonName } = meta
     const isSampler = pythonName.includes('sample') || pythonName.includes('sampler')
 
-    code.indent(`# ${nodeName}`, 2)
+    code.indent(`# ${nodeName}`, level)
     if (isSampler && node.parameters?.num_samples) {
-      code.indent(`state = ${varName}(state, num_samples=${node.parameters.num_samples})`, 2)
+      code.indent(`state = ${varName}(state, num_samples=${node.parameters.num_samples})`, level)
     } else {
-      code.indent(`state = ${varName}(state)`, 2)
+      code.indent(`state = ${varName}(state)`, level)
     }
-    code.indent('', 2)
+    code.indent('', level)
   }
 
-  mainPath.forEach(addComponentCall)
-  loopPath.forEach(addComponentCall)
+  // Emit each block in order: `once` blocks run their nodes a single time (at
+  // the function-body indent), `loop` blocks wrap them in a for-loop. A workflow
+  // with several Filter nodes yields several loop blocks, one per loop.
+  blocks.forEach(block => {
+    if (block.type === 'loop') {
+      code.indent(`# Experiment loop (${block.maxCounter} cycles)`)
+      code.indent(`for i in range(${block.maxCounter}):`)
+      code.indent("print(f'Cycle {i}')", 2)
+      code.indent('', 2)
+      block.nodes.forEach(node => addComponentCall(node, 2))
+    } else {
+      block.nodes.forEach(node => addComponentCall(node, 1))
+    }
+  })
 
   code.indent('')
   code.indent('print("Workflow completed!")')

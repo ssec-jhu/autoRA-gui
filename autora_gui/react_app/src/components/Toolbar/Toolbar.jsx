@@ -12,6 +12,7 @@ import { serializeWorkflow, deserializeWorkflow } from '../../utils/serializatio
 import { generatePythonCode, generatePipInstalls } from '../../utils/pythonGenerator'
 import { generateNotebookString } from '../../utils/notebookGenerator'
 import { createComponentJson } from '../../utils/JsonGenerator'
+import { computeFitToScreen } from '../../utils/geometry'
 import './Toolbar.css'
 
 /**
@@ -35,9 +36,16 @@ const getCanvasCenter = () => {
  * exposes the editor's top-level actions. Registers global keyboard shortcuts
  * for undo/redo while mounted.
  *
+ * The three regions (brand, actions, info) are sized to mirror the columns
+ * below (left panel, canvas, right panel) so the first action button lines up
+ * with the canvas's left edge and the zoom controls with its right edge.
+ *
+ * @param {Object} props
+ * @param {number} props.leftWidth - Width of the left component palette panel, in pixels.
+ * @param {number} props.rightWidth - Width of the right properties panel, in pixels.
  * @returns {JSX.Element}
  */
-function Toolbar() {
+function Toolbar({ leftWidth, rightWidth }) {
   const { state, dispatch } = useWorkflow()
   const fileInputRef = useRef(null)
 
@@ -66,13 +74,7 @@ function Toolbar() {
       console.warn('Validation skipped:', err)
     }
 
-    const blob = new Blob([JSON.stringify(workflow, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `workflow_${new Date().toISOString().slice(0, 10)}.json`
-    a.click()
-    URL.revokeObjectURL(url)
+    await saveFile(JSON.stringify(workflow, null, 2), { type: 'application/json', extension: 'json' })
   }
 
   /**
@@ -113,19 +115,45 @@ function Toolbar() {
   }
 
   /**
-   * Trigger a browser download of the given content as a timestamped file.
+   * Save content to a file. Where supported (Chromium browsers) this opens a
+   * native Save dialog so the user can pick the name and location; elsewhere
+   * (Firefox/Safari) it falls back to a download named with a unique timestamp
+   * (date + time) so repeated saves don't collide.
    *
-   * @param {string} content - File contents to download
-   * @param {string} type - MIME type for the blob
-   * @param {string} extension - File extension (without the dot)
-   * @returns {void}
+   * @param {string} content - File contents
+   * @param {Object} opts - Options
+   * @param {string} opts.type - MIME type for the blob
+   * @param {string} opts.extension - File extension (without the dot)
+   * @returns {Promise<void>}
    */
-  const downloadFile = (content, type, extension) => {
+  const saveFile = async (content, { type, extension }) => {
+    // Filesystem-safe timestamp, e.g. "2026-08-10_16-06-43"
+    const stamp = new Date().toISOString().slice(0, 19).replace('T', '_').replace(/:/g, '-')
+    const suggestedName = `workflow_${stamp}.${extension}`
     const blob = new Blob([content], { type })
+
+    // Chromium: native Save dialog lets the user choose/rename the file
+    if (window.showSaveFilePicker) {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName,
+          types: [{ description: `${extension.toUpperCase()} file`, accept: { [type]: [`.${extension}`] } }]
+        })
+        const writable = await handle.createWritable()
+        await writable.write(blob)
+        await writable.close()
+        return
+      } catch (err) {
+        if (err.name === 'AbortError') return // user cancelled the dialog
+        console.warn('Save dialog unavailable, falling back to download:', err)
+      }
+    }
+
+    // Fallback (Firefox/Safari): download with a unique, timestamped name
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `workflow_${new Date().toISOString().slice(0, 10)}.${extension}`
+    a.download = suggestedName
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -134,16 +162,16 @@ function Toolbar() {
    * Generate Python source for the current workflow (with pip install header)
    * and download it as a .py file. Alerts on generation failure.
    *
-   * @returns {void}
+   * @returns {Promise<void>}
    */
-  const handleGeneratePython = () => {
+  const handleGeneratePython = async () => {
     try {
       const pythonCode = generatePythonCode(state)
       const pipInstalls = generatePipInstalls(state)
 
       // Create downloadable Python file
       const fullCode = `# ${pipInstalls}\n\n${pythonCode}`
-      downloadFile(fullCode, 'text/x-python', 'py')
+      await saveFile(fullCode, { type: 'text/x-python', extension: 'py' })
     } catch (err) {
       alert(`Failed to generate Python code: ${err.message}`)
     }
@@ -153,12 +181,12 @@ function Toolbar() {
    * Generate a Jupyter notebook for the current workflow and download it as an
    * .ipynb file. Alerts on generation failure.
    *
-   * @returns {void}
+   * @returns {Promise<void>}
    */
-  const handleGenerateNotebook = () => {
+  const handleGenerateNotebook = async () => {
     try {
       const notebook = generateNotebookString(state)
-      downloadFile(notebook, 'application/x-ipynb+json', 'ipynb')
+      await saveFile(notebook, { type: 'application/x-ipynb+json', extension: 'ipynb' })
     } catch (err) {
       alert(`Failed to generate notebook: ${err.message}`)
     }
@@ -338,9 +366,22 @@ function Toolbar() {
     dispatch({ type: 'SET_PAN', payload: { x: 0, y: 0 } })
   }
 
+  /**
+   * Fit the whole workflow into the visible canvas by computing the zoom and pan
+   * that center all nodes within the viewport (see `computeFitToScreen`).
+   *
+   * @returns {void}
+   */
+  const handleFitToScreen = () => {
+    const fit = computeFitToScreen(state.nodes, getCanvasCenter())
+    if (!fit) return
+    dispatch({ type: 'SET_ZOOM', payload: fit.zoom })
+    dispatch({ type: 'SET_PAN', payload: fit.pan })
+  }
+
   return (
     <header className="toolbar">
-      <div className="toolbar-brand">
+      <div className="toolbar-brand" style={{ width: leftWidth }}>
         <span className="brand-icon">🧪</span>
         <span className="brand-text">AutoRA Workflow Editor</span>
       </div>
@@ -402,22 +443,32 @@ function Toolbar() {
           </button>
         </div>
 
-        <div className="toolbar-divider" />
+        {/* Push the view controls to the canvas's right edge */}
+        <div className="toolbar-spacer" />
 
-        <div className="toolbar-group zoom-controls">
-          <button className="toolbar-btn icon-only" onClick={handleZoomOut} title="Zoom out">
-            −
+        <div className="toolbar-group">
+          <button className="toolbar-btn" onClick={handleFitToScreen} title="Fit workflow to canvas">
+            <span className="btn-icon">🖥</span>
+            <span className="btn-text">Fit to Screen</span>
           </button>
-          <button className="zoom-display" onClick={handleZoomReset} title="Reset zoom">
-            {Math.round(state.zoom * 100)}%
-          </button>
-          <button className="toolbar-btn icon-only" onClick={handleZoomIn} title="Zoom in">
-            +
-          </button>
+
+          <div className="toolbar-divider" />
+
+          <div className="toolbar-group zoom-controls">
+            <button className="toolbar-btn icon-only" onClick={handleZoomOut} title="Zoom out">
+              −
+            </button>
+            <button className="zoom-display" onClick={handleZoomReset} title="Reset zoom">
+              {Math.round(state.zoom * 100)}%
+            </button>
+            <button className="toolbar-btn icon-only" onClick={handleZoomIn} title="Zoom in">
+              +
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="toolbar-info">
+      <div className="toolbar-info" style={{ width: rightWidth }}>
         <span className="info-item">
           <span className="info-label">Nodes:</span>
           <span className="info-value">{state.nodes.length}</span>

@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - create_json
+      - improve_code_generator
   workflow_dispatch:  # Allow manual trigger
 
 permissions:
@@ -52,20 +52,20 @@ jobs:
           cp ../../index.html ../../../deploy/main/index.html
         continue-on-error: true
 
-      # Build component JSON generation version from create_json branch
-      - name: Checkout create_json branch
+      # Build improved code generator version from improve_code_generator branch
+      - name: Checkout improve_code_generator branch
         uses: actions/checkout@v4
         with:
-          ref: create_json
-          path: create_json-branch
+          ref: improve_code_generator
+          path: improve_code_generator-branch
 
       - name: Build component JSON generation standalone version
         run: |
-          cd create_json-branch/autora_gui/react_app
+          cd improve_code_generator-branch/autora_gui/react_app
           npm install
           python build_standalone.py
-          mkdir -p ../../../deploy/create_json
-          cp ../../index.html ../../../deploy/create_json/index.html
+          mkdir -p ../../../deploy/improve_code_generator
+          cp ../../index.html ../../../deploy/improve_code_generator/index.html
         continue-on-error: true
 
       # Build component JSON generation version from create_json branch
@@ -137,7 +137,7 @@ jobs:
           <h1>AutoRA Workflow Editor and Documentation</h1>
           <div class="versions">
           <a href="./main/" class="version-card"><h2>Workflow Editor</h2><p>React-based GUI</p></a>
-          <a href="./create_json/" class="version-card"><h2>Workflow Editor with JSON Generation</h2><p>React-based GUI with component JSON generation</p></a>
+          <a href="./improve_code_generator/" class="version-card"><h2>Workflow Editor with improved Code Generator</h2><p>React-based GUI with improved Code Generator</p></a>
           <a href="./docs/" class="version-card"><h2>Documentation</h2><p>API reference and guides</p></a>
           </div>
           </div>

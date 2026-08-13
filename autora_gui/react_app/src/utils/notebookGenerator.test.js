@@ -108,7 +108,7 @@ describe('generateNotebook', () => {
     expect(allCode).not.toMatch(/=sample\(/)
   })
 
-  it('derives variables from the experiment runner in the run cell', () => {
+  it('builds the runner once and reuses it for variables in the run cell', () => {
     const state = buildState()
     state.nodes.splice(3, 0, {
       id: 'run-1',
@@ -133,12 +133,15 @@ describe('generateNotebook', () => {
       }
     ]
     const nb = generateNotebook(state)
-    const runCell = nb.cells[nb.cells.length - 1]
-    const src = runCell.source.join('')
-    expect(src).toContain('runner = expected_value_theory(choice_temperature=0.1)')
-    expect(src).toContain('assert runner.variables is not None')
-    expect(src).toContain('variables = runner.variables')
-    expect(src).not.toContain('np.linspace')
+    const allCode = nb.cells.filter(c => c.cell_type === 'code').map(c => c.source.join('')).join('\n')
+    const runCell = nb.cells[nb.cells.length - 1].source.join('')
+    // The runner is constructed exactly once, in its component-definition cell
+    expect(allCode.match(/runner = expected_value_theory\(choice_temperature=0\.1\)/g).length).toBe(1)
+    expect(runCell).not.toContain('runner = expected_value_theory')
+    // The run cell reuses that runner for the variables
+    expect(runCell).toContain('assert runner.variables is not None')
+    expect(runCell).toContain('variables = runner.variables')
+    expect(runCell).not.toContain('np.linspace')
   })
 
   it('runs the loop at top level and references the sampler num_samples', () => {
@@ -148,6 +151,34 @@ describe('generateNotebook', () => {
     expect(src).toContain('for i in range(')
     expect(src).toContain('num_samples=5')
     expect(src).toContain('print("Workflow completed!")')
+  })
+
+  it('runs pre-loop nodes once, before the loop', () => {
+    const state = buildState()
+    // Insert a pooler before the sampler; filter loops back to the sampler only
+    state.nodes.splice(1, 0, {
+      id: 'pool-1', type: 'component', name: 'Grid Pooler', protocolUuid: 'proto-pool', parameters: {}
+    })
+    state.nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 4 } })
+    state.components.experimentalists.push({
+      uuid: 'proto-pool', importPath: 'autora.experimentalist.grid', pythonName: 'grid_pool',
+      file: 'grid_pooler.json', protocolType: 'experimentalist', pipInstall: 'autora-core'
+    })
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'exp-1' },
+      { sourceId: 'exp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'exp-1' },
+      { sourceId: 'filt-1', targetId: 'end-1' }
+    ]
+    const src = generateNotebook(state).cells[generateNotebook(state).cells.length - 1].source.join('')
+    const forIdx = src.indexOf('for i in range(')
+    const poolIdx = src.indexOf('state = grid_pooler_on_state(state)')
+    // The pooler runs before the loop and is not indented into the loop body
+    expect(poolIdx).toBeGreaterThan(-1)
+    expect(poolIdx).toBeLessThan(forIdx)
+    expect(src).not.toContain('    state = grid_pooler_on_state(state)')
   })
 
   it('serializes to parseable JSON', () => {

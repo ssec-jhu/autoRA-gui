@@ -4,9 +4,10 @@
   "name": "Equation Experiment (Synthetic, Abstract)",
   "description": "Creates synthetic experiments using SymPy mathematical expressions as ground truth models. Converts symbolic equations into executable experiment runners that simulate noisy observations while supporting perfect ground-truth outputs.",
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic-abstract-equation/blob/main/src/autora/experiment_runner/synthetic/abstract/equation/__init__.py#L14",
+  "github_io": "https://autoresearch.github.io/autora/abstract-equation/docs/Basic%20Usage/",
   "pythonName": "equation_experiment",
   "importPath": "autora.experiment_runner.synthetic.abstract.equation",
-  "pipInstall": "autora-synthetic==2.2.0",
+  "pipInstall": "autora-synthetic-abstract-equation==0.1.0",
   "parameters": {
     "equation_experiment": [
       {

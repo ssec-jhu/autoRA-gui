@@ -4,6 +4,7 @@
   "name": "Novelty Sampler",
   "description": "Selects experimental conditions that are most novel (dissimilar) with respect to existing reference conditions using pairwise distance metrics.",
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-novelty/blob/main/src/autora/experimentalist/novelty/__init__.py#L37",
+  "github_io": "https://autoresearch.github.io/autora/user-guide/experimentalists/novelty/",
   "pythonName": "sample",
   "importPath": "autora.experimentalist.novelty",
   "pipInstall": "autora-experimentalist-novelty==2.2.0",

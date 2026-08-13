@@ -4,6 +4,7 @@
   "name": "Summed Inequality Sampler",
   "description": "Selects experimental conditions based on inequality relative to a reference pool.",
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-inequality/blob/main/src/autora/experimentalist/inequality/__init__.py#L33",
+  "github_io": "https://autoresearch.github.io/autora/user-guide/experimentalists/inequality/",
   "pythonName": "sample",
   "importPath": "autora.experimentalist.inequality",
   "pipInstall": "autora-experimentalist-inequality==2.2.0",
