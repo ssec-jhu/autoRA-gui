@@ -1,0 +1,334 @@
+{
+  "name": "AutoRA Workflow",
+  "description": "Workflow created with AutoRA GUI",
+  "start": {
+    "uuid": "a35449e4-23bb-44ba-910a-ceb7ff6042c4",
+    "canvasLocation": {
+      "x": -240,
+      "y": -485
+    }
+  },
+  "end": {
+    "uuid": "24924fb4-126f-403f-8fd3-2bf16f485e8e",
+    "canvasLocation": {
+      "x": -43,
+      "y": 400
+    }
+  },
+  "filters": [
+    {
+      "uuid": "2a809a47-2adf-4264-9416-43cdfa4b4ae4",
+      "maxCounter": 10,
+      "altTarget": null,
+      "canvasLocation": {
+        "x": -109,
+        "y": 194
+      }
+    }
+  ],
+  "components": [
+    {
+      "uuid": "721e73ec-bcf7-43e1-96db-4dff24d83500",
+      "protocolUuid": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f",
+      "parameterSetting": [
+        {
+          "uuid": "209d8cec-a495-4566-8059-8704c738b6e7",
+          "name": "batch_size",
+          "value": 64
+        },
+        {
+          "uuid": "0d4c93c6-434b-4f04-8054-1567644020c4",
+          "name": "num_graph_nodes",
+          "value": 2
+        },
+        {
+          "uuid": "7eb67d63-84a0-4d2e-8dea-3bb589c53d87",
+          "name": "output_type",
+          "value": "real"
+        },
+        {
+          "uuid": "cbee53dd-fa45-41a7-8270-9a3aa0835d06",
+          "name": "classifier_weight_decay",
+          "value": 0.01
+        },
+        {
+          "uuid": "1828d822-342f-40ca-9e65-7b6c431cde6e",
+          "name": "darts_type",
+          "value": "original"
+        },
+        {
+          "uuid": "5a1d5ec2-2a6d-44e9-a248-0ddd40ac4a36",
+          "name": "param_updates_per_epoch",
+          "value": 10
+        },
+        {
+          "uuid": "4f615166-d46e-481b-ada5-1281a518d05b",
+          "name": "param_updates_for_sampled_model",
+          "value": 100
+        },
+        {
+          "uuid": "d5fe612e-11d7-478f-a63e-83f75fa1596d",
+          "name": "param_learning_rate_max",
+          "value": 0.025
+        },
+        {
+          "uuid": "9856c724-b41e-42f1-a52b-94d11212a3c6",
+          "name": "param_learning_rate_min",
+          "value": 0.01
+        },
+        {
+          "uuid": "2e446553-082e-4396-8a13-dfdfcc9a18db",
+          "name": "param_momentum",
+          "value": 0.9
+        },
+        {
+          "uuid": "0cb69726-ac43-4696-9060-b5fda7c557c0",
+          "name": "arch_updates_per_epoch",
+          "value": 1
+        },
+        {
+          "uuid": "cf7290c6-7591-4ecf-aae5-7468c5463ae0",
+          "name": "arch_learning_rate_max",
+          "value": 0.003
+        },
+        {
+          "uuid": "952bac2c-435a-4152-8d61-a09267892bac",
+          "name": "arch_weight_decay",
+          "value": 0.0001
+        },
+        {
+          "uuid": "59c5e263-501a-4762-a9b3-457174e611a0",
+          "name": "arch_weight_decay_df",
+          "value": 0.0003
+        },
+        {
+          "uuid": "6e05be9f-ca37-401e-9080-7132d376aa2e",
+          "name": "arch_weight_decay_base",
+          "value": 0
+        },
+        {
+          "uuid": "c13012be-85c1-437c-b5f0-5758d46202a8",
+          "name": "arch_momentum",
+          "value": 0.9
+        },
+        {
+          "uuid": "48a2ef0a-de11-4367-bfdb-aae2734543ac",
+          "name": "fair_darts_loss_weight",
+          "value": 1
+        },
+        {
+          "uuid": "a11a09c4-f859-4f57-a98e-577f436ecee8",
+          "name": "max_epochs",
+          "value": 10
+        },
+        {
+          "uuid": "d4d62ca6-ff5a-44ab-aded-124d0dc031e8",
+          "name": "grad_clip",
+          "value": 5
+        },
+        {
+          "uuid": "71d20ebe-9b76-47da-9b65-b6696e47eba9",
+          "name": "primitives",
+          "value": [
+            "none",
+            "add",
+            "subtract",
+            "linear",
+            "linear_logistic",
+            "linear_relu"
+          ]
+        },
+        {
+          "uuid": "40cacbc7-17cf-46ce-adcf-419f4c1995f4",
+          "name": "train_classifier_coefficients",
+          "value": false
+        },
+        {
+          "uuid": "714c4b43-d79e-4aff-a1fe-d2dffc4c00c8",
+          "name": "train_classifier_bias",
+          "value": false
+        },
+        {
+          "uuid": "a3d65db4-1ef7-4753-ad66-ab2422b9a3c7",
+          "name": "sampling_strategy",
+          "value": "max"
+        }
+      ],
+      "canvasLocation": {
+        "x": 152,
+        "y": -34
+      }
+    },
+    {
+      "uuid": "e6b91830-b6d1-48a7-b6df-4286e74ff791",
+      "protocolUuid": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
+      "parameterSetting": [
+        {
+          "uuid": "ccf0716c-fb02-4c01-99a2-1fbea6dcc65d",
+          "name": "num_samples",
+          "value": 1
+        },
+        {
+          "uuid": "226a34a2-9dc8-46d3-aad0-a3f9ccada4e7",
+          "name": "replace",
+          "value": false
+        }
+      ],
+      "canvasLocation": {
+        "x": 269,
+        "y": -468
+      }
+    },
+    {
+      "uuid": "f118d2a3-18c0-4f0b-96e8-c0ec6708693f",
+      "protocolUuid": "f4a5b6c7-d8e9-4f0a-1b2c-3d4e5f6a7b8c",
+      "parameterSetting": [
+        {
+          "uuid": "53cd1d85-7515-44e6-b670-e070d136b42d",
+          "name": "resolution",
+          "value": 100
+        },
+        {
+          "uuid": "7e3ef19f-395a-49d8-a8d1-31f02e17ad16",
+          "name": "minimum_trial",
+          "value": 1
+        },
+        {
+          "uuid": "797c2400-e22c-422a-992f-bea3b698e82e",
+          "name": "minimum_initial_value",
+          "value": 0
+        },
+        {
+          "uuid": "3c61ff8e-444d-43be-9740-72ae09c0a45e",
+          "name": "maximum_initial_value",
+          "value": 0.5
+        },
+        {
+          "uuid": "d504d933-b838-48b6-b040-850dd7910cfa",
+          "name": "lr",
+          "value": 0.03
+        },
+        {
+          "uuid": "aaae77f1-e147-41b0-ac48-1626e3fa3c23",
+          "name": "p_asymptotic",
+          "value": 1
+        },
+        {
+          "uuid": "8a141dc0-44a0-4f20-8b0e-172d064bcb97",
+          "name": "added_noise",
+          "value": 0.01
+        }
+      ],
+      "canvasLocation": {
+        "x": 215,
+        "y": -271
+      }
+    },
+    {
+      "uuid": "a7cca558-846e-46af-998d-a2a20df951bc",
+      "protocolUuid": "e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",
+      "parameterSetting": [
+        {
+          "uuid": "492b1d6b-d740-4f0c-837f-fb3c7b19a367",
+          "name": "num_samples",
+          "value": 5
+        },
+        {
+          "uuid": "3ebc406b-7a6e-4540-a58d-820cbeb7dcd5",
+          "name": "replace",
+          "value": true
+        }
+      ],
+      "canvasLocation": {
+        "x": -16,
+        "y": -492
+      }
+    }
+  ],
+  "links": [
+    {
+      "source": "2a809a47-2adf-4264-9416-43cdfa4b4ae4",
+      "target": "24924fb4-126f-403f-8fd3-2bf16f485e8e",
+      "sourcePoint": {
+        "x": -64.35227272727275,
+        "y": 291.27287150477423
+      },
+      "targetPoint": {
+        "x": 6.897727272727252,
+        "y": 400.19696969696975
+      }
+    },
+    {
+      "source": "a35449e4-23bb-44ba-910a-ceb7ff6042c4",
+      "target": "a7cca558-846e-46af-998d-a2a20df951bc",
+      "sourcePoint": {
+        "x": -140.0467171717172,
+        "y": -444.5252525252524
+      },
+      "targetPoint": {
+        "x": -16.435606060606005,
+        "y": -451.89069264069246
+      }
+    },
+    {
+      "source": "a7cca558-846e-46af-998d-a2a20df951bc",
+      "target": "e6b91830-b6d1-48a7-b6df-4286e74ff791",
+      "sourcePoint": {
+        "x": 143.564393939394,
+        "y": -451.89069264069246
+      },
+      "targetPoint": {
+        "x": 268.76010101010115,
+        "y": -428.1363636363635
+      }
+    },
+    {
+      "source": "e6b91830-b6d1-48a7-b6df-4286e74ff791",
+      "target": "f118d2a3-18c0-4f0b-96e8-c0ec6708693f",
+      "sourcePoint": {
+        "x": 348.76010101010115,
+        "y": -388.1363636363635
+      },
+      "targetPoint": {
+        "x": 294.814393939394,
+        "y": -270.64069264069246
+      }
+    },
+    {
+      "source": "f118d2a3-18c0-4f0b-96e8-c0ec6708693f",
+      "target": "721e73ec-bcf7-43e1-96db-4dff24d83500",
+      "sourcePoint": {
+        "x": 294.814393939394,
+        "y": -190.64069264069246
+      },
+      "targetPoint": {
+        "x": 231.60101010101005,
+        "y": -33.989898989899075
+      }
+    },
+    {
+      "source": "721e73ec-bcf7-43e1-96db-4dff24d83500",
+      "target": "2a809a47-2adf-4264-9416-43cdfa4b4ae4",
+      "sourcePoint": {
+        "x": 231.60101010101005,
+        "y": 46.010101010100925
+      },
+      "targetPoint": {
+        "x": -64.35227272727275,
+        "y": 180.96421363967283
+      }
+    },
+    {
+      "source": "2a809a47-2adf-4264-9416-43cdfa4b4ae4",
+      "target": "a7cca558-846e-46af-998d-a2a20df951bc",
+      "sourcePoint": {
+        "x": -119.15432893255071,
+        "y": 239
+      },
+      "targetPoint": {
+        "x": 64,
+        "y": -412
+      }
+    }
+  ]
+}

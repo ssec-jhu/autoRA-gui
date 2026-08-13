@@ -49,7 +49,7 @@ def main():
     variables = runner.variables
     state = StandardState(variables=variables)
 
-    for i in range(10):  # <- filter for max cycles here
+    for i in range(1):  # <- filter for max cycles here
         print(f"Cycle {i}")
         print("creating pool")
         state = pool_on_state(state)

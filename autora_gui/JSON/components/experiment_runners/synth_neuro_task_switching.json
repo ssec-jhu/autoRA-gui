@@ -4,6 +4,7 @@
   "name": "Task Switching (Synthetic, Neuroscience)",
   "description": "Synthetic experiment runner implementing a cognitive model of task-switching behavior. Performance depends on current task strength, alternative task strength, and whether a task switch occurs.",
   "githubCommit": "https://github.com/AutoResearch/autora-synthetic/blob/main/src/autora/experiment_runner/synthetic/neuroscience/task_switching.py#L11",
+  "github_io": "https://autoresearch.github.io/autora/synthetic/docs/Examples/Neuroscience/Task-Switching/",
   "pythonName": "task_switching",
   "importPath": "autora.experiment_runner.synthetic.neuroscience.task_switching",
   "pipInstall": "autora-synthetic==2.2.0",

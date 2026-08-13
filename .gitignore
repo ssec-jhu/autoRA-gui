@@ -168,11 +168,6 @@ cython_debug/
 # File system
 .DS_Store
 
-# Claude AI
-.claude
-SKILL.md
-CLAUDE.md
-
 # JS tests
 node_modules
 
@@ -183,3 +178,6 @@ coverage
 
 # Generated JSDoc API docs
 frontend-docs
+
+# Claude
+settings.local.json

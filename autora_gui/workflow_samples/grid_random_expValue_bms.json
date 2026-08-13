@@ -1,0 +1,206 @@
+{
+  "name": "AutoRA Workflow",
+  "description": "Workflow created with AutoRA GUI",
+  "start": {
+    "uuid": "30323e1a-69be-492f-bbde-bdf801de5549",
+    "canvasLocation": {
+      "x": -602,
+      "y": 560
+    }
+  },
+  "end": {
+    "uuid": "dbbe2ccf-ff68-4198-8aea-f202a7e028d9",
+    "canvasLocation": {
+      "x": 590,
+      "y": 459
+    }
+  },
+  "filters": [
+    {
+      "uuid": "a03c4eb8-60ba-4063-90b8-e0318293c7dd",
+      "maxCounter": 1,
+      "altTarget": null,
+      "canvasLocation": {
+        "x": 577,
+        "y": 946
+      }
+    }
+  ],
+  "components": [
+    {
+      "uuid": "f441b5e7-cf33-4da4-bf15-0e71226a4a57",
+      "protocolUuid": "f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c",
+      "parameterSetting": [],
+      "canvasLocation": {
+        "x": -355,
+        "y": 551
+      }
+    },
+    {
+      "uuid": "7786f9cf-10e5-4041-88c1-90cc1cb06fe7",
+      "protocolUuid": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
+      "parameterSetting": [
+        {
+          "uuid": "34564e24-c832-4b52-ac29-800666616328",
+          "name": "num_samples",
+          "value": 1
+        },
+        {
+          "uuid": "277a89b2-ce05-44f4-a061-8a66f93b8153",
+          "name": "replace",
+          "value": false
+        }
+      ],
+      "canvasLocation": {
+        "x": -289,
+        "y": 713
+      }
+    },
+    {
+      "uuid": "4b34d9c0-b5e2-4014-8ad8-ec48283b9bfe",
+      "protocolUuid": "a5b6c7d8-e9f0-4a1b-2c3d-4e5f6a7b8c9d",
+      "parameterSetting": [
+        {
+          "uuid": "bbbff590-a120-44d7-878c-e6719d7fbda7",
+          "name": "choice_temperature",
+          "value": 0.1
+        },
+        {
+          "uuid": "ed0aa962-f43a-435f-8a93-cf589f8b029d",
+          "name": "value_lambda",
+          "value": 0.5
+        },
+        {
+          "uuid": "2ebd242a-3a13-443c-927a-5d9ae4cafcbb",
+          "name": "resolution",
+          "value": 10
+        },
+        {
+          "uuid": "59f9b542-909e-48e8-91ec-076a9b1c8753",
+          "name": "minimum_value",
+          "value": -1
+        },
+        {
+          "uuid": "8ae01789-d2df-4a43-bc5a-948a3270ce10",
+          "name": "maximum_value",
+          "value": 1
+        },
+        {
+          "uuid": "d5054a51-0054-493e-aff1-89160cefb425",
+          "name": "added_noise",
+          "value": 0.01
+        }
+      ],
+      "canvasLocation": {
+        "x": -281,
+        "y": 937
+      }
+    },
+    {
+      "uuid": "d86f8476-cafb-4fb4-bdfb-6fb6ab010a07",
+      "protocolUuid": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      "parameterSetting": [
+        {
+          "uuid": "0a4b1459-8192-42c0-9f7f-79bca8c581a6",
+          "name": "epochs",
+          "value": 1500
+        },
+        {
+          "uuid": "63153d99-cb3c-44f3-88f7-bd8faabc3796",
+          "name": "num_param",
+          "value": 1
+        }
+      ],
+      "canvasLocation": {
+        "x": 103,
+        "y": 974
+      }
+    }
+  ],
+  "links": [
+    {
+      "source": "a03c4eb8-60ba-4063-90b8-e0318293c7dd",
+      "target": "dbbe2ccf-ff68-4198-8aea-f202a7e028d9",
+      "sourcePoint": {
+        "x": 676.6868959823594,
+        "y": 991.0229885057469
+      },
+      "targetPoint": {
+        "x": 639.8659003831419,
+        "y": 539.3563218390802
+      }
+    },
+    {
+      "source": "30323e1a-69be-492f-bbde-bdf801de5549",
+      "target": "f441b5e7-cf33-4da4-bf15-0e71226a4a57",
+      "sourcePoint": {
+        "x": -502.30303030303025,
+        "y": 599.848484848485
+      },
+      "targetPoint": {
+        "x": -354.67666815942744,
+        "y": 591.0938653413295
+      }
+    },
+    {
+      "source": "f441b5e7-cf33-4da4-bf15-0e71226a4a57",
+      "target": "7786f9cf-10e5-4041-88c1-90cc1cb06fe7",
+      "sourcePoint": {
+        "x": -274.67666815942744,
+        "y": 631.0938653413295
+      },
+      "targetPoint": {
+        "x": -208.71588384570168,
+        "y": 713.133081027604
+      }
+    },
+    {
+      "source": "7786f9cf-10e5-4041-88c1-90cc1cb06fe7",
+      "target": "4b34d9c0-b5e2-4014-8ad8-ec48283b9bfe",
+      "sourcePoint": {
+        "x": -208.71588384570168,
+        "y": 793.133081027604
+      },
+      "targetPoint": {
+        "x": -200.71588384570168,
+        "y": 937.133081027604
+      }
+    },
+    {
+      "source": "4b34d9c0-b5e2-4014-8ad8-ec48283b9bfe",
+      "target": "d86f8476-cafb-4fb4-bdfb-6fb6ab010a07",
+      "sourcePoint": {
+        "x": -120.71588384570168,
+        "y": 977.133081027604
+      },
+      "targetPoint": {
+        "x": 103.28411615429832,
+        "y": 1014.4664143609374
+      }
+    },
+    {
+      "source": "d86f8476-cafb-4fb4-bdfb-6fb6ab010a07",
+      "target": "a03c4eb8-60ba-4063-90b8-e0318293c7dd",
+      "sourcePoint": {
+        "x": 263.2841161542983,
+        "y": 1014.4664143609374
+      },
+      "targetPoint": {
+        "x": 566.378238117258,
+        "y": 991.0229885057469
+      }
+    },
+    {
+      "source": "a03c4eb8-60ba-4063-90b8-e0318293c7dd",
+      "target": "f441b5e7-cf33-4da4-bf15-0e71226a4a57",
+      "sourcePoint": {
+        "x": 622,
+        "y": 933.0172439427031
+      },
+      "targetPoint": {
+        "x": -195,
+        "y": 591
+      }
+    }
+  ]
+}

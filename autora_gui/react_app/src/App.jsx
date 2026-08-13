@@ -75,7 +75,7 @@ function App() {
 
   return (
     <div className="app">
-      <Toolbar />
+      <Toolbar leftWidth={leftWidth} rightWidth={rightWidth} />
       <div className="main-content">
         <div className="panel-left" style={{ width: leftWidth }}>
           <ComponentPalette />

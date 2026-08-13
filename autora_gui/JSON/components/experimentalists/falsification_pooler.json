@@ -4,6 +4,7 @@
   "name": "Falsification Pooler",
   "description": "Selects experimental conditions most likely to falsify the current model by identifying regions where the model predictions may deviate from ground truth.",
   "githubCommit": "https://github.com/AutoResearch/autora-experimentalist-falsification/blob/main/src/autora/experimentalist/falsification/__init__.py#L22",
+  "github_io": "https://autoresearch.github.io/autora/user-guide/experimentalists/falsification/",
   "pythonName": "pool",
   "importPath": "autora.experimentalist.falsification",
   "pipInstall": "autora-experimentalist-falsification==2.2.0",
