@@ -150,7 +150,6 @@ export function getExecutionOrder(nodes, connections) {
   }
 
   const nodeById = new Map(nodes.map(n => [n.id, n]))
-  const hasFilter = nodes.some(n => n.type === 'filter_point')
 
   // Build adjacency map (source -> [targets])
   const adjacency = {}
@@ -189,7 +188,7 @@ export function getExecutionOrder(nodes, connections) {
           'form the loop before generating code.'
         )
       }
-      sequence.push({ loopBackId, maxCounter: node.filterParams?.maxCounter ?? 10 })
+      sequence.push({ loopBackId, maxCounter: node.filterParams?.maxCounter ?? 1 })
       current = targets.find(id => id !== loopBackId) ?? null
       continue
     }
@@ -218,11 +217,9 @@ export function getExecutionOrder(nodes, connections) {
     run = []
   }
   if (run.length) {
-    // Trailing components run once — except a filter-less workflow, where the
-    // whole path is one experiment loop with the default cycle count (legacy).
-    blocks.push(hasFilter
-      ? { type: 'once', nodes: run }
-      : { type: 'loop', nodes: run, maxCounter: 10 })
+    // Trailing components run once. A filter-less workflow has no loop at all —
+    // every component simply runs a single time.
+    blocks.push({ type: 'once', nodes: run })
   }
 
   return { blocks }

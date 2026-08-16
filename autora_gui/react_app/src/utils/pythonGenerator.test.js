@@ -115,11 +115,34 @@ describe('getExecutionOrder', () => {
       ? { type: 'loop', maxCounter: b.maxCounter, ids: b.nodes.map(n => n.id) }
       : { type: 'once', ids: b.nodes.map(n => n.id) })
 
-  it('wraps a filter-less workflow in one default experiment loop', () => {
+  it('runs a filter-less workflow once, with no loop', () => {
     const { nodes, connections } = buildState()
     const { blocks } = getExecutionOrder(nodes, connections)
     expect(shape(blocks)).toEqual([
-      { type: 'loop', maxCounter: 10, ids: ['pool-1', 'samp-1', 'theo-1'] }
+      { type: 'once', ids: ['pool-1', 'samp-1', 'theo-1'] }
+    ])
+  })
+
+  it('throws when the workflow has no end node', () => {
+    const { nodes, connections } = buildState()
+    const noEnd = nodes.filter(n => n.type !== 'end_point')
+    expect(() => getExecutionOrder(noEnd, connections)).toThrow('End node')
+  })
+
+  it('defaults a filter loop to 1 cycle when maxCounter is unset', () => {
+    const { nodes } = buildState()
+    nodes.push({ id: 'filt-1', type: 'filter_point' })  // no filterParams
+    const connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'pool-1' },
+      { sourceId: 'filt-1', targetId: 'end-1' }
+    ]
+    const { blocks } = getExecutionOrder(nodes, connections)
+    expect(shape(blocks)).toEqual([
+      { type: 'loop', maxCounter: 1, ids: ['pool-1', 'samp-1', 'theo-1'] }
     ])
   })
 
@@ -390,7 +413,7 @@ describe('generatePythonCode', () => {
     expect(code).not.toMatch(/=sample\(/)
   })
 
-  it('gives the sampler wrapper a num_samples default and passes it in the loop', () => {
+  it('gives the sampler wrapper a num_samples default and passes it in the call', () => {
     const code = generatePythonCode(buildState())
     expect(code).toContain('def falsification_sampler_on_state(conditions: pd.DataFrame, num_samples: int = 5)')
     expect(code).toContain('state = falsification_sampler_on_state(state, num_samples=5)')
@@ -415,7 +438,11 @@ describe('generatePythonCode', () => {
   })
 
   it('throws when the workflow has no components', () => {
-    const empty = { nodes: [{ id: 'start-1', type: 'start_point' }], connections: [], components: {} }
+    const empty = {
+      nodes: [{ id: 'start-1', type: 'start_point' }, { id: 'end-1', type: 'end_point' }],
+      connections: [{ sourceId: 'start-1', targetId: 'end-1' }],
+      components: {}
+    }
     expect(() => generatePythonCode(empty)).toThrow('No components found')
   })
 
