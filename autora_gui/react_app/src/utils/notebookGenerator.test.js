@@ -145,7 +145,17 @@ describe('generateNotebook', () => {
   })
 
   it('runs the loop at top level and references the sampler num_samples', () => {
-    const nb = generateNotebook(buildState())
+    const state = buildState()
+    // Add a filter that loops back over the components so there is a real loop
+    state.nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 3 } })
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'exp-1' },
+      { sourceId: 'exp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'exp-1' },
+      { sourceId: 'filt-1', targetId: 'end-1' }
+    ]
+    const nb = generateNotebook(state)
     const runCell = nb.cells[nb.cells.length - 1]
     const src = runCell.source.join('')
     expect(src).toContain('for i in range(')
