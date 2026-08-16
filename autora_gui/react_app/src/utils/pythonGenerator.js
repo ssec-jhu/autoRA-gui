@@ -145,6 +145,10 @@ export function getExecutionOrder(nodes, connections) {
     throw new Error('Workflow must have a Start node')
   }
 
+  if (!nodes.some(n => n.type === 'end_point')) {
+    throw new Error('Workflow must have an End node')
+  }
+
   const nodeById = new Map(nodes.map(n => [n.id, n]))
   const hasFilter = nodes.some(n => n.type === 'filter_point')
 
