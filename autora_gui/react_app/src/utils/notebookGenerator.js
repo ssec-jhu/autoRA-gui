@@ -12,6 +12,7 @@ import {
   CodeBuilder,
   TEMPLATES,
   collectPipPackages,
+  flattenBlockNodes,
   generateImports,
   generateVariablesSetup,
   generateWrapper,
@@ -64,7 +65,7 @@ function toSource(text) {
  * Build the "run the workflow" code cell. Unlike the standalone Python file,
  * the notebook runs the loop at top level so each cycle's state is inspectable.
  *
- * @param {Array<{type: 'once'|'loop', nodes: Object[], maxCounter?: number}>} blocks - Ordered execution blocks (see getExecutionOrder).
+ * @param {import('./pythonGenerator').Block[]} blocks - Ordered execution block tree (see getExecutionOrder).
  * @param {Map} componentMeta - Map of node id to component metadata (`varName`, `nodeName`, `pythonName`).
  * @returns {string} Python source for the run cell.
  */
@@ -73,7 +74,7 @@ function buildRunCell(blocks, componentMeta) {
 
   // Variable setup + state initialization (templates are indented for a
   // function body, so strip the leading 4 spaces for top-level use).
-  code.multiline(dedent(generateVariablesSetup(componentMeta, blocks.flatMap(b => b.nodes))))
+  code.multiline(dedent(generateVariablesSetup(componentMeta, flattenBlockNodes(blocks))))
   code.blank()
   code.multiline(dedent(TEMPLATES.initState))
   code.blank()
@@ -95,21 +96,27 @@ function buildRunCell(blocks, componentMeta) {
     code.blank()
   }
 
-  // Emit each block in order (see getExecutionOrder). At top level, `once`
-  // blocks run their nodes unindented and `loop` blocks wrap them in a
-  // for-loop. Several Filter nodes produce several loop blocks.
-  blocks.forEach(block => {
-    if (block.type === 'loop') {
-      code.line(`# Experiment loop (${block.maxCounter} cycles)`)
-      code.line(`for i in range(${block.maxCounter}):`)
-      code.indent("print(f'Cycle {i}')")
-      code.blank()
-      block.nodes.forEach(node => addComponentCall(node, 1))
-      code.blank()
-    } else {
-      block.nodes.forEach(node => addComponentCall(node, 0))
-    }
-  })
+  // Emit the block tree in order (see getExecutionOrder). At top level `once`
+  // blocks run unindented; `loop` blocks wrap their children in a for-loop and
+  // recurse, so nested loops render as nested for-loops. A loop prints its cycle
+  // only when it directly runs components (not when it only holds nested loops).
+  const renderBlocks = (blks, level) => {
+    blks.forEach(block => {
+      if (block.type === 'loop') {
+        code.indent(`# Experiment loop (${block.maxCounter} cycles)`, level)
+        code.indent(`for i in range(${block.maxCounter}):`, level)
+        if (block.children.some(c => c.type === 'once')) {
+          code.indent("print(f'Cycle {i}')", level + 1)
+          code.blank()
+        }
+        renderBlocks(block.children, level + 1)
+        code.blank()
+      } else {
+        block.nodes.forEach(node => addComponentCall(node, level))
+      }
+    })
+  }
+  renderBlocks(blocks, 0)
 
   code.line('print("Workflow completed!")')
   code.line('state')

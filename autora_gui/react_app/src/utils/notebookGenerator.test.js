@@ -163,6 +163,34 @@ describe('generateNotebook', () => {
     expect(src).toContain('print("Workflow completed!")')
   })
 
+  it('renders nested loops as nested for-loops in the run cell', () => {
+    // Inner filter loops back to the theorist; outer filter loops back to the
+    // sampler, wrapping the whole thing — so the theorist becomes an inner loop
+    // nested inside the outer loop, with the sampler running once per outer cycle.
+    const state = buildState()
+    state.nodes.push(
+      { id: 'filt-in', type: 'filter_point', filterParams: { maxCounter: 5 } },
+      { id: 'filt-out', type: 'filter_point', filterParams: { maxCounter: 2 } }
+    )
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'exp-1' },
+      { sourceId: 'exp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-in' },
+      { sourceId: 'filt-in', targetId: 'theo-1' },    // inner back-edge
+      { sourceId: 'filt-in', targetId: 'filt-out' },
+      { sourceId: 'filt-out', targetId: 'exp-1' },     // outer back-edge (spans all)
+      { sourceId: 'filt-out', targetId: 'end-1' }
+    ]
+    const src = generateNotebook(state).cells.at(-1).source.join('')
+    // Outer loop at top level, inner loop indented one level in
+    expect(src).toContain('\nfor i in range(2):')
+    expect(src).toContain('\n    for i in range(5):')
+    // Sampler runs once per outer cycle (4 spaces); theorist is in the inner loop (8)
+    expect(src).toContain('\n    state = random_sampler_on_state(state, num_samples=5)')
+    expect(src).toContain('\n        state = bms_regressor_on_state(state)')
+    expect(src.indexOf('for i in range(2):')).toBeLessThan(src.indexOf('for i in range(5):'))
+  })
+
   it('runs pre-loop nodes once, before the loop', () => {
     const state = buildState()
     // Insert a pooler before the sampler; filter loops back to the sampler only

@@ -124,20 +124,84 @@ export class CodeBuilder {
 }
 
 /**
- * Traverse the workflow graph and split it into ordered execution blocks,
- * supporting any number of loops (each Filter node defines one loop).
+ * Fold a set of filter intervals over an ordered component list into a nested
+ * block tree spanning `[lo, hi]`. Intervals passed in are all within that range.
+ * Each range's *top-level* intervals (those not strictly contained in another)
+ * become loop blocks; their inner intervals recurse into child loops; and any
+ * component not covered by a top-level interval accumulates into a `once` block.
+ *
+ * @param {Object[]} orderedNodes - Components in execution order.
+ * @param {number} lo - First component index of this range (inclusive).
+ * @param {number} hi - Last component index of this range (inclusive).
+ * @param {Array<{start: number, end: number, maxCounter: number}>} intervals - Filter intervals within `[lo, hi]`.
+ * @returns {Block[]} Ordered child blocks covering `[lo, hi]`.
+ */
+function buildBlockTree(orderedNodes, lo, hi, intervals) {
+  const topLevel = intervals
+    .filter(iv => !intervals.some(o =>
+      o !== iv && o.start <= iv.start && iv.end <= o.end &&
+      (o.start < iv.start || iv.end < o.end)))
+    .sort((a, b) => a.start - b.start)
+
+  const blocks = []
+  let onceRun = []
+  const flushOnce = () => {
+    if (onceRun.length) { blocks.push({ type: 'once', nodes: onceRun }); onceRun = [] }
+  }
+
+  let pos = lo
+  let ti = 0
+  while (pos <= hi) {
+    const iv = topLevel[ti]
+    if (iv && iv.start === pos) {
+      flushOnce()
+      const inner = intervals.filter(o => o !== iv && o.start >= iv.start && o.end <= iv.end)
+      blocks.push({
+        type: 'loop',
+        maxCounter: iv.maxCounter,
+        children: buildBlockTree(orderedNodes, iv.start, iv.end, inner)
+      })
+      pos = iv.end + 1
+      ti++
+      while (topLevel[ti] && topLevel[ti].start < pos) ti++
+    } else {
+      onceRun.push(orderedNodes[pos])
+      pos++
+    }
+  }
+  flushOnce()
+  return blocks
+}
+
+/**
+ * Flatten a (possibly nested) block tree into its components in execution order.
+ *
+ * @param {Block[]} blocks - Execution blocks from getExecutionOrder.
+ * @returns {Object[]} All component nodes, in order.
+ */
+export function flattenBlockNodes(blocks) {
+  return blocks.flatMap(b => (b.type === 'loop' ? flattenBlockNodes(b.children) : b.nodes))
+}
+
+/**
+ * Traverse the workflow graph and split it into a (possibly nested) tree of
+ * execution blocks, supporting any number of loops — including nested loops
+ * (each Filter node defines one loop).
  *
  * The graph is walked forward from the Start node. At each Filter the traversal
  * follows the *exit* output (toward the end) and records the *loop-back* output,
  * which points to an already-visited node marking where that loop's body began.
- * The linear sequence of components is then partitioned so that each filter's
- * body becomes a `loop` block and every other run of components a `once` block.
+ * Each filter therefore spans an interval over the ordered components (loop-back
+ * target → last component before the filter). Intervals that contain one another
+ * become nested loops, disjoint intervals become sibling loops, and components
+ * covered by no interval run once.
  *
  * @param {Object[]} nodes - Graph nodes, each with `id`, `type` and optional `filterParams`.
  * @param {Object[]} connections - Graph edges, each with `sourceId` and `targetId`.
- * @returns {{blocks: Array<{type: 'once'|'loop', nodes: Object[], maxCounter?: number}>}}
- *   Ordered execution blocks: `once` blocks run their nodes a single time,
- *   `loop` blocks run their nodes inside `for i in range(maxCounter)`.
+ * @returns {{blocks: Block[]}} A tree of ordered execution blocks, where a
+ *   `Block` is either `{type: 'once', nodes: Object[]}` (its nodes run a single
+ *   time) or `{type: 'loop', maxCounter: number, children: Block[]}` (its child
+ *   blocks run inside `for i in range(maxCounter)`).
  */
 export function getExecutionOrder(nodes, connections) {
   const startNode = nodes.find(n => n.type === 'start_point')
@@ -199,28 +263,27 @@ export function getExecutionOrder(nodes, connections) {
     current = (adjacency[current] || [])[0]
   }
 
-  // Partition the linear sequence into ordered blocks. A pending run of
-  // components accumulates until a filter closes a loop over its tail (from the
-  // loop-back target onward); components before the loop-back target run once.
-  const blocks = []
-  let run = []
+  // Turn the linear sequence into ordered components plus one interval per
+  // filter (loop-back target index → last component index before the filter),
+  // then fold those intervals into a nested block tree.
+  const orderedNodes = []
+  const indexById = new Map()
+  const intervals = []
   for (const item of sequence) {
     if (item.node) {
-      run.push(item.node)
-      continue
+      indexById.set(item.node.id, orderedNodes.length)
+      orderedNodes.push(item.node)
+    } else {
+      intervals.push({
+        start: indexById.get(item.loopBackId),
+        end: orderedNodes.length - 1,
+        maxCounter: item.maxCounter
+      })
     }
-    const idx = run.findIndex(n => n.id === item.loopBackId)
-    const before = idx > 0 ? run.slice(0, idx) : []
-    const body = idx >= 0 ? run.slice(idx) : run
-    if (before.length) blocks.push({ type: 'once', nodes: before })
-    if (body.length) blocks.push({ type: 'loop', nodes: body, maxCounter: item.maxCounter })
-    run = []
   }
-  if (run.length) {
-    // Trailing components run once. A filter-less workflow has no loop at all —
-    // every component simply runs a single time.
-    blocks.push({ type: 'once', nodes: run })
-  }
+
+  // A filter-less workflow has no interval — every component simply runs once.
+  const blocks = buildBlockTree(orderedNodes, 0, orderedNodes.length - 1, intervals)
 
   return { blocks }
 }
@@ -573,7 +636,7 @@ export function prepareWorkflow(state) {
   const allComponents = components ? Object.values(components).flat() : []
   const { blocks } = getExecutionOrder(nodes, connections)
 
-  const allPathNodes = blocks.flatMap(block => block.nodes)
+  const allPathNodes = flattenBlockNodes(blocks)
   if (allPathNodes.length === 0) {
     throw new Error('No components found in workflow. Add components and connect them.')
   }
@@ -726,7 +789,7 @@ export function generatePythonCode(state) {
 
   // Generate main function
   code.line('def main():')
-  code.multiline(generateVariablesSetup(componentMeta, blocks.flatMap(b => b.nodes)))
+  code.multiline(generateVariablesSetup(componentMeta, flattenBlockNodes(blocks)))
   code.indent('')
   code.multiline(TEMPLATES.initState)
   code.indent('')
@@ -748,20 +811,26 @@ export function generatePythonCode(state) {
     code.indent('', level)
   }
 
-  // Emit each block in order: `once` blocks run their nodes a single time (at
-  // the function-body indent), `loop` blocks wrap them in a for-loop. A workflow
-  // with several Filter nodes yields several loop blocks, one per loop.
-  blocks.forEach(block => {
-    if (block.type === 'loop') {
-      code.indent(`# Experiment loop (${block.maxCounter} cycles)`)
-      code.indent(`for i in range(${block.maxCounter}):`)
-      code.indent("print(f'Cycle {i}')", 2)
-      code.indent('', 2)
-      block.nodes.forEach(node => addComponentCall(node, 2))
-    } else {
-      block.nodes.forEach(node => addComponentCall(node, 1))
-    }
-  })
+  // Emit the block tree in order: `once` blocks run their nodes a single time,
+  // `loop` blocks wrap their children in a for-loop and recurse (nested loops
+  // become nested for-loops). A loop prints its cycle only when it directly runs
+  // components; a loop that only holds nested loops emits no cycle print.
+  const renderBlocks = (blks, level) => {
+    blks.forEach(block => {
+      if (block.type === 'loop') {
+        code.indent(`# Experiment loop (${block.maxCounter} cycles)`, level)
+        code.indent(`for i in range(${block.maxCounter}):`, level)
+        if (block.children.some(c => c.type === 'once')) {
+          code.indent("print(f'Cycle {i}')", level + 1)
+          code.indent('', level + 1)
+        }
+        renderBlocks(block.children, level + 1)
+      } else {
+        block.nodes.forEach(node => addComponentCall(node, level))
+      }
+    })
+  }
+  renderBlocks(blocks, 1)
 
   code.indent('')
   code.indent('print("Workflow completed!")')
