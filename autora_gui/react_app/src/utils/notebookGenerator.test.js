@@ -144,6 +144,63 @@ describe('generateNotebook', () => {
     expect(runCell).not.toContain('np.linspace')
   })
 
+  it('emits an identical component definition in a single cell, called at every site', () => {
+    // Two samplers with the same name and parameters produce identical wrappers.
+    const state = buildState()
+    state.nodes.splice(2, 0, {
+      id: 'exp-2', type: 'component', name: 'Random Sampler',
+      protocolUuid: 'proto-exp', parameters: { num_samples: 5 }
+    })
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'exp-1' },
+      { sourceId: 'exp-1', targetId: 'exp-2' },
+      { sourceId: 'exp-2', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'end-1' }
+    ]
+    const nb = generateNotebook(state)
+    const defCells = nb.cells.filter(c =>
+      c.cell_type === 'code' && c.source.join('').includes('def random_sampler_on_state('))
+    expect(defCells.length).toBe(1)
+    // Both call sites remain in the run cell
+    const runCell = nb.cells.at(-1).source.join('')
+    expect(runCell.match(/state = random_sampler_on_state\(state/g).length).toBe(2)
+  })
+
+  it('keeps nested loops while de-duplicating identical definitions', () => {
+    // A duplicated sampler (deduped to one def) sits in an outer loop that wraps
+    // an inner loop — dedup must not flatten or drop the nesting.
+    const state = buildState()
+    state.nodes.splice(2, 0, {
+      id: 'exp-2', type: 'component', name: 'Random Sampler',
+      protocolUuid: 'proto-exp', parameters: { num_samples: 5 }
+    })
+    state.nodes.push(
+      { id: 'filt-in', type: 'filter_point', filterParams: { maxCounter: 5 } },
+      { id: 'filt-out', type: 'filter_point', filterParams: { maxCounter: 2 } }
+    )
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'exp-1' },
+      { sourceId: 'exp-1', targetId: 'exp-2' },
+      { sourceId: 'exp-2', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-in' },
+      { sourceId: 'filt-in', targetId: 'theo-1' },    // inner back-edge
+      { sourceId: 'filt-in', targetId: 'filt-out' },
+      { sourceId: 'filt-out', targetId: 'exp-1' },     // outer back-edge (spans all)
+      { sourceId: 'filt-out', targetId: 'end-1' }
+    ]
+    const nb = generateNotebook(state)
+    // Identical sampler defined once
+    const defCells = nb.cells.filter(c =>
+      c.cell_type === 'code' && c.source.join('').includes('def random_sampler_on_state('))
+    expect(defCells.length).toBe(1)
+    // Nesting preserved in the run cell
+    const runCell = nb.cells.at(-1).source.join('')
+    expect(runCell).toContain('\nfor i in range(2):')
+    expect(runCell).toContain('\n    for i in range(5):')
+    // Both duplicated call sites remain
+    expect(runCell.match(/state = random_sampler_on_state\(state/g).length).toBe(2)
+  })
+
   it('runs the loop at top level and references the sampler num_samples', () => {
     const state = buildState()
     // Add a filter that loops back over the components so there is a real loop

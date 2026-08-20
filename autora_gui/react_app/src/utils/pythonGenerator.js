@@ -782,8 +782,18 @@ export function generatePythonCode(state) {
   generateImports(code, imports, { usesPlaceholderVariables: !derivesVariablesFromRunner, usesEquationVariables: needsEquationVariables })
   code.blank().blank()
 
-  // Generate wrapper functions
-  componentMeta.forEach((meta) => generateWrapper(code, meta))
+  // Generate wrapper functions. Components that produce an identical definition
+  // (same function name and parameters) are emitted only once and reused by
+  // every call site, so no duplicate `def`s appear.
+  const seenWrappers = new Set()
+  componentMeta.forEach((meta) => {
+    const wrapper = new CodeBuilder()
+    generateWrapper(wrapper, meta)
+    const text = wrapper.toString()
+    if (seenWrappers.has(text)) return
+    seenWrappers.add(text)
+    code.multiline(text)
+  })
 
   code.blank()
 

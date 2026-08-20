@@ -483,6 +483,26 @@ describe('generatePythonCode', () => {
     expect(code).not.toContain('num_param')
   })
 
+  it('emits an identical component definition once but calls it at every site', () => {
+    // Two poolers with the same name and parameters produce identical wrappers.
+    const state = buildState()
+    state.nodes.splice(2, 0, {
+      id: 'pool-2', type: 'component', name: 'Random Pooler',
+      protocolUuid: 'proto-pool', parameters: { num_samples: 10 }
+    })
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'pool-2' },
+      { sourceId: 'pool-2', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'end-1' }
+    ]
+    const code = generatePythonCode(state)
+    // Defined once, called at both sites
+    expect(code.match(/def random_pooler_on_state\(/g).length).toBe(1)
+    expect(code.match(/state = random_pooler_on_state\(state\)/g).length).toBe(2)
+  })
+
   it('throws when the workflow has no components', () => {
     const empty = {
       nodes: [{ id: 'start-1', type: 'start_point' }, { id: 'end-1', type: 'end_point' }],

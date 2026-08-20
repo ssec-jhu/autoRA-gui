@@ -169,13 +169,19 @@ export function generateNotebook(state) {
   generateImports(importsCode, imports, { usesPlaceholderVariables: !derivesVariablesFromRunner, usesEquationVariables: needsEquationVariables })
   cells.push(codeCell(importsCode.toString()))
 
-  // 4. Component definitions (one code cell per component for clarity)
+  // 4. Component definitions (one code cell per component for clarity).
+  // Components that produce an identical definition (same function name and
+  // parameters) are emitted only once and reused, so no duplicate cells appear.
   cells.push(markdownCell('## 3. Component definitions'))
+  const seenWrappers = new Set()
   componentMeta.forEach((meta) => {
     const wrapper = new CodeBuilder()
     generateWrapper(wrapper, meta)
     // Drop the trailing blank line each wrapper appends.
-    cells.push(codeCell(wrapper.toString().replace(/\n+$/, '')))
+    const src = wrapper.toString().replace(/\n+$/, '')
+    if (seenWrappers.has(src)) return
+    seenWrappers.add(src)
+    cells.push(codeCell(src))
   })
 
   // 5. Run the workflow
