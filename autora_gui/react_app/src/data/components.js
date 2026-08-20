@@ -474,7 +474,7 @@ export const EMBEDDED_COMPONENTS = {
       "github_io": "https://github.com/AutoResearch/autora-experimentalist-lhs/blob/main/docs/index.md",
       "pythonName": "pool",
       "importPath": "autora.experimentalist.lhs",
-      "pipInstall": "autora==4.2.0",
+      "pipInstall": "git+https://github.com/AutoResearch/autora-experimentalist-lhs.git",
       "parameters": {
         "pool": [
           {
@@ -538,7 +538,7 @@ export const EMBEDDED_COMPONENTS = {
       "github_io": "https://github.com/AutoResearch/autora-experimentalist-lhs/blob/main/docs/index.md",
       "pythonName": "sample",
       "importPath": "autora.experimentalist.lhs",
-      "pipInstall": "autora==4.2.0",
+      "pipInstall": "git+https://github.com/AutoResearch/autora-experimentalist-lhs.git",
       "parameters": {
         "sample": [
           {

@@ -430,6 +430,9 @@ function buildXYRunnerCall(meta, baseSpaces = 4) {
   const ivNames = cfg.parseIVs(params[cfg.specParam])
   const finalIVs = ivNames.length ? ivNames : ['x']
   const range = 'allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)'
+  // The LHS pooler raises on any IV carrying `allowed_values` and needs a
+  // `value_range`; emit IVs with value_range only when one is in the workflow.
+  const ivRange = meta.omitAllowedValues ? 'value_range=(-10, 10)' : range
   // Regular factory params (expression is sympified by buildFactoryParamString).
   const factory = buildFactoryParamString(pythonName, params, runParamNames)
   const pad = ' '.repeat(baseSpaces)
@@ -440,7 +443,7 @@ function buildXYRunnerCall(meta, baseSpaces = 4) {
   if (factory) lines.push(`${pad2}${factory},`)
   lines.push(`${pad2}# TODO: adjust the variable names and ranges below for your experiment`)
   lines.push(`${pad2}X=[`)
-  finalIVs.forEach(n => lines.push(`${pad3}IV(name="${n}", ${range}),`))
+  finalIVs.forEach(n => lines.push(`${pad3}IV(name="${n}", ${ivRange}),`))
   if (cfg.needsY) {
     lines.push(`${pad2}],`)
     const dvName = ['y', 'z', 'output'].find(n => !finalIVs.includes(n)) || 'dv'
@@ -590,12 +593,29 @@ function generateExperimentalistWrapper(code, meta) {
   } else if (isSampler) {
     const numSamples = params.num_samples || 1
     const otherParamStr = buildParamString(params, ['num_samples'])
+    // Some samplers (e.g. the LHS sampler) also require `reference_conditions`,
+    // which is not a state field. Derive it from the IV columns of the
+    // already-collected experiment_data (empty on the first cycle);
+    // experiment_data and variables are auto-injected by @on_state().
+    const inputVarNames = Array.isArray(inputDataType?.variables)
+      ? inputDataType.variables.map(v => v.name)
+      : []
+    const needsReference = inputVarNames.includes('reference_conditions')
 
-    code.line(`def ${varName}(conditions: pd.DataFrame, num_samples: int = ${numSamples}) -> Delta:`)
-    const call = otherParamStr
-      ? `${pythonName}(conditions=conditions, num_samples=num_samples, ${otherParamStr})`
-      : `${pythonName}(conditions=conditions, num_samples=num_samples)`
-    code.indent(`return Delta(conditions=${call})`)
+    if (needsReference) {
+      code.line(`def ${varName}(conditions: pd.DataFrame, experiment_data: pd.DataFrame, variables: VariableCollection, num_samples: int = ${numSamples}) -> Delta:`)
+      code.indent('reference_conditions = experiment_data[[v.name for v in variables.independent_variables]] if experiment_data is not None else conditions.iloc[0:0]')
+      const refCall = otherParamStr
+        ? `${pythonName}(conditions=conditions, reference_conditions=reference_conditions, num_samples=num_samples, ${otherParamStr})`
+        : `${pythonName}(conditions=conditions, reference_conditions=reference_conditions, num_samples=num_samples)`
+      code.indent(`return Delta(conditions=${refCall})`)
+    } else {
+      code.line(`def ${varName}(conditions: pd.DataFrame, num_samples: int = ${numSamples}) -> Delta:`)
+      const call = otherParamStr
+        ? `${pythonName}(conditions=conditions, num_samples=num_samples, ${otherParamStr})`
+        : `${pythonName}(conditions=conditions, num_samples=num_samples)`
+      code.indent(`return Delta(conditions=${call})`)
+    }
   } else {
     const paramStr = buildParamString(params)
     code.line(`def ${varName}(conditions: pd.DataFrame) -> Delta:`)
@@ -700,6 +720,15 @@ export function prepareWorkflow(state) {
       nodeName: node.name
     })
   })
+
+  // The LHS pooler (autora.experimentalist.lhs `pool`) raises on any variable
+  // carrying `allowed_values` and requires a `value_range`; when one is in the
+  // workflow, generated IVs must be emitted with value_range only.
+  const hasLhsPooler = allPathNodes.some(node => {
+    const p = allComponents.find(c => c.uuid === node.protocolUuid)
+    return p && p.importPath === 'autora.experimentalist.lhs' && p.pythonName === 'pool'
+  })
+  if (hasLhsPooler) componentMeta.forEach(meta => { meta.omitAllowedValues = true })
 
   // Only synthetic runners provide `.variables`; with such a runner the
   // variables are derived from it, otherwise placeholder variables are emitted.
