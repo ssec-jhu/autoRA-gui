@@ -198,12 +198,17 @@ function ComponentPalette() {
         alert(`Added "${data.component.name}" to ${category} (saved to disk).`)
         return
       }
+      // 404/405 mean there is no persistence endpoint (e.g. the standalone build
+      // served by a static host) — fall back to a session-only add.
+      if (res.status === 404 || res.status === 405) {
+        throw new Error('no-backend')
+      }
       // Backend reachable but rejected the component — surface why, don't fall back.
       let detail = `${res.status} ${res.statusText}`
       try { detail = (await res.json()).detail || detail } catch { /* keep status */ }
       alert('Could not save component: ' + detail)
     } catch {
-      // Backend unreachable — add for this session only.
+      // Backend unreachable or no upload endpoint — add for this session only.
       dispatch({ type: 'ADD_COMPONENT', payload: { category, component } })
       setExpandedSections(prev => ({ ...prev, [category]: true }))
       alert(
