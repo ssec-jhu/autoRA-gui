@@ -29,6 +29,67 @@ describe('workflowReducer', () => {
     })
   })
 
+  describe('ADD_COMPONENT', () => {
+    it('adds a component to an empty category, sorted by name', () => {
+      const state = { ...initialState, components: { experimentalists: [] } }
+      const component = { uuid: 'c-1', name: 'Random Sampler' }
+      const result = workflowReducer(state, {
+        type: 'ADD_COMPONENT',
+        payload: { category: 'experimentalists', component }
+      })
+
+      expect(result.components.experimentalists).toEqual([component])
+    })
+
+    it('inserts into the correct sorted position', () => {
+      const state = {
+        ...initialState,
+        components: { theorists: [{ uuid: 'a', name: 'Alpha' }, { uuid: 'z', name: 'Zeta' }] }
+      }
+      const result = workflowReducer(state, {
+        type: 'ADD_COMPONENT',
+        payload: { category: 'theorists', component: { uuid: 'm', name: 'Mid' } }
+      })
+
+      expect(result.components.theorists.map(c => c.name)).toEqual(['Alpha', 'Mid', 'Zeta'])
+    })
+
+    it('replaces an existing component with the same uuid', () => {
+      const state = {
+        ...initialState,
+        components: { theorists: [{ uuid: 'a', name: 'Old Name' }] }
+      }
+      const result = workflowReducer(state, {
+        type: 'ADD_COMPONENT',
+        payload: { category: 'theorists', component: { uuid: 'a', name: 'New Name' } }
+      })
+
+      expect(result.components.theorists).toHaveLength(1)
+      expect(result.components.theorists[0].name).toBe('New Name')
+    })
+
+    it('handles a category that does not yet exist in state', () => {
+      const state = { ...initialState, components: {} }
+      const result = workflowReducer(state, {
+        type: 'ADD_COMPONENT',
+        payload: { category: 'experiment_runners', component: { uuid: 'r-1', name: 'Runner' } }
+      })
+
+      expect(result.components.experiment_runners).toEqual([{ uuid: 'r-1', name: 'Runner' }])
+    })
+
+    it('does not mutate other categories', () => {
+      const theorists = [{ uuid: 't-1', name: 'Theorist' }]
+      const state = { ...initialState, components: { theorists, experimentalists: [] } }
+      const result = workflowReducer(state, {
+        type: 'ADD_COMPONENT',
+        payload: { category: 'experimentalists', component: { uuid: 'e-1', name: 'Exp' } }
+      })
+
+      expect(result.components.theorists).toBe(theorists)
+    })
+  })
+
   describe('ADD_NODE', () => {
     it('adds a new node and selects it', () => {
       const componentData = {

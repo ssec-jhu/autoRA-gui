@@ -6,7 +6,7 @@
  *
  * @module components/ComponentPalette/ComponentPalette
  */
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { useWorkflow } from '../../context/WorkflowContext'
 import './ComponentPalette.css'
 
@@ -15,6 +15,13 @@ const typeConfig = {
   theorists: { label: 'Theorists', icon: '🧠', color: 'var(--node-theorists)' },
   experimentalists: { label: 'Experimentalists', icon: '🔬', color: 'var(--node-experimentalists)' },
   experiment_runners: { label: 'Experiment Runners', icon: '⚡', color: 'var(--node-experiment-runners)' }
+}
+
+// Maps a component's protocolType (singular) to its palette/category key (plural).
+const protocolTypeToCategory = {
+  theorist: 'theorists',
+  experimentalist: 'experimentalists',
+  experiment_runner: 'experiment_runners'
 }
 
 const controlNodes = [
@@ -55,6 +62,7 @@ const controlNodes = [
 function ComponentPalette() {
   const { state, dispatch } = useWorkflow()
   const [searchTerm, setSearchTerm] = useState('')
+  const fileInputRef = useRef(null)
   const [expandedSections, setExpandedSections] = useState({
     controls: true,
     theorists: false,
@@ -144,10 +152,87 @@ function ComponentPalette() {
     dispatch({ type: 'SET_PREVIEWED_COMPONENT', payload: component })
   }
 
+  /**
+   * Upload a component JSON file. Tries to persist it to disk via the backend
+   * (dev mode); if the backend is unreachable (e.g. standalone build), falls
+   * back to adding it to the palette for the current session only.
+   *
+   * @param {Event} e - Change event from the hidden file input
+   */
+  const handleFileSelected = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+
+    let component
+    try {
+      component = JSON.parse(await file.text())
+    } catch (err) {
+      alert('Invalid JSON file: ' + err.message)
+      return
+    }
+
+    const category = protocolTypeToCategory[component?.protocolType]
+    if (!category) {
+      alert(
+        `Unknown or missing protocolType: ${component?.protocolType}. ` +
+        'Expected one of: theorist, experimentalist, experiment_runner.'
+      )
+      return
+    }
+    if (!component.uuid || !component.name) {
+      alert('Component is missing a required "uuid" or "name" field.')
+      return
+    }
+
+    try {
+      const res = await fetch('/api/components', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(component)
+      })
+      if (res.ok) {
+        const data = await res.json()
+        dispatch({ type: 'ADD_COMPONENT', payload: data })
+        setExpandedSections(prev => ({ ...prev, [category]: true }))
+        alert(`Added "${data.component.name}" to ${category} (saved to disk).`)
+        return
+      }
+      // Backend reachable but rejected the component — surface why, don't fall back.
+      let detail = `${res.status} ${res.statusText}`
+      try { detail = (await res.json()).detail || detail } catch { /* keep status */ }
+      alert('Could not save component: ' + detail)
+    } catch {
+      // Backend unreachable — add for this session only.
+      dispatch({ type: 'ADD_COMPONENT', payload: { category, component } })
+      setExpandedSections(prev => ({ ...prev, [category]: true }))
+      alert(
+        `Added "${component.name}" to ${category} for this session only ` +
+        '(no backend available, not saved to disk).'
+      )
+    }
+  }
+
   return (
     <aside className="component-palette">
       <div className="palette-header">
-        <h2>Components</h2>
+        <div className="palette-title-row">
+          <h2>Components</h2>
+          <button
+            className="add-component-btn"
+            onClick={() => fileInputRef.current?.click()}
+            title="Upload a component JSON file"
+          >
+            + Add
+          </button>
+        </div>
+        <input
+          type="file"
+          accept=".json,application/json"
+          ref={fileInputRef}
+          onChange={handleFileSelected}
+          style={{ display: 'none' }}
+        />
         <input
           type="text"
           placeholder="Search components..."

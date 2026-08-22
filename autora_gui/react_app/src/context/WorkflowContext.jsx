@@ -69,6 +69,18 @@ export function workflowReducer(state, action) {
     case 'SET_COMPONENTS':
       return { ...state, components: action.payload }
 
+    case 'ADD_COMPONENT': {
+      // Add (or replace by uuid) a single component in its category, keeping the
+      // list sorted by name so it matches the backend-loaded ordering.
+      const { category, component } = action.payload
+      const existing = state.components[category] || []
+      const merged = [
+        ...existing.filter(c => c.uuid !== component.uuid),
+        component
+      ].sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+      return { ...state, components: { ...state.components, [category]: merged } }
+    }
+
     case 'ADD_NODE': {
       const { componentData, x, y } = action.payload
       const isFilter = componentData.protocolType === 'filter_point'
