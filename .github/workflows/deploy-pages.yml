@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - improve_code_generator
-      - add_component
   workflow_dispatch:  # Allow manual trigger
 
 permissions:
@@ -69,22 +68,6 @@ jobs:
           cp ../../index.html ../../../deploy/improve_code_generator/index.html
         continue-on-error: true
 
-      # Build add_component version from add_component branch
-      - name: Checkout add_component branch
-        uses: actions/checkout@v4
-        with:
-          ref: add_component
-          path: add_component-branch
-
-      - name: Build component JSON generation standalone version
-        run: |
-          cd add_component-branch/autora_gui/react_app
-          npm install
-          python build_standalone.py
-          mkdir -p ../../../deploy/add_component
-          cp ../../index.html ../../../deploy/add_component/index.html
-        continue-on-error: true
-
       # Build Sphinx docs from main branch
       - name: Checkout main branch for docs
         uses: actions/checkout@v4
@@ -139,7 +122,6 @@ jobs:
           <div class="versions">
           <a href="./main/" class="version-card"><h2>Workflow Editor</h2><p>React-based GUI</p></a>
           <a href="./improve_code_generator/" class="version-card"><h2>Workflow Editor with Improved Code Generator</h2><p>React-based GUI with improved Code Generator</p></a>
-          <a href="./add_component/" class="version-card"><h2>Workflow Editor with Add Component</h2><p>React-based GUI with Add Component</p></a>
           <a href="./docs/" class="version-card"><h2>Documentation</h2><p>API reference and guides</p></a>
           </div>
           </div>
