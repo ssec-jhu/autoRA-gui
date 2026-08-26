@@ -687,6 +687,12 @@ export function prepareWorkflow(state) {
   const imports = new Map()
   const componentMeta = new Map()
 
+  // Track varName assignments to ensure uniqueness per distinct wrapper signature:
+  // - same base varName + same signature → reuse (identical wrapper body, safe to share)
+  // - same base varName + different signature → add numeric suffix to disambiguate
+  const varNameToSignature = new Map()  // varName → JSON-serialized signature
+  const varNameSuffix = new Map()       // base varName → next available numeric suffix
+
   allPathNodes.forEach(node => {
     const protocol = allComponents.find(c => c.uuid === node.protocolUuid)
     if (!protocol) {
@@ -738,9 +744,36 @@ export function prepareWorkflow(state) {
       usesFirebaseCredentials,
       protocolType,
       params: node.parameters || {},
-      varName: `${toPythonName(node.name)}_on_state`,
+      varName: null, // assigned below
       nodeName: node.name
     })
+
+    // Assign varName: reuse when base name and signature both match; add a
+    // numeric suffix when the same base varName is claimed with a different
+    // wrapper signature so the two generated `def` blocks don't collide.
+    const meta = componentMeta.get(node.id)
+    const signature = JSON.stringify({ pythonName: meta.pythonName, params: meta.params })
+    const baseName = `${toPythonName(node.name)}_on_state`
+
+    if (varNameToSignature.has(baseName) && varNameToSignature.get(baseName) === signature) {
+      // Identical signature for this base name: safe to reuse the same wrapper.
+      meta.varName = baseName
+    } else if (!varNameToSignature.has(baseName)) {
+      // First time this base name is seen: claim it.
+      varNameToSignature.set(baseName, signature)
+      meta.varName = baseName
+    } else {
+      // Same base name but different signature: find or create a suffixed variant.
+      let suffix = varNameSuffix.get(baseName) || 1
+      let candidate
+      do {
+        candidate = `${baseName}_${suffix}`
+        suffix++
+      } while (varNameToSignature.has(candidate) && varNameToSignature.get(candidate) !== signature)
+      varNameSuffix.set(baseName, suffix)
+      varNameToSignature.set(candidate, signature)
+      meta.varName = candidate
+    }
   })
 
   // The LHS pooler (autora.experimentalist.lhs `pool`) raises on any variable
