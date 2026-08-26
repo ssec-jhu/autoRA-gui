@@ -100,16 +100,17 @@ function buildRunCell(blocks, componentMeta) {
   // blocks run unindented; `loop` blocks wrap their children in a for-loop and
   // recurse, so nested loops render as nested for-loops. A loop prints its cycle
   // only when it directly runs components (not when it only holds nested loops).
-  const renderBlocks = (blks, level) => {
+  const renderBlocks = (blks, level, loopDepth = 0) => {
     blks.forEach(block => {
       if (block.type === 'loop') {
+        const loopVar = `cycle_${loopDepth}`
         code.indent(`# Experiment loop (${block.maxCounter} cycles)`, level)
-        code.indent(`for i in range(${block.maxCounter}):`, level)
+        code.indent(`for ${loopVar} in range(${block.maxCounter}):`, level)
         if (block.children.some(c => c.type === 'once')) {
-          code.indent("print(f'Cycle {i}')", level + 1)
+          code.indent(`print(f'Cycle {${loopVar}}')`, level + 1)
           code.blank()
         }
-        renderBlocks(block.children, level + 1)
+        renderBlocks(block.children, level + 1, loopDepth + 1)
         code.blank()
       } else {
         block.nodes.forEach(node => addComponentCall(node, level))

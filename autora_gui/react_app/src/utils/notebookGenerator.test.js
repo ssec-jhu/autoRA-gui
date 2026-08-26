@@ -195,8 +195,10 @@ describe('generateNotebook', () => {
     expect(defCells.length).toBe(1)
     // Nesting preserved in the run cell
     const runCell = nb.cells.at(-1).source.join('')
-    expect(runCell).toContain('\nfor i in range(2):')
-    expect(runCell).toContain('\n    for i in range(5):')
+    expect(runCell).toContain('\nfor cycle_0 in range(2):')
+    expect(runCell).toContain('\n    for cycle_1 in range(5):')
+    expect(runCell).toContain("    print(f'Cycle {cycle_0}')")
+    expect(runCell).toContain("        print(f'Cycle {cycle_1}')")
     // Both duplicated call sites remain
     expect(runCell.match(/state = random_sampler_on_state\(state/g).length).toBe(2)
   })
@@ -215,7 +217,7 @@ describe('generateNotebook', () => {
     const nb = generateNotebook(state)
     const runCell = nb.cells[nb.cells.length - 1]
     const src = runCell.source.join('')
-    expect(src).toContain('for i in range(')
+    expect(src).toContain('for cycle_0 in range(')
     expect(src).toContain('num_samples=5')
     expect(src).toContain('print("Workflow completed!")')
   })
@@ -240,12 +242,14 @@ describe('generateNotebook', () => {
     ]
     const src = generateNotebook(state).cells.at(-1).source.join('')
     // Outer loop at top level, inner loop indented one level in
-    expect(src).toContain('\nfor i in range(2):')
-    expect(src).toContain('\n    for i in range(5):')
+    expect(src).toContain('\nfor cycle_0 in range(2):')
+    expect(src).toContain('\n    for cycle_1 in range(5):')
+    expect(src).toContain("    print(f'Cycle {cycle_0}')")
+    expect(src).toContain("        print(f'Cycle {cycle_1}')")
     // Sampler runs once per outer cycle (4 spaces); theorist is in the inner loop (8)
     expect(src).toContain('\n    state = random_sampler_on_state(state, num_samples=5)')
     expect(src).toContain('\n        state = bms_regressor_on_state(state)')
-    expect(src.indexOf('for i in range(2):')).toBeLessThan(src.indexOf('for i in range(5):'))
+    expect(src.indexOf('for cycle_0 in range(2):')).toBeLessThan(src.indexOf('for cycle_1 in range(5):'))
   })
 
   it('runs pre-loop nodes once, before the loop', () => {
@@ -268,7 +272,7 @@ describe('generateNotebook', () => {
       { sourceId: 'filt-1', targetId: 'end-1' }
     ]
     const src = generateNotebook(state).cells[generateNotebook(state).cells.length - 1].source.join('')
-    const forIdx = src.indexOf('for i in range(')
+    const forIdx = src.indexOf('for cycle_0 in range(')
     const poolIdx = src.indexOf('state = grid_pooler_on_state(state)')
     // The pooler runs before the loop and is not indented into the loop body
     expect(poolIdx).toBeGreaterThan(-1)

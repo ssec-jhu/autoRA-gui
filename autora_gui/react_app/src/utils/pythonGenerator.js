@@ -173,6 +173,26 @@ function buildBlockTree(orderedNodes, lo, hi, intervals) {
   return blocks
 }
 
+function assertNestedOrDisjointIntervals(intervals) {
+  const sorted = [...intervals].sort((a, b) => {
+    if (a.start !== b.start) return a.start - b.start
+    return b.end - a.end
+  })
+
+  const stack = []
+  sorted.forEach(interval => {
+    while (stack.length && interval.start > stack[stack.length - 1].end) stack.pop()
+    const parent = stack[stack.length - 1]
+    if (parent && interval.end > parent.end) {
+      throw new Error(
+        'Filter loops must be either disjoint or fully nested. ' +
+        'Partially overlapping loops are not supported.'
+      )
+    }
+    stack.push(interval)
+  })
+}
+
 /**
  * Flatten a (possibly nested) block tree into its components in execution order.
  *
@@ -201,7 +221,7 @@ export function flattenBlockNodes(blocks) {
  * @returns {{blocks: Block[]}} A tree of ordered execution blocks, where a
  *   `Block` is either `{type: 'once', nodes: Object[]}` (its nodes run a single
  *   time) or `{type: 'loop', maxCounter: number, children: Block[]}` (its child
- *   blocks run inside `for i in range(maxCounter)`).
+ *   blocks run inside `for cycle_N in range(maxCounter)`).
  */
 export function getExecutionOrder(nodes, connections) {
   const startNode = nodes.find(n => n.type === 'start_point')
@@ -281,6 +301,8 @@ export function getExecutionOrder(nodes, connections) {
       })
     }
   }
+
+  assertNestedOrDisjointIntervals(intervals)
 
   // A filter-less workflow has no interval — every component simply runs once.
   const blocks = buildBlockTree(orderedNodes, 0, orderedNodes.length - 1, intervals)
@@ -854,16 +876,17 @@ export function generatePythonCode(state) {
   // `loop` blocks wrap their children in a for-loop and recurse (nested loops
   // become nested for-loops). A loop prints its cycle only when it directly runs
   // components; a loop that only holds nested loops emits no cycle print.
-  const renderBlocks = (blks, level) => {
+  const renderBlocks = (blks, level, loopDepth = 0) => {
     blks.forEach(block => {
       if (block.type === 'loop') {
+        const loopVar = `cycle_${loopDepth}`
         code.indent(`# Experiment loop (${block.maxCounter} cycles)`, level)
-        code.indent(`for i in range(${block.maxCounter}):`, level)
+        code.indent(`for ${loopVar} in range(${block.maxCounter}):`, level)
         if (block.children.some(c => c.type === 'once')) {
-          code.indent("print(f'Cycle {i}')", level + 1)
+          code.indent(`print(f'Cycle {${loopVar}}')`, level + 1)
           code.indent('', level + 1)
         }
-        renderBlocks(block.children, level + 1)
+        renderBlocks(block.children, level + 1, loopDepth + 1)
       } else {
         block.nodes.forEach(node => addComponentCall(node, level))
       }
