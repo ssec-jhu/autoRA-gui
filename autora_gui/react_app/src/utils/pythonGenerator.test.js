@@ -525,7 +525,7 @@ describe('generatePythonCode', () => {
       { sourceId: 'filt-1', targetId: 'end-1' }
     ]
     const code = generatePythonCode(state)
-    const forIdx = code.indexOf('for i in range(')
+    const forIdx = code.indexOf('for cycle_0 in range(')
     const poolIdx = code.indexOf('state = random_pooler_on_state(state)')
     const sampIdx = code.indexOf('state = falsification_sampler_on_state(state')
     // The pooler call comes before the loop; the sampler call after it
@@ -555,7 +555,7 @@ describe('generatePythonCode', () => {
       { sourceId: 'pool-2', targetId: 'end-1' }
     ]
     const code = generatePythonCode(state)
-    const forIdx = code.indexOf('for i in range(')
+    const forIdx = code.indexOf('for cycle_0 in range(')
     const pool1Idx = code.indexOf('    state = random_pooler_on_state(state)')
     const pool2Idx = code.indexOf('    state = random_pooler_2_on_state(state)')
     // pooler#1 before the loop, pooler#2 after it
@@ -565,6 +565,27 @@ describe('generatePythonCode', () => {
     // pooler#2 runs once at function-body indent (4 spaces), not inside the loop (8)
     expect(code).toContain('    state = random_pooler_2_on_state(state)')
     expect(code).not.toContain('        state = random_pooler_2_on_state(state)')
+  })
+
+  it('throws when filter loops partially overlap', () => {
+    const state = buildState()
+    state.nodes.push(
+      { id: 'pool-2', type: 'component', name: 'Random Pooler 2', protocolUuid: 'proto-pool', parameters: {} },
+      { id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } },
+      { id: 'filt-2', type: 'filter_point', filterParams: { maxCounter: 2 } }
+    )
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'pool-1' },
+      { sourceId: 'filt-1', targetId: 'pool-2' },
+      { sourceId: 'pool-2', targetId: 'filt-2' },
+      { sourceId: 'filt-2', targetId: 'samp-1' },
+      { sourceId: 'filt-2', targetId: 'end-1' }
+    ]
+    expect(() => generatePythonCode(state)).toThrow(/Partially overlapping loops/)
   })
 
   it('renders nested loops as nested for-loops', () => {
@@ -588,14 +609,16 @@ describe('generatePythonCode', () => {
     ]
     const code = generatePythonCode(state)
     // Outer loop at the function-body indent (4 spaces), inner loop one level in
-    expect(code).toContain('    for i in range(2):')
-    expect(code).toContain('        for i in range(5):')
+    expect(code).toContain('    for cycle_0 in range(2):')
+    expect(code).toContain('        for cycle_1 in range(5):')
+    expect(code).toContain("        print(f'Cycle {cycle_0}')")
+    expect(code).toContain("            print(f'Cycle {cycle_1}')")
     // Pooler runs once per outer cycle (8 spaces), sampler is in the inner loop (12)
     expect(code).toContain('        state = random_pooler_on_state(state)')
     expect(code).toContain('            state = falsification_sampler_on_state(state, num_samples=5)')
     // The inner loop opens after the pooler call and before the sampler call
-    const outerIdx = code.indexOf('for i in range(2):')
-    const innerIdx = code.indexOf('for i in range(5):')
+    const outerIdx = code.indexOf('for cycle_0 in range(2):')
+    const innerIdx = code.indexOf('for cycle_1 in range(5):')
     const poolIdx = code.indexOf('        state = random_pooler_on_state(state)')
     const sampIdx = code.indexOf('            state = falsification_sampler_on_state(state')
     expect(outerIdx).toBeLessThan(poolIdx)
@@ -606,7 +629,7 @@ describe('generatePythonCode', () => {
   it('emits a separate for-loop per filter for a multi-loop workflow', () => {
     // Two sequential loops (mirrors workflow_2loops.json): pool+theo repeat 10x,
     // then a second pool2+theo2 repeat 2x. Each loop body is indented into its
-    // own `for i in range(...)`.
+    // own `for cycle_0 in range(...)`.
     const state = buildState()
     state.nodes.push(
       { id: 'pool-2', type: 'component', name: 'Random Pooler 2', protocolUuid: 'proto-pool', parameters: {} },
@@ -627,16 +650,16 @@ describe('generatePythonCode', () => {
     ]
     const code = generatePythonCode(state)
     // Two independent for-loops, with the second one's cycle count
-    expect(code.match(/for i in range\(/g).length).toBe(2)
-    expect(code).toContain('for i in range(10):')
-    expect(code).toContain('for i in range(2):')
+    expect(code.match(/for cycle_0 in range\(/g).length).toBe(2)
+    expect(code).toContain('for cycle_0 in range(10):')
+    expect(code).toContain('for cycle_0 in range(2):')
     // Each loop's nodes are indented into the loop body (8 spaces)
     expect(code).toContain('        state = random_pooler_on_state(state)')
     expect(code).toContain('        state = random_pooler_2_on_state(state)')
     // Loop 2 comes after loop 1
-    expect(code.indexOf('for i in range(2):')).toBeGreaterThan(code.indexOf('for i in range(10):'))
+    expect(code.indexOf('for cycle_0 in range(2):')).toBeGreaterThan(code.indexOf('for cycle_0 in range(10):'))
     expect(code.indexOf('state = random_pooler_2_on_state(state)'))
-      .toBeGreaterThan(code.indexOf('for i in range(2):'))
+      .toBeGreaterThan(code.indexOf('for cycle_0 in range(2):'))
   })
 })
 

@@ -4,14 +4,15 @@ Run with: uvicorn server:app --reload --port 8000
 """
 
 import json
-import re
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import Body, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
+
+from autora_gui.data_model import Protocol
 
 
 @asynccontextmanager
@@ -157,15 +158,25 @@ def get_schema(name: str) -> dict:
     return load_schema(name)
 
 
-def _safe_filename(component: dict) -> str:
-    """Derive a filesystem-safe JSON filename from a component."""
-    base = component.get("pythonName") or component.get("name") or component.get("uuid")
-    slug = re.sub(r"[^a-zA-Z0-9]+", "_", str(base)).strip("_").lower()
-    return f"{slug or 'component'}.json"
+def _safe_filename(protocol: Protocol) -> str:
+    """Derive a filesystem-safe JSON filename from a validated component."""
+    return f"{protocol.uuid.hex}.json"
+
+
+def _component_file_path(category: str, protocol: Protocol) -> tuple[Path, str]:
+    """Build a validated output path for an uploaded component."""
+    category_dir = COMPONENTS_DIR / category
+    category_dir.mkdir(parents=True, exist_ok=True)
+    category_dir = category_dir.resolve()
+    filename = _safe_filename(protocol)
+    file_path = (category_dir / filename).resolve()
+    if file_path.parent != category_dir:
+        raise HTTPException(status_code=400, detail="Invalid component filename")
+    return file_path, filename
 
 
 @app.post("/api/components")
-def add_component(component: dict[str, Any] = Body(...)) -> dict:
+def add_component(component: Annotated[dict[str, Any], Body(...)]) -> dict:
     """Persist an uploaded component JSON into the appropriate category folder."""
     protocol_type = component.get("protocolType")
     category = PROTOCOL_TYPE_TO_CATEGORY.get(protocol_type)
@@ -182,19 +193,21 @@ def add_component(component: dict[str, Any] = Body(...)) -> dict:
             raise HTTPException(status_code=400, detail=f"Missing required field: {field}")
 
     # The 'file' field is injected at load time, never persisted to disk.
-    to_save = {k: v for k, v in component.items() if k != "file"}
+    payload = {k: v for k, v in component.items() if k != "file"}
+    try:
+        protocol = Protocol.model_validate(payload)
+    except ValidationError as exc:
+        raise HTTPException(status_code=400, detail=exc.errors()) from exc
+    to_save = protocol.model_dump(mode="json")
 
-    category_dir = COMPONENTS_DIR / category
-    category_dir.mkdir(parents=True, exist_ok=True)
-    filename = _safe_filename(component)
-    file_path = category_dir / filename
+    file_path, filename = _component_file_path(category, protocol)
     if file_path.exists():
         raise HTTPException(
             status_code=409,
             detail=f"A component file named {filename} already exists in {category}.",
         )
 
-    with open(file_path, "w") as f:
+    with file_path.open("w") as f:
         json.dump(to_save, f, indent=2)
 
     return {"category": category, "component": {**to_save, "file": filename}}

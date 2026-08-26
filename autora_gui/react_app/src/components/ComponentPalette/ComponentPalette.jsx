@@ -224,6 +224,7 @@ function ComponentPalette() {
         <div className="palette-title-row">
           <h2>Components</h2>
           <button
+            type="button"
             className="add-component-btn"
             onClick={() => fileInputRef.current?.click()}
             title="Upload a component JSON file"

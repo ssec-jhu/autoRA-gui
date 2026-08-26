@@ -1,10 +1,12 @@
 """Tests for server.py FastAPI backend."""
 
+import json
+
 import pytest
 from fastapi.testclient import TestClient
 
+import autora_gui.react_app.server as server_module
 from autora_gui.react_app.server import (
-    COMPONENTS_DIR,
     CanvasLocation,
     ControlComponent,
     FilterComponent,
@@ -186,35 +188,43 @@ class TestAPIEndpoints:
 class TestAddComponent:
     """Tests for POST /api/components (component upload)."""
 
+    filename = "11111111111111111111111111111111.json"
+
     @pytest.fixture
-    def cleanup_files(self):
-        """Track files created during a test and remove them afterwards."""
-        created: list = []
-        yield created
-        for path in created:
-            path.unlink(missing_ok=True)
+    def isolated_components_dir(self, tmp_path, monkeypatch):
+        """Store uploaded components in a temporary catalog during each test."""
+        components_dir = tmp_path / "components"
+        monkeypatch.setattr(server_module, "COMPONENTS_DIR", components_dir)
+        return components_dir
 
     def _component(self, **overrides) -> dict:
         component = {
-            "uuid": "test-upload-uuid",
+            "uuid": "11111111-1111-1111-1111-111111111111",
             "protocolType": "experimentalist",
             "name": "Zzz Test Upload",
+            "description": "Uploaded during tests.",
+            "githubCommit": "https://example.com/commit",
+            "github_io": "https://example.com/docs",
             "pythonName": "zzz_test_upload",
+            "importPath": "autora.experimentalist.test_upload",
+            "pipInstall": "autora-test-upload",
+            "parameters": None,
+            "inputDataType": None,
+            "outputDataType": None,
         }
         component.update(overrides)
         return component
 
-    def test_add_component_persists_to_disk(self, cleanup_files):
+    def test_add_component_persists_to_disk(self, isolated_components_dir):
         """A valid component is written into its category folder and returned."""
-        expected_file = COMPONENTS_DIR / "experimentalists" / "zzz_test_upload.json"
-        cleanup_files.append(expected_file)
+        expected_file = isolated_components_dir / "experimentalists" / self.filename
 
         response = client.post("/api/components", json=self._component())
 
         assert response.status_code == 200
         data = response.json()
         assert data["category"] == "experimentalists"
-        assert data["component"]["file"] == "zzz_test_upload.json"
+        assert data["component"]["file"] == self.filename
         assert expected_file.exists()
 
     def test_add_component_unknown_protocol_type(self):
@@ -229,26 +239,31 @@ class TestAddComponent:
         response = client.post("/api/components", json=component)
         assert response.status_code == 400
 
-    def test_add_component_duplicate_filename(self, cleanup_files):
+    def test_add_component_rejects_incomplete_protocol(self):
+        """A component missing schema-required fields is rejected with 400."""
+        response = client.post(
+            "/api/components",
+            json=self._component(description=None),
+        )
+        assert response.status_code == 400
+
+    def test_add_component_duplicate_filename(self, isolated_components_dir):
         """Uploading a component whose file already exists returns 409."""
-        expected_file = COMPONENTS_DIR / "experimentalists" / "zzz_test_upload.json"
-        cleanup_files.append(expected_file)
+        expected_file = isolated_components_dir / "experimentalists" / self.filename
 
         first = client.post("/api/components", json=self._component())
         assert first.status_code == 200
+        assert expected_file.exists()
 
         second = client.post("/api/components", json=self._component())
         assert second.status_code == 409
 
-    def test_add_component_does_not_persist_file_field(self, cleanup_files):
+    def test_add_component_does_not_persist_file_field(self, isolated_components_dir):
         """The injected 'file' field is stripped before writing to disk."""
-        import json
-
-        expected_file = COMPONENTS_DIR / "experimentalists" / "zzz_test_upload.json"
-        cleanup_files.append(expected_file)
+        expected_file = isolated_components_dir / "experimentalists" / self.filename
 
         client.post("/api/components", json=self._component(file="should_be_dropped.json"))
 
-        with open(expected_file) as f:
+        with expected_file.open() as f:
             saved = json.load(f)
         assert "file" not in saved
