@@ -9,7 +9,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
-import { EMBEDDED_COMPONENTS } from '../data/components.js'
+import { loadComponents } from '../utils/componentLoader'
 
 const WorkflowContext = createContext(null)
 
@@ -376,8 +376,8 @@ function undoableReducer(state, action) {
 
 /**
  * Context provider that owns the workflow reducer state and dispatch, making
- * them available to descendant components. On mount it seeds the component
- * catalog from embedded data when present, otherwise fetching it from the API.
+ * them available to descendant components. On mount it loads the component
+ * catalog via loadComponents (local backend, or GitHub for the web build).
  *
  * @param {Object} props - Component props.
  * @param {JSX.Element} props.children - The subtree that consumes the context.
@@ -387,15 +387,9 @@ export function WorkflowProvider({ children }) {
   const [state, dispatch] = useReducer(undoableReducer, initialState)
 
   useEffect(() => {
-    // Use embedded data if available, otherwise fetch from API
-    if (EMBEDDED_COMPONENTS && Object.keys(EMBEDDED_COMPONENTS).length > 0) {
-      dispatch({ type: 'SET_COMPONENTS', payload: EMBEDDED_COMPONENTS })
-    } else {
-      fetch('/api/components')
-        .then(res => res.json())
-        .then(data => dispatch({ type: 'SET_COMPONENTS', payload: data }))
-        .catch(err => console.error('Failed to load components:', err))
-    }
+    loadComponents()
+      .then(data => dispatch({ type: 'SET_COMPONENTS', payload: data }))
+      .catch(err => console.error('Failed to load components:', err))
   }, [])
 
   return (

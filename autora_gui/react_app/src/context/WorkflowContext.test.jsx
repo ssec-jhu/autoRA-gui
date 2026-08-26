@@ -17,6 +17,11 @@ vi.mock('uuid', () => ({
   v4: () => 'mocked-uuid'
 }))
 
+// Mock the component loader so the provider does not hit the network in tests
+vi.mock('../utils/componentLoader', () => ({
+  loadComponents: () => Promise.resolve({})
+}))
+
 describe('workflowReducer', () => {
   describe('SET_COMPONENTS', () => {
     it('sets components in state', () => {
