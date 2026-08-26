@@ -20,6 +20,7 @@ describe('componentLoader', () => {
   afterEach(() => {
     global.fetch = originalFetch
     vi.restoreAllMocks()
+    sessionStorage.clear()
   })
 
   describe('loadComponents', () => {

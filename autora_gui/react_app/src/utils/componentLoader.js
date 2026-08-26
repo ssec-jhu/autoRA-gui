@@ -17,6 +17,10 @@ const COMPONENTS_PATH = 'autora_gui/JSON/components'
 // Component category folders (the `controls` category is provided by the UI).
 const CATEGORIES = ['theorists', 'experimentalists', 'experiment_runners']
 
+// SessionStorage cache key and TTL (5 minutes) for the GitHub component catalog.
+const CACHE_KEY = 'componentCache'
+const CACHE_TTL_MS = 5 * 60 * 1000
+
 /**
  * Load all components, keyed by category. Tries the local backend first and
  * falls back to reading the JSON files from GitHub when no backend is present.
@@ -37,14 +41,36 @@ export async function loadComponents() {
  * Read every component JSON file from the repository on GitHub and group them by
  * category, matching the shape returned by the backend's `/api/components`.
  *
+ * Results are cached in sessionStorage for CACHE_TTL_MS to avoid hitting the
+ * GitHub API rate limit on repeated page loads.
+ *
  * @returns {Promise<Object.<string, Object[]>>} Components grouped by category.
  */
 export async function fetchComponentsFromGitHub() {
+  try {
+    const cached = sessionStorage.getItem(CACHE_KEY)
+    if (cached) {
+      const { timestamp, data } = JSON.parse(cached)
+      if (Date.now() - timestamp < CACHE_TTL_MS) {
+        return data
+      }
+    }
+  } catch {
+    // sessionStorage unavailable or corrupted — proceed without cache.
+  }
+
   const lists = await Promise.all(CATEGORIES.map(fetchCategoryFromGitHub))
   const components = { controls: [] }
   CATEGORIES.forEach((category, i) => {
     components[category] = lists[i]
   })
+
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data: components }))
+  } catch {
+    // sessionStorage full or unavailable — skip caching.
+  }
+
   return components
 }
 
