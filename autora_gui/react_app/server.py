@@ -151,7 +151,6 @@ def get_schema(name: str) -> dict:
     return load_schema(name)
 
 
-
 @app.post("/api/workflow/validate")
 def validate_workflow(workflow: Workflow) -> dict:
     """Validate a workflow against the schema."""
