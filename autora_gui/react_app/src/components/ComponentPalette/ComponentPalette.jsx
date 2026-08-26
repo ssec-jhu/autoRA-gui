@@ -153,9 +153,9 @@ function ComponentPalette() {
   }
 
   /**
-   * Upload a component JSON file. Tries to persist it to disk via the backend
-   * (dev mode); if the backend is unreachable (e.g. standalone build), falls
-   * back to adding it to the palette for the current session only.
+   * Upload a component JSON file and add it to the palette for the current
+   * session. Components are not persisted to disk, so the behaviour is identical
+   * in both the local dev and standalone web versions.
    *
    * @param {Event} e - Change event from the hidden file input
    */
@@ -185,37 +185,9 @@ function ComponentPalette() {
       return
     }
 
-    try {
-      const res = await fetch('/api/components', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(component)
-      })
-      if (res.ok) {
-        const data = await res.json()
-        dispatch({ type: 'ADD_COMPONENT', payload: data })
-        setExpandedSections(prev => ({ ...prev, [category]: true }))
-        alert(`Added "${data.component.name}" to ${category} (saved to disk).`)
-        return
-      }
-      // 404/405 mean there is no persistence endpoint (e.g. the standalone build
-      // served by a static host) — fall back to a session-only add.
-      if (res.status === 404 || res.status === 405) {
-        throw new Error('no-backend')
-      }
-      // Backend reachable but rejected the component — surface why, don't fall back.
-      let detail = `${res.status} ${res.statusText}`
-      try { detail = (await res.json()).detail || detail } catch { /* keep status */ }
-      alert('Could not save component: ' + detail)
-    } catch {
-      // Backend unreachable or no upload endpoint — add for this session only.
-      dispatch({ type: 'ADD_COMPONENT', payload: { category, component } })
-      setExpandedSections(prev => ({ ...prev, [category]: true }))
-      alert(
-        `Added "${component.name}" to ${category} for this session only ` +
-        '(no backend available, not saved to disk).'
-      )
-    }
+    dispatch({ type: 'ADD_COMPONENT', payload: { category, component } })
+    setExpandedSections(prev => ({ ...prev, [category]: true }))
+    alert(`Added "${component.name}" to ${category} for this session.`)
   }
 
   return (
