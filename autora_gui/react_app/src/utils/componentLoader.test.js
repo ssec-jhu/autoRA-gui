@@ -15,7 +15,10 @@ function jsonResponse(data, ok = true, status = 200) {
 }
 
 describe('componentLoader', () => {
+  const originalFetch = global.fetch
+
   afterEach(() => {
+    global.fetch = originalFetch
     vi.restoreAllMocks()
   })
 
