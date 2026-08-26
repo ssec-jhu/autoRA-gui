@@ -6,13 +6,11 @@ Run with: uvicorn server:app --reload --port 8000
 import json
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, ValidationError
-
-from autora_gui.data_model import Protocol
+from pydantic import BaseModel
 
 
 @asynccontextmanager
@@ -149,7 +147,6 @@ def get_components_by_category(category: str) -> list[dict]:
 def get_schema(name: str) -> dict:
     """Get a JSON schema by name."""
     return load_schema(name)
-
 
 
 @app.post("/api/workflow/validate")

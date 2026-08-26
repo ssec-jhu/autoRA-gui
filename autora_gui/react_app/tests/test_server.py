@@ -1,9 +1,7 @@
 """Tests for server.py FastAPI backend."""
 
-import pytest
 from fastapi.testclient import TestClient
 
-import autora_gui.react_app.server as server_module
 from autora_gui.react_app.server import (
     CanvasLocation,
     ControlComponent,
