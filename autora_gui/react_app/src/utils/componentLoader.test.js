@@ -35,6 +35,7 @@ describe('componentLoader', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
+    sessionStorage.clear()
   })
 
   describe('loadComponents', () => {
