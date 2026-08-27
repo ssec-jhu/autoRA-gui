@@ -11,13 +11,38 @@
   border-bottom: 1px solid var(--border-color);
 }
 
+.palette-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
 .palette-header h2 {
   font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text-secondary);
-  margin-bottom: 12px;
+}
+
+.add-component-btn {
+  padding: 5px 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.add-component-btn:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent-primary);
 }
 
 .search-input {

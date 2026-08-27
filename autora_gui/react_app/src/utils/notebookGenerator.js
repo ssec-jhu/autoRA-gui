@@ -12,6 +12,7 @@ import {
   CodeBuilder,
   TEMPLATES,
   collectPipPackages,
+  flattenBlockNodes,
   generateImports,
   generateVariablesSetup,
   generateWrapper,
@@ -64,7 +65,7 @@ function toSource(text) {
  * Build the "run the workflow" code cell. Unlike the standalone Python file,
  * the notebook runs the loop at top level so each cycle's state is inspectable.
  *
- * @param {Array<{type: 'once'|'loop', nodes: Object[], maxCounter?: number}>} blocks - Ordered execution blocks (see getExecutionOrder).
+ * @param {import('./pythonGenerator').Block[]} blocks - Ordered execution block tree (see getExecutionOrder).
  * @param {Map} componentMeta - Map of node id to component metadata (`varName`, `nodeName`, `pythonName`).
  * @returns {string} Python source for the run cell.
  */
@@ -73,7 +74,7 @@ function buildRunCell(blocks, componentMeta) {
 
   // Variable setup + state initialization (templates are indented for a
   // function body, so strip the leading 4 spaces for top-level use).
-  code.multiline(dedent(generateVariablesSetup(componentMeta, blocks.flatMap(b => b.nodes))))
+  code.multiline(dedent(generateVariablesSetup(componentMeta, flattenBlockNodes(blocks))))
   code.blank()
   code.multiline(dedent(TEMPLATES.initState))
   code.blank()
@@ -87,7 +88,7 @@ function buildRunCell(blocks, componentMeta) {
     const isSampler = pythonName.includes('sample') || pythonName.includes('sampler')
 
     code.indent(`# ${nodeName}`, level)
-    if (isSampler && node.parameters?.num_samples) {
+    if (isSampler && node.parameters?.num_samples != null) {
       code.indent(`state = ${varName}(state, num_samples=${node.parameters.num_samples})`, level)
     } else {
       code.indent(`state = ${varName}(state)`, level)
@@ -95,21 +96,28 @@ function buildRunCell(blocks, componentMeta) {
     code.blank()
   }
 
-  // Emit each block in order (see getExecutionOrder). At top level, `once`
-  // blocks run their nodes unindented and `loop` blocks wrap them in a
-  // for-loop. Several Filter nodes produce several loop blocks.
-  blocks.forEach(block => {
-    if (block.type === 'loop') {
-      code.line(`# Experiment loop (${block.maxCounter} cycles)`)
-      code.line(`for i in range(${block.maxCounter}):`)
-      code.indent("print(f'Cycle {i}')")
-      code.blank()
-      block.nodes.forEach(node => addComponentCall(node, 1))
-      code.blank()
-    } else {
-      block.nodes.forEach(node => addComponentCall(node, 0))
-    }
-  })
+  // Emit the block tree in order (see getExecutionOrder). At top level `once`
+  // blocks run unindented; `loop` blocks wrap their children in a for-loop and
+  // recurse, so nested loops render as nested for-loops. A loop prints its cycle
+  // only when it directly runs components (not when it only holds nested loops).
+  const renderBlocks = (blks, level, loopDepth = 0) => {
+    blks.forEach(block => {
+      if (block.type === 'loop') {
+        const loopVar = `cycle_${loopDepth}`
+        code.indent(`# Experiment loop (${block.maxCounter} cycles)`, level)
+        code.indent(`for ${loopVar} in range(${block.maxCounter}):`, level)
+        if (block.children.some(c => c.type === 'once')) {
+          code.indent(`print(f'Cycle {${loopVar}}')`, level + 1)
+          code.blank()
+        }
+        renderBlocks(block.children, level + 1, loopDepth + 1)
+        code.blank()
+      } else {
+        block.nodes.forEach(node => addComponentCall(node, level))
+      }
+    })
+  }
+  renderBlocks(blocks, 0)
 
   code.line('print("Workflow completed!")')
   code.line('state')
@@ -162,13 +170,19 @@ export function generateNotebook(state) {
   generateImports(importsCode, imports, { usesPlaceholderVariables: !derivesVariablesFromRunner, usesEquationVariables: needsEquationVariables })
   cells.push(codeCell(importsCode.toString()))
 
-  // 4. Component definitions (one code cell per component for clarity)
+  // 4. Component definitions (one code cell per component for clarity).
+  // Components that produce an identical definition (same function name and
+  // parameters) are emitted only once and reused, so no duplicate cells appear.
   cells.push(markdownCell('## 3. Component definitions'))
+  const seenWrappers = new Set()
   componentMeta.forEach((meta) => {
     const wrapper = new CodeBuilder()
     generateWrapper(wrapper, meta)
     // Drop the trailing blank line each wrapper appends.
-    cells.push(codeCell(wrapper.toString().replace(/\n+$/, '')))
+    const src = wrapper.toString().replace(/\n+$/, '')
+    if (seenWrappers.has(src)) return
+    seenWrappers.add(src)
+    cells.push(codeCell(src))
   })
 
   // 5. Run the workflow

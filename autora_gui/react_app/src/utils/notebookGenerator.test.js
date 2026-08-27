@@ -144,13 +144,120 @@ describe('generateNotebook', () => {
     expect(runCell).not.toContain('np.linspace')
   })
 
+  it('emits an identical component definition in a single cell, called at every site', () => {
+    // Two samplers with the same name and parameters produce identical wrappers.
+    const state = buildState()
+    state.nodes.splice(2, 0, {
+      id: 'exp-2', type: 'component', name: 'Random Sampler',
+      protocolUuid: 'proto-exp', parameters: { num_samples: 5 }
+    })
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'exp-1' },
+      { sourceId: 'exp-1', targetId: 'exp-2' },
+      { sourceId: 'exp-2', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'end-1' }
+    ]
+    const nb = generateNotebook(state)
+    const defCells = nb.cells.filter(c =>
+      c.cell_type === 'code' && c.source.join('').includes('def random_sampler_on_state('))
+    expect(defCells.length).toBe(1)
+    // Both call sites remain in the run cell
+    const runCell = nb.cells.at(-1).source.join('')
+    expect(runCell.match(/state = random_sampler_on_state\(state/g).length).toBe(2)
+  })
+
+  it('keeps nested loops while de-duplicating identical definitions', () => {
+    // A duplicated sampler (deduped to one def) sits in an outer loop that wraps
+    // an inner loop — dedup must not flatten or drop the nesting.
+    const state = buildState()
+    state.nodes.splice(2, 0, {
+      id: 'exp-2', type: 'component', name: 'Random Sampler',
+      protocolUuid: 'proto-exp', parameters: { num_samples: 5 }
+    })
+    state.nodes.push(
+      { id: 'filt-in', type: 'filter_point', filterParams: { maxCounter: 5 } },
+      { id: 'filt-out', type: 'filter_point', filterParams: { maxCounter: 2 } }
+    )
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'exp-1' },
+      { sourceId: 'exp-1', targetId: 'exp-2' },
+      { sourceId: 'exp-2', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-in' },
+      { sourceId: 'filt-in', targetId: 'theo-1' },    // inner back-edge
+      { sourceId: 'filt-in', targetId: 'filt-out' },
+      { sourceId: 'filt-out', targetId: 'exp-1' },     // outer back-edge (spans all)
+      { sourceId: 'filt-out', targetId: 'end-1' }
+    ]
+    const nb = generateNotebook(state)
+    // Identical sampler defined once
+    const defCells = nb.cells.filter(c =>
+      c.cell_type === 'code' && c.source.join('').includes('def random_sampler_on_state('))
+    expect(defCells.length).toBe(1)
+    // Nesting preserved in the run cell
+    const runCell = nb.cells.at(-1).source.join('')
+    expect(runCell).toContain('\nfor cycle_0 in range(2):')
+    expect(runCell).toContain('\n    for cycle_1 in range(5):')
+    expect(runCell).toContain("    print(f'Cycle {cycle_0}')")
+    expect(runCell).toContain("        print(f'Cycle {cycle_1}')")
+    // Both duplicated call sites remain
+    expect(runCell.match(/state = random_sampler_on_state\(state/g).length).toBe(2)
+  })
+
   it('runs the loop at top level and references the sampler num_samples', () => {
-    const nb = generateNotebook(buildState())
+    const state = buildState()
+    // Add a filter that loops back over the components so there is a real loop
+    state.nodes.push({ id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 3 } })
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'exp-1' },
+      { sourceId: 'exp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'exp-1' },
+      { sourceId: 'filt-1', targetId: 'end-1' }
+    ]
+    const nb = generateNotebook(state)
     const runCell = nb.cells[nb.cells.length - 1]
     const src = runCell.source.join('')
-    expect(src).toContain('for i in range(')
+    expect(src).toContain('for cycle_0 in range(')
     expect(src).toContain('num_samples=5')
     expect(src).toContain('print("Workflow completed!")')
+  })
+
+  it('respects an explicit num_samples of 0 in the run cell', () => {
+    // num_samples: 0 is falsy; it must still be passed, not dropped as "unset".
+    const state = buildState()
+    state.nodes[1].parameters = { num_samples: 0 }
+    const src = generateNotebook(state).cells.at(-1).source.join('')
+    expect(src).toContain('state = random_sampler_on_state(state, num_samples=0)')
+  })
+
+  it('renders nested loops as nested for-loops in the run cell', () => {
+    // Inner filter loops back to the theorist; outer filter loops back to the
+    // sampler, wrapping the whole thing — so the theorist becomes an inner loop
+    // nested inside the outer loop, with the sampler running once per outer cycle.
+    const state = buildState()
+    state.nodes.push(
+      { id: 'filt-in', type: 'filter_point', filterParams: { maxCounter: 5 } },
+      { id: 'filt-out', type: 'filter_point', filterParams: { maxCounter: 2 } }
+    )
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'exp-1' },
+      { sourceId: 'exp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-in' },
+      { sourceId: 'filt-in', targetId: 'theo-1' },    // inner back-edge
+      { sourceId: 'filt-in', targetId: 'filt-out' },
+      { sourceId: 'filt-out', targetId: 'exp-1' },     // outer back-edge (spans all)
+      { sourceId: 'filt-out', targetId: 'end-1' }
+    ]
+    const src = generateNotebook(state).cells.at(-1).source.join('')
+    // Outer loop at top level, inner loop indented one level in
+    expect(src).toContain('\nfor cycle_0 in range(2):')
+    expect(src).toContain('\n    for cycle_1 in range(5):')
+    expect(src).toContain("    print(f'Cycle {cycle_0}')")
+    expect(src).toContain("        print(f'Cycle {cycle_1}')")
+    // Sampler runs once per outer cycle (4 spaces); theorist is in the inner loop (8)
+    expect(src).toContain('\n    state = random_sampler_on_state(state, num_samples=5)')
+    expect(src).toContain('\n        state = bms_regressor_on_state(state)')
+    expect(src.indexOf('for cycle_0 in range(2):')).toBeLessThan(src.indexOf('for cycle_1 in range(5):'))
   })
 
   it('runs pre-loop nodes once, before the loop', () => {
@@ -173,7 +280,7 @@ describe('generateNotebook', () => {
       { sourceId: 'filt-1', targetId: 'end-1' }
     ]
     const src = generateNotebook(state).cells[generateNotebook(state).cells.length - 1].source.join('')
-    const forIdx = src.indexOf('for i in range(')
+    const forIdx = src.indexOf('for cycle_0 in range(')
     const poolIdx = src.indexOf('state = grid_pooler_on_state(state)')
     // The pooler runs before the loop and is not indented into the loop body
     expect(poolIdx).toBeGreaterThan(-1)
