@@ -390,96 +390,64 @@ function buildFactoryParamString(pythonName, params, exclude = []) {
     .join(', ')
 }
 
-// SymPy/numpy function names and constants that must not be treated as
-// variable symbols when scanning an expression for its free variables.
-const NON_SYMBOL_NAMES = new Set([
-  'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh',
-  'exp', 'log', 'ln', 'sqrt', 'Abs', 'abs', 'sign', 'floor', 'ceiling',
-  'Max', 'Min', 'pi', 'E', 'I', 'oo'
-])
-
 /**
- * Extract the distinct variable symbols from a SymPy expression string, sorted
- * by name and excluding known function/constant names.
- *
- * @param {string} expression - e.g. "x_1 ** 2 - x_2 ** 2".
- * @returns {string[]} Sorted unique variable names.
- */
-function parseExpressionSymbols(expression) {
-  const ids = String(expression || '').match(/[A-Za-z_]\w*/g) || []
-  return [...new Set(ids)].filter(id => !NON_SYMBOL_NAMES.has(id)).sort()
-}
-
-/**
- * Extract the independent-variable names from a mixed-model formula. Uses the
- * right-hand side of `~`, drops intercept markers and random-effect groups.
- *
- * @param {string} formula - e.g. "rt ~ 1 + x1".
- * @returns {string[]} Sorted unique IV names.
- */
-function parseFormulaIVs(formula) {
-  const s = String(formula || '')
-  const rhs = (s.includes('~') ? s.split('~')[1] : s).replace(/\([^)]*\)/g, '')
-  const ids = rhs.match(/[A-Za-z_]\w*/g) || []
-  return [...new Set(ids)].sort()
-}
-
-// Synthetic runners whose factory needs X (and sometimes y) as Variable objects
-// the workflow does not capture. Each entry names the param carrying the
-// variable spec, how to parse IV names from it, and whether a y (DV) is needed.
-const XY_RUNNERS = {
-  equation_experiment: { specParam: 'expression', parseIVs: parseExpressionSymbols, needsY: true },
-  lmm_experiment: { specParam: 'formula', parseIVs: parseFormulaIVs, needsY: false }
-}
-
-/**
- * Whether a runner needs X/y Variable objects synthesized for its factory call.
+ * Whether a runner takes X/y (IV/DV) Variable objects on its factory call.
+ * These are declared as parameters with datatype "IV"/"DV" in the component's
+ * JSON and collected into `meta.xyParams` by prepareWorkflow.
  *
  * @param {Object} meta - Component metadata.
  * @returns {boolean}
  */
 function needsXYVariables(meta) {
-  return isSyntheticRunner(meta) && !!XY_RUNNERS[meta?.pythonName]
+  return isSyntheticRunner(meta) && (meta?.xyParams?.length > 0)
 }
 
 /**
- * Build the multi-line `runner = <name>(...)` call for a runner that needs X/y,
- * synthesizing an IV per variable in its expression/formula (and a DV when the
- * factory takes one) with default ranges the user adjusts. Emitted with a
- * 4-space base indent for use inside a function body.
+ * Build the multi-line `runner = <name>(...)` call for a runner that takes X/y
+ * (IV/DV) Variable objects. The IV/DV literals are emitted verbatim from the
+ * component JSON's IV/DV parameter definitions (the node value, or the declared
+ * default); a TODO comment prompts the user to adjust the names and ranges.
+ * Emitted with a 4-space base indent for use inside a function body.
  *
- * @param {Object} meta - Runner metadata with `pythonName`, `params`, `runParamNames`.
+ * @param {Object} meta - Runner metadata with `pythonName`, `params`, `runParamNames`, `xyParams`.
  * @param {number} [baseSpaces=4] - Leading indentation for the first line.
  * @returns {string} The indented, newline-joined call.
  */
 function buildXYRunnerCall(meta, baseSpaces = 4) {
-  const { pythonName, params, runParamNames = [] } = meta
-  const cfg = XY_RUNNERS[pythonName]
-  const ivNames = cfg.parseIVs(params[cfg.specParam])
-  const finalIVs = ivNames.length ? ivNames : ['x']
-  const range = 'allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)'
-  // The LHS pooler raises on any IV carrying `allowed_values` and needs a
-  // `value_range`; emit IVs with value_range only when one is in the workflow.
-  const ivRange = meta.omitAllowedValues ? 'value_range=(-10, 10)' : range
-  // Regular factory params (expression is sympified by buildFactoryParamString).
-  const factory = buildFactoryParamString(pythonName, params, runParamNames)
+  const { pythonName, params, runParamNames = [], xyParams = [] } = meta
+  const xyNames = xyParams.map(p => p.name)
+  // Regular factory params (expression is sympified by buildFactoryParamString);
+  // the IV/DV params are emitted verbatim below, under the TODO comment, so
+  // exclude them (and the run params) from the ordinary keyword arguments.
+  const factory = buildFactoryParamString(pythonName, params, [...runParamNames, ...xyNames])
   const pad = ' '.repeat(baseSpaces)
   const pad2 = ' '.repeat(baseSpaces + 4)
-  const pad3 = ' '.repeat(baseSpaces + 8)
 
   const lines = [`${pad}runner = ${pythonName}(`]
   if (factory) lines.push(`${pad2}${factory},`)
   lines.push(`${pad2}# TODO: adjust the variable names and ranges below for your experiment`)
-  lines.push(`${pad2}X=[`)
-  finalIVs.forEach(n => lines.push(`${pad3}IV(name="${n}", ${ivRange}),`))
-  if (cfg.needsY) {
-    lines.push(`${pad2}],`)
-    const dvName = ['y', 'z', 'output'].find(n => !finalIVs.includes(n)) || 'dv'
-    lines.push(`${pad2}y=DV(name="${dvName}", ${range}))`)
-  } else {
-    lines.push(`${pad2}])`)
-  }
+  xyParams.forEach(p => lines.push(`${pad2}${p.name}=${p.value},`))
+  // Close the factory call on the final argument line.
+  lines[lines.length - 1] = lines[lines.length - 1].replace(/,$/, ')')
   return lines.join('\n')
+}
+
+/**
+ * Remove `allowed_values=...` entries from an IV literal. The LHS pooler
+ * (autora.experimentalist.lhs) samples from `value_range` and raises on any IV
+ * that carries `allowed_values`; when such a pooler is in the workflow the IV
+ * declarations passed to a synthetic runner must drop `allowed_values`.
+ *
+ * Handles the `allowed_values=np.linspace(...)` form used in the component
+ * defaults, whether it is a leading, middle, or trailing argument.
+ *
+ * @param {string} literal - An IV literal, e.g. `[IV(name="x", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))]`.
+ * @returns {string} The literal with any `allowed_values=np.linspace(...)` removed.
+ */
+function stripAllowedValues(literal) {
+  return String(literal)
+    .replace(/allowed_values=np\.linspace\([^)]*\)\s*,\s*/g, '')
+    .replace(/\s*,\s*allowed_values=np\.linspace\([^)]*\)/g, '')
 }
 
 /**
@@ -740,6 +708,17 @@ export function prepareWorkflow(state) {
     // credentials template emitted automatically (see generateRunnerWrapper).
     const usesFirebaseCredentials = declaredParamNames.includes('firebase_credentials')
 
+    // IV/DV factory arguments (datatype "IV"/"DV" in the JSON, e.g. a synthetic
+    // runner's X and y). Their literal is taken from the node value if set,
+    // otherwise the declared default, and emitted verbatim (see buildXYRunnerCall).
+    const xyParams = initGroup
+      .filter(p => p.datatype === 'IV' || p.datatype === 'DV')
+      .map(p => ({
+        name: p.name,
+        datatype: p.datatype,
+        value: String((node.parameters || {})[p.name] ?? p.default)
+      }))
+
     componentMeta.set(node.id, {
       importPath,
       // Name as imported into the generated file (alias when aliased)
@@ -747,6 +726,7 @@ export function prepareWorkflow(state) {
       inputDataType,
       outputDataType: protocol.outputDataType,
       runParamNames,
+      xyParams,
       usesFirebaseCredentials,
       protocolType,
       params: node.parameters || {},
@@ -782,19 +762,26 @@ export function prepareWorkflow(state) {
     }
   })
 
-  // The LHS pooler (autora.experimentalist.lhs `pool`) raises on any variable
-  // carrying `allowed_values` and requires a `value_range`; when one is in the
-  // workflow, generated IVs must be emitted with value_range only.
+  // The LHS pooler (autora.experimentalist.lhs `pool`) samples from
+  // `value_range` and raises on any IV carrying `allowed_values`; when one is in
+  // the workflow, strip `allowed_values` from the IV declarations passed to
+  // runners. The DV is untouched — the pooler only samples independent variables.
   const hasLhsPooler = allPathNodes.some(node => {
     const p = allComponents.find(c => c.uuid === node.protocolUuid)
     return p && p.importPath === 'autora.experimentalist.lhs' && p.pythonName === 'pool'
   })
-  if (hasLhsPooler) componentMeta.forEach(meta => { meta.omitAllowedValues = true })
+  if (hasLhsPooler) {
+    componentMeta.forEach(meta => {
+      meta.xyParams = meta.xyParams.map(p =>
+        p.datatype === 'IV' ? { ...p, value: stripAllowedValues(p.value) } : p
+      )
+    })
+  }
 
   // Only synthetic runners provide `.variables`; with such a runner the
   // variables are derived from it, otherwise placeholder variables are emitted.
   const derivesVariablesFromRunner = [...componentMeta.values()].some(isSyntheticRunner)
-  // Runners needing synthesized X/y require IV/DV and numpy imports.
+  // Runners taking IV/DV factory arguments require IV/DV and numpy imports.
   const needsEquationVariables = [...componentMeta.values()].some(needsXYVariables)
 
   return { blocks, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables }

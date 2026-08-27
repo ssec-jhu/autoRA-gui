@@ -817,6 +817,16 @@ function buildStateWithEquationRunner() {
       parameters: {
         equation_experiment: [
           { name: 'expression', datatype: 'string' },
+          {
+            name: 'X',
+            datatype: 'IV',
+            default: '[IV(name="x", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)), IV(name="y", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))]'
+          },
+          {
+            name: 'y',
+            datatype: 'DV',
+            default: 'DV(name="z", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))'
+          },
           { name: 'rename_output_columns', datatype: 'boolean' }
         ],
         run: [{ name: 'added_noise', datatype: 'real' }]
@@ -843,40 +853,66 @@ describe('sympify expression params', () => {
   })
 })
 
-describe('equation_experiment X/y synthesis', () => {
-  it('synthesizes one IV per expression symbol plus a DV', () => {
+describe('equation_experiment X/y from IV/DV params', () => {
+  it('emits X and y verbatim from the IV/DV parameter defaults, under a TODO', () => {
     const code = generatePythonCode(buildStateWithEquationRunner())
-    expect(code).toContain('X=[')
-    expect(code).toContain('IV(name="x_1", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)),')
-    expect(code).toContain('IV(name="x_2", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)),')
-    expect(code).toContain('y=DV(name="y", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))')
     expect(code).toContain('# TODO: adjust the variable names and ranges below for your experiment')
+    expect(code).toContain(
+      'X=[IV(name="x", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)), ' +
+        'IV(name="y", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))],'
+    )
+    // y is the final factory argument, so its literal closes the runner call.
+    expect(code).toContain(
+      'y=DV(name="z", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)))'
+    )
+    // The expression is still sympified and precedes the IV/DV arguments.
+    expect(code).toContain('expression=sympify("x_1 ** 2 - x_2 ** 2"),')
   })
 
-  it('imports IV, DV and numpy for the synthesized variables', () => {
+  it('imports IV, DV and numpy for the IV/DV literals', () => {
     const code = generatePythonCode(buildStateWithEquationRunner())
     expect(code).toContain('from autora.variable import VariableCollection, IV, DV')
     expect(code).toContain('import numpy as np')
   })
 
-  it('names the DV to avoid colliding with an expression symbol', () => {
+  it('uses the node value over the default when the user sets X', () => {
     const state = buildStateWithEquationRunner()
-    state.nodes[3].parameters.expression = 'x ** 2 - y ** 2'
+    state.nodes[3].parameters.X = '[IV(name="a", value_range=(0, 1))]'
     const code = generatePythonCode(state)
-    expect(code).toContain('IV(name="x",')
-    expect(code).toContain('IV(name="y",')
-    // "y" is taken by an IV, so the DV falls back to the next free name
+    expect(code).toContain('X=[IV(name="a", value_range=(0, 1))],')
+    // The unset y still falls back to its declared default.
     expect(code).toContain('y=DV(name="z",')
   })
+})
 
-  it('does not treat function names as variables', () => {
+describe('LHS pooler strips allowed_values from IVs', () => {
+  // Turn the workflow's random pooler into the LHS pooler, which raises on any
+  // IV carrying allowed_values.
+  function buildStateWithLhsPooler() {
     const state = buildStateWithEquationRunner()
-    state.nodes[3].parameters.expression = 'sin(x_1) + cos(x_2)'
-    const code = generatePythonCode(state)
-    expect(code).toContain('IV(name="x_1",')
-    expect(code).toContain('IV(name="x_2",')
-    expect(code).not.toContain('IV(name="sin"')
-    expect(code).not.toContain('IV(name="cos"')
+    const pooler = state.components.experimentalists.find(c => c.uuid === 'proto-pool')
+    pooler.importPath = 'autora.experimentalist.lhs'
+    return state
+  }
+
+  it('drops allowed_values from IV declarations but keeps value_range', () => {
+    const code = generatePythonCode(buildStateWithLhsPooler())
+    expect(code).toContain(
+      'X=[IV(name="x", value_range=(-10, 10)), IV(name="y", value_range=(-10, 10))],'
+    )
+    expect(code).not.toMatch(/IV\([^)]*allowed_values/)
+  })
+
+  it('keeps allowed_values on the DV (the pooler samples IVs only)', () => {
+    const code = generatePythonCode(buildStateWithLhsPooler())
+    expect(code).toContain(
+      'y=DV(name="z", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)))'
+    )
+  })
+
+  it('leaves IV allowed_values intact when no LHS pooler is present', () => {
+    const code = generatePythonCode(buildStateWithEquationRunner())
+    expect(code).toMatch(/IV\(name="x", allowed_values=np\.linspace/)
   })
 })
 
@@ -900,7 +936,12 @@ function buildStateWithLmmRunner() {
       parameters: {
         lmm_experiment: [
           { name: 'formula', datatype: 'string' },
-          { name: 'fixed_effects', datatype: 'string' }
+          { name: 'fixed_effects', datatype: 'string' },
+          {
+            name: 'X',
+            datatype: 'IV',
+            default: '[IV(name="x1", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))]'
+          }
         ],
         run: [{ name: 'added_noise', datatype: 'real' }]
       },
@@ -910,26 +951,19 @@ function buildStateWithLmmRunner() {
   return state
 }
 
-describe('lmm_experiment X synthesis', () => {
-  it('synthesizes IVs from the formula RHS and passes no y', () => {
+describe('lmm_experiment X from IV param (no DV)', () => {
+  it('emits X verbatim from its default and passes no y', () => {
     const code = generatePythonCode(buildStateWithLmmRunner())
     expect(code).toContain('formula="rt ~ 1 + x1"')
     expect(code).toContain("fixed_effects={'Intercept': 0., 'x1': 2.}")
-    expect(code).toContain('IV(name="x1", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)),')
-    // lmm takes no y argument; the DV comes from the formula
+    // X is the only IV/DV param, so its literal closes the runner call.
+    expect(code).toContain(
+      'X=[IV(name="x1", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))])'
+    )
+    // lmm declares no DV param, so no y argument is emitted.
     expect(code).not.toContain('y=DV(')
     expect(code).toContain('from autora.variable import VariableCollection, IV, DV')
     expect(code).toContain('import numpy as np')
-  })
-
-  it('handles multiple IVs and ignores the intercept marker', () => {
-    const state = buildStateWithLmmRunner()
-    state.nodes[3].parameters.formula = 'rt ~ 1 + x1 + x2'
-    const code = generatePythonCode(state)
-    expect(code).toContain('IV(name="x1",')
-    expect(code).toContain('IV(name="x2",')
-    expect(code).not.toContain('IV(name="rt"')  // rt is the DV, not an IV
-    expect(code).not.toContain('IV(name="1"')
   })
 })
 
