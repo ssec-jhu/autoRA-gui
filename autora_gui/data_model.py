@@ -27,6 +27,8 @@ class Datatype(str, Enum):
     STRING = "string"
     CATEGORICAL = "categorical"
     ANY = "any"
+    IV = "IV"
+    DV = "DV"
 
 
 class ProtocolType(str, Enum):

@@ -38,6 +38,9 @@ class TestDatatype:
         assert Datatype.BOOLEAN == "boolean"
         assert Datatype.STRING == "string"
         assert Datatype.CATEGORICAL == "categorical"
+        assert Datatype.ANY == "any"
+        assert Datatype.IV == "IV"
+        assert Datatype.DV == "DV"
 
     def test_datatype_is_string_enum(self):
         assert isinstance(Datatype.REAL, str)

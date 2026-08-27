@@ -49,7 +49,9 @@
         "boolean",
         "string",
         "categorical",
-        "any"
+        "any",
+        "IV",
+        "DV"
       ],
       "title": "Datatype",
       "type": "string"
