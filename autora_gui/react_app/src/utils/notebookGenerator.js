@@ -88,7 +88,7 @@ function buildRunCell(blocks, componentMeta) {
     const isSampler = pythonName.includes('sample') || pythonName.includes('sampler')
 
     code.indent(`# ${nodeName}`, level)
-    if (isSampler && node.parameters?.num_samples) {
+    if (isSampler && node.parameters?.num_samples != null) {
       code.indent(`state = ${varName}(state, num_samples=${node.parameters.num_samples})`, level)
     } else {
       code.indent(`state = ${varName}(state)`, level)

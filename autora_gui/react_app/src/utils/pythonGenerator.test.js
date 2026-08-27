@@ -328,6 +328,31 @@ describe('getExecutionOrder', () => {
       }
     ])
   })
+
+  it('throws when two filters enclose exactly the same components', () => {
+    // Two filters chained back-to-back with no component between them, both
+    // looping back to the first component, span the identical interval [a, b].
+    // Nesting them would silently multiply cycle counts, so this is rejected.
+    // start -> a -> b -> F1(loops to a, exits to F2) -> F2(loops to a) -> end
+    const nodes = [
+      { id: 'start-1', type: 'start_point' },
+      { id: 'a', type: 'component', name: 'A', protocolUuid: 'proto-pool' },
+      { id: 'b', type: 'component', name: 'B', protocolUuid: 'proto-theo' },
+      { id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } },
+      { id: 'filt-2', type: 'filter_point', filterParams: { maxCounter: 2 } },
+      { id: 'end-1', type: 'end_point' }
+    ]
+    const connections = [
+      { sourceId: 'start-1', targetId: 'a' },
+      { sourceId: 'a', targetId: 'b' },
+      { sourceId: 'b', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'a' },      // loop-back (spans a..b)
+      { sourceId: 'filt-1', targetId: 'filt-2' }, // exit into the second filter
+      { sourceId: 'filt-2', targetId: 'a' },      // loop-back (also spans a..b)
+      { sourceId: 'filt-2', targetId: 'end-1' }
+    ]
+    expect(() => getExecutionOrder(nodes, connections)).toThrow(/exactly the same components/)
+  })
 })
 
 describe('prepareWorkflow aliasing', () => {
@@ -463,6 +488,15 @@ describe('generatePythonCode', () => {
     const code = generatePythonCode(buildState())
     expect(code).toContain('def falsification_sampler_on_state(conditions: pd.DataFrame, num_samples: int = 5)')
     expect(code).toContain('state = falsification_sampler_on_state(state, num_samples=5)')
+  })
+
+  it('respects an explicit num_samples of 0 instead of defaulting to 1', () => {
+    // num_samples: 0 is falsy; it must not be treated as "unset" and overridden.
+    const state = buildState()
+    state.nodes[2].parameters = { num_samples: 0 }
+    const code = generatePythonCode(state)
+    expect(code).toContain('def falsification_sampler_on_state(conditions: pd.DataFrame, num_samples: int = 0)')
+    expect(code).toContain('state = falsification_sampler_on_state(state, num_samples=0)')
   })
 
   it('wraps theorists with estimator_on_state using constructor parameters', () => {

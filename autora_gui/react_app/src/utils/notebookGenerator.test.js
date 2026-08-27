@@ -222,6 +222,14 @@ describe('generateNotebook', () => {
     expect(src).toContain('print("Workflow completed!")')
   })
 
+  it('respects an explicit num_samples of 0 in the run cell', () => {
+    // num_samples: 0 is falsy; it must still be passed, not dropped as "unset".
+    const state = buildState()
+    state.nodes[1].parameters = { num_samples: 0 }
+    const src = generateNotebook(state).cells.at(-1).source.join('')
+    expect(src).toContain('state = random_sampler_on_state(state, num_samples=0)')
+  })
+
   it('renders nested loops as nested for-loops in the run cell', () => {
     // Inner filter loops back to the theorist; outer filter loops back to the
     // sampler, wrapping the whole thing — so the theorist becomes an inner loop

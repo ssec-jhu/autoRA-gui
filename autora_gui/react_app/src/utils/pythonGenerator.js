@@ -189,6 +189,12 @@ function assertNestedOrDisjointIntervals(intervals) {
         'Partially overlapping loops are not supported.'
       )
     }
+    if (parent && interval.start === parent.start && interval.end === parent.end) {
+      throw new Error(
+        'Two Filter loops enclose exactly the same components. ' +
+        'Remove one, or place a component between them to nest.'
+      )
+    }
     stack.push(interval)
   })
 }
@@ -613,7 +619,7 @@ function generateExperimentalistWrapper(code, meta) {
       : `${pythonName}(variables)`
     code.indent(`return Delta(conditions=${call})`)
   } else if (isSampler) {
-    const numSamples = params.num_samples || 1
+    const numSamples = params.num_samples ?? 1
     const otherParamStr = buildParamString(params, ['num_samples'])
     // Some samplers (e.g. the LHS sampler) also require `reference_conditions`,
     // which is not a state field. Derive it from the IV columns of the
@@ -897,7 +903,7 @@ export function generatePythonCode(state) {
     const isSampler = pythonName.includes('sample') || pythonName.includes('sampler')
 
     code.indent(`# ${nodeName}`, level)
-    if (isSampler && node.parameters?.num_samples) {
+    if (isSampler && node.parameters?.num_samples != null) {
       code.indent(`state = ${varName}(state, num_samples=${node.parameters.num_samples})`, level)
     } else {
       code.indent(`state = ${varName}(state)`, level)
