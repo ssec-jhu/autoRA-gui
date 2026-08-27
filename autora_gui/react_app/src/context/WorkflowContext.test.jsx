@@ -17,9 +17,12 @@ vi.mock('uuid', () => ({
   v4: () => 'mocked-uuid'
 }))
 
-// Mock the component loader so the provider does not hit the network in tests
+// Mock the component loader so the provider does not hit the network in tests.
+// The promise never resolves on purpose: these tests drive components via manual
+// SET_COMPONENTS dispatches, and a resolving load would fire its dispatch after
+// the synchronous act() blocks, triggering React's "not wrapped in act(...)" warning.
 vi.mock('../utils/componentLoader', () => ({
-  loadComponents: () => Promise.resolve({})
+  loadComponents: () => new Promise(() => {})
 }))
 
 describe('workflowReducer', () => {
@@ -716,14 +719,22 @@ describe('WorkflowProvider', () => {
 // Consumer hook access and dispatch behavior
 describe('useWorkflow', () => {
   it('throws error when used outside WorkflowProvider', () => {
-    // Suppress console.error for this test
+    // Rendering the hook without a provider throws on purpose. React re-dispatches
+    // that render error as a window 'error' event, which jsdom would otherwise log
+    // as "Uncaught". Cancel it (and silence React's own console.error) so the
+    // expected failure does not spam the test output.
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const swallowError = (e) => e.preventDefault()
+    window.addEventListener('error', swallowError)
 
-    expect(() => {
-      renderHook(() => useWorkflow())
-    }).toThrow('useWorkflow must be used within a WorkflowProvider')
-
-    consoleSpy.mockRestore()
+    try {
+      expect(() => {
+        renderHook(() => useWorkflow())
+      }).toThrow('useWorkflow must be used within a WorkflowProvider')
+    } finally {
+      window.removeEventListener('error', swallowError)
+      consoleSpy.mockRestore()
+    }
   })
 
   it('returns state and dispatch when used inside WorkflowProvider', () => {
