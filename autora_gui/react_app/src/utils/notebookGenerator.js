@@ -65,7 +65,7 @@ function toSource(text) {
  * Build the "run the workflow" code cell. Unlike the standalone Python file,
  * the notebook runs the loop at top level so each cycle's state is inspectable.
  *
- * @param {import('./pythonGenerator').Block[]} blocks - Ordered execution block tree (see getExecutionOrder).
+ * @param {Block[]} blocks - Ordered execution block tree (see getExecutionOrder in pythonGenerator).
  * @param {Map} componentMeta - Map of node id to component metadata (`varName`, `nodeName`, `pythonName`).
  * @returns {string} Python source for the run cell.
  */

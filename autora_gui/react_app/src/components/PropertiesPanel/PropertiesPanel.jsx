@@ -155,8 +155,8 @@ const getVariableEntries = (dataType) => {
  * @param {Object} props
  * @param {Object} props.param - Parameter descriptor (name, description, default)
  * @param {string} props.initialValue - The parameter's current value
- * @param {(value: string) => void} props.onUpdate - Commit the edited value
- * @param {() => void} props.onClose - Dismiss without committing
+ * @param {function(string): void} props.onUpdate - Commit the edited value
+ * @param {function(): void} props.onClose - Dismiss without committing
  * @returns {JSX.Element}
  */
 function ExpressionEditorModal({ param, initialValue, onUpdate, onClose }) {
