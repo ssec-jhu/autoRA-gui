@@ -914,6 +914,33 @@ describe('LHS pooler strips allowed_values from IVs', () => {
     const code = generatePythonCode(buildStateWithEquationRunner())
     expect(code).toMatch(/IV\(name="x", allowed_values=np\.linspace/)
   })
+
+  it('strips allowed_values with whitespace around = (e.g. allowed_values = values)', () => {
+    const state = buildStateWithLhsPooler()
+    const xParam = state.components.experiment_runners[0].parameters.equation_experiment.find(p => p.name === 'X')
+    xParam.default = `[IV(name="x", allowed_values = values, value_range=(-10, 10))]`
+    const code = generatePythonCode(state)
+    expect(code).not.toMatch(/IV\([^)]*allowed_values/)
+    expect(code).toContain('value_range=(-10, 10)')
+  })
+
+  it('strips allowed_values with a plain number value (e.g. allowed_values=42)', () => {
+    const state = buildStateWithLhsPooler()
+    const xParam = state.components.experiment_runners[0].parameters.equation_experiment.find(p => p.name === 'X')
+    xParam.default = `[IV(name="x", allowed_values=42, value_range=(-10, 10))]`
+    const code = generatePythonCode(state)
+    expect(code).not.toMatch(/IV\([^)]*allowed_values/)
+    expect(code).toContain('value_range=(-10, 10)')
+  })
+
+  it('strips allowed_values with a quoted string value (e.g. allowed_values="auto")', () => {
+    const state = buildStateWithLhsPooler()
+    const xParam = state.components.experiment_runners[0].parameters.equation_experiment.find(p => p.name === 'X')
+    xParam.default = `[IV(name="x", allowed_values="auto", value_range=(-10, 10))]`
+    const code = generatePythonCode(state)
+    expect(code).not.toMatch(/IV\([^)]*allowed_values/)
+    expect(code).toContain('value_range=(-10, 10)')
+  })
 })
 
 // Extend the base state with the lmm_experiment synthetic runner

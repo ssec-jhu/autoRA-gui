@@ -451,13 +451,13 @@ function buildXYRunnerCall(meta, baseSpaces = 4) {
  * @returns {string} The literal with any `allowed_values=...` argument removed.
  */
 function stripAllowedValues(literal) {
-  // Match allowed_values= followed by a value that may be:
+  // Match allowed_values= (with optional whitespace around =) followed by a value that may be:
   //   - a bracketed/parenthesised/braced expression (possibly nested): [...], (...), {...}
   //   - a function call with balanced parens: name(...)
-  //   - a plain token (number, identifier, quoted string without commas)
-  const bracketedValue = String.raw`(?:\[(?:[^\[\]]|\[(?:[^\[\]])*\])*\]|\((?:[^()]|\((?:[^()])*\))*\)|{(?:[^{}]|{(?:[^{}])*})*}|\w[\w.]*\((?:[^()]|\((?:[^()])*\))*\))`
+  //   - a plain token (number, identifier, or quoted string)
+  const bracketedValue = String.raw`(?:\[(?:[^\[\]]|\[(?:[^\[\]])*\])*\]|\((?:[^()]|\((?:[^()])*\))*\)|{(?:[^{}]|{(?:[^{}])*})*}|\w[\w.]*\((?:[^()]|\((?:[^()])*\))*\)|"[^"]*"|'[^']*'|\w[\w.]*)`
   const re = new RegExp(
-    `allowed_values=${bracketedValue}\\s*,\\s*|\\s*,\\s*allowed_values=${bracketedValue}`,
+    `allowed_values\\s*=\\s*${bracketedValue}\\s*,\\s*|\\s*,\\s*allowed_values\\s*=\\s*${bracketedValue}`,
     'g'
   )
   return String(literal).replace(re, '')

@@ -99,7 +99,11 @@ jobs:
       # Create landing page as main index
       - name: Create landing page
         run: |
-          cat > deploy/index.html << 'EOF'
+          FXY_CARD=""
+          if [ -f deploy/fix-xy-runners/index.html ]; then
+            FXY_CARD='<a href="./fix-xy-runners/" class="version-card"><h2>Workflow Editor with fixed XY runners</h2><p>React-based GUI with fixed XY runners</p></a>'
+          fi
+          cat > deploy/index.html << HTMLEOF
           <!DOCTYPE html>
           <html lang="en">
           <head>
@@ -122,13 +126,13 @@ jobs:
           <h1>AutoRA Workflow Editor and Documentation</h1>
           <div class="versions">
           <a href="./main/" class="version-card"><h2>Workflow Editor</h2><p>React-based GUI</p></a>
-          <a href="./fix-xy-runners/" class="version-card"><h2>Workflow Editor with fixed XY runners</h2><p>React-based GUI with fixed XY runners</p></a>
+          ${FXY_CARD}
           <a href="./docs/" class="version-card"><h2>Documentation</h2><p>API reference and guides</p></a>
           </div>
           </div>
           </body>
           </html>
-          EOF
+          HTMLEOF
 
       - name: List deployment contents
         run: |
