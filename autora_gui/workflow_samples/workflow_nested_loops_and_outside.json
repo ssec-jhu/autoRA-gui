@@ -50,102 +50,102 @@
       "protocolUuid": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f",
       "parameterSetting": [
         {
-          "uuid": "59e82136-44f1-4e05-960a-057e9d8f928a",
+          "uuid": "51284891-b1d2-4c53-87a9-447b0fa17d50",
           "name": "batch_size",
           "value": 64
         },
         {
-          "uuid": "6390ef97-2490-44f9-93a5-89405238fbbd",
+          "uuid": "ba5d8333-7c24-44e6-8cdf-c1acb217ffe8",
           "name": "num_graph_nodes",
           "value": 2
         },
         {
-          "uuid": "cbe42363-259d-4f45-8b5e-54032f3ffe1d",
+          "uuid": "ac68b024-7e14-47f9-81ea-da2eeda20bcf",
           "name": "output_type",
           "value": "real"
         },
         {
-          "uuid": "b4f1b79c-e7a9-41d3-b9d5-ddba0fdf50cf",
+          "uuid": "4a387ba3-252b-4a97-84c0-a0c4350346ba",
           "name": "classifier_weight_decay",
           "value": 0.01
         },
         {
-          "uuid": "30a69fef-2ae3-4021-a205-dd7b357d3d2f",
+          "uuid": "fdd0b3c7-32a8-449e-a15b-e31b64dbbbd5",
           "name": "darts_type",
           "value": "original"
         },
         {
-          "uuid": "8f574411-743d-469d-a0ef-e754e8f93279",
+          "uuid": "a0962bec-8210-4b06-a7ba-78c98d411e14",
           "name": "param_updates_per_epoch",
           "value": 10
         },
         {
-          "uuid": "588a9c84-261e-4e54-80b8-b0d7e368c081",
+          "uuid": "0ae855e3-d681-4032-b0e8-a6861d9b1d4a",
           "name": "param_updates_for_sampled_model",
           "value": 100
         },
         {
-          "uuid": "b88c6357-fa3e-4e89-8d49-ea358d30ec0d",
+          "uuid": "ba4907e2-c584-4283-bad3-8df9f8c5e54d",
           "name": "param_learning_rate_max",
           "value": 0.025
         },
         {
-          "uuid": "36ba1d56-bdf8-40fc-90fc-476a4461e895",
+          "uuid": "f1febd14-7f5c-4a09-a1d3-93d8c65e2c8e",
           "name": "param_learning_rate_min",
           "value": 0.01
         },
         {
-          "uuid": "08654268-cef2-475a-8d7a-0f4d66da68b7",
+          "uuid": "f34d62ec-e101-4f51-a52c-5a806f83a9e0",
           "name": "param_momentum",
           "value": 0.9
         },
         {
-          "uuid": "8122b958-c68c-4a26-9225-788855157c46",
+          "uuid": "6d454b7f-c26c-4e50-b9e6-591eb986760d",
           "name": "arch_updates_per_epoch",
           "value": 1
         },
         {
-          "uuid": "6b0c19d1-b3e5-4098-b80a-0026dfbe1397",
+          "uuid": "be7f35c8-bf09-487d-9814-6d6f0f139374",
           "name": "arch_learning_rate_max",
           "value": 0.003
         },
         {
-          "uuid": "71ad552d-b400-4631-a0da-dbf2ff461ae9",
+          "uuid": "aa95cc0d-20a0-4d5d-9a4c-434757e874ca",
           "name": "arch_weight_decay",
           "value": 0.0001
         },
         {
-          "uuid": "5521835a-a48f-4741-82a0-be16a1392c4f",
+          "uuid": "30796ed4-8d03-43bc-9135-979bdc7d735d",
           "name": "arch_weight_decay_df",
           "value": 0.0003
         },
         {
-          "uuid": "8182b28b-3d2f-41d6-b764-b39b87b976dd",
+          "uuid": "d8952e20-547d-4e1f-913e-3777ab10ae26",
           "name": "arch_weight_decay_base",
           "value": 0
         },
         {
-          "uuid": "8318ed82-3b2a-4c70-96d5-de8e3e8f60f9",
+          "uuid": "39cc729d-bd0e-4780-8e80-742743e789ce",
           "name": "arch_momentum",
           "value": 0.9
         },
         {
-          "uuid": "3f506e02-ea8c-44d0-bdc2-49da6a232a30",
+          "uuid": "9d965ac8-f9ba-4b77-81b6-13fc5c25cc37",
           "name": "fair_darts_loss_weight",
           "value": 1
         },
         {
-          "uuid": "f0385e0b-d49c-48ea-9cad-b338bd7ca321",
+          "uuid": "88062e4a-d9e2-49e1-aa37-c895352b0d02",
           "name": "max_epochs",
           "value": 10
         },
         {
-          "uuid": "b79f32b0-01f8-4724-97d2-ae3f5e326775",
+          "uuid": "6f6d399e-df43-45c1-83c6-f2de88dd5860",
           "name": "grad_clip",
           "value": 5
         },
         {
-          "uuid": "6590fdb7-b75d-444d-af10-9b71a168f728",
+          "uuid": "1e709739-d312-4b11-bea2-bdff17c8eb2b",
           "name": "primitives",
           "value": [
             "none",
@@ -157,17 +157,17 @@
           ]
         },
         {
-          "uuid": "78f89922-ce0b-49cc-acdb-cced700195fc",
+          "uuid": "b32620a6-39ab-4bc2-9ec1-6ed2990a9d38",
           "name": "train_classifier_coefficients",
           "value": false
         },
         {
-          "uuid": "657b500c-0006-47b3-a027-b3267257c744",
+          "uuid": "75893244-ca1a-4c1e-ae55-06741ee4c70d",
           "name": "train_classifier_bias",
           "value": false
         },
         {
-          "uuid": "48947070-4e04-490c-beb4-dbfadeade2f2",
+          "uuid": "b731faec-258d-48c9-911f-4eddb6c9bfc4",
           "name": "sampling_strategy",
           "value": "max"
         }
@@ -182,12 +182,12 @@
       "protocolUuid": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
       "parameterSetting": [
         {
-          "uuid": "183e3ca4-5352-4923-b56e-84a3c5d4b878",
+          "uuid": "707906ed-1a0e-4a3c-ab88-f4477d9c6969",
           "name": "num_samples",
           "value": 1
         },
         {
-          "uuid": "2b8bc014-c38e-444b-9ca7-b0db328553bd",
+          "uuid": "c4a5bfa3-9632-4dcc-82c2-89a19f665efe",
           "name": "replace",
           "value": false
         }
@@ -202,12 +202,12 @@
       "protocolUuid": "e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",
       "parameterSetting": [
         {
-          "uuid": "865904e4-5732-48a3-adfa-c94a33190f4b",
+          "uuid": "e915829c-bbaf-4e43-ade4-6287164349dc",
           "name": "num_samples",
           "value": 5
         },
         {
-          "uuid": "77d2f6ae-7117-41f7-ae62-ec67af2ff713",
+          "uuid": "9d92b588-3085-4a23-87c2-9b4956329e47",
           "name": "replace",
           "value": true
         }
@@ -222,32 +222,32 @@
       "protocolUuid": "a5b6c7d8-e9f0-4a1b-2c3d-4e5f6a7b8c9d",
       "parameterSetting": [
         {
-          "uuid": "8bd76008-7d14-43ef-b691-76ad60ba5b78",
+          "uuid": "52442de9-c187-4c38-8516-ecd8722f083e",
           "name": "choice_temperature",
           "value": 0.1
         },
         {
-          "uuid": "b1d00b6e-742a-466c-a7df-a2a1c7b18e33",
+          "uuid": "0d5c859b-fe84-472c-95d9-3c39e2605c28",
           "name": "value_lambda",
           "value": 0.5
         },
         {
-          "uuid": "818b925a-7725-4c53-81d9-e7766802c0a6",
+          "uuid": "28b87d8a-3500-49c4-baad-ddc495c7f2c5",
           "name": "resolution",
           "value": 10
         },
         {
-          "uuid": "3c854eae-bf54-49f1-a252-ed8749524717",
+          "uuid": "cd77f473-2cd9-4020-8a0c-ee128e1130ec",
           "name": "minimum_value",
           "value": -1
         },
         {
-          "uuid": "01963ceb-0ae0-468a-a1f3-1ee022a4814d",
+          "uuid": "ff267d71-f52f-499e-9c18-f75da9f82743",
           "name": "maximum_value",
           "value": 1
         },
         {
-          "uuid": "d90c53bf-3109-493d-b7fa-b26be8873a99",
+          "uuid": "63b90d6a-13da-4ebf-8904-b834065339f9",
           "name": "added_noise",
           "value": 0.01
         }
@@ -258,136 +258,16 @@
       }
     },
     {
-      "uuid": "e44ae1ed-be65-4138-b299-358f4d1eaad3",
-      "protocolUuid": "d8e9f0a1-b2c3-4d4e-5f6a-7b8c9d0e1f2a",
-      "parameterSetting": [
-        {
-          "uuid": "612304c8-1a21-4e86-9e64-2b4ef725fc18",
-          "name": "learning_rate",
-          "value": 0.2
-        },
-        {
-          "uuid": "81b78573-8da1-49be-9a53-a8f7716254b9",
-          "name": "decision_noise",
-          "value": 3
-        },
-        {
-          "uuid": "b5a55891-d9d6-4750-9473-3fdde88f93a9",
-          "name": "n_actions",
-          "value": 2
-        },
-        {
-          "uuid": "e0f3f953-3a4e-420d-84ee-e0d379245038",
-          "name": "forget_rate",
-          "value": 0
-        },
-        {
-          "uuid": "45b888db-39bc-45da-9da4-fd18d8772f86",
-          "name": "perseverance_bias",
-          "value": 0
-        },
-        {
-          "uuid": "2b54c533-5d33-459a-a1de-38d1bb915e3e",
-          "name": "correlated_reward",
-          "value": false
-        },
-        {
-          "uuid": "83ba47b3-e9d8-4254-94cc-5b74b26d10ac",
-          "name": "return_choice_probabilities",
-          "value": false
-        }
-      ],
-      "canvasLocation": {
-        "x": 929,
-        "y": 474
-      }
-    },
-    {
-      "uuid": "c1f283cc-4358-4750-a963-3df3443087ab",
-      "protocolUuid": "a7b8c9d0-e1f2-4a3b-4c5d-6e7f8a9b0c1d",
-      "parameterSetting": [
-        {
-          "uuid": "a1e89f9a-cf32-499a-9c97-11c9b6359c53",
-          "name": "num_samples",
-          "value": 100
-        },
-        {
-          "uuid": "1b5e7710-8a00-49cf-ac2b-82fc1b2b147b",
-          "name": "training_epochs",
-          "value": 1000
-        },
-        {
-          "uuid": "3f5a18e7-fe11-4e02-89e1-4dbf3063511a",
-          "name": "optimization_epochs",
-          "value": 1000
-        },
-        {
-          "uuid": "9abd089d-4f8a-4c9f-905a-c17473846dd3",
-          "name": "training_lr",
-          "value": 0.001
-        },
-        {
-          "uuid": "ac5a0c9d-fa54-45b8-8942-34c9c2436c99",
-          "name": "optimization_lr",
-          "value": 0.001
-        },
-        {
-          "uuid": "4bf4c230-fd6a-421c-bffd-27f4eb2229b5",
-          "name": "limit_offset",
-          "value": 0
-        },
-        {
-          "uuid": "fa7d113b-05e2-4e30-a5cc-14ab251c719f",
-          "name": "limit_repulsion",
-          "value": 0
-        },
-        {
-          "uuid": "ec2f4182-6e1d-465a-84c7-d64ecbc79a12",
-          "name": "plot",
-          "value": false
-        }
-      ],
-      "canvasLocation": {
-        "x": 683,
-        "y": 28
-      }
-    },
-    {
-      "uuid": "76c788e0-13de-4999-883e-01ba98cfabf0",
-      "protocolUuid": "b8c9d0e1-f2a3-4b4c-5d6e-7f8a9b0c1d2e",
-      "parameterSetting": [
-        {
-          "uuid": "a051f852-1a10-4ebe-919b-3bde4b4b8d23",
-          "name": "training_epochs",
-          "value": 1000
-        },
-        {
-          "uuid": "740ff376-bc8d-4019-bfdf-09a018e03ae4",
-          "name": "training_lr",
-          "value": 0.001
-        },
-        {
-          "uuid": "27bd5621-a5c1-416b-8239-d8ebdbe543c9",
-          "name": "plot",
-          "value": false
-        }
-      ],
-      "canvasLocation": {
-        "x": 1128,
-        "y": 193
-      }
-    },
-    {
       "uuid": "215ecd07-fe2f-4226-a87a-531ac7d724be",
       "protocolUuid": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       "parameterSetting": [
         {
-          "uuid": "fd9d75c5-f5d4-4b4a-8aa6-2f611af5fcc2",
+          "uuid": "f06e8fab-d3fc-40b8-979e-9ac9fa749218",
           "name": "epochs",
           "value": 1500
         },
         {
-          "uuid": "0368482e-3a86-4144-8843-cc5df850953f",
+          "uuid": "7c92cb15-702d-4bf2-a54c-74c90a08b843",
           "name": "num_param",
           "value": 1
         }
@@ -402,12 +282,12 @@
       "protocolUuid": "e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",
       "parameterSetting": [
         {
-          "uuid": "3b8df86e-0473-4faf-8829-1a1f2a09f09e",
+          "uuid": "ae14eda4-1973-43ba-b864-c6196543e3f3",
           "name": "num_samples",
           "value": 5
         },
         {
-          "uuid": "9dd89436-90a9-4e23-9129-343c43ce7f77",
+          "uuid": "e47bfce9-3f2f-4e68-9421-1cdbc7e75211",
           "name": "replace",
           "value": true
         }
@@ -422,12 +302,12 @@
       "protocolUuid": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
       "parameterSetting": [
         {
-          "uuid": "dfb3d702-7f4e-48f8-9ad9-c0a8e33034a1",
+          "uuid": "017eb0be-4005-4e6e-9e32-8f8addb32ad6",
           "name": "num_samples",
           "value": 1
         },
         {
-          "uuid": "6339a08f-a2e7-4bb3-ad4d-31433fe3c93d",
+          "uuid": "6bde5e79-1101-4a9b-a006-53625a107cf3",
           "name": "replace",
           "value": false
         }
@@ -435,6 +315,86 @@
       "canvasLocation": {
         "x": -33,
         "y": 535
+      }
+    },
+    {
+      "uuid": "ef38df72-bb22-4c25-83c9-067fc8996079",
+      "protocolUuid": "e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",
+      "parameterSetting": [
+        {
+          "uuid": "64b49bdb-31b7-43fc-a658-005f7ee2adc4",
+          "name": "num_samples",
+          "value": 5
+        },
+        {
+          "uuid": "e6f8d27f-e6a1-4463-bb05-459482327849",
+          "name": "replace",
+          "value": true
+        }
+      ],
+      "canvasLocation": {
+        "x": 648,
+        "y": 133
+      }
+    },
+    {
+      "uuid": "6148c1d7-a12f-4720-a3e6-56cd525302f6",
+      "protocolUuid": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
+      "parameterSetting": [
+        {
+          "uuid": "ac508f40-408b-4d9b-ab12-d4558da09936",
+          "name": "num_samples",
+          "value": 1
+        },
+        {
+          "uuid": "b78a05ff-aa4a-4403-bd97-6e53cd3695f7",
+          "name": "replace",
+          "value": false
+        }
+      ],
+      "canvasLocation": {
+        "x": 1114,
+        "y": 261
+      }
+    },
+    {
+      "uuid": "b316a003-b053-4b44-9238-44d127f3830a",
+      "protocolUuid": "a5b6c7d8-e9f0-4a1b-2c3d-4e5f6a7b8c9d",
+      "parameterSetting": [
+        {
+          "uuid": "b440e425-607e-4b50-a72d-7952d98e234d",
+          "name": "choice_temperature",
+          "value": 0.1
+        },
+        {
+          "uuid": "ff3fad27-0617-48af-b637-b447918b0e74",
+          "name": "value_lambda",
+          "value": 0.5
+        },
+        {
+          "uuid": "fb92fbe1-7655-444d-ac64-06a3eca25fc9",
+          "name": "resolution",
+          "value": 10
+        },
+        {
+          "uuid": "93daed25-5d6c-4049-ab3a-dab56b4e68aa",
+          "name": "minimum_value",
+          "value": -1
+        },
+        {
+          "uuid": "b13b294d-c111-4b07-8f8a-6648e8f01f59",
+          "name": "maximum_value",
+          "value": 1
+        },
+        {
+          "uuid": "3fd48d19-3dcc-469b-83e7-39f752ec5905",
+          "name": "added_noise",
+          "value": 0.01
+        }
+      ],
+      "canvasLocation": {
+        "x": 961,
+        "y": 461
       }
     }
   ],
@@ -476,54 +436,6 @@
       }
     },
     {
-      "source": "2a809a47-2adf-4264-9416-43cdfa4b4ae4",
-      "target": "c1f283cc-4358-4750-a963-3df3443087ab",
-      "sourcePoint": {
-        "x": 205.15432893255092,
-        "y": 71.22222222222217
-      },
-      "targetPoint": {
-        "x": 683.0891265597147,
-        "y": 68.36320215731962
-      }
-    },
-    {
-      "source": "c1f283cc-4358-4750-a963-3df3443087ab",
-      "target": "76c788e0-13de-4999-883e-01ba98cfabf0",
-      "sourcePoint": {
-        "x": 843.0891265597147,
-        "y": 68.36320215731962
-      },
-      "targetPoint": {
-        "x": 1207.5335710041595,
-        "y": 192.80764660176408
-      }
-    },
-    {
-      "source": "76c788e0-13de-4999-883e-01ba98cfabf0",
-      "target": "e44ae1ed-be65-4138-b299-358f4d1eaad3",
-      "sourcePoint": {
-        "x": 1207.5335710041595,
-        "y": 272.8076466017641
-      },
-      "targetPoint": {
-        "x": 1088.8383838383843,
-        "y": 514.0656565656565
-      }
-    },
-    {
-      "source": "e44ae1ed-be65-4138-b299-358f4d1eaad3",
-      "target": "215ecd07-fe2f-4226-a87a-531ac7d724be",
-      "sourcePoint": {
-        "x": 1008.8383838383843,
-        "y": 554.0656565656565
-      },
-      "targetPoint": {
-        "x": 780.8669043374925,
-        "y": 599.4743132684308
-      }
-    },
-    {
       "source": "215ecd07-fe2f-4226-a87a-531ac7d724be",
       "target": "d66847af-d83d-458b-8df3-bdef3279613a",
       "sourcePoint": {
@@ -533,18 +445,6 @@
       "targetPoint": {
         "x": 364.54826832649064,
         "y": 467.9545454545454
-      }
-    },
-    {
-      "source": "d66847af-d83d-458b-8df3-bdef3279613a",
-      "target": "c1f283cc-4358-4750-a963-3df3443087ab",
-      "sourcePoint": {
-        "x": 309.39393939393995,
-        "y": 409.9717893972485
-      },
-      "targetPoint": {
-        "x": 763.0891265597147,
-        "y": 108.36320215731962
       }
     },
     {
@@ -641,6 +541,66 @@
       "targetPoint": {
         "x": -483.3666210670315,
         "y": -656.2202462380302
+      }
+    },
+    {
+      "source": "d66847af-d83d-458b-8df3-bdef3279613a",
+      "target": "ef38df72-bb22-4c25-83c9-067fc8996079",
+      "sourcePoint": {
+        "x": 309,
+        "y": 410.0172439427031
+      },
+      "targetPoint": {
+        "x": 648.3530280649923,
+        "y": 173.06450024618402
+      }
+    },
+    {
+      "source": "ef38df72-bb22-4c25-83c9-067fc8996079",
+      "target": "6148c1d7-a12f-4720-a3e6-56cd525302f6",
+      "sourcePoint": {
+        "x": 808.3530280649923,
+        "y": 173.06450024618402
+      },
+      "targetPoint": {
+        "x": 1194.3067454455936,
+        "y": 261.4899064500246
+      }
+    },
+    {
+      "source": "2a809a47-2adf-4264-9416-43cdfa4b4ae4",
+      "target": "ef38df72-bb22-4c25-83c9-067fc8996079",
+      "sourcePoint": {
+        "x": 205.1543289325507,
+        "y": 71
+      },
+      "targetPoint": {
+        "x": 728.3530280649923,
+        "y": 133.06450024618402
+      }
+    },
+    {
+      "source": "6148c1d7-a12f-4720-a3e6-56cd525302f6",
+      "target": "b316a003-b053-4b44-9238-44d127f3830a",
+      "sourcePoint": {
+        "x": 1194.3067454455936,
+        "y": 341.4899064500246
+      },
+      "targetPoint": {
+        "x": 1121.1841457410142,
+        "y": 500.713934022649
+      }
+    },
+    {
+      "source": "b316a003-b053-4b44-9238-44d127f3830a",
+      "target": "215ecd07-fe2f-4226-a87a-531ac7d724be",
+      "sourcePoint": {
+        "x": 1041.1841457410142,
+        "y": 540.713934022649
+      },
+      "targetPoint": {
+        "x": 781,
+        "y": 599
       }
     }
   ]
