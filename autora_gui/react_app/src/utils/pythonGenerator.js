@@ -438,32 +438,6 @@ function buildXYRunnerCall(meta, baseSpaces = 4) {
 }
 
 /**
- * Remove `allowed_values=...` entries from an IV literal. The LHS pooler
- * (autora.experimentalist.lhs) samples from `value_range` and raises on any IV
- * that carries `allowed_values`; when such a pooler is in the workflow the IV
- * declarations passed to a synthetic runner must drop `allowed_values`.
- *
- * Handles common literal forms including `np.linspace(...)`, lists, tuples,
- * `np.array(...)`, and other common argument shapes, whether the argument is
- * leading, middle, or trailing.
- *
- * @param {string} literal - An IV literal, e.g. `[IV(name="x", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))]`.
- * @returns {string} The literal with any `allowed_values=...` argument removed.
- */
-function stripAllowedValues(literal) {
-  // Match allowed_values= (with optional whitespace around =) followed by a value that may be:
-  //   - a bracketed/parenthesised/braced expression (possibly nested): [...], (...), {...}
-  //   - a function call with balanced parens: name(...)
-  //   - a plain token (number, identifier, or quoted string)
-  const bracketedValue = String.raw`(?:\[(?:[^\[\]]|\[(?:[^\[\]])*\])*\]|\((?:[^()]|\((?:[^()])*\))*\)|{(?:[^{}]|{(?:[^{}])*})*}|\w[\w.]*\((?:[^()]|\((?:[^()])*\))*\)|"[^"]*"|'[^']*'|\w[\w.]*)`
-  const re = new RegExp(
-    `allowed_values\\s*=\\s*${bracketedValue}\\s*,\\s*|\\s*,\\s*allowed_values\\s*=\\s*${bracketedValue}`,
-    'g'
-  )
-  return String(literal).replace(re, '')
-}
-
-/**
  * Generate wrapper function for a theorist component
  *
  * @param {CodeBuilder} code - Builder to append the wrapper to.
@@ -789,22 +763,6 @@ export function prepareWorkflow(state) {
       meta.varName = candidate
     }
   })
-
-  // The LHS pooler (autora.experimentalist.lhs `pool`) samples from
-  // `value_range` and raises on any IV carrying `allowed_values`; when one is in
-  // the workflow, strip `allowed_values` from the IV declarations passed to
-  // runners. The DV is untouched — the pooler only samples independent variables.
-  const hasLhsPooler = allPathNodes.some(node => {
-    const p = allComponents.find(c => c.uuid === node.protocolUuid)
-    return p && p.importPath === 'autora.experimentalist.lhs' && p.pythonName === 'pool'
-  })
-  if (hasLhsPooler) {
-    componentMeta.forEach(meta => {
-      meta.xyParams = meta.xyParams.map(p =>
-        p.datatype === 'IV' ? { ...p, value: stripAllowedValues(p.value) } : p
-      )
-    })
-  }
 
   // Only synthetic runners provide `.variables`; with such a runner the
   // variables are derived from it, otherwise placeholder variables are emitted.
