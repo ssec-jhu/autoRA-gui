@@ -44,7 +44,7 @@
           "unique": false
         },
         "validValues": null,
-        "default": "DV(name=\"z\", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))"
+        "default": "DV(name=\"z\")"
       },
       {
         "name": "rename_output_columns",
