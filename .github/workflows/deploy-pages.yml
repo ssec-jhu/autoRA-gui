@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - fix-xy-runners
+      - fix-xy-runners
   workflow_dispatch:  # Allow manual trigger
 
 permissions:
@@ -126,7 +127,7 @@ jobs:
           <h1>AutoRA Workflow Editor and Documentation</h1>
           <div class="versions">
           <a href="./main/" class="version-card"><h2>Workflow Editor</h2><p>React-based GUI</p></a>
-          ${FXY_CARD}
+          <a href="./fix-xy-runners/" class="version-card"><h2>Workflow Editor with fixed XY runners</h2><p>React-based GUI with fixed XY runners</p></a>
           <a href="./docs/" class="version-card"><h2>Documentation</h2><p>API reference and guides</p></a>
           </div>
           </div>
