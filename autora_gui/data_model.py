@@ -98,6 +98,11 @@ class Protocol(AutoraBaseModel):
     parameters: dict[str, list[VariableTypes]] | None
     inputDataType: VariableTypes | None  # could be a bunch of allowed datatypes
     outputDataType: VariableTypes | None  # could be a bunch of allowed datatypes
+    # True for experiment runners whose `.run()` returns the dependent-variable
+    # values (a list, one per condition) rather than a full experiment_data
+    # DataFrame (e.g. the bandit/Q-learning synthetic runner). The code generator
+    # then assembles experiment_data by pairing the conditions with these values.
+    runReturnsDV: bool = False
 
 
 # Workflow classes from here

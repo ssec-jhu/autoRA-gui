@@ -525,7 +525,19 @@ function generateRunnerWrapper(code, meta) {
     code.blank()
     code.line('@on_state()')
     code.line(`def ${varName}(conditions: pd.DataFrame) -> Delta:`)
-    code.indent(`return Delta(experiment_data=runner.run(${runArgs}))`)
+    if (meta.runReturnsDV) {
+      // This runner's `.run()` returns the DV values (one per condition), not a
+      // full experiment_data frame (e.g. bandit/Q-learning). Assemble one keyed
+      // by the runner's own IV/DV variable names.
+      code.indent(`dv_values = runner.run(${runArgs})`)
+      code.indent('experiment_data = pd.DataFrame({')
+      code.indent('runner.variables.independent_variables[0].name: list(conditions.iloc[:, 0]),', 2)
+      code.indent('runner.variables.dependent_variables[0].name: dv_values,', 2)
+      code.indent('})')
+      code.indent('return Delta(experiment_data=experiment_data)')
+    } else {
+      code.indent(`return Delta(experiment_data=runner.run(${runArgs}))`)
+    }
     code.blank()
     return
   }
@@ -740,6 +752,9 @@ export function prepareWorkflow(state) {
       outputDataType: protocol.outputDataType,
       runParamNames,
       xyParams,
+      // Runner whose `.run()` returns the DV values rather than a full
+      // experiment_data frame (see generateRunnerWrapper).
+      runReturnsDV: protocol.runReturnsDV === true,
       usesFirebaseCredentials,
       protocolType,
       params: node.parameters || {},

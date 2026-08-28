@@ -767,6 +767,27 @@ function buildStateWithFirebaseRunner() {
   return state
 }
 
+describe('runReturnsDV runners assemble experiment_data', () => {
+  it('assembles experiment_data from conditions + run() DV values', () => {
+    const state = buildStateWithRunner()
+    state.components.experiment_runners[0].runReturnsDV = true
+    const code = generatePythonCode(state)
+    expect(code).toContain('dv_values = runner.run(')
+    expect(code).toContain('experiment_data = pd.DataFrame({')
+    expect(code).toContain('runner.variables.independent_variables[0].name: list(conditions.iloc[:, 0]),')
+    expect(code).toContain('runner.variables.dependent_variables[0].name: dv_values,')
+    expect(code).toContain('return Delta(experiment_data=experiment_data)')
+    // The plain single-line form must not be used for this runner.
+    expect(code).not.toContain('return Delta(experiment_data=runner.run(')
+  })
+
+  it('uses the plain run() return for a normal synthetic runner', () => {
+    const code = generatePythonCode(buildStateWithRunner())
+    expect(code).toContain('return Delta(experiment_data=runner.run(')
+    expect(code).not.toContain('dv_values = runner.run(')
+  })
+})
+
 describe('real (non-synthetic) runners', () => {
   it('calls the runner directly instead of runner.run()', () => {
     const code = generatePythonCode(buildStateWithFirebaseRunner())

@@ -331,6 +331,11 @@
         }
       ],
       "title": "Outputdatatype"
+    },
+    "runReturnsDV": {
+      "default": false,
+      "title": "Runreturnsdv",
+      "type": "boolean"
     }
   },
   "required": [
