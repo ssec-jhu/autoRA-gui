@@ -36,8 +36,8 @@ jobs:
       - name: Create deployment directory
         run: mkdir -p deploy
 
-      # Build React version from main branch
-      - name: Checkout React branch
+      # Build from main branch
+      - name: Checkout main branch
         uses: actions/checkout@v4
         with:
           ref: main
@@ -52,7 +52,7 @@ jobs:
           cp ../../index.html ../../../deploy/main/index.html
         continue-on-error: true
 
-      # Build improved code generator version from fix-xy-runners branch
+      # Build from fix-xy-runners branch
       - name: Checkout fix-xy-runners branch
         uses: actions/checkout@v4
         continue-on-error: true
@@ -60,7 +60,7 @@ jobs:
           ref: fix-xy-runners
           path: fix-xy-runners-branch
 
-      - name: Build component JSON generation standalone version
+      - name: Build fix-xy-runners standalone version
         run: |
           cd fix-xy-runners-branch/autora_gui/react_app
           npm install
