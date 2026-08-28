@@ -93,6 +93,13 @@ function Toolbar({ leftWidth, rightWidth }) {
         const workflow = JSON.parse(event.target.result)
         const { nodes, connections } = deserializeWorkflow(workflow, state.components)
         dispatch({ type: 'LOAD_WORKFLOW', payload: { nodes, connections } })
+        // Fit the freshly loaded workflow into view. Use the parsed `nodes`
+        // directly — `state.nodes` is not updated synchronously by the dispatch.
+        const fit = computeFitToScreen(nodes, getCanvasCenter())
+        if (fit) {
+          dispatch({ type: 'SET_ZOOM', payload: fit.zoom })
+          dispatch({ type: 'SET_PAN', payload: fit.pan })
+        }
       } catch (err) {
         alert('Failed to load workflow: ' + err.message)
       }
