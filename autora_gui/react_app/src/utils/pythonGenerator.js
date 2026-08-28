@@ -426,7 +426,12 @@ function buildXYRunnerCall(meta, baseSpaces = 4) {
   const lines = [`${pad}runner = ${pythonName}(`]
   if (factory) lines.push(`${pad2}${factory},`)
   lines.push(`${pad2}# TODO: adjust the variable names and ranges below for your experiment`)
-  xyParams.forEach(p => lines.push(`${pad2}${p.name}=${p.value},`))
+  xyParams.forEach(p => {
+    // Indent any newlines inside multi-line values so the generated Python stays
+    // syntactically valid regardless of how the user formatted the value.
+    const indentedValue = String(p.value).replace(/\n/g, `\n${pad2}`)
+    lines.push(`${pad2}${p.name}=${indentedValue},`)
+  })
   // Close the factory call on the final argument line.
   lines[lines.length - 1] = lines[lines.length - 1].replace(/,$/, ')')
   return lines.join('\n')
@@ -438,16 +443,24 @@ function buildXYRunnerCall(meta, baseSpaces = 4) {
  * that carries `allowed_values`; when such a pooler is in the workflow the IV
  * declarations passed to a synthetic runner must drop `allowed_values`.
  *
- * Handles the `allowed_values=np.linspace(...)` form used in the component
- * defaults, whether it is a leading, middle, or trailing argument.
+ * Handles common literal forms including `np.linspace(...)`, lists, tuples,
+ * `np.array(...)`, and other common argument shapes, whether the argument is
+ * leading, middle, or trailing.
  *
  * @param {string} literal - An IV literal, e.g. `[IV(name="x", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))]`.
- * @returns {string} The literal with any `allowed_values=np.linspace(...)` removed.
+ * @returns {string} The literal with any `allowed_values=...` argument removed.
  */
 function stripAllowedValues(literal) {
-  return String(literal)
-    .replace(/allowed_values=np\.linspace\([^)]*\)\s*,\s*/g, '')
-    .replace(/\s*,\s*allowed_values=np\.linspace\([^)]*\)/g, '')
+  // Match allowed_values= followed by a value that may be:
+  //   - a bracketed/parenthesised/braced expression (possibly nested): [...], (...), {...}
+  //   - a function call with balanced parens: name(...)
+  //   - a plain token (number, identifier, quoted string without commas)
+  const bracketedValue = String.raw`(?:\[(?:[^\[\]]|\[(?:[^\[\]])*\])*\]|\((?:[^()]|\((?:[^()])*\))*\)|{(?:[^{}]|{(?:[^{}])*})*}|\w[\w.]*\((?:[^()]|\((?:[^()])*\))*\))`
+  const re = new RegExp(
+    `allowed_values=${bracketedValue}\\s*,\\s*|\\s*,\\s*allowed_values=${bracketedValue}`,
+    'g'
+  )
+  return String(literal).replace(re, '')
 }
 
 /**
