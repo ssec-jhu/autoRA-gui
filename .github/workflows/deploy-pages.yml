@@ -55,6 +55,7 @@ jobs:
       # Build improved code generator version from fix-xy-runners branch
       - name: Checkout fix-xy-runners branch
         uses: actions/checkout@v4
+        continue-on-error: true
         with:
           ref: fix-xy-runners
           path: fix-xy-runners-branch
