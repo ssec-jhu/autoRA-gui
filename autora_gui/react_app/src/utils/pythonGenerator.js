@@ -403,13 +403,26 @@ function needsXYVariables(meta) {
 }
 
 /**
- * Build the multi-line `runner = <name>(...)` call for a runner that takes X/y
+ * Module-level variable name holding a synthetic runner's built object. Derived
+ * from the (already-unique) wrapper `varName` so identical wrappers share it
+ * (keeping wrapper-dedup intact) while two distinct synthetic runners get
+ * distinct names and never overwrite one another's global `runner`.
+ *
+ * @param {Object} meta - Component metadata with an assigned `varName`.
+ * @returns {string} A unique Python identifier for this runner's object.
+ */
+function runnerVarName(meta) {
+  return `${meta.varName.replace(/_on_state(_\d+)?$/, '$1')}_runner`
+}
+
+/**
+ * Build the multi-line `<runner> = <name>(...)` call for a runner that takes X/y
  * (IV/DV) Variable objects. The IV/DV literals are emitted verbatim from the
  * component JSON's IV/DV parameter definitions (the node value, or the declared
  * default); a TODO comment prompts the user to adjust the names and ranges.
  * Emitted with a 4-space base indent for use inside a function body.
  *
- * @param {Object} meta - Runner metadata with `pythonName`, `params`, `runParamNames`, `xyParams`.
+ * @param {Object} meta - Runner metadata with `pythonName`, `params`, `runParamNames`, `xyParams`, `varName`.
  * @param {number} [baseSpaces=4] - Leading indentation for the first line.
  * @returns {string} The indented, newline-joined call.
  */
@@ -423,7 +436,7 @@ function buildXYRunnerCall(meta, baseSpaces = 4) {
   const pad = ' '.repeat(baseSpaces)
   const pad2 = ' '.repeat(baseSpaces + 4)
 
-  const lines = [`${pad}runner = ${pythonName}(`]
+  const lines = [`${pad}${runnerVarName(meta)} = ${pythonName}(`]
   if (factory) lines.push(`${pad2}${factory},`)
   lines.push(`${pad2}# TODO: adjust the variable names and ranges below for your experiment`)
   xyParams.forEach(p => {
@@ -487,14 +500,16 @@ function generateRunnerWrapper(code, meta) {
       Object.fromEntries(Object.entries(params).filter(([name]) => runParamNames.includes(name)))
     )
     const runArgs = ['conditions=conditions', runParamStr].filter(Boolean).join(', ')
-    // Build the runner once at module scope so the same object is reused by the
-    // variables setup (see generateVariablesSetup) — no need to rebuild it.
+    // Build the runner once at module scope, under a name unique to this wrapper,
+    // so distinct synthetic runners don't overwrite one another's global and the
+    // variables setup (see generateVariablesSetup) can reuse it — no rebuild.
+    const runVar = runnerVarName(meta)
     if (needsXYVariables(meta)) {
       // Synthesize the required X (IVs) and y (DV); the workflow does not carry them.
       code.multiline(buildXYRunnerCall(meta, 0))
     } else {
       const factoryParamStr = buildFactoryParamString(pythonName, params, runParamNames)
-      code.line(`runner = ${pythonName}(${factoryParamStr})`)
+      code.line(`${runVar} = ${pythonName}(${factoryParamStr})`)
     }
     code.blank()
     code.line('@on_state()')
@@ -503,7 +518,7 @@ function generateRunnerWrapper(code, meta) {
       // This runner's `.run()` returns the DV values (one per condition), not a
       // full experiment_data frame (e.g. bandit/Q-learning). Assemble one keyed
       // by the runner's own IV/DV variable names.
-      code.indent(`dv_values = runner.run(${runArgs})`)
+      code.indent(`dv_values = ${runVar}.run(${runArgs})`)
       // Some runners return a tuple of outputs when extra results are requested
       // (e.g. Q-learning's return_choice_probabilities=True yields
       // (choices, probabilities)). Keep the first element as the DV values; any
@@ -511,12 +526,12 @@ function generateRunnerWrapper(code, meta) {
       code.indent('if isinstance(dv_values, tuple):')
       code.indent('dv_values = dv_values[0]', 2)
       code.indent('experiment_data = pd.DataFrame({')
-      code.indent('runner.variables.independent_variables[0].name: list(conditions.iloc[:, 0]),', 2)
-      code.indent('runner.variables.dependent_variables[0].name: dv_values,', 2)
+      code.indent(`${runVar}.variables.independent_variables[0].name: list(conditions.iloc[:, 0]),`, 2)
+      code.indent(`${runVar}.variables.dependent_variables[0].name: dv_values,`, 2)
       code.indent('})')
       code.indent('return Delta(experiment_data=experiment_data)')
     } else {
-      code.indent(`return Delta(experiment_data=runner.run(${runArgs}))`)
+      code.indent(`return Delta(experiment_data=${runVar}.run(${runArgs}))`)
     }
     code.blank()
     return
@@ -797,11 +812,14 @@ export function generateVariablesSetup(componentMeta, orderedNodes) {
 
   if (!runnerMeta) return TEMPLATES.defaultVariables
 
-  // Reuse the `runner` defined in the component section — do not rebuild it.
+  // Reuse this runner's object defined in the component section — do not rebuild
+  // it. Use its unique variable name so we bind the intended runner even when the
+  // workflow defines several distinct synthetic runners.
+  const runVar = runnerVarName(runnerMeta)
   return [
     '    # Variables are governed by the experiment runner defined above',
-    '    assert runner.variables is not None',
-    '    variables = runner.variables'
+    `    assert ${runVar}.variables is not None`,
+    `    variables = ${runVar}.variables`
   ].join('\n')
 }
 
