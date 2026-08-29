@@ -86,3 +86,51 @@ describe('PropertiesPanel IV/DV expression editor', () => {
     expect(screen.queryByRole('dialog')).toBeNull()
   })
 })
+
+describe('PropertiesPanel modal accessibility', () => {
+  it('moves focus into the textarea on open', () => {
+    render(<PropertiesPanel />)
+    fireEvent.click(screen.getByLabelText('Open a larger editor for X'))
+    const textarea = within(screen.getByRole('dialog')).getByRole('textbox')
+    expect(document.activeElement).toBe(textarea)
+  })
+
+  it('closes on Escape', () => {
+    render(<PropertiesPanel />)
+    fireEvent.click(screen.getByLabelText('Open a larger editor for X'))
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('traps focus: Tab from the last control wraps to the first', () => {
+    render(<PropertiesPanel />)
+    fireEvent.click(screen.getByLabelText('Open a larger editor for X'))
+    const dialog = screen.getByRole('dialog')
+    const closeBtn = within(dialog).getByLabelText('Close editor')
+    const updateBtn = within(dialog).getByText('Update')
+
+    updateBtn.focus()
+    fireEvent.keyDown(dialog, { key: 'Tab' })
+    expect(document.activeElement).toBe(closeBtn)
+  })
+
+  it('traps focus: Shift+Tab from the first control wraps to the last', () => {
+    render(<PropertiesPanel />)
+    fireEvent.click(screen.getByLabelText('Open a larger editor for X'))
+    const dialog = screen.getByRole('dialog')
+    const closeBtn = within(dialog).getByLabelText('Close editor')
+    const updateBtn = within(dialog).getByText('Update')
+
+    closeBtn.focus()
+    fireEvent.keyDown(dialog, { key: 'Tab', shiftKey: true })
+    expect(document.activeElement).toBe(updateBtn)
+  })
+
+  it('restores focus to the expand button on close', () => {
+    render(<PropertiesPanel />)
+    const expandBtn = screen.getByLabelText('Open a larger editor for X')
+    fireEvent.click(expandBtn)
+    fireEvent.click(within(screen.getByRole('dialog')).getByText('Cancel'))
+    expect(document.activeElement).toBe(expandBtn)
+  })
+})

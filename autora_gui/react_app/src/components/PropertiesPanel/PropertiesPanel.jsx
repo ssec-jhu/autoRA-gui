@@ -161,17 +161,49 @@ const getVariableEntries = (dataType) => {
  */
 function ExpressionEditorModal({ param, initialValue, onUpdate, onClose }) {
   const [draft, setDraft] = React.useState(initialValue ?? '')
+  const panelRef = React.useRef(null)
+
+  // Move focus into the modal on open. (aria-modal alone does not contain focus.)
+  React.useEffect(() => {
+    const target = panelRef.current?.querySelector('textarea') ||
+      panelRef.current?.querySelector('button')
+    target?.focus()
+  }, [])
+
+  // Keep focus inside the modal: Escape closes; Tab/Shift+Tab wrap at the edges
+  // so focus cannot land on the underlying page controls.
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') { onClose(); return }
+    if (e.key !== 'Tab' || !panelRef.current) return
+    const focusable = Array.from(
+      panelRef.current.querySelectorAll('button, textarea, input, select, [href], [tabindex]:not([tabindex="-1"])')
+    ).filter(el => !el.disabled)
+    if (focusable.length === 0) return
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault()
+      last.focus()
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault()
+      first.focus()
+    }
+  }
 
   return (
     <div
       className="expr-editor-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Edit ${param.name}`}
       onMouseDown={onClose}
-      onKeyDown={(e) => { if (e.key === 'Escape') onClose() }}
+      onKeyDown={handleKeyDown}
     >
-      <div className="expr-editor" onMouseDown={(e) => e.stopPropagation()}>
+      <div
+        className="expr-editor"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Edit ${param.name}`}
+        ref={panelRef}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         <div className="expr-editor-header">
           <h3 className="expr-editor-title">Edit <code>{param.name}</code></h3>
           <button
@@ -190,7 +222,6 @@ function ExpressionEditorModal({ param, initialValue, onUpdate, onClose }) {
           className="expr-editor-textarea"
           value={draft}
           spellCheck={false}
-          autoFocus
           placeholder={param.default != null ? param.default.toString() : ''}
           onChange={(e) => setDraft(e.target.value)}
         />
@@ -222,9 +253,21 @@ function PropertiesPanel() {
 
   // The parameter currently being edited in the expanded modal editor, if any.
   const [editorParam, setEditorParam] = React.useState(null)
+  // The expand button that opened the modal, so focus can be restored on close.
+  const editorTriggerRef = React.useRef(null)
   // Close the modal if the selection changes, so an Update can't land on the
   // wrong node.
   React.useEffect(() => { setEditorParam(null) }, [state.selectedNodeId])
+
+  /**
+   * Close the modal editor and restore focus to the expand button that opened it.
+   *
+   * @returns {void}
+   */
+  const closeEditor = () => {
+    setEditorParam(null)
+    editorTriggerRef.current?.focus()
+  }
 
   /**
    * Dispatch an update to a single parameter on the selected node.
@@ -335,7 +378,7 @@ function PropertiesPanel() {
               className="expression-expand-btn"
               aria-label={`Open a larger editor for ${param.name}`}
               title="Open larger editor"
-              onClick={() => setEditorParam(param)}
+              onClick={(e) => { editorTriggerRef.current = e.currentTarget; setEditorParam(param) }}
             >
               ⤢
             </button>
@@ -584,9 +627,9 @@ function PropertiesPanel() {
           initialValue={selectedNode.parameters[editorParam.name]}
           onUpdate={(value) => {
             handleParameterChange(editorParam.name, value)
-            setEditorParam(null)
+            closeEditor()
           }}
-          onClose={() => setEditorParam(null)}
+          onClose={closeEditor}
         />
       )}
     </aside>
