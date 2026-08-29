@@ -222,6 +222,7 @@ function ExpressionEditorModal({ param, initialValue, onUpdate, onClose }) {
           className="expr-editor-textarea"
           value={draft}
           spellCheck={false}
+          aria-label={`Value for ${param.name}`}
           placeholder={param.default != null ? param.default.toString() : ''}
           onChange={(e) => setDraft(e.target.value)}
         />
