@@ -504,6 +504,12 @@ function generateRunnerWrapper(code, meta) {
       // full experiment_data frame (e.g. bandit/Q-learning). Assemble one keyed
       // by the runner's own IV/DV variable names.
       code.indent(`dv_values = runner.run(${runArgs})`)
+      // Some runners return a tuple of outputs when extra results are requested
+      // (e.g. Q-learning's return_choice_probabilities=True yields
+      // (choices, probabilities)). Keep the first element as the DV values; any
+      // additional outputs are not part of the declared dependent variable.
+      code.indent('if isinstance(dv_values, tuple):')
+      code.indent('dv_values = dv_values[0]', 2)
       code.indent('experiment_data = pd.DataFrame({')
       code.indent('runner.variables.independent_variables[0].name: list(conditions.iloc[:, 0]),', 2)
       code.indent('runner.variables.dependent_variables[0].name: dv_values,', 2)

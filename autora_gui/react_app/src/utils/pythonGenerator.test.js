@@ -773,6 +773,9 @@ describe('runReturnsDV runners assemble experiment_data', () => {
     state.components.experiment_runners[0].runReturnsDV = true
     const code = generatePythonCode(state)
     expect(code).toContain('dv_values = runner.run(')
+    // A tuple return (e.g. return_choice_probabilities=True) is reduced to the DV values.
+    expect(code).toContain('if isinstance(dv_values, tuple):')
+    expect(code).toContain('dv_values = dv_values[0]')
     expect(code).toContain('experiment_data = pd.DataFrame({')
     expect(code).toContain('runner.variables.independent_variables[0].name: list(conditions.iloc[:, 0]),')
     expect(code).toContain('runner.variables.dependent_variables[0].name: dv_values,')
