@@ -849,7 +849,7 @@ function buildStateWithEquationRunner() {
           {
             name: 'y',
             datatype: 'DV',
-            default: 'DV(name="z", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))'
+            default: 'DV(name="z")'
           },
           { name: 'rename_output_columns', datatype: 'boolean' }
         ],
@@ -887,7 +887,7 @@ describe('equation_experiment X/y from IV/DV params', () => {
     )
     // y is the final factory argument, so its literal closes the runner call.
     expect(code).toContain(
-      'y=DV(name="z", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)))'
+      'y=DV(name="z")'
     )
     // The expression is still sympified and precedes the IV/DV arguments.
     expect(code).toContain('expression=sympify("x_1 ** 2 - x_2 ** 2"),')
@@ -905,7 +905,7 @@ describe('equation_experiment X/y from IV/DV params', () => {
     const code = generatePythonCode(state)
     expect(code).toContain('X=[IV(name="a", value_range=(0, 1))],')
     // The unset y still falls back to its declared default.
-    expect(code).toContain('y=DV(name="z",')
+    expect(code).toContain('y=DV(name="z")')
   })
 })
 
