@@ -736,7 +736,7 @@ export function prepareWorkflow(state) {
       .map(p => ({
         name: p.name,
         datatype: p.datatype,
-        value: String((node.parameters || {})[p.name] ?? p.default)
+        value: String(String((node.parameters || {})[p.name] ?? '').trim() || (p.default ?? ''))
       }))
 
     componentMeta.set(node.id, {
