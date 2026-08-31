@@ -6,6 +6,14 @@
  * @module utils/pythonGenerator
  */
 
+/**
+ * One execution block produced by getExecutionOrder: a `once` block runs its
+ * nodes a single time, while a `loop` block runs its child blocks inside
+ * `for cycle_N in range(maxCounter)` (nested loops become nested block trees).
+ *
+ * @typedef {{type: 'once', nodes: Object[]} | {type: 'loop', maxCounter: number, children: Block[]}} Block
+ */
+
 export const CONTROL_NODE_TYPES = ['start_point', 'end_point', 'filter_point']
 
 // Python code templates
