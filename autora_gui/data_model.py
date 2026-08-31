@@ -61,6 +61,10 @@ class PrimitiveVariableType(VariableType):
     cardinality: Cardinality | None = None
     validValues: list[str] | None = None
     default: Any | None = None
+    # True for a string param whose value is a SymPy expression: the code
+    # generator wraps its emitted literal in `sympify(...)` (e.g. the equation
+    # experiment runner's `expression`) rather than passing a plain string.
+    sympify: bool = False
 
 
 class ListVariableType(VariableType):

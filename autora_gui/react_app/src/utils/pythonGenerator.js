@@ -367,21 +367,22 @@ function buildParamString(params, exclude = []) {
     .join(', ')
 }
 
-// Factory params (keyed by function pythonName) whose string value is not a
-// plain string but must be parsed into a SymPy expression via sympify().
-const SYMPIFY_PARAMS = { equation_experiment: ['expression'] }
+// The import that a `sympify`-flagged param needs. Which params are SymPy
+// expressions is declared per-component in the JSON (a param with
+// `"sympify": true`); this is only the fixed fact of where `sympify` lives.
+const SYMPIFY_IMPORT = { module: 'sympy', name: 'sympify' }
 
 /**
- * Build a factory/constructor parameter string, wrapping any params that must
- * be SymPy expressions (see SYMPIFY_PARAMS) in `sympify(...)`.
+ * Build a factory/constructor parameter string, wrapping any params named in
+ * `sympifyNames` (declared `"sympify": true` in the component JSON) in
+ * `sympify(...)` so their string value is parsed into a SymPy expression.
  *
- * @param {string} pythonName - The factory function name (identifies special params).
  * @param {Object} params - Map of parameter name to value.
+ * @param {string[]} [sympifyNames=[]] - Names of params to wrap in `sympify(...)`.
  * @param {string[]} [exclude=[]] - Parameter names to omit.
  * @returns {string} Comma-separated `name=value` keyword arguments (nulls skipped).
  */
-function buildFactoryParamString(pythonName, params, exclude = []) {
-  const sympifyNames = SYMPIFY_PARAMS[pythonName] || []
+function buildFactoryParamString(params, sympifyNames = [], exclude = []) {
   return Object.entries(params)
     .filter(([k, v]) => v !== null && v !== undefined && !exclude.includes(k))
     .map(([k, v]) => sympifyNames.includes(k)
@@ -427,12 +428,13 @@ function runnerVarName(meta) {
  * @returns {string} The indented, newline-joined call.
  */
 function buildXYRunnerCall(meta, baseSpaces = 4) {
-  const { pythonName, params, runParamNames = [], xyParams = [] } = meta
+  const { pythonName, params, runParamNames = [], xyParams = [], sympifyParams = [] } = meta
   const xyNames = xyParams.map(p => p.name)
-  // Regular factory params (expression is sympified by buildFactoryParamString);
-  // the IV/DV params are emitted verbatim below, under the TODO comment, so
-  // exclude them (and the run params) from the ordinary keyword arguments.
-  const factory = buildFactoryParamString(pythonName, params, [...runParamNames, ...xyNames])
+  // Regular factory params (sympify-flagged ones are wrapped by
+  // buildFactoryParamString); the IV/DV params are emitted verbatim below, under
+  // the TODO comment, so exclude them (and the run params) from the ordinary
+  // keyword arguments.
+  const factory = buildFactoryParamString(params, sympifyParams, [...runParamNames, ...xyNames])
   const pad = ' '.repeat(baseSpaces)
   const pad2 = ' '.repeat(baseSpaces + 4)
 
@@ -491,7 +493,7 @@ function isSyntheticRunner(meta) {
  * @returns {void}
  */
 function generateRunnerWrapper(code, meta) {
-  const { pythonName, params, varName, nodeName, runParamNames = [] } = meta
+  const { pythonName, params, varName, nodeName, runParamNames = [], sympifyParams = [] } = meta
 
   code.comment(nodeName)
 
@@ -508,7 +510,7 @@ function generateRunnerWrapper(code, meta) {
       // Synthesize the required X (IVs) and y (DV); the workflow does not carry them.
       code.multiline(buildXYRunnerCall(meta, 0))
     } else {
-      const factoryParamStr = buildFactoryParamString(pythonName, params, runParamNames)
+      const factoryParamStr = buildFactoryParamString(params, sympifyParams, runParamNames)
       code.line(`${runVar} = ${pythonName}(${factoryParamStr})`)
     }
     code.blank()
@@ -707,13 +709,6 @@ export function prepareWorkflow(state) {
     if (!imports.has(importPath)) imports.set(importPath, new Set())
     imports.get(importPath).add(alias ? `${pythonName} as ${alias}` : pythonName)
 
-    // Some factory params must be SymPy expressions (e.g. equation_experiment's
-    // `expression`); pull in sympify when such a param is actually set.
-    if ((SYMPIFY_PARAMS[pythonName] || []).some(name => (node.parameters || {})[name] != null)) {
-      if (!imports.has('sympy')) imports.set('sympy', new Set())
-      imports.get('sympy').add('sympify')
-    }
-
     // Parameters are grouped by function in the JSON. The instantiation group
     // configures the constructor/factory: theorist classes use an "__init__"
     // group, runner factories use a group named after the function (pythonName).
@@ -739,6 +734,16 @@ export function prepareWorkflow(state) {
         value: String(String((node.parameters || {})[p.name] ?? '').trim() || (p.default ?? ''))
       }))
 
+    // Factory params declared `"sympify": true` in the JSON: their string value
+    // is a SymPy expression and is wrapped in `sympify(...)` when emitted (see
+    // buildFactoryParamString). Pull in the `sympify` import when any such param
+    // is actually set on this node.
+    const sympifyParams = initGroup.filter(p => p.sympify === true).map(p => p.name)
+    if (sympifyParams.some(name => (node.parameters || {})[name] != null)) {
+      if (!imports.has(SYMPIFY_IMPORT.module)) imports.set(SYMPIFY_IMPORT.module, new Set())
+      imports.get(SYMPIFY_IMPORT.module).add(SYMPIFY_IMPORT.name)
+    }
+
     componentMeta.set(node.id, {
       importPath,
       // Name as imported into the generated file (alias when aliased)
@@ -747,6 +752,7 @@ export function prepareWorkflow(state) {
       outputDataType: protocol.outputDataType,
       runParamNames,
       xyParams,
+      sympifyParams,
       // Runner whose `.run()` returns the DV values rather than a full
       // experiment_data frame (see generateRunnerWrapper).
       runReturnsDV: protocol.runReturnsDV === true,

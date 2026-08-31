@@ -214,6 +214,11 @@
           ],
           "default": null,
           "title": "Default"
+        },
+        "sympify": {
+          "default": false,
+          "title": "Sympify",
+          "type": "boolean"
         }
       },
       "required": [

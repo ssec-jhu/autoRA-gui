@@ -840,7 +840,7 @@ function buildStateWithEquationRunner() {
       protocolType: 'experiment_runner',
       parameters: {
         equation_experiment: [
-          { name: 'expression', datatype: 'string' },
+          { name: 'expression', datatype: 'string', sympify: true },
           {
             name: 'X',
             datatype: 'IV',
