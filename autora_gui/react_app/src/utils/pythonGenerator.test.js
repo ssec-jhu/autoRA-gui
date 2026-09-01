@@ -767,6 +767,30 @@ function buildStateWithFirebaseRunner() {
   return state
 }
 
+describe('runReturnsDV runners assemble experiment_data', () => {
+  it('assembles experiment_data from conditions + run() DV values', () => {
+    const state = buildStateWithRunner()
+    state.components.experiment_runners[0].runReturnsDV = true
+    const code = generatePythonCode(state)
+    expect(code).toContain('dv_values = expected_value_theory_runner.run(')
+    // A tuple return (e.g. return_choice_probabilities=True) is reduced to the DV values.
+    expect(code).toContain('if isinstance(dv_values, tuple):')
+    expect(code).toContain('dv_values = dv_values[0]')
+    expect(code).toContain('experiment_data = pd.DataFrame({')
+    expect(code).toContain('expected_value_theory_runner.variables.independent_variables[0].name: list(conditions.iloc[:, 0]),')
+    expect(code).toContain('expected_value_theory_runner.variables.dependent_variables[0].name: dv_values,')
+    expect(code).toContain('return Delta(experiment_data=experiment_data)')
+    // The plain single-line form must not be used for this runner.
+    expect(code).not.toContain('return Delta(experiment_data=expected_value_theory_runner.run(')
+  })
+
+  it('uses the plain run() return for a normal synthetic runner', () => {
+    const code = generatePythonCode(buildStateWithRunner())
+    expect(code).toContain('return Delta(experiment_data=expected_value_theory_runner.run(')
+    expect(code).not.toContain('dv_values = expected_value_theory_runner.run(')
+  })
+})
+
 describe('real (non-synthetic) runners', () => {
   it('calls the runner directly instead of runner.run()', () => {
     const code = generatePythonCode(buildStateWithFirebaseRunner())
@@ -816,7 +840,17 @@ function buildStateWithEquationRunner() {
       protocolType: 'experiment_runner',
       parameters: {
         equation_experiment: [
-          { name: 'expression', datatype: 'string' },
+          { name: 'expression', datatype: 'string', sympify: true },
+          {
+            name: 'X',
+            datatype: 'IV',
+            default: '[IV(name="x", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)), IV(name="y", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))]'
+          },
+          {
+            name: 'y',
+            datatype: 'DV',
+            default: 'DV(name="z")'
+          },
           { name: 'rename_output_columns', datatype: 'boolean' }
         ],
         run: [{ name: 'added_noise', datatype: 'real' }]
@@ -841,42 +875,46 @@ describe('sympify expression params', () => {
   it('does not import sympify when no sympify param is used', () => {
     expect(generatePythonCode(buildStateWithRunner())).not.toContain('sympify')
   })
+
+  it('omits a blank sympify param (never emits sympify("")) and skips the import', () => {
+    const state = buildStateWithEquationRunner()
+    // User cleared the expression field to whitespace: treat as unset.
+    state.nodes[3].parameters = { expression: '   ', rename_output_columns: true, added_noise: 0.01 }
+    const code = generatePythonCode(state)
+    expect(code).not.toContain('sympify')
+    expect(code).not.toContain('expression=')
+  })
 })
 
-describe('equation_experiment X/y synthesis', () => {
-  it('synthesizes one IV per expression symbol plus a DV', () => {
+describe('equation_experiment X/y from IV/DV params', () => {
+  it('emits X and y verbatim from the IV/DV parameter defaults, under a TODO', () => {
     const code = generatePythonCode(buildStateWithEquationRunner())
-    expect(code).toContain('X=[')
-    expect(code).toContain('IV(name="x_1", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)),')
-    expect(code).toContain('IV(name="x_2", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)),')
-    expect(code).toContain('y=DV(name="y", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))')
     expect(code).toContain('# TODO: adjust the variable names and ranges below for your experiment')
+    expect(code).toContain(
+      'X=[IV(name="x", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)), ' +
+        'IV(name="y", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))],'
+    )
+    // y is the final factory argument, so its literal closes the runner call.
+    expect(code).toContain(
+      'y=DV(name="z")'
+    )
+    // The expression is still sympified and precedes the IV/DV arguments.
+    expect(code).toContain('expression=sympify("x_1 ** 2 - x_2 ** 2"),')
   })
 
-  it('imports IV, DV and numpy for the synthesized variables', () => {
+  it('imports IV, DV and numpy for the IV/DV literals', () => {
     const code = generatePythonCode(buildStateWithEquationRunner())
     expect(code).toContain('from autora.variable import VariableCollection, IV, DV')
     expect(code).toContain('import numpy as np')
   })
 
-  it('names the DV to avoid colliding with an expression symbol', () => {
+  it('uses the node value over the default when the user sets X', () => {
     const state = buildStateWithEquationRunner()
-    state.nodes[3].parameters.expression = 'x ** 2 - y ** 2'
+    state.nodes[3].parameters.X = '[IV(name="a", value_range=(0, 1))]'
     const code = generatePythonCode(state)
-    expect(code).toContain('IV(name="x",')
-    expect(code).toContain('IV(name="y",')
-    // "y" is taken by an IV, so the DV falls back to the next free name
-    expect(code).toContain('y=DV(name="z",')
-  })
-
-  it('does not treat function names as variables', () => {
-    const state = buildStateWithEquationRunner()
-    state.nodes[3].parameters.expression = 'sin(x_1) + cos(x_2)'
-    const code = generatePythonCode(state)
-    expect(code).toContain('IV(name="x_1",')
-    expect(code).toContain('IV(name="x_2",')
-    expect(code).not.toContain('IV(name="sin"')
-    expect(code).not.toContain('IV(name="cos"')
+    expect(code).toContain('X=[IV(name="a", value_range=(0, 1))],')
+    // The unset y still falls back to its declared default.
+    expect(code).toContain('y=DV(name="z")')
   })
 })
 
@@ -900,7 +938,12 @@ function buildStateWithLmmRunner() {
       parameters: {
         lmm_experiment: [
           { name: 'formula', datatype: 'string' },
-          { name: 'fixed_effects', datatype: 'string' }
+          { name: 'fixed_effects', datatype: 'string' },
+          {
+            name: 'X',
+            datatype: 'IV',
+            default: '[IV(name="x1", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))]'
+          }
         ],
         run: [{ name: 'added_noise', datatype: 'real' }]
       },
@@ -910,26 +953,19 @@ function buildStateWithLmmRunner() {
   return state
 }
 
-describe('lmm_experiment X synthesis', () => {
-  it('synthesizes IVs from the formula RHS and passes no y', () => {
+describe('lmm_experiment X from IV param (no DV)', () => {
+  it('emits X verbatim from its default and passes no y', () => {
     const code = generatePythonCode(buildStateWithLmmRunner())
     expect(code).toContain('formula="rt ~ 1 + x1"')
     expect(code).toContain("fixed_effects={'Intercept': 0., 'x1': 2.}")
-    expect(code).toContain('IV(name="x1", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)),')
-    // lmm takes no y argument; the DV comes from the formula
+    // X is the only IV/DV param, so its literal closes the runner call.
+    expect(code).toContain(
+      'X=[IV(name="x1", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))])'
+    )
+    // lmm declares no DV param, so no y argument is emitted.
     expect(code).not.toContain('y=DV(')
     expect(code).toContain('from autora.variable import VariableCollection, IV, DV')
     expect(code).toContain('import numpy as np')
-  })
-
-  it('handles multiple IVs and ignores the intercept marker', () => {
-    const state = buildStateWithLmmRunner()
-    state.nodes[3].parameters.formula = 'rt ~ 1 + x1 + x2'
-    const code = generatePythonCode(state)
-    expect(code).toContain('IV(name="x1",')
-    expect(code).toContain('IV(name="x2",')
-    expect(code).not.toContain('IV(name="rt"')  // rt is the DV, not an IV
-    expect(code).not.toContain('IV(name="1"')
   })
 })
 
@@ -937,11 +973,62 @@ describe('synthetic runner is built once (no duplication)', () => {
   it('constructs the runner in the component section and reuses it for variables', () => {
     const code = generatePythonCode(buildStateWithLmmRunner())
     // Exactly one construction of the runner across the whole file
-    expect(code.match(/runner = lmm_experiment\(/g).length).toBe(1)
+    expect(code.match(/linear_mixed_model_experiment_runner = lmm_experiment\(/g).length).toBe(1)
     // The wrapper and the variables setup both reference the shared runner
-    expect(code).toContain('return Delta(experiment_data=runner.run(conditions=conditions))')
+    expect(code).toContain('return Delta(experiment_data=linear_mixed_model_experiment_runner.run(conditions=conditions))')
     expect(code).toContain('# Variables are governed by the experiment runner defined above')
-    expect(code).toContain('variables = runner.variables')
+    expect(code).toContain('variables = linear_mixed_model_experiment_runner.variables')
+  })
+
+  it('gives two distinct synthetic runners separate module-level variables', () => {
+    // Two different synthetic runners in one workflow: each wrapper must build and
+    // read its OWN runner object. A shared `runner` global would let the later
+    // definition overwrite the earlier one, so the first wrapper would silently
+    // invoke the wrong component (and label its output with the wrong variables).
+    const state = buildStateWithRunner() // expected_value_theory at run-1
+    state.nodes.splice(4, 0, {
+      id: 'run-2',
+      type: 'component',
+      name: 'Linear Mixed Model Experiment (Synthetic, Abstract)',
+      protocolUuid: 'proto-run-2',
+      parameters: { formula: 'rt ~ 1 + x1', fixed_effects: "{'Intercept': 0., 'x1': 2.}" }
+    })
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'run-1' },
+      { sourceId: 'run-1', targetId: 'run-2' },
+      { sourceId: 'run-2', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'end-1' }
+    ]
+    state.components.experiment_runners.push({
+      uuid: 'proto-run-2',
+      importPath: 'autora.experiment_runner.synthetic.abstract.lmm',
+      pythonName: 'lmm_experiment',
+      file: 'synth_abstr_lmm_experiment.json',
+      protocolType: 'experiment_runner',
+      parameters: {
+        lmm_experiment: [
+          { name: 'formula', datatype: 'string' },
+          { name: 'fixed_effects', datatype: 'string' },
+          {
+            name: 'X',
+            datatype: 'IV',
+            default: '[IV(name="x1", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))]'
+          }
+        ],
+        run: [{ name: 'added_noise', datatype: 'real' }]
+      },
+      pipInstall: 'autora-synthetic'
+    })
+
+    const code = generatePythonCode(state)
+    // Each runner is built under its own unique module-level name...
+    expect(code).toContain('expected_value_theory_runner = expected_value_theory(')
+    expect(code).toContain('linear_mixed_model_experiment_runner = lmm_experiment(')
+    // ...and each wrapper reads that same unique name (no shared bare `runner`).
+    expect(code).toContain('return Delta(experiment_data=expected_value_theory_runner.run(')
+    expect(code).toContain('X=[IV(name="x1"')
   })
 })
 
@@ -954,8 +1041,8 @@ describe('runner parameter grouping', () => {
 
   it('passes run-group parameters to run() instead of the factory', () => {
     const code = generatePythonCode(buildStateWithRunner())
-    expect(code).toContain('runner = expected_value_theory(choice_temperature=0.1, resolution=10)')
-    expect(code).toContain('return Delta(experiment_data=runner.run(conditions=conditions, added_noise=0.01))')
+    expect(code).toContain('expected_value_theory_runner = expected_value_theory(choice_temperature=0.1, resolution=10)')
+    expect(code).toContain('return Delta(experiment_data=expected_value_theory_runner.run(conditions=conditions, added_noise=0.01))')
     expect(code).not.toContain('expected_value_theory(choice_temperature=0.1, resolution=10, added_noise=0.01)')
   })
 
@@ -963,7 +1050,7 @@ describe('runner parameter grouping', () => {
     const state = buildStateWithRunner()
     state.nodes[3].parameters = { choice_temperature: 0.1 }
     const code = generatePythonCode(state)
-    expect(code).toContain('return Delta(experiment_data=runner.run(conditions=conditions))')
+    expect(code).toContain('return Delta(experiment_data=expected_value_theory_runner.run(conditions=conditions))')
   })
 
   it('emits dict/list literal string parameters unquoted', () => {
@@ -985,9 +1072,9 @@ describe('runner parameter grouping', () => {
 describe('variables initialization', () => {
   it('derives variables from the experiment runner when the workflow has one', () => {
     const code = generatePythonCode(buildStateWithRunner())
-    expect(code).toContain('runner = expected_value_theory(choice_temperature=0.1, resolution=10)')
-    expect(code).toContain('assert runner.variables is not None')
-    expect(code).toContain('variables = runner.variables')
+    expect(code).toContain('expected_value_theory_runner = expected_value_theory(choice_temperature=0.1, resolution=10)')
+    expect(code).toContain('assert expected_value_theory_runner.variables is not None')
+    expect(code).toContain('variables = expected_value_theory_runner.variables')
     expect(code).not.toContain('np.linspace')
   })
 

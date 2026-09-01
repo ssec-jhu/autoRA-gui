@@ -6,6 +6,14 @@
  * @module utils/pythonGenerator
  */
 
+/**
+ * One execution block produced by getExecutionOrder: a `once` block runs its
+ * nodes a single time, while a `loop` block runs its child blocks inside
+ * `for cycle_N in range(maxCounter)` (nested loops become nested block trees).
+ *
+ * @typedef {{type: 'once', nodes: Object[]} | {type: 'loop', maxCounter: number, children: Block[]}} Block
+ */
+
 export const CONTROL_NODE_TYPES = ['start_point', 'end_point', 'filter_point']
 
 // Python code templates
@@ -367,118 +375,104 @@ function buildParamString(params, exclude = []) {
     .join(', ')
 }
 
-// Factory params (keyed by function pythonName) whose string value is not a
-// plain string but must be parsed into a SymPy expression via sympify().
-const SYMPIFY_PARAMS = { equation_experiment: ['expression'] }
+// The import that a `sympify`-flagged param needs. Which params are SymPy
+// expressions is declared per-component in the JSON (a param with
+// `"sympify": true`); this is only the fixed fact of where `sympify` lives.
+const SYMPIFY_IMPORT = { module: 'sympy', name: 'sympify' }
 
 /**
- * Build a factory/constructor parameter string, wrapping any params that must
- * be SymPy expressions (see SYMPIFY_PARAMS) in `sympify(...)`.
+ * Whether a param's value is a blank (empty/whitespace-only) string. Such a
+ * value counts as "unset" — the user cleared the input — so the param is omitted
+ * and the runner's own default applies rather than emitting an invalid literal
+ * (e.g. `sympify("")`, which raises at runtime).
  *
- * @param {string} pythonName - The factory function name (identifies special params).
+ * @param {*} value - The param value.
+ * @returns {boolean}
+ */
+function isBlankString(value) {
+  return typeof value === 'string' && value.trim() === ''
+}
+
+/**
+ * Build a factory/constructor parameter string, wrapping any params named in
+ * `sympifyNames` (declared `"sympify": true` in the component JSON) in
+ * `sympify(...)` so their string value is parsed into a SymPy expression. A
+ * sympify param left blank is treated as unset and omitted (so the runner's
+ * default applies) rather than emitting `sympify("")`, which would raise.
+ *
  * @param {Object} params - Map of parameter name to value.
+ * @param {string[]} [sympifyNames=[]] - Names of params to wrap in `sympify(...)`.
  * @param {string[]} [exclude=[]] - Parameter names to omit.
  * @returns {string} Comma-separated `name=value` keyword arguments (nulls skipped).
  */
-function buildFactoryParamString(pythonName, params, exclude = []) {
-  const sympifyNames = SYMPIFY_PARAMS[pythonName] || []
+function buildFactoryParamString(params, sympifyNames = [], exclude = []) {
   return Object.entries(params)
-    .filter(([k, v]) => v !== null && v !== undefined && !exclude.includes(k))
+    .filter(([k, v]) => v !== null && v !== undefined && !exclude.includes(k) &&
+      !(sympifyNames.includes(k) && isBlankString(v)))
     .map(([k, v]) => sympifyNames.includes(k)
       ? `${k}=sympify(${formatPythonValue(String(v))})`
       : `${k}=${formatPythonValue(v)}`)
     .join(', ')
 }
 
-// SymPy/numpy function names and constants that must not be treated as
-// variable symbols when scanning an expression for its free variables.
-const NON_SYMBOL_NAMES = new Set([
-  'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh',
-  'exp', 'log', 'ln', 'sqrt', 'Abs', 'abs', 'sign', 'floor', 'ceiling',
-  'Max', 'Min', 'pi', 'E', 'I', 'oo'
-])
-
 /**
- * Extract the distinct variable symbols from a SymPy expression string, sorted
- * by name and excluding known function/constant names.
- *
- * @param {string} expression - e.g. "x_1 ** 2 - x_2 ** 2".
- * @returns {string[]} Sorted unique variable names.
- */
-function parseExpressionSymbols(expression) {
-  const ids = String(expression || '').match(/[A-Za-z_]\w*/g) || []
-  return [...new Set(ids)].filter(id => !NON_SYMBOL_NAMES.has(id)).sort()
-}
-
-/**
- * Extract the independent-variable names from a mixed-model formula. Uses the
- * right-hand side of `~`, drops intercept markers and random-effect groups.
- *
- * @param {string} formula - e.g. "rt ~ 1 + x1".
- * @returns {string[]} Sorted unique IV names.
- */
-function parseFormulaIVs(formula) {
-  const s = String(formula || '')
-  const rhs = (s.includes('~') ? s.split('~')[1] : s).replace(/\([^)]*\)/g, '')
-  const ids = rhs.match(/[A-Za-z_]\w*/g) || []
-  return [...new Set(ids)].sort()
-}
-
-// Synthetic runners whose factory needs X (and sometimes y) as Variable objects
-// the workflow does not capture. Each entry names the param carrying the
-// variable spec, how to parse IV names from it, and whether a y (DV) is needed.
-const XY_RUNNERS = {
-  equation_experiment: { specParam: 'expression', parseIVs: parseExpressionSymbols, needsY: true },
-  lmm_experiment: { specParam: 'formula', parseIVs: parseFormulaIVs, needsY: false }
-}
-
-/**
- * Whether a runner needs X/y Variable objects synthesized for its factory call.
+ * Whether a runner takes X/y (IV/DV) Variable objects on its factory call.
+ * These are declared as parameters with datatype "IV"/"DV" in the component's
+ * JSON and collected into `meta.xyParams` by prepareWorkflow.
  *
  * @param {Object} meta - Component metadata.
  * @returns {boolean}
  */
 function needsXYVariables(meta) {
-  return isSyntheticRunner(meta) && !!XY_RUNNERS[meta?.pythonName]
+  return isSyntheticRunner(meta) && (meta?.xyParams?.length > 0)
 }
 
 /**
- * Build the multi-line `runner = <name>(...)` call for a runner that needs X/y,
- * synthesizing an IV per variable in its expression/formula (and a DV when the
- * factory takes one) with default ranges the user adjusts. Emitted with a
- * 4-space base indent for use inside a function body.
+ * Module-level variable name holding a synthetic runner's built object. Derived
+ * from the (already-unique) wrapper `varName` so identical wrappers share it
+ * (keeping wrapper-dedup intact) while two distinct synthetic runners get
+ * distinct names and never overwrite one another's global `runner`.
  *
- * @param {Object} meta - Runner metadata with `pythonName`, `params`, `runParamNames`.
+ * @param {Object} meta - Component metadata with an assigned `varName`.
+ * @returns {string} A unique Python identifier for this runner's object.
+ */
+function runnerVarName(meta) {
+  return `${meta.varName.replace(/_on_state(_\d+)?$/, '$1')}_runner`
+}
+
+/**
+ * Build the multi-line `<runner> = <name>(...)` call for a runner that takes X/y
+ * (IV/DV) Variable objects. The IV/DV literals are emitted verbatim from the
+ * component JSON's IV/DV parameter definitions (the node value, or the declared
+ * default); a TODO comment prompts the user to adjust the names and ranges.
+ * Emitted with a 4-space base indent for use inside a function body.
+ *
+ * @param {Object} meta - Runner metadata with `pythonName`, `params`, `runParamNames`, `xyParams`, `varName`.
  * @param {number} [baseSpaces=4] - Leading indentation for the first line.
  * @returns {string} The indented, newline-joined call.
  */
 function buildXYRunnerCall(meta, baseSpaces = 4) {
-  const { pythonName, params, runParamNames = [] } = meta
-  const cfg = XY_RUNNERS[pythonName]
-  const ivNames = cfg.parseIVs(params[cfg.specParam])
-  const finalIVs = ivNames.length ? ivNames : ['x']
-  const range = 'allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)'
-  // The LHS pooler raises on any IV carrying `allowed_values` and needs a
-  // `value_range`; emit IVs with value_range only when one is in the workflow.
-  const ivRange = meta.omitAllowedValues ? 'value_range=(-10, 10)' : range
-  // Regular factory params (expression is sympified by buildFactoryParamString).
-  const factory = buildFactoryParamString(pythonName, params, runParamNames)
+  const { pythonName, params, runParamNames = [], xyParams = [], sympifyParams = [] } = meta
+  const xyNames = xyParams.map(p => p.name)
+  // Regular factory params (sympify-flagged ones are wrapped by
+  // buildFactoryParamString); the IV/DV params are emitted verbatim below, under
+  // the TODO comment, so exclude them (and the run params) from the ordinary
+  // keyword arguments.
+  const factory = buildFactoryParamString(params, sympifyParams, [...runParamNames, ...xyNames])
   const pad = ' '.repeat(baseSpaces)
   const pad2 = ' '.repeat(baseSpaces + 4)
-  const pad3 = ' '.repeat(baseSpaces + 8)
 
-  const lines = [`${pad}runner = ${pythonName}(`]
+  const lines = [`${pad}${runnerVarName(meta)} = ${pythonName}(`]
   if (factory) lines.push(`${pad2}${factory},`)
   lines.push(`${pad2}# TODO: adjust the variable names and ranges below for your experiment`)
-  lines.push(`${pad2}X=[`)
-  finalIVs.forEach(n => lines.push(`${pad3}IV(name="${n}", ${ivRange}),`))
-  if (cfg.needsY) {
-    lines.push(`${pad2}],`)
-    const dvName = ['y', 'z', 'output'].find(n => !finalIVs.includes(n)) || 'dv'
-    lines.push(`${pad2}y=DV(name="${dvName}", ${range}))`)
-  } else {
-    lines.push(`${pad2}])`)
-  }
+  xyParams.forEach(p => {
+    // Indent any newlines inside multi-line values so the generated Python stays
+    // syntactically valid regardless of how the user formatted the value.
+    const indentedValue = String(p.value).replace(/\n/g, `\n${pad2}`)
+    lines.push(`${pad2}${p.name}=${indentedValue},`)
+  })
+  // Close the factory call on the final argument line.
+  lines[lines.length - 1] = lines[lines.length - 1].replace(/,$/, ')')
   return lines.join('\n')
 }
 
@@ -523,7 +517,7 @@ function isSyntheticRunner(meta) {
  * @returns {void}
  */
 function generateRunnerWrapper(code, meta) {
-  const { pythonName, params, varName, nodeName, runParamNames = [] } = meta
+  const { pythonName, params, varName, nodeName, runParamNames = [], sympifyParams = [] } = meta
 
   code.comment(nodeName)
 
@@ -532,19 +526,39 @@ function generateRunnerWrapper(code, meta) {
       Object.fromEntries(Object.entries(params).filter(([name]) => runParamNames.includes(name)))
     )
     const runArgs = ['conditions=conditions', runParamStr].filter(Boolean).join(', ')
-    // Build the runner once at module scope so the same object is reused by the
-    // variables setup (see generateVariablesSetup) — no need to rebuild it.
+    // Build the runner once at module scope, under a name unique to this wrapper,
+    // so distinct synthetic runners don't overwrite one another's global and the
+    // variables setup (see generateVariablesSetup) can reuse it — no rebuild.
+    const runVar = runnerVarName(meta)
     if (needsXYVariables(meta)) {
       // Synthesize the required X (IVs) and y (DV); the workflow does not carry them.
       code.multiline(buildXYRunnerCall(meta, 0))
     } else {
-      const factoryParamStr = buildFactoryParamString(pythonName, params, runParamNames)
-      code.line(`runner = ${pythonName}(${factoryParamStr})`)
+      const factoryParamStr = buildFactoryParamString(params, sympifyParams, runParamNames)
+      code.line(`${runVar} = ${pythonName}(${factoryParamStr})`)
     }
     code.blank()
     code.line('@on_state()')
     code.line(`def ${varName}(conditions: pd.DataFrame) -> Delta:`)
-    code.indent(`return Delta(experiment_data=runner.run(${runArgs}))`)
+    if (meta.runReturnsDV) {
+      // This runner's `.run()` returns the DV values (one per condition), not a
+      // full experiment_data frame (e.g. bandit/Q-learning). Assemble one keyed
+      // by the runner's own IV/DV variable names.
+      code.indent(`dv_values = ${runVar}.run(${runArgs})`)
+      // Some runners return a tuple of outputs when extra results are requested
+      // (e.g. Q-learning's return_choice_probabilities=True yields
+      // (choices, probabilities)). Keep the first element as the DV values; any
+      // additional outputs are not part of the declared dependent variable.
+      code.indent('if isinstance(dv_values, tuple):')
+      code.indent('dv_values = dv_values[0]', 2)
+      code.indent('experiment_data = pd.DataFrame({')
+      code.indent(`${runVar}.variables.independent_variables[0].name: list(conditions.iloc[:, 0]),`, 2)
+      code.indent(`${runVar}.variables.dependent_variables[0].name: dv_values,`, 2)
+      code.indent('})')
+      code.indent('return Delta(experiment_data=experiment_data)')
+    } else {
+      code.indent(`return Delta(experiment_data=${runVar}.run(${runArgs}))`)
+    }
     code.blank()
     return
   }
@@ -719,13 +733,6 @@ export function prepareWorkflow(state) {
     if (!imports.has(importPath)) imports.set(importPath, new Set())
     imports.get(importPath).add(alias ? `${pythonName} as ${alias}` : pythonName)
 
-    // Some factory params must be SymPy expressions (e.g. equation_experiment's
-    // `expression`); pull in sympify when such a param is actually set.
-    if ((SYMPIFY_PARAMS[pythonName] || []).some(name => (node.parameters || {})[name] != null)) {
-      if (!imports.has('sympy')) imports.set('sympy', new Set())
-      imports.get('sympy').add('sympify')
-    }
-
     // Parameters are grouped by function in the JSON. The instantiation group
     // configures the constructor/factory: theorist classes use an "__init__"
     // group, runner factories use a group named after the function (pythonName).
@@ -740,6 +747,28 @@ export function prepareWorkflow(state) {
     // credentials template emitted automatically (see generateRunnerWrapper).
     const usesFirebaseCredentials = declaredParamNames.includes('firebase_credentials')
 
+    // IV/DV factory arguments (datatype "IV"/"DV" in the JSON, e.g. a synthetic
+    // runner's X and y). Their literal is taken from the node value if set,
+    // otherwise the declared default, and emitted verbatim (see buildXYRunnerCall).
+    const xyParams = initGroup
+      .filter(p => p.datatype === 'IV' || p.datatype === 'DV')
+      .map(p => ({
+        name: p.name,
+        datatype: p.datatype,
+        value: String(String((node.parameters || {})[p.name] ?? '').trim() || (p.default ?? ''))
+      }))
+
+    // Factory params declared `"sympify": true` in the JSON: their string value
+    // is a SymPy expression and is wrapped in `sympify(...)` when emitted (see
+    // buildFactoryParamString). Pull in the `sympify` import only when such a
+    // param is actually set to a non-blank value (a blank one is omitted, so the
+    // import would be unused).
+    const sympifyParams = initGroup.filter(p => p.sympify === true).map(p => p.name)
+    if (sympifyParams.some(name => !isBlankString((node.parameters || {})[name] ?? ''))) {
+      if (!imports.has(SYMPIFY_IMPORT.module)) imports.set(SYMPIFY_IMPORT.module, new Set())
+      imports.get(SYMPIFY_IMPORT.module).add(SYMPIFY_IMPORT.name)
+    }
+
     componentMeta.set(node.id, {
       importPath,
       // Name as imported into the generated file (alias when aliased)
@@ -747,6 +776,11 @@ export function prepareWorkflow(state) {
       inputDataType,
       outputDataType: protocol.outputDataType,
       runParamNames,
+      xyParams,
+      sympifyParams,
+      // Runner whose `.run()` returns the DV values rather than a full
+      // experiment_data frame (see generateRunnerWrapper).
+      runReturnsDV: protocol.runReturnsDV === true,
       usesFirebaseCredentials,
       protocolType,
       params: node.parameters || {},
@@ -782,19 +816,10 @@ export function prepareWorkflow(state) {
     }
   })
 
-  // The LHS pooler (autora.experimentalist.lhs `pool`) raises on any variable
-  // carrying `allowed_values` and requires a `value_range`; when one is in the
-  // workflow, generated IVs must be emitted with value_range only.
-  const hasLhsPooler = allPathNodes.some(node => {
-    const p = allComponents.find(c => c.uuid === node.protocolUuid)
-    return p && p.importPath === 'autora.experimentalist.lhs' && p.pythonName === 'pool'
-  })
-  if (hasLhsPooler) componentMeta.forEach(meta => { meta.omitAllowedValues = true })
-
   // Only synthetic runners provide `.variables`; with such a runner the
   // variables are derived from it, otherwise placeholder variables are emitted.
   const derivesVariablesFromRunner = [...componentMeta.values()].some(isSyntheticRunner)
-  // Runners needing synthesized X/y require IV/DV and numpy imports.
+  // Runners taking IV/DV factory arguments require IV/DV and numpy imports.
   const needsEquationVariables = [...componentMeta.values()].some(needsXYVariables)
 
   return { blocks, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables }
@@ -818,11 +843,14 @@ export function generateVariablesSetup(componentMeta, orderedNodes) {
 
   if (!runnerMeta) return TEMPLATES.defaultVariables
 
-  // Reuse the `runner` defined in the component section — do not rebuild it.
+  // Reuse this runner's object defined in the component section — do not rebuild
+  // it. Use its unique variable name so we bind the intended runner even when the
+  // workflow defines several distinct synthetic runners.
+  const runVar = runnerVarName(runnerMeta)
   return [
     '    # Variables are governed by the experiment runner defined above',
-    '    assert runner.variables is not None',
-    '    variables = runner.variables'
+    `    assert ${runVar}.variables is not None`,
+    `    variables = ${runVar}.variables`
   ].join('\n')
 }
 

@@ -136,11 +136,11 @@ describe('generateNotebook', () => {
     const allCode = nb.cells.filter(c => c.cell_type === 'code').map(c => c.source.join('')).join('\n')
     const runCell = nb.cells[nb.cells.length - 1].source.join('')
     // The runner is constructed exactly once, in its component-definition cell
-    expect(allCode.match(/runner = expected_value_theory\(choice_temperature=0\.1\)/g).length).toBe(1)
-    expect(runCell).not.toContain('runner = expected_value_theory')
+    expect(allCode.match(/expected_value_theory_runner = expected_value_theory\(choice_temperature=0\.1\)/g).length).toBe(1)
+    expect(runCell).not.toContain('expected_value_theory_runner = expected_value_theory')
     // The run cell reuses that runner for the variables
-    expect(runCell).toContain('assert runner.variables is not None')
-    expect(runCell).toContain('variables = runner.variables')
+    expect(runCell).toContain('assert expected_value_theory_runner.variables is not None')
+    expect(runCell).toContain('variables = expected_value_theory_runner.variables')
     expect(runCell).not.toContain('np.linspace')
   })
 

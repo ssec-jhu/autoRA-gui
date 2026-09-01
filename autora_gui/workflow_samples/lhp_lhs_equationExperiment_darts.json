@@ -32,102 +32,102 @@
       "protocolUuid": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f",
       "parameterSetting": [
         {
-          "uuid": "33381d78-29bd-4578-b988-879e48664249",
+          "uuid": "e543a897-b4a3-4b9a-adfb-f2e424d443be",
           "name": "batch_size",
           "value": 64
         },
         {
-          "uuid": "9fd5cf7c-6676-4add-944a-4de3a68dac12",
+          "uuid": "edbf76ac-cfbf-4f84-bfec-c4869aea33b3",
           "name": "num_graph_nodes",
           "value": 2
         },
         {
-          "uuid": "59a66cc7-c0bc-498f-bbb4-3d85648f79af",
+          "uuid": "7c482831-b1c9-431e-a3e0-7b18fb71dda2",
           "name": "output_type",
           "value": "real"
         },
         {
-          "uuid": "ab4a2b47-7dfc-4a40-8715-f90b0a71fc4f",
+          "uuid": "5466c6da-8213-40d3-a788-c99ebbc67c4e",
           "name": "classifier_weight_decay",
           "value": 0.01
         },
         {
-          "uuid": "a97d44fd-7b53-49cb-9a5a-d737fc7040fc",
+          "uuid": "fdbb3770-052f-4917-845a-bdd814dc49de",
           "name": "darts_type",
           "value": "original"
         },
         {
-          "uuid": "c4286da9-4c39-418b-b222-c74af2fd6283",
+          "uuid": "e2dab47c-88f7-446c-a11d-7b6388b5898b",
           "name": "param_updates_per_epoch",
           "value": 10
         },
         {
-          "uuid": "d083b993-16a5-4ec7-a584-af5e8dd7b4e0",
+          "uuid": "b4ffceeb-c666-4917-b4ca-32c1177b138d",
           "name": "param_updates_for_sampled_model",
           "value": 100
         },
         {
-          "uuid": "1f2fd7c8-5c28-4e34-ab6f-22e991399083",
+          "uuid": "35e3356e-99e7-44c5-a0e2-7fa92c110175",
           "name": "param_learning_rate_max",
           "value": 0.025
         },
         {
-          "uuid": "fcc31c50-528f-48ee-8bc9-530a77c0b2f0",
+          "uuid": "854397cf-19e7-4c49-9314-3f6067f24bc1",
           "name": "param_learning_rate_min",
           "value": 0.01
         },
         {
-          "uuid": "fff40bdb-81c7-4c25-8f35-276c9e26f8af",
+          "uuid": "3e3b7250-456e-434a-bbc0-1e7a6a771991",
           "name": "param_momentum",
           "value": 0.9
         },
         {
-          "uuid": "5e597399-fc3d-4f8b-a769-62fd0ef0828a",
+          "uuid": "da8ecb73-1814-4e01-a61a-f213948676b1",
           "name": "arch_updates_per_epoch",
           "value": 1
         },
         {
-          "uuid": "63da27f1-66b5-4a80-be99-40152b60ac0a",
+          "uuid": "a5a8ad8b-81e3-4758-a482-5ace1da616df",
           "name": "arch_learning_rate_max",
           "value": 0.003
         },
         {
-          "uuid": "22dff0b0-0309-4f66-b3f3-ecc3be31dcff",
+          "uuid": "cec7bcf6-cf2d-44cd-a15d-d4e363f37ca8",
           "name": "arch_weight_decay",
           "value": 0.0001
         },
         {
-          "uuid": "313cb439-98c4-4f80-8a98-d957b156c68c",
+          "uuid": "5585e2ec-42e3-4ef1-bfef-eced1ad9fd9d",
           "name": "arch_weight_decay_df",
           "value": 0.0003
         },
         {
-          "uuid": "e6666ab7-fd74-48cf-897d-ff0078d3c0c1",
+          "uuid": "5cf370bb-fbf2-4e3c-be92-6badfbb9d255",
           "name": "arch_weight_decay_base",
           "value": 0
         },
         {
-          "uuid": "87be6f2a-9e81-4ba7-b1a9-134ceaf28dad",
+          "uuid": "d9ff9d33-2158-42f3-bf5c-dae34a6d99bd",
           "name": "arch_momentum",
           "value": 0.9
         },
         {
-          "uuid": "bc956bf7-d41f-4376-b64d-4b5753293280",
+          "uuid": "238b1afc-3439-4064-bf74-916691df18d5",
           "name": "fair_darts_loss_weight",
           "value": 1
         },
         {
-          "uuid": "18469d0d-c666-4519-9f1c-4abe0271b8a2",
+          "uuid": "6507c147-397c-4388-9fd5-4c7e4aca93bd",
           "name": "max_epochs",
           "value": 10
         },
         {
-          "uuid": "43792ae7-fe29-4a83-a3ea-4813d50ed48f",
+          "uuid": "bb240572-dbd6-4d16-a6a0-02a001e09803",
           "name": "grad_clip",
           "value": 5
         },
         {
-          "uuid": "1913e39a-d65e-4754-b150-2cbf44fbd418",
+          "uuid": "fec49e4c-9698-498d-a0a4-5168d16fde55",
           "name": "primitives",
           "value": [
             "none",
@@ -139,17 +139,17 @@
           ]
         },
         {
-          "uuid": "7133e0dc-ad61-43a8-91df-ec96675c3a16",
+          "uuid": "fa179fef-dc9c-47fd-a944-00ab3dc4a567",
           "name": "train_classifier_coefficients",
           "value": false
         },
         {
-          "uuid": "4beb9a50-abeb-42ec-9bc7-99ad74f134d1",
+          "uuid": "b59b764b-36ab-4fd8-866f-ac53d93d619a",
           "name": "train_classifier_bias",
           "value": false
         },
         {
-          "uuid": "40416289-9b61-4d3e-8b73-190364557c8f",
+          "uuid": "13d39c12-6ce4-4844-88e3-05d2ff4d7560",
           "name": "sampling_strategy",
           "value": "max"
         }
@@ -164,7 +164,7 @@
       "protocolUuid": "336823c9-7075-419e-96bc-a3eb9276ce3a",
       "parameterSetting": [
         {
-          "uuid": "849393f2-ecea-45b0-b685-a4c98526f115",
+          "uuid": "62baffa3-199f-4999-a064-7563e6deb7c8",
           "name": "num_samples",
           "value": 1
         }
@@ -179,7 +179,7 @@
       "protocolUuid": "e56cbce7-1e68-4c54-93bf-4567989a42d2",
       "parameterSetting": [
         {
-          "uuid": "63365c64-086c-49ef-aff7-91b48dd284af",
+          "uuid": "7b2a9548-f724-4bd5-be10-25aedcc23e44",
           "name": "num_samples",
           "value": 1
         }
@@ -194,17 +194,27 @@
       "protocolUuid": "ca7cf533-08c4-4486-bfbf-ba48c8bdc578",
       "parameterSetting": [
         {
-          "uuid": "83e47fd2-6691-433e-90b1-443bf604bcfd",
+          "uuid": "2461a913-380b-4250-aa45-b0e70e1bcd91",
           "name": "expression",
           "value": "x**2+y**2"
         },
         {
-          "uuid": "06706bc7-c2aa-4dc2-a011-b6ff305e17e5",
+          "uuid": "f13c55ed-8793-47a0-b2ca-1ca36dc6bc11",
+          "name": "X",
+          "value": "[IV(name=\"x\", value_range=(-10, 10)), IV(name=\"y\", value_range=(-10, 10))]"
+        },
+        {
+          "uuid": "8e405ea4-b6f0-40c5-8ff2-c67ac56acaeb",
+          "name": "y",
+          "value": "DV(name=\"z\")"
+        },
+        {
+          "uuid": "6cd08181-ef78-453f-bc79-f76b0fc90f5f",
           "name": "rename_output_columns",
           "value": true
         },
         {
-          "uuid": "e2ee1788-59f3-473a-a651-4b6eb271344f",
+          "uuid": "fd758c41-2e18-40b7-a12e-ab9016ea2661",
           "name": "added_noise",
           "value": 0.01
         }

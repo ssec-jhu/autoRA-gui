@@ -137,5 +137,6 @@
       "validValues": null,
       "default": null
     }
-  }
+  },
+  "runReturnsDV": true
 }
