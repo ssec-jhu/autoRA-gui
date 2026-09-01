@@ -17,6 +17,14 @@ vi.mock('uuid', () => ({
   v4: () => 'mocked-uuid'
 }))
 
+// Mock the component loader so the provider does not hit the network in tests.
+// The promise never resolves on purpose: these tests drive components via manual
+// SET_COMPONENTS dispatches, and a resolving load would fire its dispatch after
+// the synchronous act() blocks, triggering React's "not wrapped in act(...)" warning.
+vi.mock('../utils/componentLoader', () => ({
+  loadComponents: () => new Promise(() => {})
+}))
+
 describe('workflowReducer', () => {
   describe('SET_COMPONENTS', () => {
     it('sets components in state', () => {
@@ -26,6 +34,67 @@ describe('workflowReducer', () => {
         payload: components
       })
       expect(result.components).toEqual(components)
+    })
+  })
+
+  describe('ADD_COMPONENT', () => {
+    it('adds a component to an empty category, sorted by name', () => {
+      const state = { ...initialState, components: { experimentalists: [] } }
+      const component = { uuid: 'c-1', name: 'Random Sampler' }
+      const result = workflowReducer(state, {
+        type: 'ADD_COMPONENT',
+        payload: { category: 'experimentalists', component }
+      })
+
+      expect(result.components.experimentalists).toEqual([component])
+    })
+
+    it('inserts into the correct sorted position', () => {
+      const state = {
+        ...initialState,
+        components: { theorists: [{ uuid: 'a', name: 'Alpha' }, { uuid: 'z', name: 'Zeta' }] }
+      }
+      const result = workflowReducer(state, {
+        type: 'ADD_COMPONENT',
+        payload: { category: 'theorists', component: { uuid: 'm', name: 'Mid' } }
+      })
+
+      expect(result.components.theorists.map(c => c.name)).toEqual(['Alpha', 'Mid', 'Zeta'])
+    })
+
+    it('replaces an existing component with the same uuid', () => {
+      const state = {
+        ...initialState,
+        components: { theorists: [{ uuid: 'a', name: 'Old Name' }] }
+      }
+      const result = workflowReducer(state, {
+        type: 'ADD_COMPONENT',
+        payload: { category: 'theorists', component: { uuid: 'a', name: 'New Name' } }
+      })
+
+      expect(result.components.theorists).toHaveLength(1)
+      expect(result.components.theorists[0].name).toBe('New Name')
+    })
+
+    it('handles a category that does not yet exist in state', () => {
+      const state = { ...initialState, components: {} }
+      const result = workflowReducer(state, {
+        type: 'ADD_COMPONENT',
+        payload: { category: 'experiment_runners', component: { uuid: 'r-1', name: 'Runner' } }
+      })
+
+      expect(result.components.experiment_runners).toEqual([{ uuid: 'r-1', name: 'Runner' }])
+    })
+
+    it('does not mutate other categories', () => {
+      const theorists = [{ uuid: 't-1', name: 'Theorist' }]
+      const state = { ...initialState, components: { theorists, experimentalists: [] } }
+      const result = workflowReducer(state, {
+        type: 'ADD_COMPONENT',
+        payload: { category: 'experimentalists', component: { uuid: 'e-1', name: 'Exp' } }
+      })
+
+      expect(result.components.theorists).toBe(theorists)
     })
   })
 
@@ -650,14 +719,22 @@ describe('WorkflowProvider', () => {
 // Consumer hook access and dispatch behavior
 describe('useWorkflow', () => {
   it('throws error when used outside WorkflowProvider', () => {
-    // Suppress console.error for this test
+    // Rendering the hook without a provider throws on purpose. React re-dispatches
+    // that render error as a window 'error' event, which jsdom would otherwise log
+    // as "Uncaught". Cancel it (and silence React's own console.error) so the
+    // expected failure does not spam the test output.
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const swallowError = (e) => e.preventDefault()
+    window.addEventListener('error', swallowError)
 
-    expect(() => {
-      renderHook(() => useWorkflow())
-    }).toThrow('useWorkflow must be used within a WorkflowProvider')
-
-    consoleSpy.mockRestore()
+    try {
+      expect(() => {
+        renderHook(() => useWorkflow())
+      }).toThrow('useWorkflow must be used within a WorkflowProvider')
+    } finally {
+      window.removeEventListener('error', swallowError)
+      consoleSpy.mockRestore()
+    }
   })
 
   it('returns state and dispatch when used inside WorkflowProvider', () => {

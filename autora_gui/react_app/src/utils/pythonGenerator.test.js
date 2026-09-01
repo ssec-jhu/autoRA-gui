@@ -109,17 +109,45 @@ describe('getExecutionOrder', () => {
     expect(() => getExecutionOrder([], [])).toThrow('Start node')
   })
 
-  // Map blocks to a compact shape for readable assertions.
-  const shape = blocks => blocks.map(b =>
-    b.type === 'loop'
-      ? { type: 'loop', maxCounter: b.maxCounter, ids: b.nodes.map(n => n.id) }
-      : { type: 'once', ids: b.nodes.map(n => n.id) })
+  // Map blocks to a compact shape for readable assertions. A loop that simply
+  // wraps a single run of components is flattened to `ids`; a loop containing
+  // nested loops keeps its `children` so the nesting is visible.
+  const shape = blocks => blocks.map(b => {
+    if (b.type === 'once') return { type: 'once', ids: b.nodes.map(n => n.id) }
+    const simple = b.children.length === 1 && b.children[0].type === 'once'
+    return simple
+      ? { type: 'loop', maxCounter: b.maxCounter, ids: b.children[0].nodes.map(n => n.id) }
+      : { type: 'loop', maxCounter: b.maxCounter, children: shape(b.children) }
+  })
 
-  it('wraps a filter-less workflow in one default experiment loop', () => {
+  it('runs a filter-less workflow once, with no loop', () => {
     const { nodes, connections } = buildState()
     const { blocks } = getExecutionOrder(nodes, connections)
     expect(shape(blocks)).toEqual([
-      { type: 'loop', maxCounter: 10, ids: ['pool-1', 'samp-1', 'theo-1'] }
+      { type: 'once', ids: ['pool-1', 'samp-1', 'theo-1'] }
+    ])
+  })
+
+  it('throws when the workflow has no end node', () => {
+    const { nodes, connections } = buildState()
+    const noEnd = nodes.filter(n => n.type !== 'end_point')
+    expect(() => getExecutionOrder(noEnd, connections)).toThrow('End node')
+  })
+
+  it('defaults a filter loop to 1 cycle when maxCounter is unset', () => {
+    const { nodes } = buildState()
+    nodes.push({ id: 'filt-1', type: 'filter_point' })  // no filterParams
+    const connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'pool-1' },
+      { sourceId: 'filt-1', targetId: 'end-1' }
+    ]
+    const { blocks } = getExecutionOrder(nodes, connections)
+    expect(shape(blocks)).toEqual([
+      { type: 'loop', maxCounter: 1, ids: ['pool-1', 'samp-1', 'theo-1'] }
     ])
   })
 
@@ -259,6 +287,72 @@ describe('getExecutionOrder', () => {
       { type: 'loop', maxCounter: 2, ids: ['c', 'd'] }
     ])
   })
+
+  it('nests loops when one filter spans another (mirrors workflow_nested_loops)', () => {
+    // Outer filter (F3) loops back to the first component, wrapping two inner
+    // loops: F1 over [a, b] and F2 over [c, d].
+    // start -> a -> b -> F1(loops to a) -> c -> d -> F2(loops to c) -> F3(loops to a) -> end
+    const nodes = [
+      { id: 'start-1', type: 'start_point' },
+      { id: 'a', type: 'component', name: 'A', protocolUuid: 'proto-pool' },
+      { id: 'b', type: 'component', name: 'B', protocolUuid: 'proto-theo' },
+      { id: 'c', type: 'component', name: 'C', protocolUuid: 'proto-pool' },
+      { id: 'd', type: 'component', name: 'D', protocolUuid: 'proto-theo' },
+      { id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } },
+      { id: 'filt-2', type: 'filter_point', filterParams: { maxCounter: 1 } },
+      { id: 'filt-3', type: 'filter_point', filterParams: { maxCounter: 2 } },
+      { id: 'end-1', type: 'end_point' }
+    ]
+    const connections = [
+      { sourceId: 'start-1', targetId: 'a' },
+      { sourceId: 'a', targetId: 'b' },
+      { sourceId: 'b', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'a' },   // inner loop 1 back-edge
+      { sourceId: 'filt-1', targetId: 'c' },   // exit to inner loop 2
+      { sourceId: 'c', targetId: 'd' },
+      { sourceId: 'd', targetId: 'filt-2' },
+      { sourceId: 'filt-2', targetId: 'c' },   // inner loop 2 back-edge
+      { sourceId: 'filt-2', targetId: 'filt-3' },
+      { sourceId: 'filt-3', targetId: 'a' },   // outer loop back-edge (spans a..d)
+      { sourceId: 'filt-3', targetId: 'end-1' }
+    ]
+    const { blocks } = getExecutionOrder(nodes, connections)
+    expect(shape(blocks)).toEqual([
+      {
+        type: 'loop',
+        maxCounter: 2,
+        children: [
+          { type: 'loop', maxCounter: 10, ids: ['a', 'b'] },
+          { type: 'loop', maxCounter: 1, ids: ['c', 'd'] }
+        ]
+      }
+    ])
+  })
+
+  it('throws when two filters enclose exactly the same components', () => {
+    // Two filters chained back-to-back with no component between them, both
+    // looping back to the first component, span the identical interval [a, b].
+    // Nesting them would silently multiply cycle counts, so this is rejected.
+    // start -> a -> b -> F1(loops to a, exits to F2) -> F2(loops to a) -> end
+    const nodes = [
+      { id: 'start-1', type: 'start_point' },
+      { id: 'a', type: 'component', name: 'A', protocolUuid: 'proto-pool' },
+      { id: 'b', type: 'component', name: 'B', protocolUuid: 'proto-theo' },
+      { id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } },
+      { id: 'filt-2', type: 'filter_point', filterParams: { maxCounter: 2 } },
+      { id: 'end-1', type: 'end_point' }
+    ]
+    const connections = [
+      { sourceId: 'start-1', targetId: 'a' },
+      { sourceId: 'a', targetId: 'b' },
+      { sourceId: 'b', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'a' },      // loop-back (spans a..b)
+      { sourceId: 'filt-1', targetId: 'filt-2' }, // exit into the second filter
+      { sourceId: 'filt-2', targetId: 'a' },      // loop-back (also spans a..b)
+      { sourceId: 'filt-2', targetId: 'end-1' }
+    ]
+    expect(() => getExecutionOrder(nodes, connections)).toThrow(/exactly the same components/)
+  })
 })
 
 describe('prepareWorkflow aliasing', () => {
@@ -390,10 +484,19 @@ describe('generatePythonCode', () => {
     expect(code).not.toMatch(/=sample\(/)
   })
 
-  it('gives the sampler wrapper a num_samples default and passes it in the loop', () => {
+  it('gives the sampler wrapper a num_samples default and passes it in the call', () => {
     const code = generatePythonCode(buildState())
     expect(code).toContain('def falsification_sampler_on_state(conditions: pd.DataFrame, num_samples: int = 5)')
     expect(code).toContain('state = falsification_sampler_on_state(state, num_samples=5)')
+  })
+
+  it('respects an explicit num_samples of 0 instead of defaulting to 1', () => {
+    // num_samples: 0 is falsy; it must not be treated as "unset" and overridden.
+    const state = buildState()
+    state.nodes[2].parameters = { num_samples: 0 }
+    const code = generatePythonCode(state)
+    expect(code).toContain('def falsification_sampler_on_state(conditions: pd.DataFrame, num_samples: int = 0)')
+    expect(code).toContain('state = falsification_sampler_on_state(state, num_samples=0)')
   })
 
   it('wraps theorists with estimator_on_state using constructor parameters', () => {
@@ -414,8 +517,32 @@ describe('generatePythonCode', () => {
     expect(code).not.toContain('num_param')
   })
 
+  it('emits an identical component definition once but calls it at every site', () => {
+    // Two poolers with the same name and parameters produce identical wrappers.
+    const state = buildState()
+    state.nodes.splice(2, 0, {
+      id: 'pool-2', type: 'component', name: 'Random Pooler',
+      protocolUuid: 'proto-pool', parameters: { num_samples: 10 }
+    })
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'pool-2' },
+      { sourceId: 'pool-2', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'end-1' }
+    ]
+    const code = generatePythonCode(state)
+    // Defined once, called at both sites
+    expect(code.match(/def random_pooler_on_state\(/g).length).toBe(1)
+    expect(code.match(/state = random_pooler_on_state\(state\)/g).length).toBe(2)
+  })
+
   it('throws when the workflow has no components', () => {
-    const empty = { nodes: [{ id: 'start-1', type: 'start_point' }], connections: [], components: {} }
+    const empty = {
+      nodes: [{ id: 'start-1', type: 'start_point' }, { id: 'end-1', type: 'end_point' }],
+      connections: [{ sourceId: 'start-1', targetId: 'end-1' }],
+      components: {}
+    }
     expect(() => generatePythonCode(empty)).toThrow('No components found')
   })
 
@@ -432,7 +559,7 @@ describe('generatePythonCode', () => {
       { sourceId: 'filt-1', targetId: 'end-1' }
     ]
     const code = generatePythonCode(state)
-    const forIdx = code.indexOf('for i in range(')
+    const forIdx = code.indexOf('for cycle_0 in range(')
     const poolIdx = code.indexOf('state = random_pooler_on_state(state)')
     const sampIdx = code.indexOf('state = falsification_sampler_on_state(state')
     // The pooler call comes before the loop; the sampler call after it
@@ -462,7 +589,7 @@ describe('generatePythonCode', () => {
       { sourceId: 'pool-2', targetId: 'end-1' }
     ]
     const code = generatePythonCode(state)
-    const forIdx = code.indexOf('for i in range(')
+    const forIdx = code.indexOf('for cycle_0 in range(')
     const pool1Idx = code.indexOf('    state = random_pooler_on_state(state)')
     const pool2Idx = code.indexOf('    state = random_pooler_2_on_state(state)')
     // pooler#1 before the loop, pooler#2 after it
@@ -474,10 +601,69 @@ describe('generatePythonCode', () => {
     expect(code).not.toContain('        state = random_pooler_2_on_state(state)')
   })
 
+  it('throws when filter loops partially overlap', () => {
+    const state = buildState()
+    state.nodes.push(
+      { id: 'pool-2', type: 'component', name: 'Random Pooler 2', protocolUuid: 'proto-pool', parameters: {} },
+      { id: 'filt-1', type: 'filter_point', filterParams: { maxCounter: 10 } },
+      { id: 'filt-2', type: 'filter_point', filterParams: { maxCounter: 2 } }
+    )
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-1' },
+      { sourceId: 'filt-1', targetId: 'pool-1' },
+      { sourceId: 'filt-1', targetId: 'pool-2' },
+      { sourceId: 'pool-2', targetId: 'filt-2' },
+      { sourceId: 'filt-2', targetId: 'samp-1' },
+      { sourceId: 'filt-2', targetId: 'end-1' }
+    ]
+    expect(() => generatePythonCode(state)).toThrow(/Partially overlapping loops/)
+  })
+
+  it('renders nested loops as nested for-loops', () => {
+    // Outer filter loops back to the pooler (wrapping everything); inner filter
+    // loops back to the sampler only, so the sampler+theorist form an inner loop
+    // nested inside the outer loop, with the pooler running once per outer cycle.
+    const state = buildState()
+    state.nodes.push(
+      { id: 'filt-in', type: 'filter_point', filterParams: { maxCounter: 5 } },
+      { id: 'filt-out', type: 'filter_point', filterParams: { maxCounter: 2 } }
+    )
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'filt-in' },
+      { sourceId: 'filt-in', targetId: 'samp-1' },    // inner back-edge
+      { sourceId: 'filt-in', targetId: 'filt-out' },
+      { sourceId: 'filt-out', targetId: 'pool-1' },    // outer back-edge (spans all)
+      { sourceId: 'filt-out', targetId: 'end-1' }
+    ]
+    const code = generatePythonCode(state)
+    // Outer loop at the function-body indent (4 spaces), inner loop one level in
+    expect(code).toContain('    for cycle_0 in range(2):')
+    expect(code).toContain('        for cycle_1 in range(5):')
+    expect(code).toContain("        print(f'Cycle {cycle_0}')")
+    expect(code).toContain("            print(f'Cycle {cycle_1}')")
+    // Pooler runs once per outer cycle (8 spaces), sampler is in the inner loop (12)
+    expect(code).toContain('        state = random_pooler_on_state(state)')
+    expect(code).toContain('            state = falsification_sampler_on_state(state, num_samples=5)')
+    // The inner loop opens after the pooler call and before the sampler call
+    const outerIdx = code.indexOf('for cycle_0 in range(2):')
+    const innerIdx = code.indexOf('for cycle_1 in range(5):')
+    const poolIdx = code.indexOf('        state = random_pooler_on_state(state)')
+    const sampIdx = code.indexOf('            state = falsification_sampler_on_state(state')
+    expect(outerIdx).toBeLessThan(poolIdx)
+    expect(poolIdx).toBeLessThan(innerIdx)
+    expect(innerIdx).toBeLessThan(sampIdx)
+  })
+
   it('emits a separate for-loop per filter for a multi-loop workflow', () => {
     // Two sequential loops (mirrors workflow_2loops.json): pool+theo repeat 10x,
     // then a second pool2+theo2 repeat 2x. Each loop body is indented into its
-    // own `for i in range(...)`.
+    // own `for cycle_0 in range(...)`.
     const state = buildState()
     state.nodes.push(
       { id: 'pool-2', type: 'component', name: 'Random Pooler 2', protocolUuid: 'proto-pool', parameters: {} },
@@ -498,16 +684,16 @@ describe('generatePythonCode', () => {
     ]
     const code = generatePythonCode(state)
     // Two independent for-loops, with the second one's cycle count
-    expect(code.match(/for i in range\(/g).length).toBe(2)
-    expect(code).toContain('for i in range(10):')
-    expect(code).toContain('for i in range(2):')
+    expect(code.match(/for cycle_0 in range\(/g).length).toBe(2)
+    expect(code).toContain('for cycle_0 in range(10):')
+    expect(code).toContain('for cycle_0 in range(2):')
     // Each loop's nodes are indented into the loop body (8 spaces)
     expect(code).toContain('        state = random_pooler_on_state(state)')
     expect(code).toContain('        state = random_pooler_2_on_state(state)')
     // Loop 2 comes after loop 1
-    expect(code.indexOf('for i in range(2):')).toBeGreaterThan(code.indexOf('for i in range(10):'))
+    expect(code.indexOf('for cycle_0 in range(2):')).toBeGreaterThan(code.indexOf('for cycle_0 in range(10):'))
     expect(code.indexOf('state = random_pooler_2_on_state(state)'))
-      .toBeGreaterThan(code.indexOf('for i in range(2):'))
+      .toBeGreaterThan(code.indexOf('for cycle_0 in range(2):'))
   })
 })
 
@@ -581,6 +767,30 @@ function buildStateWithFirebaseRunner() {
   return state
 }
 
+describe('runReturnsDV runners assemble experiment_data', () => {
+  it('assembles experiment_data from conditions + run() DV values', () => {
+    const state = buildStateWithRunner()
+    state.components.experiment_runners[0].runReturnsDV = true
+    const code = generatePythonCode(state)
+    expect(code).toContain('dv_values = expected_value_theory_runner.run(')
+    // A tuple return (e.g. return_choice_probabilities=True) is reduced to the DV values.
+    expect(code).toContain('if isinstance(dv_values, tuple):')
+    expect(code).toContain('dv_values = dv_values[0]')
+    expect(code).toContain('experiment_data = pd.DataFrame({')
+    expect(code).toContain('expected_value_theory_runner.variables.independent_variables[0].name: list(conditions.iloc[:, 0]),')
+    expect(code).toContain('expected_value_theory_runner.variables.dependent_variables[0].name: dv_values,')
+    expect(code).toContain('return Delta(experiment_data=experiment_data)')
+    // The plain single-line form must not be used for this runner.
+    expect(code).not.toContain('return Delta(experiment_data=expected_value_theory_runner.run(')
+  })
+
+  it('uses the plain run() return for a normal synthetic runner', () => {
+    const code = generatePythonCode(buildStateWithRunner())
+    expect(code).toContain('return Delta(experiment_data=expected_value_theory_runner.run(')
+    expect(code).not.toContain('dv_values = expected_value_theory_runner.run(')
+  })
+})
+
 describe('real (non-synthetic) runners', () => {
   it('calls the runner directly instead of runner.run()', () => {
     const code = generatePythonCode(buildStateWithFirebaseRunner())
@@ -630,7 +840,17 @@ function buildStateWithEquationRunner() {
       protocolType: 'experiment_runner',
       parameters: {
         equation_experiment: [
-          { name: 'expression', datatype: 'string' },
+          { name: 'expression', datatype: 'string', sympify: true },
+          {
+            name: 'X',
+            datatype: 'IV',
+            default: '[IV(name="x", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)), IV(name="y", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))]'
+          },
+          {
+            name: 'y',
+            datatype: 'DV',
+            default: 'DV(name="z")'
+          },
           { name: 'rename_output_columns', datatype: 'boolean' }
         ],
         run: [{ name: 'added_noise', datatype: 'real' }]
@@ -655,42 +875,46 @@ describe('sympify expression params', () => {
   it('does not import sympify when no sympify param is used', () => {
     expect(generatePythonCode(buildStateWithRunner())).not.toContain('sympify')
   })
+
+  it('omits a blank sympify param (never emits sympify("")) and skips the import', () => {
+    const state = buildStateWithEquationRunner()
+    // User cleared the expression field to whitespace: treat as unset.
+    state.nodes[3].parameters = { expression: '   ', rename_output_columns: true, added_noise: 0.01 }
+    const code = generatePythonCode(state)
+    expect(code).not.toContain('sympify')
+    expect(code).not.toContain('expression=')
+  })
 })
 
-describe('equation_experiment X/y synthesis', () => {
-  it('synthesizes one IV per expression symbol plus a DV', () => {
+describe('equation_experiment X/y from IV/DV params', () => {
+  it('emits X and y verbatim from the IV/DV parameter defaults, under a TODO', () => {
     const code = generatePythonCode(buildStateWithEquationRunner())
-    expect(code).toContain('X=[')
-    expect(code).toContain('IV(name="x_1", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)),')
-    expect(code).toContain('IV(name="x_2", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)),')
-    expect(code).toContain('y=DV(name="y", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))')
     expect(code).toContain('# TODO: adjust the variable names and ranges below for your experiment')
+    expect(code).toContain(
+      'X=[IV(name="x", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)), ' +
+        'IV(name="y", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))],'
+    )
+    // y is the final factory argument, so its literal closes the runner call.
+    expect(code).toContain(
+      'y=DV(name="z")'
+    )
+    // The expression is still sympified and precedes the IV/DV arguments.
+    expect(code).toContain('expression=sympify("x_1 ** 2 - x_2 ** 2"),')
   })
 
-  it('imports IV, DV and numpy for the synthesized variables', () => {
+  it('imports IV, DV and numpy for the IV/DV literals', () => {
     const code = generatePythonCode(buildStateWithEquationRunner())
     expect(code).toContain('from autora.variable import VariableCollection, IV, DV')
     expect(code).toContain('import numpy as np')
   })
 
-  it('names the DV to avoid colliding with an expression symbol', () => {
+  it('uses the node value over the default when the user sets X', () => {
     const state = buildStateWithEquationRunner()
-    state.nodes[3].parameters.expression = 'x ** 2 - y ** 2'
+    state.nodes[3].parameters.X = '[IV(name="a", value_range=(0, 1))]'
     const code = generatePythonCode(state)
-    expect(code).toContain('IV(name="x",')
-    expect(code).toContain('IV(name="y",')
-    // "y" is taken by an IV, so the DV falls back to the next free name
-    expect(code).toContain('y=DV(name="z",')
-  })
-
-  it('does not treat function names as variables', () => {
-    const state = buildStateWithEquationRunner()
-    state.nodes[3].parameters.expression = 'sin(x_1) + cos(x_2)'
-    const code = generatePythonCode(state)
-    expect(code).toContain('IV(name="x_1",')
-    expect(code).toContain('IV(name="x_2",')
-    expect(code).not.toContain('IV(name="sin"')
-    expect(code).not.toContain('IV(name="cos"')
+    expect(code).toContain('X=[IV(name="a", value_range=(0, 1))],')
+    // The unset y still falls back to its declared default.
+    expect(code).toContain('y=DV(name="z")')
   })
 })
 
@@ -714,7 +938,12 @@ function buildStateWithLmmRunner() {
       parameters: {
         lmm_experiment: [
           { name: 'formula', datatype: 'string' },
-          { name: 'fixed_effects', datatype: 'string' }
+          { name: 'fixed_effects', datatype: 'string' },
+          {
+            name: 'X',
+            datatype: 'IV',
+            default: '[IV(name="x1", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))]'
+          }
         ],
         run: [{ name: 'added_noise', datatype: 'real' }]
       },
@@ -724,26 +953,19 @@ function buildStateWithLmmRunner() {
   return state
 }
 
-describe('lmm_experiment X synthesis', () => {
-  it('synthesizes IVs from the formula RHS and passes no y', () => {
+describe('lmm_experiment X from IV param (no DV)', () => {
+  it('emits X verbatim from its default and passes no y', () => {
     const code = generatePythonCode(buildStateWithLmmRunner())
     expect(code).toContain('formula="rt ~ 1 + x1"')
     expect(code).toContain("fixed_effects={'Intercept': 0., 'x1': 2.}")
-    expect(code).toContain('IV(name="x1", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)),')
-    // lmm takes no y argument; the DV comes from the formula
+    // X is the only IV/DV param, so its literal closes the runner call.
+    expect(code).toContain(
+      'X=[IV(name="x1", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))])'
+    )
+    // lmm declares no DV param, so no y argument is emitted.
     expect(code).not.toContain('y=DV(')
     expect(code).toContain('from autora.variable import VariableCollection, IV, DV')
     expect(code).toContain('import numpy as np')
-  })
-
-  it('handles multiple IVs and ignores the intercept marker', () => {
-    const state = buildStateWithLmmRunner()
-    state.nodes[3].parameters.formula = 'rt ~ 1 + x1 + x2'
-    const code = generatePythonCode(state)
-    expect(code).toContain('IV(name="x1",')
-    expect(code).toContain('IV(name="x2",')
-    expect(code).not.toContain('IV(name="rt"')  // rt is the DV, not an IV
-    expect(code).not.toContain('IV(name="1"')
   })
 })
 
@@ -751,11 +973,62 @@ describe('synthetic runner is built once (no duplication)', () => {
   it('constructs the runner in the component section and reuses it for variables', () => {
     const code = generatePythonCode(buildStateWithLmmRunner())
     // Exactly one construction of the runner across the whole file
-    expect(code.match(/runner = lmm_experiment\(/g).length).toBe(1)
+    expect(code.match(/linear_mixed_model_experiment_runner = lmm_experiment\(/g).length).toBe(1)
     // The wrapper and the variables setup both reference the shared runner
-    expect(code).toContain('return Delta(experiment_data=runner.run(conditions=conditions))')
+    expect(code).toContain('return Delta(experiment_data=linear_mixed_model_experiment_runner.run(conditions=conditions))')
     expect(code).toContain('# Variables are governed by the experiment runner defined above')
-    expect(code).toContain('variables = runner.variables')
+    expect(code).toContain('variables = linear_mixed_model_experiment_runner.variables')
+  })
+
+  it('gives two distinct synthetic runners separate module-level variables', () => {
+    // Two different synthetic runners in one workflow: each wrapper must build and
+    // read its OWN runner object. A shared `runner` global would let the later
+    // definition overwrite the earlier one, so the first wrapper would silently
+    // invoke the wrong component (and label its output with the wrong variables).
+    const state = buildStateWithRunner() // expected_value_theory at run-1
+    state.nodes.splice(4, 0, {
+      id: 'run-2',
+      type: 'component',
+      name: 'Linear Mixed Model Experiment (Synthetic, Abstract)',
+      protocolUuid: 'proto-run-2',
+      parameters: { formula: 'rt ~ 1 + x1', fixed_effects: "{'Intercept': 0., 'x1': 2.}" }
+    })
+    state.connections = [
+      { sourceId: 'start-1', targetId: 'pool-1' },
+      { sourceId: 'pool-1', targetId: 'samp-1' },
+      { sourceId: 'samp-1', targetId: 'run-1' },
+      { sourceId: 'run-1', targetId: 'run-2' },
+      { sourceId: 'run-2', targetId: 'theo-1' },
+      { sourceId: 'theo-1', targetId: 'end-1' }
+    ]
+    state.components.experiment_runners.push({
+      uuid: 'proto-run-2',
+      importPath: 'autora.experiment_runner.synthetic.abstract.lmm',
+      pythonName: 'lmm_experiment',
+      file: 'synth_abstr_lmm_experiment.json',
+      protocolType: 'experiment_runner',
+      parameters: {
+        lmm_experiment: [
+          { name: 'formula', datatype: 'string' },
+          { name: 'fixed_effects', datatype: 'string' },
+          {
+            name: 'X',
+            datatype: 'IV',
+            default: '[IV(name="x1", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))]'
+          }
+        ],
+        run: [{ name: 'added_noise', datatype: 'real' }]
+      },
+      pipInstall: 'autora-synthetic'
+    })
+
+    const code = generatePythonCode(state)
+    // Each runner is built under its own unique module-level name...
+    expect(code).toContain('expected_value_theory_runner = expected_value_theory(')
+    expect(code).toContain('linear_mixed_model_experiment_runner = lmm_experiment(')
+    // ...and each wrapper reads that same unique name (no shared bare `runner`).
+    expect(code).toContain('return Delta(experiment_data=expected_value_theory_runner.run(')
+    expect(code).toContain('X=[IV(name="x1"')
   })
 })
 
@@ -768,8 +1041,8 @@ describe('runner parameter grouping', () => {
 
   it('passes run-group parameters to run() instead of the factory', () => {
     const code = generatePythonCode(buildStateWithRunner())
-    expect(code).toContain('runner = expected_value_theory(choice_temperature=0.1, resolution=10)')
-    expect(code).toContain('return Delta(experiment_data=runner.run(conditions=conditions, added_noise=0.01))')
+    expect(code).toContain('expected_value_theory_runner = expected_value_theory(choice_temperature=0.1, resolution=10)')
+    expect(code).toContain('return Delta(experiment_data=expected_value_theory_runner.run(conditions=conditions, added_noise=0.01))')
     expect(code).not.toContain('expected_value_theory(choice_temperature=0.1, resolution=10, added_noise=0.01)')
   })
 
@@ -777,7 +1050,7 @@ describe('runner parameter grouping', () => {
     const state = buildStateWithRunner()
     state.nodes[3].parameters = { choice_temperature: 0.1 }
     const code = generatePythonCode(state)
-    expect(code).toContain('return Delta(experiment_data=runner.run(conditions=conditions))')
+    expect(code).toContain('return Delta(experiment_data=expected_value_theory_runner.run(conditions=conditions))')
   })
 
   it('emits dict/list literal string parameters unquoted', () => {
@@ -799,9 +1072,9 @@ describe('runner parameter grouping', () => {
 describe('variables initialization', () => {
   it('derives variables from the experiment runner when the workflow has one', () => {
     const code = generatePythonCode(buildStateWithRunner())
-    expect(code).toContain('runner = expected_value_theory(choice_temperature=0.1, resolution=10)')
-    expect(code).toContain('assert runner.variables is not None')
-    expect(code).toContain('variables = runner.variables')
+    expect(code).toContain('expected_value_theory_runner = expected_value_theory(choice_temperature=0.1, resolution=10)')
+    expect(code).toContain('assert expected_value_theory_runner.variables is not None')
+    expect(code).toContain('variables = expected_value_theory_runner.variables')
     expect(code).not.toContain('np.linspace')
   })
 
