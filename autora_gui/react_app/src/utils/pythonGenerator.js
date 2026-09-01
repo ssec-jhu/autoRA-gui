@@ -381,9 +381,24 @@ function buildParamString(params, exclude = []) {
 const SYMPIFY_IMPORT = { module: 'sympy', name: 'sympify' }
 
 /**
+ * Whether a param's value is a blank (empty/whitespace-only) string. Such a
+ * value counts as "unset" — the user cleared the input — so the param is omitted
+ * and the runner's own default applies rather than emitting an invalid literal
+ * (e.g. `sympify("")`, which raises at runtime).
+ *
+ * @param {*} value - The param value.
+ * @returns {boolean}
+ */
+function isBlankString(value) {
+  return typeof value === 'string' && value.trim() === ''
+}
+
+/**
  * Build a factory/constructor parameter string, wrapping any params named in
  * `sympifyNames` (declared `"sympify": true` in the component JSON) in
- * `sympify(...)` so their string value is parsed into a SymPy expression.
+ * `sympify(...)` so their string value is parsed into a SymPy expression. A
+ * sympify param left blank is treated as unset and omitted (so the runner's
+ * default applies) rather than emitting `sympify("")`, which would raise.
  *
  * @param {Object} params - Map of parameter name to value.
  * @param {string[]} [sympifyNames=[]] - Names of params to wrap in `sympify(...)`.
@@ -392,7 +407,8 @@ const SYMPIFY_IMPORT = { module: 'sympy', name: 'sympify' }
  */
 function buildFactoryParamString(params, sympifyNames = [], exclude = []) {
   return Object.entries(params)
-    .filter(([k, v]) => v !== null && v !== undefined && !exclude.includes(k))
+    .filter(([k, v]) => v !== null && v !== undefined && !exclude.includes(k) &&
+      !(sympifyNames.includes(k) && isBlankString(v)))
     .map(([k, v]) => sympifyNames.includes(k)
       ? `${k}=sympify(${formatPythonValue(String(v))})`
       : `${k}=${formatPythonValue(v)}`)
@@ -744,10 +760,11 @@ export function prepareWorkflow(state) {
 
     // Factory params declared `"sympify": true` in the JSON: their string value
     // is a SymPy expression and is wrapped in `sympify(...)` when emitted (see
-    // buildFactoryParamString). Pull in the `sympify` import when any such param
-    // is actually set on this node.
+    // buildFactoryParamString). Pull in the `sympify` import only when such a
+    // param is actually set to a non-blank value (a blank one is omitted, so the
+    // import would be unused).
     const sympifyParams = initGroup.filter(p => p.sympify === true).map(p => p.name)
-    if (sympifyParams.some(name => (node.parameters || {})[name] != null)) {
+    if (sympifyParams.some(name => !isBlankString((node.parameters || {})[name] ?? ''))) {
       if (!imports.has(SYMPIFY_IMPORT.module)) imports.set(SYMPIFY_IMPORT.module, new Set())
       imports.get(SYMPIFY_IMPORT.module).add(SYMPIFY_IMPORT.name)
     }

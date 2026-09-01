@@ -875,6 +875,15 @@ describe('sympify expression params', () => {
   it('does not import sympify when no sympify param is used', () => {
     expect(generatePythonCode(buildStateWithRunner())).not.toContain('sympify')
   })
+
+  it('omits a blank sympify param (never emits sympify("")) and skips the import', () => {
+    const state = buildStateWithEquationRunner()
+    // User cleared the expression field to whitespace: treat as unset.
+    state.nodes[3].parameters = { expression: '   ', rename_output_columns: true, added_noise: 0.01 }
+    const code = generatePythonCode(state)
+    expect(code).not.toContain('sympify')
+    expect(code).not.toContain('expression=')
+  })
 })
 
 describe('equation_experiment X/y from IV/DV params', () => {
