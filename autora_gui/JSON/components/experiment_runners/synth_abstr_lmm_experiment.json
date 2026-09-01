@@ -20,7 +20,7 @@
           "unique": true
         },
         "validValues": null,
-        "default": null
+        "default": "rt ~ 1 + x1"
       },
       {
         "name": "fixed_effects",
@@ -45,6 +45,18 @@
         },
         "validValues": null,
         "default": null
+      },
+      {
+        "name": "X",
+        "description": "Declaration of IV.",
+        "datatype": "IV",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": -1,
+          "unique": false
+        },
+        "validValues": null,
+        "default": "[IV(name=\"x1\", allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10))]"
       },
       {
         "name": "random_state",

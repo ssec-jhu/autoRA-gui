@@ -146,6 +146,100 @@ const getVariableEntries = (dataType) => {
 }
 
 /**
+ * Modal editor for long text/expression parameters (e.g. IV/DV declarations),
+ * which don't fit comfortably in the inline single-line field. Edits a local
+ * draft seeded from the current value; the change is only pushed to the node
+ * when the user clicks "Update". Cancel, the close button, the Escape key, and
+ * clicking the backdrop all discard the draft.
+ *
+ * @param {Object} props
+ * @param {Object} props.param - Parameter descriptor (name, description, default)
+ * @param {string} props.initialValue - The parameter's current value
+ * @param {function(string): void} props.onUpdate - Commit the edited value
+ * @param {function(): void} props.onClose - Dismiss without committing
+ * @returns {JSX.Element}
+ */
+function ExpressionEditorModal({ param, initialValue, onUpdate, onClose }) {
+  const [draft, setDraft] = React.useState(initialValue ?? '')
+  const panelRef = React.useRef(null)
+
+  // Move focus into the modal on open. (aria-modal alone does not contain focus.)
+  React.useEffect(() => {
+    const target = panelRef.current?.querySelector('textarea') ||
+      panelRef.current?.querySelector('button')
+    target?.focus()
+  }, [])
+
+  // Keep focus inside the modal: Escape closes; Tab/Shift+Tab wrap at the edges
+  // so focus cannot land on the underlying page controls.
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') { onClose(); return }
+    if (e.key !== 'Tab' || !panelRef.current) return
+    const focusable = Array.from(
+      panelRef.current.querySelectorAll('button, textarea, input, select, [href], [tabindex]:not([tabindex="-1"])')
+    ).filter(el => !el.disabled)
+    if (focusable.length === 0) return
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault()
+      last.focus()
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault()
+      first.focus()
+    }
+  }
+
+  return (
+    <div
+      className="expr-editor-overlay"
+      onMouseDown={onClose}
+      onKeyDown={handleKeyDown}
+    >
+      <div
+        className="expr-editor"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Edit ${param.name}`}
+        ref={panelRef}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <div className="expr-editor-header">
+          <h3 className="expr-editor-title">Edit <code>{param.name}</code></h3>
+          <button
+            type="button"
+            className="expr-editor-close"
+            aria-label="Close editor"
+            onClick={onClose}
+          >
+            ×
+          </button>
+        </div>
+        {param.description && (
+          <p className="expr-editor-description">{param.description}</p>
+        )}
+        <textarea
+          className="expr-editor-textarea"
+          value={draft}
+          spellCheck={false}
+          aria-label={`Value for ${param.name}`}
+          placeholder={param.default != null ? param.default.toString() : ''}
+          onChange={(e) => setDraft(e.target.value)}
+        />
+        <div className="expr-editor-actions">
+          <button type="button" className="expr-editor-cancel" onClick={onClose}>
+            Cancel
+          </button>
+          <button type="button" className="expr-editor-update" onClick={() => onUpdate(draft)}>
+            Update
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/**
  * Properties panel component. Reads the workflow state from context and renders
  * one of three views: the selected node's editable properties, a read-only
  * preview of a palette component, or an empty-state prompt. Defines local
@@ -157,6 +251,24 @@ function PropertiesPanel() {
   const { state, dispatch } = useWorkflow()
   const selectedNode = state.nodes.find(n => n.id === state.selectedNodeId)
   const previewedComponent = state.previewedComponent
+
+  // The parameter currently being edited in the expanded modal editor, if any.
+  const [editorParam, setEditorParam] = React.useState(null)
+  // The expand button that opened the modal, so focus can be restored on close.
+  const editorTriggerRef = React.useRef(null)
+  // Close the modal if the selection changes, so an Update can't land on the
+  // wrong node.
+  React.useEffect(() => { setEditorParam(null) }, [state.selectedNodeId])
+
+  /**
+   * Close the modal editor and restore focus to the expand button that opened it.
+   *
+   * @returns {void}
+   */
+  const closeEditor = () => {
+    setEditorParam(null)
+    editorTriggerRef.current?.focus()
+  }
 
   /**
    * Dispatch an update to a single parameter on the selected node.
@@ -249,6 +361,29 @@ function PropertiesPanel() {
               <option key={val} value={val}>{val}</option>
             ))}
           </select>
+        )
+      case 'IV':
+      case 'DV':
+        // IV/DV declarations are long Python literals; offer an expand button
+        // that opens the larger modal editor alongside the inline field.
+        return (
+          <div className="expression-field">
+            <input
+              type="text"
+              value={currentValue ?? ''}
+              onChange={(e) => handleParameterChange(param.name, e.target.value)}
+              placeholder={param.default?.toString() || ''}
+            />
+            <button
+              type="button"
+              className="expression-expand-btn"
+              aria-label={`Open a larger editor for ${param.name}`}
+              title="Open larger editor"
+              onClick={(e) => { editorTriggerRef.current = e.currentTarget; setEditorParam(param) }}
+            >
+              ⤢
+            </button>
+          </div>
         )
       default:
         return (
@@ -486,6 +621,18 @@ function PropertiesPanel() {
           </div>
         )}
       </div>
+
+      {editorParam && (
+        <ExpressionEditorModal
+          param={editorParam}
+          initialValue={selectedNode.parameters[editorParam.name]}
+          onUpdate={(value) => {
+            handleParameterChange(editorParam.name, value)
+            closeEditor()
+          }}
+          onClose={closeEditor}
+        />
+      )}
     </aside>
   )
 }

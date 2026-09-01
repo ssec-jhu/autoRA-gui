@@ -30,7 +30,9 @@
         "boolean",
         "string",
         "categorical",
-        "any"
+        "any",
+        "IV",
+        "DV"
       ],
       "title": "Datatype",
       "type": "string"
@@ -212,6 +214,11 @@
           ],
           "default": null,
           "title": "Default"
+        },
+        "sympify": {
+          "default": false,
+          "title": "Sympify",
+          "type": "boolean"
         }
       },
       "required": [
@@ -329,6 +336,11 @@
         }
       ],
       "title": "Outputdatatype"
+    },
+    "runReturnsDV": {
+      "default": false,
+      "title": "Runreturnsdv",
+      "type": "boolean"
     }
   },
   "required": [

@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - improve_code_generator
+      - fix-xy-runners
   workflow_dispatch:  # Allow manual trigger
 
 permissions:
@@ -36,8 +36,8 @@ jobs:
       - name: Create deployment directory
         run: mkdir -p deploy
 
-      # Build React version from main branch
-      - name: Checkout React branch
+      # Build from main branch
+      - name: Checkout main branch
         uses: actions/checkout@v4
         with:
           ref: main
@@ -52,20 +52,21 @@ jobs:
           cp ../../index.html ../../../deploy/main/index.html
         continue-on-error: true
 
-      # Build improved code generator version from improve_code_generator branch
-      - name: Checkout improve_code_generator branch
+      # Build from fix-xy-runners branch
+      - name: Checkout fix-xy-runners branch
         uses: actions/checkout@v4
+        continue-on-error: true
         with:
-          ref: improve_code_generator
-          path: improve_code_generator-branch
+          ref: fix-xy-runners
+          path: fix-xy-runners-branch
 
-      - name: Build component JSON generation standalone version
+      - name: Build fix-xy-runners standalone version
         run: |
-          cd improve_code_generator-branch/autora_gui/react_app
+          cd fix-xy-runners-branch/autora_gui/react_app
           npm install
           python build_standalone.py
-          mkdir -p ../../../deploy/improve_code_generator
-          cp ../../index.html ../../../deploy/improve_code_generator/index.html
+          mkdir -p ../../../deploy/fix-xy-runners
+          cp ../../index.html ../../../deploy/fix-xy-runners/index.html
         continue-on-error: true
 
       # Build Sphinx docs from main branch
@@ -121,7 +122,7 @@ jobs:
           <h1>AutoRA Workflow Editor and Documentation</h1>
           <div class="versions">
           <a href="./main/" class="version-card"><h2>Workflow Editor</h2><p>React-based GUI</p></a>
-          <a href="./improve_code_generator/" class="version-card"><h2>Workflow Editor with improved Code Generator</h2><p>React-based GUI with improved Code Generator</p></a>
+          <a href="./fix-xy-runners/" class="version-card"><h2>Workflow Editor with fixed XY runners</h2><p>React-based GUI with fixed XY runners</p></a>
           <a href="./docs/" class="version-card"><h2>Documentation</h2><p>API reference and guides</p></a>
           </div>
           </div>

@@ -38,6 +38,9 @@ class TestDatatype:
         assert Datatype.BOOLEAN == "boolean"
         assert Datatype.STRING == "string"
         assert Datatype.CATEGORICAL == "categorical"
+        assert Datatype.ANY == "any"
+        assert Datatype.IV == "IV"
+        assert Datatype.DV == "DV"
 
     def test_datatype_is_string_enum(self):
         assert isinstance(Datatype.REAL, str)
@@ -402,6 +405,26 @@ class TestProtocol:
         assert protocol.githubCommit == "commit123"
         assert protocol.importPath == "test.module"
         assert protocol.pipInstall == "test-package"
+        # Optional runner hint defaults to False.
+        assert protocol.runReturnsDV is False
+
+    def test_run_returns_dv_can_be_set(self):
+        protocol = Protocol(
+            uuid=uuid.uuid4(),
+            protocolType=ProtocolType.EXPERIMENT_RUNNER,
+            name="Bandit Runner",
+            description="Returns DV values per condition",
+            githubCommit="commit123",
+            github_io="https://example.github.io/test",
+            pythonName="q_learning",
+            importPath="autora.experiment_runner.synthetic.psychology.q_learning",
+            pipInstall="autora-synthetic",
+            parameters=None,
+            inputDataType=None,
+            outputDataType=None,
+            runReturnsDV=True,
+        )
+        assert protocol.runReturnsDV is True
 
     def test_create_protocol_with_all_fields(self):
         test_uuid = uuid.uuid4()

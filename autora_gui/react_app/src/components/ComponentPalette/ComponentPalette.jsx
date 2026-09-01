@@ -6,7 +6,7 @@
  *
  * @module components/ComponentPalette/ComponentPalette
  */
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { useWorkflow } from '../../context/WorkflowContext'
 import './ComponentPalette.css'
 
@@ -15,6 +15,13 @@ const typeConfig = {
   theorists: { label: 'Theorists', icon: '🧠', color: 'var(--node-theorists)' },
   experimentalists: { label: 'Experimentalists', icon: '🔬', color: 'var(--node-experimentalists)' },
   experiment_runners: { label: 'Experiment Runners', icon: '⚡', color: 'var(--node-experiment-runners)' }
+}
+
+// Maps a component's protocolType (singular) to its palette/category key (plural).
+const protocolTypeToCategory = {
+  theorist: 'theorists',
+  experimentalist: 'experimentalists',
+  experiment_runner: 'experiment_runners'
 }
 
 const controlNodes = [
@@ -55,6 +62,7 @@ const controlNodes = [
 function ComponentPalette() {
   const { state, dispatch } = useWorkflow()
   const [searchTerm, setSearchTerm] = useState('')
+  const fileInputRef = useRef(null)
   const [expandedSections, setExpandedSections] = useState({
     controls: true,
     theorists: false,
@@ -144,10 +152,65 @@ function ComponentPalette() {
     dispatch({ type: 'SET_PREVIEWED_COMPONENT', payload: component })
   }
 
+  /**
+   * Upload a component JSON file and add it to the palette for the current
+   * session. Components are not persisted to disk, so the behaviour is identical
+   * in both the local dev and standalone web versions.
+   *
+   * @param {Event} e - Change event from the hidden file input
+   */
+  const handleFileSelected = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+
+    let component
+    try {
+      component = JSON.parse(await file.text())
+    } catch (err) {
+      alert('Invalid JSON file: ' + err.message)
+      return
+    }
+
+    const category = protocolTypeToCategory[component?.protocolType]
+    if (!category) {
+      alert(
+        `Unknown or missing protocolType: ${component?.protocolType}. ` +
+        'Expected one of: theorist, experimentalist, experiment_runner.'
+      )
+      return
+    }
+    if (!component.uuid || !component.name) {
+      alert('Component is missing a required "uuid" or "name" field.')
+      return
+    }
+
+    dispatch({ type: 'ADD_COMPONENT', payload: { category, component } })
+    setExpandedSections(prev => ({ ...prev, [category]: true }))
+    alert(`Added "${component.name}" to ${category} for this session.`)
+  }
+
   return (
     <aside className="component-palette">
       <div className="palette-header">
-        <h2>Components</h2>
+        <div className="palette-title-row">
+          <h2>Components</h2>
+          <button
+            type="button"
+            className="add-component-btn"
+            onClick={() => fileInputRef.current?.click()}
+            title="Upload a component JSON file"
+          >
+            + Add
+          </button>
+        </div>
+        <input
+          type="file"
+          accept=".json,application/json"
+          ref={fileInputRef}
+          onChange={handleFileSelected}
+          style={{ display: 'none' }}
+        />
         <input
           type="text"
           placeholder="Search components..."

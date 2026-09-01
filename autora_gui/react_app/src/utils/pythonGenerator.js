@@ -6,6 +6,14 @@
  * @module utils/pythonGenerator
  */
 
+/**
+ * One execution block produced by getExecutionOrder: a `once` block runs its
+ * nodes a single time, while a `loop` block runs its child blocks inside
+ * `for cycle_N in range(maxCounter)` (nested loops become nested block trees).
+ *
+ * @typedef {{type: 'once', nodes: Object[]} | {type: 'loop', maxCounter: number, children: Block[]}} Block
+ */
+
 export const CONTROL_NODE_TYPES = ['start_point', 'end_point', 'filter_point']
 
 // Python code templates
@@ -124,20 +132,110 @@ export class CodeBuilder {
 }
 
 /**
- * Traverse the workflow graph and split it into ordered execution blocks,
- * supporting any number of loops (each Filter node defines one loop).
+ * Fold a set of filter intervals over an ordered component list into a nested
+ * block tree spanning `[lo, hi]`. Intervals passed in are all within that range.
+ * Each range's *top-level* intervals (those not strictly contained in another)
+ * become loop blocks; their inner intervals recurse into child loops; and any
+ * component not covered by a top-level interval accumulates into a `once` block.
+ *
+ * @param {Object[]} orderedNodes - Components in execution order.
+ * @param {number} lo - First component index of this range (inclusive).
+ * @param {number} hi - Last component index of this range (inclusive).
+ * @param {Array<{start: number, end: number, maxCounter: number}>} intervals - Filter intervals within `[lo, hi]`.
+ * @returns {Block[]} Ordered child blocks covering `[lo, hi]`.
+ */
+function buildBlockTree(orderedNodes, lo, hi, intervals) {
+  const topLevel = intervals
+    .filter(iv => !intervals.some(o =>
+      o !== iv && o.start <= iv.start && iv.end <= o.end &&
+      (o.start < iv.start || iv.end < o.end)))
+    .sort((a, b) => a.start - b.start)
+
+  const blocks = []
+  let onceRun = []
+  const flushOnce = () => {
+    if (onceRun.length) { blocks.push({ type: 'once', nodes: onceRun }); onceRun = [] }
+  }
+
+  let pos = lo
+  let ti = 0
+  while (pos <= hi) {
+    const iv = topLevel[ti]
+    if (iv && iv.start === pos) {
+      flushOnce()
+      const inner = intervals.filter(o => o !== iv && o.start >= iv.start && o.end <= iv.end)
+      blocks.push({
+        type: 'loop',
+        maxCounter: iv.maxCounter,
+        children: buildBlockTree(orderedNodes, iv.start, iv.end, inner)
+      })
+      pos = iv.end + 1
+      ti++
+      while (topLevel[ti] && topLevel[ti].start < pos) ti++
+    } else {
+      onceRun.push(orderedNodes[pos])
+      pos++
+    }
+  }
+  flushOnce()
+  return blocks
+}
+
+function assertNestedOrDisjointIntervals(intervals) {
+  const sorted = [...intervals].sort((a, b) => {
+    if (a.start !== b.start) return a.start - b.start
+    return b.end - a.end
+  })
+
+  const stack = []
+  sorted.forEach(interval => {
+    while (stack.length && interval.start > stack[stack.length - 1].end) stack.pop()
+    const parent = stack[stack.length - 1]
+    if (parent && interval.end > parent.end) {
+      throw new Error(
+        'Filter loops must be either disjoint or fully nested. ' +
+        'Partially overlapping loops are not supported.'
+      )
+    }
+    if (parent && interval.start === parent.start && interval.end === parent.end) {
+      throw new Error(
+        'Two Filter loops enclose exactly the same components. ' +
+        'Remove one, or place a component between them to nest.'
+      )
+    }
+    stack.push(interval)
+  })
+}
+
+/**
+ * Flatten a (possibly nested) block tree into its components in execution order.
+ *
+ * @param {Block[]} blocks - Execution blocks from getExecutionOrder.
+ * @returns {Object[]} All component nodes, in order.
+ */
+export function flattenBlockNodes(blocks) {
+  return blocks.flatMap(b => (b.type === 'loop' ? flattenBlockNodes(b.children) : b.nodes))
+}
+
+/**
+ * Traverse the workflow graph and split it into a (possibly nested) tree of
+ * execution blocks, supporting any number of loops — including nested loops
+ * (each Filter node defines one loop).
  *
  * The graph is walked forward from the Start node. At each Filter the traversal
  * follows the *exit* output (toward the end) and records the *loop-back* output,
  * which points to an already-visited node marking where that loop's body began.
- * The linear sequence of components is then partitioned so that each filter's
- * body becomes a `loop` block and every other run of components a `once` block.
+ * Each filter therefore spans an interval over the ordered components (loop-back
+ * target → last component before the filter). Intervals that contain one another
+ * become nested loops, disjoint intervals become sibling loops, and components
+ * covered by no interval run once.
  *
  * @param {Object[]} nodes - Graph nodes, each with `id`, `type` and optional `filterParams`.
  * @param {Object[]} connections - Graph edges, each with `sourceId` and `targetId`.
- * @returns {{blocks: Array<{type: 'once'|'loop', nodes: Object[], maxCounter?: number}>}}
- *   Ordered execution blocks: `once` blocks run their nodes a single time,
- *   `loop` blocks run their nodes inside `for i in range(maxCounter)`.
+ * @returns {{blocks: Block[]}} A tree of ordered execution blocks, where a
+ *   `Block` is either `{type: 'once', nodes: Object[]}` (its nodes run a single
+ *   time) or `{type: 'loop', maxCounter: number, children: Block[]}` (its child
+ *   blocks run inside `for cycle_N in range(maxCounter)`).
  */
 export function getExecutionOrder(nodes, connections) {
   const startNode = nodes.find(n => n.type === 'start_point')
@@ -145,8 +243,11 @@ export function getExecutionOrder(nodes, connections) {
     throw new Error('Workflow must have a Start node')
   }
 
+  if (!nodes.some(n => n.type === 'end_point')) {
+    throw new Error('Workflow must have an End node')
+  }
+
   const nodeById = new Map(nodes.map(n => [n.id, n]))
-  const hasFilter = nodes.some(n => n.type === 'filter_point')
 
   // Build adjacency map (source -> [targets])
   const adjacency = {}
@@ -185,7 +286,7 @@ export function getExecutionOrder(nodes, connections) {
           'form the loop before generating code.'
         )
       }
-      sequence.push({ loopBackId, maxCounter: node.filterParams?.maxCounter ?? 10 })
+      sequence.push({ loopBackId, maxCounter: node.filterParams?.maxCounter ?? 1 })
       current = targets.find(id => id !== loopBackId) ?? null
       continue
     }
@@ -196,30 +297,29 @@ export function getExecutionOrder(nodes, connections) {
     current = (adjacency[current] || [])[0]
   }
 
-  // Partition the linear sequence into ordered blocks. A pending run of
-  // components accumulates until a filter closes a loop over its tail (from the
-  // loop-back target onward); components before the loop-back target run once.
-  const blocks = []
-  let run = []
+  // Turn the linear sequence into ordered components plus one interval per
+  // filter (loop-back target index → last component index before the filter),
+  // then fold those intervals into a nested block tree.
+  const orderedNodes = []
+  const indexById = new Map()
+  const intervals = []
   for (const item of sequence) {
     if (item.node) {
-      run.push(item.node)
-      continue
+      indexById.set(item.node.id, orderedNodes.length)
+      orderedNodes.push(item.node)
+    } else {
+      intervals.push({
+        start: indexById.get(item.loopBackId),
+        end: orderedNodes.length - 1,
+        maxCounter: item.maxCounter
+      })
     }
-    const idx = run.findIndex(n => n.id === item.loopBackId)
-    const before = idx > 0 ? run.slice(0, idx) : []
-    const body = idx >= 0 ? run.slice(idx) : run
-    if (before.length) blocks.push({ type: 'once', nodes: before })
-    if (body.length) blocks.push({ type: 'loop', nodes: body, maxCounter: item.maxCounter })
-    run = []
   }
-  if (run.length) {
-    // Trailing components run once — except a filter-less workflow, where the
-    // whole path is one experiment loop with the default cycle count (legacy).
-    blocks.push(hasFilter
-      ? { type: 'once', nodes: run }
-      : { type: 'loop', nodes: run, maxCounter: 10 })
-  }
+
+  assertNestedOrDisjointIntervals(intervals)
+
+  // A filter-less workflow has no interval — every component simply runs once.
+  const blocks = buildBlockTree(orderedNodes, 0, orderedNodes.length - 1, intervals)
 
   return { blocks }
 }
@@ -275,115 +375,104 @@ function buildParamString(params, exclude = []) {
     .join(', ')
 }
 
-// Factory params (keyed by function pythonName) whose string value is not a
-// plain string but must be parsed into a SymPy expression via sympify().
-const SYMPIFY_PARAMS = { equation_experiment: ['expression'] }
+// The import that a `sympify`-flagged param needs. Which params are SymPy
+// expressions is declared per-component in the JSON (a param with
+// `"sympify": true`); this is only the fixed fact of where `sympify` lives.
+const SYMPIFY_IMPORT = { module: 'sympy', name: 'sympify' }
 
 /**
- * Build a factory/constructor parameter string, wrapping any params that must
- * be SymPy expressions (see SYMPIFY_PARAMS) in `sympify(...)`.
+ * Whether a param's value is a blank (empty/whitespace-only) string. Such a
+ * value counts as "unset" — the user cleared the input — so the param is omitted
+ * and the runner's own default applies rather than emitting an invalid literal
+ * (e.g. `sympify("")`, which raises at runtime).
  *
- * @param {string} pythonName - The factory function name (identifies special params).
+ * @param {*} value - The param value.
+ * @returns {boolean}
+ */
+function isBlankString(value) {
+  return typeof value === 'string' && value.trim() === ''
+}
+
+/**
+ * Build a factory/constructor parameter string, wrapping any params named in
+ * `sympifyNames` (declared `"sympify": true` in the component JSON) in
+ * `sympify(...)` so their string value is parsed into a SymPy expression. A
+ * sympify param left blank is treated as unset and omitted (so the runner's
+ * default applies) rather than emitting `sympify("")`, which would raise.
+ *
  * @param {Object} params - Map of parameter name to value.
+ * @param {string[]} [sympifyNames=[]] - Names of params to wrap in `sympify(...)`.
  * @param {string[]} [exclude=[]] - Parameter names to omit.
  * @returns {string} Comma-separated `name=value` keyword arguments (nulls skipped).
  */
-function buildFactoryParamString(pythonName, params, exclude = []) {
-  const sympifyNames = SYMPIFY_PARAMS[pythonName] || []
+function buildFactoryParamString(params, sympifyNames = [], exclude = []) {
   return Object.entries(params)
-    .filter(([k, v]) => v !== null && v !== undefined && !exclude.includes(k))
+    .filter(([k, v]) => v !== null && v !== undefined && !exclude.includes(k) &&
+      !(sympifyNames.includes(k) && isBlankString(v)))
     .map(([k, v]) => sympifyNames.includes(k)
       ? `${k}=sympify(${formatPythonValue(String(v))})`
       : `${k}=${formatPythonValue(v)}`)
     .join(', ')
 }
 
-// SymPy/numpy function names and constants that must not be treated as
-// variable symbols when scanning an expression for its free variables.
-const NON_SYMBOL_NAMES = new Set([
-  'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh',
-  'exp', 'log', 'ln', 'sqrt', 'Abs', 'abs', 'sign', 'floor', 'ceiling',
-  'Max', 'Min', 'pi', 'E', 'I', 'oo'
-])
-
 /**
- * Extract the distinct variable symbols from a SymPy expression string, sorted
- * by name and excluding known function/constant names.
- *
- * @param {string} expression - e.g. "x_1 ** 2 - x_2 ** 2".
- * @returns {string[]} Sorted unique variable names.
- */
-function parseExpressionSymbols(expression) {
-  const ids = String(expression || '').match(/[A-Za-z_]\w*/g) || []
-  return [...new Set(ids)].filter(id => !NON_SYMBOL_NAMES.has(id)).sort()
-}
-
-/**
- * Extract the independent-variable names from a mixed-model formula. Uses the
- * right-hand side of `~`, drops intercept markers and random-effect groups.
- *
- * @param {string} formula - e.g. "rt ~ 1 + x1".
- * @returns {string[]} Sorted unique IV names.
- */
-function parseFormulaIVs(formula) {
-  const s = String(formula || '')
-  const rhs = (s.includes('~') ? s.split('~')[1] : s).replace(/\([^)]*\)/g, '')
-  const ids = rhs.match(/[A-Za-z_]\w*/g) || []
-  return [...new Set(ids)].sort()
-}
-
-// Synthetic runners whose factory needs X (and sometimes y) as Variable objects
-// the workflow does not capture. Each entry names the param carrying the
-// variable spec, how to parse IV names from it, and whether a y (DV) is needed.
-const XY_RUNNERS = {
-  equation_experiment: { specParam: 'expression', parseIVs: parseExpressionSymbols, needsY: true },
-  lmm_experiment: { specParam: 'formula', parseIVs: parseFormulaIVs, needsY: false }
-}
-
-/**
- * Whether a runner needs X/y Variable objects synthesized for its factory call.
+ * Whether a runner takes X/y (IV/DV) Variable objects on its factory call.
+ * These are declared as parameters with datatype "IV"/"DV" in the component's
+ * JSON and collected into `meta.xyParams` by prepareWorkflow.
  *
  * @param {Object} meta - Component metadata.
  * @returns {boolean}
  */
 function needsXYVariables(meta) {
-  return isSyntheticRunner(meta) && !!XY_RUNNERS[meta?.pythonName]
+  return isSyntheticRunner(meta) && (meta?.xyParams?.length > 0)
 }
 
 /**
- * Build the multi-line `runner = <name>(...)` call for a runner that needs X/y,
- * synthesizing an IV per variable in its expression/formula (and a DV when the
- * factory takes one) with default ranges the user adjusts. Emitted with a
- * 4-space base indent for use inside a function body.
+ * Module-level variable name holding a synthetic runner's built object. Derived
+ * from the (already-unique) wrapper `varName` so identical wrappers share it
+ * (keeping wrapper-dedup intact) while two distinct synthetic runners get
+ * distinct names and never overwrite one another's global `runner`.
  *
- * @param {Object} meta - Runner metadata with `pythonName`, `params`, `runParamNames`.
+ * @param {Object} meta - Component metadata with an assigned `varName`.
+ * @returns {string} A unique Python identifier for this runner's object.
+ */
+function runnerVarName(meta) {
+  return `${meta.varName.replace(/_on_state(_\d+)?$/, '$1')}_runner`
+}
+
+/**
+ * Build the multi-line `<runner> = <name>(...)` call for a runner that takes X/y
+ * (IV/DV) Variable objects. The IV/DV literals are emitted verbatim from the
+ * component JSON's IV/DV parameter definitions (the node value, or the declared
+ * default); a TODO comment prompts the user to adjust the names and ranges.
+ * Emitted with a 4-space base indent for use inside a function body.
+ *
+ * @param {Object} meta - Runner metadata with `pythonName`, `params`, `runParamNames`, `xyParams`, `varName`.
  * @param {number} [baseSpaces=4] - Leading indentation for the first line.
  * @returns {string} The indented, newline-joined call.
  */
 function buildXYRunnerCall(meta, baseSpaces = 4) {
-  const { pythonName, params, runParamNames = [] } = meta
-  const cfg = XY_RUNNERS[pythonName]
-  const ivNames = cfg.parseIVs(params[cfg.specParam])
-  const finalIVs = ivNames.length ? ivNames : ['x']
-  const range = 'allowed_values=np.linspace(-10, 10, 100), value_range=(-10, 10)'
-  // Regular factory params (expression is sympified by buildFactoryParamString).
-  const factory = buildFactoryParamString(pythonName, params, runParamNames)
+  const { pythonName, params, runParamNames = [], xyParams = [], sympifyParams = [] } = meta
+  const xyNames = xyParams.map(p => p.name)
+  // Regular factory params (sympify-flagged ones are wrapped by
+  // buildFactoryParamString); the IV/DV params are emitted verbatim below, under
+  // the TODO comment, so exclude them (and the run params) from the ordinary
+  // keyword arguments.
+  const factory = buildFactoryParamString(params, sympifyParams, [...runParamNames, ...xyNames])
   const pad = ' '.repeat(baseSpaces)
   const pad2 = ' '.repeat(baseSpaces + 4)
-  const pad3 = ' '.repeat(baseSpaces + 8)
 
-  const lines = [`${pad}runner = ${pythonName}(`]
+  const lines = [`${pad}${runnerVarName(meta)} = ${pythonName}(`]
   if (factory) lines.push(`${pad2}${factory},`)
   lines.push(`${pad2}# TODO: adjust the variable names and ranges below for your experiment`)
-  lines.push(`${pad2}X=[`)
-  finalIVs.forEach(n => lines.push(`${pad3}IV(name="${n}", ${range}),`))
-  if (cfg.needsY) {
-    lines.push(`${pad2}],`)
-    const dvName = ['y', 'z', 'output'].find(n => !finalIVs.includes(n)) || 'dv'
-    lines.push(`${pad2}y=DV(name="${dvName}", ${range}))`)
-  } else {
-    lines.push(`${pad2}])`)
-  }
+  xyParams.forEach(p => {
+    // Indent any newlines inside multi-line values so the generated Python stays
+    // syntactically valid regardless of how the user formatted the value.
+    const indentedValue = String(p.value).replace(/\n/g, `\n${pad2}`)
+    lines.push(`${pad2}${p.name}=${indentedValue},`)
+  })
+  // Close the factory call on the final argument line.
+  lines[lines.length - 1] = lines[lines.length - 1].replace(/,$/, ')')
   return lines.join('\n')
 }
 
@@ -428,7 +517,7 @@ function isSyntheticRunner(meta) {
  * @returns {void}
  */
 function generateRunnerWrapper(code, meta) {
-  const { pythonName, params, varName, nodeName, runParamNames = [] } = meta
+  const { pythonName, params, varName, nodeName, runParamNames = [], sympifyParams = [] } = meta
 
   code.comment(nodeName)
 
@@ -437,19 +526,39 @@ function generateRunnerWrapper(code, meta) {
       Object.fromEntries(Object.entries(params).filter(([name]) => runParamNames.includes(name)))
     )
     const runArgs = ['conditions=conditions', runParamStr].filter(Boolean).join(', ')
-    // Build the runner once at module scope so the same object is reused by the
-    // variables setup (see generateVariablesSetup) — no need to rebuild it.
+    // Build the runner once at module scope, under a name unique to this wrapper,
+    // so distinct synthetic runners don't overwrite one another's global and the
+    // variables setup (see generateVariablesSetup) can reuse it — no rebuild.
+    const runVar = runnerVarName(meta)
     if (needsXYVariables(meta)) {
       // Synthesize the required X (IVs) and y (DV); the workflow does not carry them.
       code.multiline(buildXYRunnerCall(meta, 0))
     } else {
-      const factoryParamStr = buildFactoryParamString(pythonName, params, runParamNames)
-      code.line(`runner = ${pythonName}(${factoryParamStr})`)
+      const factoryParamStr = buildFactoryParamString(params, sympifyParams, runParamNames)
+      code.line(`${runVar} = ${pythonName}(${factoryParamStr})`)
     }
     code.blank()
     code.line('@on_state()')
     code.line(`def ${varName}(conditions: pd.DataFrame) -> Delta:`)
-    code.indent(`return Delta(experiment_data=runner.run(${runArgs}))`)
+    if (meta.runReturnsDV) {
+      // This runner's `.run()` returns the DV values (one per condition), not a
+      // full experiment_data frame (e.g. bandit/Q-learning). Assemble one keyed
+      // by the runner's own IV/DV variable names.
+      code.indent(`dv_values = ${runVar}.run(${runArgs})`)
+      // Some runners return a tuple of outputs when extra results are requested
+      // (e.g. Q-learning's return_choice_probabilities=True yields
+      // (choices, probabilities)). Keep the first element as the DV values; any
+      // additional outputs are not part of the declared dependent variable.
+      code.indent('if isinstance(dv_values, tuple):')
+      code.indent('dv_values = dv_values[0]', 2)
+      code.indent('experiment_data = pd.DataFrame({')
+      code.indent(`${runVar}.variables.independent_variables[0].name: list(conditions.iloc[:, 0]),`, 2)
+      code.indent(`${runVar}.variables.dependent_variables[0].name: dv_values,`, 2)
+      code.indent('})')
+      code.indent('return Delta(experiment_data=experiment_data)')
+    } else {
+      code.indent(`return Delta(experiment_data=${runVar}.run(${runArgs}))`)
+    }
     code.blank()
     return
   }
@@ -524,14 +633,31 @@ function generateExperimentalistWrapper(code, meta) {
       : `${pythonName}(variables)`
     code.indent(`return Delta(conditions=${call})`)
   } else if (isSampler) {
-    const numSamples = params.num_samples || 1
+    const numSamples = params.num_samples ?? 1
     const otherParamStr = buildParamString(params, ['num_samples'])
+    // Some samplers (e.g. the LHS sampler) also require `reference_conditions`,
+    // which is not a state field. Derive it from the IV columns of the
+    // already-collected experiment_data (empty on the first cycle);
+    // experiment_data and variables are auto-injected by @on_state().
+    const inputVarNames = Array.isArray(inputDataType?.variables)
+      ? inputDataType.variables.map(v => v.name)
+      : []
+    const needsReference = inputVarNames.includes('reference_conditions')
 
-    code.line(`def ${varName}(conditions: pd.DataFrame, num_samples: int = ${numSamples}) -> Delta:`)
-    const call = otherParamStr
-      ? `${pythonName}(conditions=conditions, num_samples=num_samples, ${otherParamStr})`
-      : `${pythonName}(conditions=conditions, num_samples=num_samples)`
-    code.indent(`return Delta(conditions=${call})`)
+    if (needsReference) {
+      code.line(`def ${varName}(conditions: pd.DataFrame, experiment_data: pd.DataFrame, variables: VariableCollection, num_samples: int = ${numSamples}) -> Delta:`)
+      code.indent('reference_conditions = experiment_data[[v.name for v in variables.independent_variables]] if experiment_data is not None else conditions.iloc[0:0]')
+      const refCall = otherParamStr
+        ? `${pythonName}(conditions=conditions, reference_conditions=reference_conditions, num_samples=num_samples, ${otherParamStr})`
+        : `${pythonName}(conditions=conditions, reference_conditions=reference_conditions, num_samples=num_samples)`
+      code.indent(`return Delta(conditions=${refCall})`)
+    } else {
+      code.line(`def ${varName}(conditions: pd.DataFrame, num_samples: int = ${numSamples}) -> Delta:`)
+      const call = otherParamStr
+        ? `${pythonName}(conditions=conditions, num_samples=num_samples, ${otherParamStr})`
+        : `${pythonName}(conditions=conditions, num_samples=num_samples)`
+      code.indent(`return Delta(conditions=${call})`)
+    }
   } else {
     const paramStr = buildParamString(params)
     code.line(`def ${varName}(conditions: pd.DataFrame) -> Delta:`)
@@ -572,7 +698,7 @@ export function prepareWorkflow(state) {
   const allComponents = components ? Object.values(components).flat() : []
   const { blocks } = getExecutionOrder(nodes, connections)
 
-  const allPathNodes = blocks.flatMap(block => block.nodes)
+  const allPathNodes = flattenBlockNodes(blocks)
   if (allPathNodes.length === 0) {
     throw new Error('No components found in workflow. Add components and connect them.')
   }
@@ -580,6 +706,12 @@ export function prepareWorkflow(state) {
   // Collect imports and component metadata
   const imports = new Map()
   const componentMeta = new Map()
+
+  // Track varName assignments to ensure uniqueness per distinct wrapper signature:
+  // - same base varName + same signature → reuse (identical wrapper body, safe to share)
+  // - same base varName + different signature → add numeric suffix to disambiguate
+  const varNameToSignature = new Map()  // varName → JSON-serialized signature
+  const varNameSuffix = new Map()       // base varName → next available numeric suffix
 
   allPathNodes.forEach(node => {
     const protocol = allComponents.find(c => c.uuid === node.protocolUuid)
@@ -601,13 +733,6 @@ export function prepareWorkflow(state) {
     if (!imports.has(importPath)) imports.set(importPath, new Set())
     imports.get(importPath).add(alias ? `${pythonName} as ${alias}` : pythonName)
 
-    // Some factory params must be SymPy expressions (e.g. equation_experiment's
-    // `expression`); pull in sympify when such a param is actually set.
-    if ((SYMPIFY_PARAMS[pythonName] || []).some(name => (node.parameters || {})[name] != null)) {
-      if (!imports.has('sympy')) imports.set('sympy', new Set())
-      imports.get('sympy').add('sympify')
-    }
-
     // Parameters are grouped by function in the JSON. The instantiation group
     // configures the constructor/factory: theorist classes use an "__init__"
     // group, runner factories use a group named after the function (pythonName).
@@ -622,6 +747,28 @@ export function prepareWorkflow(state) {
     // credentials template emitted automatically (see generateRunnerWrapper).
     const usesFirebaseCredentials = declaredParamNames.includes('firebase_credentials')
 
+    // IV/DV factory arguments (datatype "IV"/"DV" in the JSON, e.g. a synthetic
+    // runner's X and y). Their literal is taken from the node value if set,
+    // otherwise the declared default, and emitted verbatim (see buildXYRunnerCall).
+    const xyParams = initGroup
+      .filter(p => p.datatype === 'IV' || p.datatype === 'DV')
+      .map(p => ({
+        name: p.name,
+        datatype: p.datatype,
+        value: String(String((node.parameters || {})[p.name] ?? '').trim() || (p.default ?? ''))
+      }))
+
+    // Factory params declared `"sympify": true` in the JSON: their string value
+    // is a SymPy expression and is wrapped in `sympify(...)` when emitted (see
+    // buildFactoryParamString). Pull in the `sympify` import only when such a
+    // param is actually set to a non-blank value (a blank one is omitted, so the
+    // import would be unused).
+    const sympifyParams = initGroup.filter(p => p.sympify === true).map(p => p.name)
+    if (sympifyParams.some(name => !isBlankString((node.parameters || {})[name] ?? ''))) {
+      if (!imports.has(SYMPIFY_IMPORT.module)) imports.set(SYMPIFY_IMPORT.module, new Set())
+      imports.get(SYMPIFY_IMPORT.module).add(SYMPIFY_IMPORT.name)
+    }
+
     componentMeta.set(node.id, {
       importPath,
       // Name as imported into the generated file (alias when aliased)
@@ -629,18 +776,50 @@ export function prepareWorkflow(state) {
       inputDataType,
       outputDataType: protocol.outputDataType,
       runParamNames,
+      xyParams,
+      sympifyParams,
+      // Runner whose `.run()` returns the DV values rather than a full
+      // experiment_data frame (see generateRunnerWrapper).
+      runReturnsDV: protocol.runReturnsDV === true,
       usesFirebaseCredentials,
       protocolType,
       params: node.parameters || {},
-      varName: `${toPythonName(node.name)}_on_state`,
+      varName: null, // assigned below
       nodeName: node.name
     })
+
+    // Assign varName: reuse when base name and signature both match; add a
+    // numeric suffix when the same base varName is claimed with a different
+    // wrapper signature so the two generated `def` blocks don't collide.
+    const meta = componentMeta.get(node.id)
+    const signature = JSON.stringify({ pythonName: meta.pythonName, params: meta.params })
+    const baseName = `${toPythonName(node.name)}_on_state`
+
+    if (varNameToSignature.has(baseName) && varNameToSignature.get(baseName) === signature) {
+      // Identical signature for this base name: safe to reuse the same wrapper.
+      meta.varName = baseName
+    } else if (!varNameToSignature.has(baseName)) {
+      // First time this base name is seen: claim it.
+      varNameToSignature.set(baseName, signature)
+      meta.varName = baseName
+    } else {
+      // Same base name but different signature: find or create a suffixed variant.
+      let suffix = varNameSuffix.get(baseName) || 1
+      let candidate
+      do {
+        candidate = `${baseName}_${suffix}`
+        suffix++
+      } while (varNameToSignature.has(candidate) && varNameToSignature.get(candidate) !== signature)
+      varNameSuffix.set(baseName, suffix)
+      varNameToSignature.set(candidate, signature)
+      meta.varName = candidate
+    }
   })
 
   // Only synthetic runners provide `.variables`; with such a runner the
   // variables are derived from it, otherwise placeholder variables are emitted.
   const derivesVariablesFromRunner = [...componentMeta.values()].some(isSyntheticRunner)
-  // Runners needing synthesized X/y require IV/DV and numpy imports.
+  // Runners taking IV/DV factory arguments require IV/DV and numpy imports.
   const needsEquationVariables = [...componentMeta.values()].some(needsXYVariables)
 
   return { blocks, imports, componentMeta, derivesVariablesFromRunner, needsEquationVariables }
@@ -664,11 +843,14 @@ export function generateVariablesSetup(componentMeta, orderedNodes) {
 
   if (!runnerMeta) return TEMPLATES.defaultVariables
 
-  // Reuse the `runner` defined in the component section — do not rebuild it.
+  // Reuse this runner's object defined in the component section — do not rebuild
+  // it. Use its unique variable name so we bind the intended runner even when the
+  // workflow defines several distinct synthetic runners.
+  const runVar = runnerVarName(runnerMeta)
   return [
     '    # Variables are governed by the experiment runner defined above',
-    '    assert runner.variables is not None',
-    '    variables = runner.variables'
+    `    assert ${runVar}.variables is not None`,
+    `    variables = ${runVar}.variables`
   ].join('\n')
 }
 
@@ -718,14 +900,24 @@ export function generatePythonCode(state) {
   generateImports(code, imports, { usesPlaceholderVariables: !derivesVariablesFromRunner, usesEquationVariables: needsEquationVariables })
   code.blank().blank()
 
-  // Generate wrapper functions
-  componentMeta.forEach((meta) => generateWrapper(code, meta))
+  // Generate wrapper functions. Components that produce an identical definition
+  // (same function name and parameters) are emitted only once and reused by
+  // every call site, so no duplicate `def`s appear.
+  const seenWrappers = new Set()
+  componentMeta.forEach((meta) => {
+    const wrapper = new CodeBuilder()
+    generateWrapper(wrapper, meta)
+    const text = wrapper.toString()
+    if (seenWrappers.has(text)) return
+    seenWrappers.add(text)
+    code.multiline(text)
+  })
 
   code.blank()
 
   // Generate main function
   code.line('def main():')
-  code.multiline(generateVariablesSetup(componentMeta, blocks.flatMap(b => b.nodes)))
+  code.multiline(generateVariablesSetup(componentMeta, flattenBlockNodes(blocks)))
   code.indent('')
   code.multiline(TEMPLATES.initState)
   code.indent('')
@@ -739,7 +931,7 @@ export function generatePythonCode(state) {
     const isSampler = pythonName.includes('sample') || pythonName.includes('sampler')
 
     code.indent(`# ${nodeName}`, level)
-    if (isSampler && node.parameters?.num_samples) {
+    if (isSampler && node.parameters?.num_samples != null) {
       code.indent(`state = ${varName}(state, num_samples=${node.parameters.num_samples})`, level)
     } else {
       code.indent(`state = ${varName}(state)`, level)
@@ -747,20 +939,27 @@ export function generatePythonCode(state) {
     code.indent('', level)
   }
 
-  // Emit each block in order: `once` blocks run their nodes a single time (at
-  // the function-body indent), `loop` blocks wrap them in a for-loop. A workflow
-  // with several Filter nodes yields several loop blocks, one per loop.
-  blocks.forEach(block => {
-    if (block.type === 'loop') {
-      code.indent(`# Experiment loop (${block.maxCounter} cycles)`)
-      code.indent(`for i in range(${block.maxCounter}):`)
-      code.indent("print(f'Cycle {i}')", 2)
-      code.indent('', 2)
-      block.nodes.forEach(node => addComponentCall(node, 2))
-    } else {
-      block.nodes.forEach(node => addComponentCall(node, 1))
-    }
-  })
+  // Emit the block tree in order: `once` blocks run their nodes a single time,
+  // `loop` blocks wrap their children in a for-loop and recurse (nested loops
+  // become nested for-loops). A loop prints its cycle only when it directly runs
+  // components; a loop that only holds nested loops emits no cycle print.
+  const renderBlocks = (blks, level, loopDepth = 0) => {
+    blks.forEach(block => {
+      if (block.type === 'loop') {
+        const loopVar = `cycle_${loopDepth}`
+        code.indent(`# Experiment loop (${block.maxCounter} cycles)`, level)
+        code.indent(`for ${loopVar} in range(${block.maxCounter}):`, level)
+        if (block.children.some(c => c.type === 'once')) {
+          code.indent(`print(f'Cycle {${loopVar}}')`, level + 1)
+          code.indent('', level + 1)
+        }
+        renderBlocks(block.children, level + 1, loopDepth + 1)
+      } else {
+        block.nodes.forEach(node => addComponentCall(node, level))
+      }
+    })
+  }
+  renderBlocks(blocks, 1)
 
   code.indent('')
   code.indent('print("Workflow completed!")')
