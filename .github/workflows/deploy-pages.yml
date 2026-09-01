@@ -69,6 +69,22 @@ jobs:
           cp ../../index.html ../../../deploy/fix-xy-runners/index.html
         continue-on-error: true
 
+      # Build component JSON generation version from create_json branch
+      - name: Checkout create_json branch
+        uses: actions/checkout@v4
+        with:
+          ref: create_json
+          path: create_json-branch
+
+      - name: Build component JSON generation standalone version
+        run: |
+          cd create_json-branch/autora_gui/react_app
+          npm install
+          python build_standalone.py
+          mkdir -p ../../../deploy/create_json
+          cp ../../index.html ../../../deploy/create_json/index.html
+        continue-on-error: true
+
       # Build Sphinx docs from main branch
       - name: Checkout main branch for docs
         uses: actions/checkout@v4
@@ -141,6 +157,9 @@ jobs:
           path: deploy
 
   deploy:
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

@@ -179,3 +179,55 @@ class TestAPIEndpoints:
         """Test GET /api/schema/{name} with an unknown schema returns 404."""
         response = client.get("/api/schema/nonexistent_schema")
         assert response.status_code == 404
+
+
+class TestCreateComponent:
+    """Tests for POST /api/components."""
+
+    @staticmethod
+    def _payload(**overrides):
+        payload = {
+            "folder": "experimentalists",
+            "fileName": "test_component.json",
+            "component": {"uuid": "test-uuid", "name": "Test Component"},
+        }
+        payload.update(overrides)
+        return payload
+
+    def test_create_component_writes_file(self, tmp_path, monkeypatch):
+        """Test that a valid payload writes the JSON file into the folder."""
+        import autora_gui.react_app.server as server
+
+        monkeypatch.setattr(server, "COMPONENTS_DIR", tmp_path)
+        response = client.post("/api/components", json=self._payload())
+        assert response.status_code == 200
+        data = response.json()
+        assert data["success"] is True
+        assert data["path"] == "experimentalists/test_component.json"
+
+        import json as json_module
+
+        written = tmp_path / "experimentalists" / "test_component.json"
+        assert written.exists()
+        assert json_module.loads(written.read_text())["uuid"] == "test-uuid"
+
+    def test_create_component_invalid_folder(self):
+        """Test that an unknown folder is rejected."""
+        response = client.post("/api/components", json=self._payload(folder="controls"))
+        assert response.status_code == 400
+
+    def test_create_component_invalid_file_name(self):
+        """Test that path traversal and non-json names are rejected."""
+        for bad_name in ("../evil.json", "component.txt", "sub/dir.json"):
+            response = client.post("/api/components", json=self._payload(fileName=bad_name))
+            assert response.status_code == 400
+
+    def test_create_component_existing_file_conflicts(self, tmp_path, monkeypatch):
+        """Test that an existing file is not overwritten unless requested."""
+        import autora_gui.react_app.server as server
+
+        monkeypatch.setattr(server, "COMPONENTS_DIR", tmp_path)
+        assert client.post("/api/components", json=self._payload()).status_code == 200
+        assert client.post("/api/components", json=self._payload()).status_code == 409
+        response = client.post("/api/components", json=self._payload(overwrite=True))
+        assert response.status_code == 200
