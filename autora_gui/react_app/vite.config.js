@@ -9,7 +9,7 @@ export default defineConfig({
     // Allow importing the component JSON files that live outside the app root
     // (autora_gui/JSON/components) — bundled into the build via import.meta.glob.
     fs: {
-      allow: ['..']
+      allow: ['../JSON/components']
     },
     proxy: {
       '/api': {
