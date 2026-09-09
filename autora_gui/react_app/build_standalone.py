@@ -5,7 +5,7 @@ This script:
 1. Builds the React app with Vite
 2. Combines the result into a single HTML file at the repo root
 
-autora_gui/react_app/build_standalone.pyThe standalone build bundles its component catalog from the JSON files in
+The standalone build bundles its component catalog from the JSON files in
 autora_gui/JSON/components at build time, so no network call is made at runtime.
 """
 
