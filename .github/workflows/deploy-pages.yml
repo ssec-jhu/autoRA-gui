@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - last-changes
   workflow_dispatch:  # Allow manual trigger
 
 permissions:
@@ -50,23 +49,6 @@ jobs:
           python build_standalone.py
           mkdir -p ../../../deploy/main
           cp ../../index.html ../../../deploy/main/index.html
-        continue-on-error: true
-
-      # Build from last-changes branch
-      - name: Checkout last-changes branch
-        uses: actions/checkout@v4
-        continue-on-error: true
-        with:
-          ref: last-changes
-          path: last-changes-branch
-
-      - name: Build last-changes standalone version
-        run: |
-          cd last-changes-branch/autora_gui/react_app
-          npm install
-          python build_standalone.py
-          mkdir -p ../../../deploy/last-changes
-          cp ../../index.html ../../../deploy/last-changes/index.html
         continue-on-error: true
 
       # Build Sphinx docs from main branch
@@ -122,7 +104,6 @@ jobs:
           <h1>AutoRA Workflow Editor and Documentation</h1>
           <div class="versions">
           <a href="./main/" class="version-card"><h2>Workflow Editor</h2><p>React-based GUI</p></a>
-          <a href="./last-changes/" class="version-card"><h2>Workflow Editor with the last changes</h2><p>React-based GUI with the last changes</p></a>
           <a href="./docs/" class="version-card"><h2>Documentation</h2><p>API reference and guides</p></a>
           </div>
           </div>
