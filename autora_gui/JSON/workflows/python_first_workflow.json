@@ -1,0 +1,74 @@
+{
+  "name": "New Workflow",
+  "description": "",
+  "nodes": [
+    {
+      "uuid": "2ad14a8f-369a-423a-8e37-a5ba1330c776",
+      "componentUuid": "5de1908c-f561-11f0-8344-eefea9c7fa3b",
+      "componentFile": "experimentalists/bandit_random.json",
+      "protocolType": "experimentalist",
+      "x": -549.0066922295136,
+      "y": -369.56951650585313,
+      "parameters": {
+        "num_rewards": "required",
+        "sequence_length": "required",
+        "initial_probabilities": "none",
+        "sigmas": "none",
+        "num_samples": 1,
+        "random_state": "none"
+      }
+    },
+    {
+      "uuid": "3f26bdfc-21ce-4985-a6b1-2e486eec0fb7",
+      "componentUuid": "bms-regressor-001",
+      "componentFile": "theorists/bms_regressor.json",
+      "protocolType": "theorist",
+      "x": 27.0,
+      "y": -249.0,
+      "parameters": {
+        "epochs": 1500,
+        "prior_name": "Guimera2020"
+      }
+    },
+    {
+      "uuid": "4a44303b-91f5-47a5-840e-8b4d2e56779e",
+      "componentUuid": "exp-learning-001",
+      "componentFile": "experiment_runners/exp_learning.json",
+      "protocolType": "experiment_runner",
+      "x": -205.0,
+      "y": 68.0,
+      "parameters": {
+        "name": "Exponential Learning",
+        "resolution": 100,
+        "minimum_trial": 2,
+        "minimum_initial_value": 0,
+        "maximum_initial_value": 0.5,
+        "lr": 0.03,
+        "p_asymptotic": 1.0
+      }
+    }
+  ],
+  "connections": [
+    {
+      "uuid": "cbb48d57-eb11-49cc-b96e-210cf3529ab0",
+      "source": "2ad14a8f-369a-423a-8e37-a5ba1330c776",
+      "target": "3f26bdfc-21ce-4985-a6b1-2e486eec0fb7",
+      "sourcePort": "y",
+      "targetPort": "X"
+    },
+    {
+      "uuid": "95e18a7e-7dd8-497b-894d-65709fbffd17",
+      "source": "3f26bdfc-21ce-4985-a6b1-2e486eec0fb7",
+      "target": "4a44303b-91f5-47a5-840e-8b4d2e56779e",
+      "sourcePort": "y",
+      "targetPort": "conditions"
+    },
+    {
+      "uuid": "4d26e592-fb1b-4474-9751-cc4030f7aa88",
+      "source": "4a44303b-91f5-47a5-840e-8b4d2e56779e",
+      "target": "2ad14a8f-369a-423a-8e37-a5ba1330c776",
+      "sourcePort": "observations",
+      "targetPort": "X"
+    }
+  ]
+}
