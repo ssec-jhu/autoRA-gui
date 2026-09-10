@@ -1,0 +1,123 @@
+{
+  "uuid": "4fe93b6b-e136-4215-ba2a-3d1b10917914",
+  "protocolType": "experiment_runner",
+  "name": "Firebase Send Conditions",
+  "description": "Upload a new set of conditions, prepare the database for observations, and set up meta-data for communication with autora cycle.",
+  "githubCommit": "https://github.com/AutoResearch/autora-experiment-runner-experimentation-manager-firebase/blob/21ca13a6abf10b0f57861df46a0e6e8ba5b27418/src/autora/experiment_runner/experimentation_manager/firebase/__init__.py#L247",
+  "github_io": "https://autoresearch.github.io/autora/user-guide/experiment-runners/behavioral-web-experiments/firebase-experimentation-manager/quickstart/",
+  "pythonName": "send_conditions",
+  "importPath": "autora.experiment_runner.experimentation_manager.firebase",
+  "pipInstall": "autora-experiment-runner-experimentation-manager-firebase==1.1.5",
+  "parameters": {
+    "send_conditions": [
+      {
+        "name": "collection_name",
+        "description": "the name of the study as given in firebase",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": null
+      },
+      {
+        "name": "doc_meta",
+        "description": "document to store metadata",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": "autora_meta"
+      },
+      {
+        "name": "doc_out",
+        "description": "document to store out data",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": "autora_out"
+      },
+      {
+        "name": "doc_in",
+        "description": "document to store in data",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": "autora_in"
+      },
+      {
+        "name": "col_observation",
+        "description": "collection to store the observations",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": "observations"
+      },
+      {
+        "name": "col_condition",
+        "description": "collection to store the conditions",
+        "datatype": "string",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": "conditions"
+      },
+      {
+        "name": "is_append",
+        "description": "if true, append the conditions, observations and meta-data instead of resetting them",
+        "datatype": "boolean",
+        "cardinality": {
+          "minOccurs": 1,
+          "maxOccurs": 1,
+          "unique": true
+        },
+        "validValues": null,
+        "default": false
+      }
+    ]
+  },
+  "inputDataType": {
+    "name": "conditions",
+    "description": "the condition to run",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  },
+  "outputDataType": {
+    "name": "conditions",
+    "description": "Generated experimental conditions.",
+    "datatype": "real",
+    "cardinality": {
+      "minOccurs": 1,
+      "maxOccurs": -1,
+      "unique": false
+    },
+    "validValues": null,
+    "default": null
+  }
+}
