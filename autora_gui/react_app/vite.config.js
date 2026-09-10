@@ -6,6 +6,11 @@ export default defineConfig({
   base: './',  // Use relative paths for standalone mode
   server: {
     port: 3000,
+    // Allow importing the component JSON files that live outside the app root
+    // (autora_gui/JSON/components) — bundled into the build via import.meta.glob.
+    fs: {
+      allow: ['.', '../JSON/components']
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:8000',

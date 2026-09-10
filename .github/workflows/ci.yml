@@ -119,6 +119,31 @@ jobs:
           env_vars: OS
           fail_ci_if_error: false
 
+  build-standalone:
+    name: Build standalone version on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: autora_gui/react_app/package-lock.json
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Build standalone version
+        run: python build_standalone.py
+        working-directory: autora_gui/react_app
+      - name: Verify standalone output was produced
+        run: test -s index.html
+        shell: bash
+
   docs:
     name: Build docs with Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest

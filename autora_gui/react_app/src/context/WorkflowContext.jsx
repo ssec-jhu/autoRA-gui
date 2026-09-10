@@ -377,7 +377,7 @@ function undoableReducer(state, action) {
 /**
  * Context provider that owns the workflow reducer state and dispatch, making
  * them available to descendant components. On mount it loads the component
- * catalog via loadComponents (local backend, or GitHub for the web build).
+ * catalog via loadComponents (local backend, or bundled JSON for the web build).
  *
  * @param {Object} props - Component props.
  * @param {JSX.Element} props.children - The subtree that consumes the context.
