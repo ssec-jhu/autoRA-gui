@@ -128,10 +128,40 @@ class Workflow(BaseModel):
     links: list[WorkflowLink] = []
 
 
+class NewComponent(BaseModel):
+    folder: str
+    fileName: str
+    component: dict
+    overwrite: bool = False
+
+
 @app.get("/api/components")
 def get_components() -> dict[str, list[dict]]:
     """Get all available components organized by category."""
     return load_components()
+
+
+@app.post("/api/components")
+def create_component(payload: NewComponent) -> dict:
+    """Write a generated component JSON file into JSON/components/<folder>/."""
+    allowed_folders = {"experimentalists", "theorists", "experiment_runners"}
+    if payload.folder not in allowed_folders:
+        raise HTTPException(status_code=400, detail=f"Invalid folder: {payload.folder}")
+
+    file_name = payload.fileName
+    if Path(file_name).name != file_name or not file_name.endswith(".json"):
+        raise HTTPException(status_code=400, detail=f"Invalid file name: {file_name}")
+
+    target = COMPONENTS_DIR / payload.folder / file_name
+    if target.exists() and not payload.overwrite:
+        raise HTTPException(status_code=409, detail=f"{payload.folder}/{file_name} already exists")
+
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with open(target, "w") as f:
+        json.dump(payload.component, f, indent=2)
+        f.write("\n")
+
+    return {"success": True, "path": f"{payload.folder}/{file_name}"}
 
 
 @app.get("/api/components/{category}")
